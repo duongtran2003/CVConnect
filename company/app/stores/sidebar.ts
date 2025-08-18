@@ -6,38 +6,52 @@ export type TSidebarItem = {
   isExpanded?: boolean;
   children?: TSidebarItem[];
   link?: string;
+  icon: string;
 };
 
 export const useSidebarStore = defineStore("sidebar", () => {
   const sidebarData = ref<TSidebarItem[]>([
     {
       id: 1,
-      name: "menu 1",
+      name: "Trang chủ",
       isExpanded: false,
+      link: "/dashboard",
+      icon: "mdi:desktop-mac-dashboard",
+    },
+    {
+      id: 2,
+      name: "Hồ sơ ứng viên",
+      isExpanded: false,
+      icon: "mdi:account-file-text-outline",
       children: [
         {
-          id: 2,
-          name: "menu 1.1",
-          isExpanded: false,
-          children: [
-            {
-              id: 3,
-              name: "menu 1.1.1",
-              link: "",
-            },
-          ],
+          id: 3,
+          name: "Danh sách",
+          link: "/application/list",
+          icon: "mdi:file-document",
         },
       ],
     },
     {
       id: 4,
-      name: "menu 2",
+      name: "Demo layer 1",
       isExpanded: false,
+      icon: "mdi:desktop-mac-dashboard",
       children: [
         {
           id: 5,
-          name: "menu 2.1",
-          link: "",
+          name: "Demo layer 2",
+          isExpanded: false,
+          icon: "mdi:desktop-mac-dashboard",
+          children: [
+            {
+              id: 6,
+              name: "Demo layer 3",
+              isExpanded: false,
+              icon: "mdi:desktop-mac-dashboard",
+              link: "/demo-page",
+            },
+          ],
         },
       ],
     },
@@ -60,8 +74,31 @@ export const useSidebarStore = defineStore("sidebar", () => {
     return false;
   };
 
+  const searchNode = (
+    searchString: string,
+    items: TSidebarItem[] = sidebarData.value,
+    parents: TSidebarItem[] = [],
+  ): TSidebarItem | null => {
+    for (const item of items) {
+      if (item.name.toLowerCase().includes(searchString.toLowerCase())) {
+        parents.forEach((parent) => (parent.isExpanded = true));
+        return item;
+      }
+
+      if (item.children) {
+        const found = searchNode(searchString, item.children, [
+          ...parents,
+          item,
+        ]);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
   return {
     sidebarData,
     expandItem,
+    searchNode,
   };
 });
