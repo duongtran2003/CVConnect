@@ -1,6 +1,5 @@
 <template>
   <div class="main-layout">
-    <AppSidebar />
     <div class="main-content">
       <slot />
     </div>
@@ -11,13 +10,14 @@
   display: flex;
   min-height: 100vh;
   height: 100vh;
+  background-color: $color-gray-100;
 
   .main-content {
     max-height: 100%;
+    width: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
     padding: 0px 6%;
-    flex: 1;
   }
 }
 </style>

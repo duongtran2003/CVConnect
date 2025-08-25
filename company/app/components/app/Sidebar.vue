@@ -11,7 +11,7 @@
         v-for="(menu, index) in sidebarStore.sidebarData"
         :key="index"
         :item="menu"
-        :isSidebarExpanded="isExpanded"
+        :is-sidebar-expanded="isExpanded"
         @expand="handleItemExpand"
       />
     </div>
@@ -26,7 +26,7 @@
 </template>
 <script setup lang="ts">
 import { useSidebarStore } from "~/stores/sidebar";
-import type { TSidebarItemExpandPayload } from "./sidebar/Item.vue";
+import type { TSidebarItemExpandPayload } from "./sidebar/item.vue";
 
 const sidebarStore = useSidebarStore();
 
@@ -70,7 +70,7 @@ const isExpanded = ref(true);
       border-bottom-left-radius: 0px;
       &:focus,
       &:hover {
-        border: 1px solid $color-primary-300;
+        border: 1px solid $color-primary-500;
       }
     }
   }
@@ -95,8 +95,8 @@ const isExpanded = ref(true);
     transition-duration: 200ms;
 
     &:hover {
-      background-color: $color-primary-100;
-      color: $color-primary-900;
+      background-color: $color-primary-50;
+      color: $color-primary-500;
     }
   }
 

@@ -37,8 +37,8 @@
         v-for="(menu, index) in props.item.children"
         :key="index"
         :item="menu"
-        @expand="handleExpand"
         :isSidebarExpanded="props.isSidebarExpanded"
+        @expand="handleExpand"
       />
     </div>
   </div>
@@ -95,9 +95,9 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
     justify-content: center;
     text-decoration: none;
     color: $text-light;
-    transition-duration: 200ms;
+    transition: background-color 200ms;
     &.child-active {
-      background-color: rgba($color-primary-100, 0.5);
+      background-color: rgba($color-primary-50, 0.5);
     }
 
     .item-icon,
@@ -113,8 +113,9 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
 
     &:hover,
     &.router-link-exact-active {
-      background-color: $color-primary-100;
-      color: $color-primary-900;
+      background-color: $color-primary-50;
+      color: $color-primary-500;
+      font-weight: 700;
     }
   }
 
