@@ -6,17 +6,28 @@
     </div>
     <div class="form-content">
       <AppInputText
-        v-model="formInput.username"
+        :value="formInput.username"
         :label="'Tên đăng nhập'"
         :required="true"
         :error="formError.username"
+        @input="handleInput('username', $event)"
+        @blur="validateKey('username')"
       />
       <AppInputText
-        v-model="formInput.password"
+        :value="formInput.password"
         :label="'Mật khẩu'"
         :required="true"
         :error="formError.password"
         :is-secured="true"
+        @input="handleInput('password', $event)"
+        @blur="validateKey('password')"
+      />
+      <AppButton
+        class="login-button"
+        :is-loading="false"
+        :text="'Đăng nhập'"
+        :is-disabled="!isFormValid"
+        @click="handleLoginClick"
       />
     </div>
   </div>
@@ -27,14 +38,79 @@ useHead({
   title: "Đăng nhập",
 });
 const formInput = ref({
-  username: '',
-  password: '',
+  username: "",
+  password: "",
 });
 
 const formError = ref({
-  username: '',
-  password: '',
+  username: "",
+  password: "",
 });
+
+const formRules = {
+  username: [
+    (input: string) => {
+      if (!input.trim()) {
+        formError.value.username = "Mời nhập tên đăng nhập";
+        return false;
+      }
+      return true;
+    },
+  ],
+  password: [
+    (input: string) => {
+      if (!input.trim()) {
+        formError.value.password = "Mời nhập mật khẩu";
+        return false;
+      }
+      return true;
+    },
+  ],
+};
+
+const isFormValid = computed(() => {
+  for (const key of Object.keys(
+    formError.value,
+  ) as (keyof typeof formError.value)[]) {
+    if (formError.value[key]) {
+      return false;
+    }
+  }
+  return true;
+});
+
+const validateForm = () => {
+  for (const key of Object.keys(
+    formInput.value,
+  ) as (keyof typeof formInput.value)[]) {
+    console.log(key);
+    validateKey(key);
+  }
+};
+
+const validateKey = (key: keyof typeof formInput.value) => {
+  const input = formInput.value[key];
+  const rules = formRules[key as keyof typeof formRules];
+  for (const rule of rules) {
+    const ok = rule(input);
+    if (!ok) {
+      break;
+    }
+  }
+};
+
+const handleLoginClick = () => {
+  // if able, validate before calling api
+  validateForm();
+  console.log(formError.value);
+};
+
+const handleInput = (key: string, value: string) => {
+  formInput.value[key as keyof typeof formInput.value] = value
+  formError.value[key as keyof typeof formError.value] = ""
+}
+
+const isLoading = ref(true);
 </script>
 <style lang="scss" scoped>
 .login-form {
@@ -56,6 +132,7 @@ const formError = ref({
       color: $color-primary-500;
       line-height: 24px;
       margin-left: 16px;
+      margin-right: 16px;
     }
     img {
       width: fit-content;
@@ -65,6 +142,19 @@ const formError = ref({
   .form-content {
     padding: 16px;
     margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .login-button {
+      margin-top: 12px;
+      background-color: $color-primary-500;
+      color: $text-dark;
+
+      &.disabled {
+        background-color: $color-gray-400;
+      }
+    }
   }
 }
 </style>

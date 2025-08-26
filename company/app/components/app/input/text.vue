@@ -1,5 +1,5 @@
 <template>
-  <label class="text-input">
+  <label class="text-input" :class="{ disabled: isDisabled }">
     <div class="label">
       <div class="name">{{ label }}</div>
       <div v-if="required" class="required">Bắt buộc</div>
@@ -10,10 +10,14 @@
     <div :class="{ error: error }" class="input-wrapper">
       <div class="input">
         <input
-          :value="modelValue"
+          :disabled="isDisabled"
+          :maxlength="maxLength"
+          :value="value"
           :type="isSecured && isTextHidden ? 'password' : 'text'"
+          :placeholder="placeholder"
+          :class="{ disabled: isDisabled }"
           @input="updateValue"
-          v-on="$attrs"
+          @blur="emit('blur')"
         />
         <Icon
           v-if="isSecured"
@@ -31,24 +35,38 @@ export type TInputTextProps = {
   label: string;
   desc?: string;
   required?: boolean;
-  modelValue: string;
+  value: string;
   error: string;
   isSecured?: boolean;
+  isDisabled?: boolean;
+  maxLength?: number;
+  placeholder?: string;
 };
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string): void;
+  (e: "input", value: string): void;
+  (e: 'blur'): void;
 }>();
 
 const props = withDefaults(defineProps<TInputTextProps>(), {
   desc: "",
   required: false,
   isSecured: false,
+  isDisabled: false,
+  maxLength: 80,
+  placeholder: "",
 });
 
-const { label, desc, required, modelValue } = toRefs(props);
+const { label, desc, required, value, isDisabled, isSecured } =
+  toRefs(props);
 const updateValue = (event: Event) => {
-  emit("update:modelValue", (event.target as HTMLInputElement)?.value || "");
+  if (isDisabled.value) {
+    return;
+  }
+
+  const value = (event.target as HTMLInputElement)?.value || "";
+
+  emit("input", isSecured.value ? value : value.trimStart());
 };
 const isTextHidden = ref(true);
 </script>
@@ -57,6 +75,11 @@ const isTextHidden = ref(true);
   display: flex;
   flex-direction: column;
   gap: 4px;
+
+  &.isDisabled {
+    cursor: default;
+  }
+
   .label {
     display: flex;
     flex-direction: row;
@@ -114,8 +137,8 @@ const isTextHidden = ref(true);
         border: none;
       }
 
-      &:hover,
-      &:focus-within {
+      &:hover:not(.disabled),
+      &:focus-within:not(.disabled) {
         border: 2px solid rgba($color-primary-400, 1);
       }
     }
