@@ -1,7 +1,7 @@
 <template>
-  <div
+  <button
     class="button"
-    :class="{ disabled: isDisabled }"
+    :class="{ disabled: isDisabled, loading: isLoading }"
     :disabled="isDisabled"
     @click="handleClick"
   >
@@ -9,7 +9,7 @@
     <div v-if="isLoading" class="loading-icon">
       <Icon :name="'line-md:loading-twotone-loop'" />
     </div>
-  </div>
+  </button>
 </template>
 <script setup lang="ts">
 import { SPINNER_COLOR } from "~/const/spinner";
@@ -60,7 +60,11 @@ const handleClick = () => {
     cursor: default;
   }
 
-  &:hover:not(.disabled) {
+  &.loading {
+    cursor: default;
+  }
+
+  &:hover:not(.disabled, .loading) {
     filter: brightness(0.96);
   }
 }

@@ -45,7 +45,7 @@ export type TInputTextProps = {
 
 const emit = defineEmits<{
   (e: "input", value: string): void;
-  (e: 'blur'): void;
+  (e: "blur"): void;
 }>();
 
 const props = withDefaults(defineProps<TInputTextProps>(), {
@@ -57,8 +57,7 @@ const props = withDefaults(defineProps<TInputTextProps>(), {
   placeholder: "",
 });
 
-const { label, desc, required, value, isDisabled, isSecured } =
-  toRefs(props);
+const { label, desc, required, value, isDisabled, isSecured } = toRefs(props);
 const updateValue = (event: Event) => {
   if (isDisabled.value) {
     return;
@@ -125,6 +124,7 @@ const isTextHidden = ref(true);
       display: flex;
       align-items: center;
       flex-direction: row;
+      color: $text-light;
 
       .secure-toggle {
         cursor: pointer;
@@ -148,8 +148,11 @@ const isTextHidden = ref(true);
   }
 
   .error-message {
+    min-height: 16px;
+    display: inline-block;
     color: $color-danger;
     font-size: 12px;
+    line-height: 16px;
   }
 }
 </style>

@@ -14,6 +14,7 @@
 
   .main-content {
     max-height: 100%;
+    background-color: $color-gray-100;
     width: 100%;
     overflow-y: scroll;
     overflow-x: hidden;

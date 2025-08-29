@@ -19,7 +19,10 @@ export default defineNuxtPlugin(() => {
         return Promise.resolve();
       });
 
-  createAuthRefreshInterceptor(axiosInstance, refreshAuthLogic);
+  createAuthRefreshInterceptor(axiosInstance, refreshAuthLogic, {
+    shouldRefresh: (error) =>
+      error?.response?.data?.code === STATUS_CODE.TOKEN_EXPIRED,
+  });
 
   axiosInstance.interceptors.request.use(
     (config) => {

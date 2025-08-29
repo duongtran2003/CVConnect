@@ -9,6 +9,10 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "@vueuse/nuxt",
   ],
+  devServer: {
+    host: "0.0.0.0",
+    port: 3000,
+  },
   app: {
     head: {
       link: [{ rel: "icon", type: "image/svg+xml", href: "/favicon-icon.svg" }],
@@ -16,10 +20,10 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBaseUrl: "http://26.9.175.39:8888/api/v1"
-    }
+      apiBaseUrl: "http://26.9.175.39:8888/api/v1",
+    },
   },
-  css: ["~/assets/global.scss"],
+  css: ["~/assets/main.css"],
   vite: {
     css: {
       preprocessorOptions: {

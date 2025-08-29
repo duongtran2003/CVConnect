@@ -24,7 +24,7 @@
       />
       <AppButton
         class="login-button"
-        :is-loading="false"
+        :is-loading="isLoading"
         :text="'Đăng nhập'"
         :is-disabled="!isFormValid"
         @click="handleLoginClick"
@@ -37,6 +37,8 @@ definePageMeta({ layout: "auth" });
 useHead({
   title: "Đăng nhập",
 });
+const { login } = useAuth();
+const router = useRouter();
 const formInput = ref({
   username: "",
   password: "",
@@ -83,7 +85,6 @@ const validateForm = () => {
   for (const key of Object.keys(
     formInput.value,
   ) as (keyof typeof formInput.value)[]) {
-    console.log(key);
     validateKey(key);
   }
 };
@@ -99,18 +100,29 @@ const validateKey = (key: keyof typeof formInput.value) => {
   }
 };
 
-const handleLoginClick = () => {
+const handleLoginClick = async () => {
   // if able, validate before calling api
   validateForm();
-  console.log(formError.value);
+  if (isFormValid.value) {
+    const loginCredentials: TLoginCredentials = {
+      username: formInput.value.username,
+      password: formInput.value.password,
+    };
+    isLoading.value = true;
+    const isSuccess = await login(loginCredentials);
+    if (isSuccess) {
+      router.push({ name: "dashboard" });
+    }
+    isLoading.value = false;
+  }
 };
 
 const handleInput = (key: string, value: string) => {
-  formInput.value[key as keyof typeof formInput.value] = value
-  formError.value[key as keyof typeof formError.value] = ""
-}
+  formInput.value[key as keyof typeof formInput.value] = value;
+  formError.value[key as keyof typeof formError.value] = "";
+};
 
-const isLoading = ref(true);
+const isLoading = ref(false);
 </script>
 <style lang="scss" scoped>
 .login-form {

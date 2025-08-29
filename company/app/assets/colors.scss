@@ -1,7 +1,7 @@
 // ===============================
 // Primary (Blue - based on #007BC3)
 // ===============================
-$color-primary-50:  #e6f3f9; // very light tint
+$color-primary-50: #e6f3f9; // very light tint
 $color-primary-100: #cce7f3;
 $color-primary-200: #99cfea;
 $color-primary-300: #66b7e0;
@@ -15,12 +15,12 @@ $color-primary-900: #002943; // deep navy-blue
 // ===============================
 // Secondary (Soft Neutral - #FAFBFC)
 // ===============================
-$color-secondary-50:  #FAFBFC; // base secondary
+$color-secondary-50: #FAFBFC; // base secondary
 $color-secondary-100: #f4f6f8;
 $color-secondary-200: #e9edf1;
 $color-secondary-300: #dde3e9;
 $color-secondary-400: #cfd7de;
-$color-secondary-500: #bfc8cf; 
+$color-secondary-500: #bfc8cf;
 $color-secondary-600: #9aa3aa;
 $color-secondary-700: #757d83;
 $color-secondary-800: #505457;
@@ -29,12 +29,12 @@ $color-secondary-900: #2b2d2f;
 // ===============================
 // Neutral / Gray
 // ===============================
-$color-gray-50:  #f9fafb;
+$color-gray-50: #f9fafb;
 $color-gray-100: #f3f4f6;
 $color-gray-200: #e5e7eb;
 $color-gray-300: #d1d5db;
 $color-gray-400: #9ca3af;
-$color-gray-500: #6b7280; 
+$color-gray-500: #6b7280;
 $color-gray-600: #4b5563;
 $color-gray-700: #374151;
 $color-gray-800: #1f2937;
@@ -43,17 +43,17 @@ $color-gray-900: #111827;
 // ===============================
 // Functional Colors
 // ===============================
-$color-success: #10b981;  // calming green
-$color-danger:  #ef4444;  // red
-$color-warning: #f59e0b;  // warm amber
-$color-info:    $color-primary-500; // now matches new primary
+$color-success: #10b981; // calming green
+$color-danger: #ef4444; // red
+$color-warning: #f59e0b; // warm amber
+$color-info: #007BC3; // now matches new primary
 
 // ===============================
 // Background & Text
 // ===============================
-$background-light: $color-gray-50;  
-$background-dark:  $color-gray-900; 
-$text-light:       $color-gray-900;
-$text-dark:        $color-gray-50;
+$background-light: $color-gray-50;
+$background-dark: $color-gray-900;
+$text-light: $color-gray-900;
+$text-dark: $color-gray-50;
 $background-light-hover: $color-gray-200;
-$text-light-hover:       $color-gray-900;
+$text-light-hover: $color-gray-900;
