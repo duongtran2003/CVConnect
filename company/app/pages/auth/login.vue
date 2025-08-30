@@ -1,7 +1,9 @@
 <template>
   <div class="login-form">
     <div class="form-header">
-      <img src="/logo-horizontal.svg" />
+      <div class="logo">
+        <img src="/logo-horizontal.svg" />
+      </div>
       <div class="welcome-message">Chào mừng quay trở lại!</div>
     </div>
     <div class="form-content">
@@ -33,7 +35,7 @@
   </div>
 </template>
 <script setup lang="ts">
-definePageMeta({ layout: "auth" });
+definePageMeta({ layout: "auth", middleware: "guest-check" });
 useHead({
   title: "Đăng nhập",
 });
@@ -110,9 +112,9 @@ const handleLoginClick = async () => {
     };
     isLoading.value = true;
     const isSuccess = await login(loginCredentials);
-    if (isSuccess) {
-      router.push({ name: "dashboard" });
-    }
+    // if (isSuccess) {
+    //   router.push({ name: "dashboard" });
+    // }
     isLoading.value = false;
   }
 };
@@ -128,7 +130,8 @@ const isLoading = ref(false);
 .login-form {
   width: fit-content;
   padding: 32px 24px;
-  height: 500px;
+  height: fit-content;
+  width: 360px;
   background-color: $background-light;
   margin: auto;
   margin-top: 64px;
@@ -138,21 +141,21 @@ const isLoading = ref(false);
   .form-header {
     display: flex;
     flex-direction: column;
+    gap: 16px;
     .welcome-message {
       font-weight: 900;
-      font-size: 28px;
+      font-size: 24px;
       color: $color-primary-500;
       line-height: 24px;
-      margin-left: 16px;
-      margin-right: 16px;
     }
-    img {
-      width: fit-content;
+    .logo {
+      img {
+        height: 64px;
+      }
     }
   }
 
   .form-content {
-    padding: 16px;
     margin-top: 12px;
     display: flex;
     flex-direction: column;

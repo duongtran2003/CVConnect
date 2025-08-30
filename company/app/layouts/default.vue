@@ -6,6 +6,9 @@
     </div>
   </div>
 </template>
+<script setup lang="ts">
+const { token, clearToken } = useAuthStore();
+</script>
 <style lang="scss" scoped>
 .main-layout {
   display: flex;

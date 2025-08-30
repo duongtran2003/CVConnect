@@ -1,5 +1,6 @@
 <template>
   <NuxtLayout>
+    <NuxtLoadingIndicator color="#38b2ac" />
     <UApp :toaster="toasterConfig">
       <NuxtPage />
     </UApp>

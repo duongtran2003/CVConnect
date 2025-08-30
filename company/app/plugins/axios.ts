@@ -2,31 +2,36 @@ import axios from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
 import { STATUS_CODE } from "~/const/api";
 
+export type TApiOption = {
+  isSilent: boolean;
+};
+
 export default defineNuxtPlugin(() => {
-  const runtimeConfig = useRuntimeConfig();
-  const apiBaseUrl = runtimeConfig.public.apiBaseUrl;
   const axiosInstance = axios.create({
-    baseURL: apiBaseUrl,
+    withCredentials: true,
   });
+
+  const { token, setToken } = useAuthStore();
 
   const refreshAuthLogic = (failedRequest: any) =>
     axios
-      .post(`${apiBaseUrl}/user/auth/refresh`)
+      .post(`/_api/user/auth/refresh`, {}, { withCredentials: true })
       .then((tokenRefreshResponse) => {
-        useAuthStore().setToken(tokenRefreshResponse.data.token);
+        console.log(tokenRefreshResponse);
+        setToken(tokenRefreshResponse.data.data.token);
         failedRequest.response.config.headers["Authorization"] =
-          "Bearer " + tokenRefreshResponse.data.token;
+          "Bearer " + token;
         return Promise.resolve();
       });
 
   createAuthRefreshInterceptor(axiosInstance, refreshAuthLogic, {
-    shouldRefresh: (error) =>
-      error?.response?.data?.code === STATUS_CODE.TOKEN_EXPIRED,
+    statusCodes: [401, 403],
   });
 
   axiosInstance.interceptors.request.use(
     (config) => {
       const token = useAuthStore().token;
+      console.log(`token: ${token}`);
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -47,6 +52,10 @@ export default defineNuxtPlugin(() => {
         error.response.data?.code === STATUS_CODE.TOKEN_INVALID
       ) {
         useAuthStore().clearToken();
+        const urlParts = window.location.href.split("/");
+        if (urlParts[urlParts.length - 1] !== "login") {
+          window.location.reload();
+        }
       }
       return Promise.reject(error);
     },

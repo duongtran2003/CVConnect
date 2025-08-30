@@ -118,7 +118,7 @@ const isTextHidden = ref(true);
     .input {
       border-radius: 6px;
       padding: 8px 10px;
-      border: 2px solid rgba($color-primary-500, 0.1);
+      border: 2px solid rgba($color-primary-800, 0.1);
       flex: 1;
       transition-duration: 200ms;
       display: flex;
@@ -139,11 +139,11 @@ const isTextHidden = ref(true);
 
       &:hover:not(.disabled),
       &:focus-within:not(.disabled) {
-        border: 2px solid rgba($color-primary-400, 1);
+        border: 2px solid rgba($color-primary-600, 1);
       }
     }
     &:focus-within {
-      border: 3px solid rgba($color-primary-500, 0.3);
+      border: 3px solid rgba($color-primary-700, 0.3);
     }
   }
 
