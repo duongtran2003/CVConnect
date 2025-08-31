@@ -12,17 +12,14 @@
   </button>
 </template>
 <script setup lang="ts">
-import { SPINNER_COLOR } from "~/const/spinner";
 
 export type TButtonProps = {
   text: string;
   isLoading?: boolean;
-  spinnerColor?: string;
   isDisabled?: boolean;
 };
 const props = withDefaults(defineProps<TButtonProps>(), {
   isLoading: false,
-  spinnerColor: SPINNER_COLOR.WHITE,
   isDisabled: false,
 });
 

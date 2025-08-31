@@ -1,3 +1,11 @@
+export type TUserDetail = {
+  detailInfo: {
+    id: number;
+    userId: number;
+  };
+  roles: TAccountRole;
+};
+
 export type TUser = {
   id?: number;
   username?: string;
@@ -17,6 +25,7 @@ export type TUser = {
   createdBy?: string;
   updatedBy?: string;
   roles?: TAccountRole[];
+  userDetails: TUserDetail[];
 };
 
 export const useUserStore = defineStore("user", () => {

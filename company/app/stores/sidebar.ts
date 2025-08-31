@@ -1,61 +1,20 @@
 import { defineStore } from "pinia";
+export type TPermission = "VIEW" | "ADD" | "UPDATE" | "DELETE" | "EXPORT";
 
 export type TSidebarItem = {
   id: number;
-  name: string;
-  isExpanded?: boolean;
+  menuCode: string;
+  menuLabel: string;
+  menuIcon?: string;
   children?: TSidebarItem[];
-  link?: string;
-  icon: string;
+  parentId?: number;
+  permissions?: TPermission[];
+  menuUrl?: string;
+  isExpanded?: boolean;
 };
 
 export const useSidebarStore = defineStore("sidebar", () => {
-  const sidebarData = ref<TSidebarItem[]>([
-    {
-      id: 1,
-      name: "Trang chủ",
-      isExpanded: false,
-      link: "/dashboard",
-      icon: "mdi:desktop-mac-dashboard",
-    },
-    {
-      id: 2,
-      name: "Hồ sơ ứng viên",
-      isExpanded: false,
-      icon: "mdi:account-file-text-outline",
-      children: [
-        {
-          id: 3,
-          name: "Danh sách",
-          link: "/application/list",
-          icon: "mdi:file-document",
-        },
-      ],
-    },
-    {
-      id: 4,
-      name: "Demo layer 1",
-      isExpanded: false,
-      icon: "mdi:desktop-mac-dashboard",
-      children: [
-        {
-          id: 5,
-          name: "Demo layer 2",
-          isExpanded: false,
-          icon: "mdi:desktop-mac-dashboard",
-          children: [
-            {
-              id: 6,
-              name: "Demo layer 3",
-              isExpanded: false,
-              icon: "mdi:desktop-mac-dashboard",
-              link: "/demo-page",
-            },
-          ],
-        },
-      ],
-    },
-  ]);
+  const sidebarData = ref<TSidebarItem[]>([]);
 
   const expandItem = (
     id: number,
@@ -74,31 +33,25 @@ export const useSidebarStore = defineStore("sidebar", () => {
     return false;
   };
 
-  const searchNode = (
-    searchString: string,
-    items: TSidebarItem[] = sidebarData.value,
-    parents: TSidebarItem[] = [],
-  ): TSidebarItem | null => {
+  const setDefaultExpand = (items: TSidebarItem[]) => {
     for (const item of items) {
-      if (item.name.toLowerCase().includes(searchString.toLowerCase())) {
-        parents.forEach((parent) => (parent.isExpanded = true));
-        return item;
-      }
-
-      if (item.children) {
-        const found = searchNode(searchString, item.children, [
-          ...parents,
-          item,
-        ]);
-        if (found) return found;
+      if (item.children?.length) {
+        console.log('go deep', item)
+        item.isExpanded = false;
+        setDefaultExpand(item.children);
       }
     }
-    return null;
+  };
+
+  const setMenus = (menus: TSidebarItem[]) => {
+    sidebarData.value = menus;
+    setDefaultExpand(sidebarData.value)
+    console.log(sidebarData.value)
   };
 
   return {
     sidebarData,
     expandItem,
-    searchNode,
+    setMenus,
   };
 });

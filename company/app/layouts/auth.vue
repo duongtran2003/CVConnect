@@ -18,7 +18,6 @@
     width: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
-    padding: 0px 6%;
   }
 }
 </style>

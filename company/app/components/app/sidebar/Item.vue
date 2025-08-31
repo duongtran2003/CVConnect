@@ -1,11 +1,17 @@
 <template>
-  <div class="item" :class="{ expanded: props.item.isExpanded }">
-    <NuxtLink v-if="props.item.link" class="name" :to="props.item.link">
+  <div
+    class="item"
+    :title="
+      !props.isSidebarExpanded && props.isFirstLevel ? props.item.menuLabel : ''
+    "
+    :class="{ expanded: props.item.isExpanded }"
+  >
+    <NuxtLink v-if="props.item.menuUrl" class="name" :to="props.item.menuUrl">
       <div class="item-icon">
-        <Icon :name="props.item.icon" />
+        <Icon v-if="props.item.menuIcon" :name="props.item.menuIcon" />
       </div>
-      <div class="item-name" v-if="isSidebarExpanded">
-        {{ props.item.name }}
+      <div v-if="isSidebarExpanded" class="item-name">
+        {{ props.item.menuLabel }}
       </div>
     </NuxtLink>
     <div
@@ -17,29 +23,50 @@
       "
     >
       <div class="item-icon">
-        <Icon :name="props.item.icon" />
+        <Icon v-if="props.item.menuIcon" :name="props.item.menuIcon" />
       </div>
-      <div class="item-name" v-if="isSidebarExpanded">
-        {{ props.item.name }}
+      <div v-if="isSidebarExpanded" class="item-name">
+        {{ props.item.menuLabel }}
       </div>
-      <div class="item-expand-icon" v-if="isSidebarExpanded">
+      <div v-if="isSidebarExpanded" class="item-expand-icon">
         <Icon
+          v-if="!isFloat"
           :name="props.item.isExpanded ? 'mdi:chevron-down' : 'mdi:chevron-up'"
         />
+        <Icon v-else name="mdi:chevron-right" />
       </div>
     </div>
     <div
       v-show="props.item.isExpanded"
-      v-if="isSidebarExpanded"
+      v-if="isSidebarExpanded && props.item.children?.length"
       class="children"
     >
       <AppSidebarItem
         v-for="(menu, index) in props.item.children"
         :key="index"
         :item="menu"
-        :isSidebarExpanded="props.isSidebarExpanded"
+        :is-sidebar-expanded="props.isSidebarExpanded"
         @expand="handleExpand"
       />
+    </div>
+    <div
+      v-if="
+        (!isSidebarExpanded || props.isFloat) && props.item.children?.length
+      "
+      class="float-children"
+      :class="{ 'first-level': props.isFirstLevel }"
+    >
+      <div class="bridge"></div>
+      <div class="child-wrapper">
+        <AppSidebarItem
+          v-for="(menu, index) in props.item.children"
+          :key="index"
+          :item="menu"
+          :is-sidebar-expanded="true"
+          :is-float="true"
+          :is-first-level="false"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -49,6 +76,8 @@ import type { TSidebarItem } from "~/stores/sidebar";
 type TProps = {
   item: TSidebarItem;
   isSidebarExpanded: boolean;
+  isFloat?: boolean;
+  isFirstLevel?: boolean;
 };
 
 export type TSidebarItemExpandPayload = {
@@ -56,7 +85,10 @@ export type TSidebarItemExpandPayload = {
   state: boolean;
 };
 
-const props = defineProps<TProps>();
+const props = withDefaults(defineProps<TProps>(), {
+  isFloat: false,
+  isFirstLevel: false,
+});
 const emit = defineEmits<{
   (e: "expand", payload: TSidebarItemExpandPayload): void;
 }>();
@@ -67,14 +99,15 @@ const handleExpand = (payload: TSidebarItemExpandPayload) => {
 
 const route = useRoute();
 const hasActiveChild = (children?: TSidebarItem[]): boolean => {
-  if (!children) return false;
-
-  return children.some((child) => {
-    if (child.link && route.path === child.link) {
-      return true;
-    }
-    return hasActiveChild(child.children);
-  });
+  return false;
+  // if (!children) return false;
+  //
+  // return children.some((child) => {
+  //   if (child.menuUrl && route.path === child.menuUrl) {
+  //     return true;
+  //   }
+  //   return hasActiveChild(child.children);
+  // });
 };
 const hasChildActive = computed(() => hasActiveChild(props.item.children));
 </script>
@@ -82,12 +115,50 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
 .item {
   font-size: 14px;
   line-height: 20px;
-  border-radius: 4px;
+  border-radius: 8px;
+  position: relative;
+
+  &:hover > .float-children,
+  > .float-children:hover {
+    display: flex;
+  }
+
+  .float-children {
+    display: none;
+    flex-direction: row;
+    background-color: transparent;
+    position: fixed;
+    margin-left: 216px;
+    margin-top: -40px;
+
+    .bridge {
+      display: block;
+      background-color: transparent;
+      width: 8px;
+    }
+    .child-wrapper {
+      display: block;
+      padding: 4px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+      width: 224px;
+    }
+
+    &.first-level {
+      margin-left: 36px;
+      margin-top: -38px;
+
+      > .bridge {
+        width: 12px;
+      }
+    }
+  }
 
   .name {
     padding: 8px;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 8px;
     display: flex;
     flex-direction: row;
     gap: 16px;
@@ -95,9 +166,11 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
     justify-content: center;
     text-decoration: none;
     color: $text-light;
+    font-weight: 600;
     transition: background-color 200ms;
     &.child-active {
       background-color: rgba($color-primary-50, 0.5);
+      color: $color-primary-400;
     }
 
     .item-icon,
@@ -107,21 +180,25 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
       align-items: center;
     }
 
+    .item-icon {
+      font-size: 20px;
+    }
+
     .item-name {
       flex: 1;
     }
 
     &:hover,
     &.router-link-exact-active {
-      background-color: $color-primary-50;
-      color: $color-primary-500;
-      font-weight: 700;
+      background-color: rgba($color-primary-100, 0.6);
+      color: $color-primary-400;
+      font-weight: 600;
     }
   }
 
   .children {
     margin-top: 4px;
-    padding-left: 8px;
+    padding-left: 4px;
   }
 
   &.expanded {

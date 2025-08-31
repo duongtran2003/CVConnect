@@ -11,7 +11,11 @@ export default defineNuxtPlugin(() => {
     withCredentials: true,
   });
 
-  const { token, setToken } = useAuthStore();
+  const { setToken, clearToken, setRoles, setCurrentRole } = useAuthStore();
+  const { clearUser } = useUserStore();
+  const authStore = useAuthStore();
+  const { token } = storeToRefs(authStore);
+  const { logout } = useAuth();
 
   const refreshAuthLogic = (failedRequest: any) =>
     axios
@@ -19,9 +23,24 @@ export default defineNuxtPlugin(() => {
       .then((tokenRefreshResponse) => {
         console.log(tokenRefreshResponse);
         setToken(tokenRefreshResponse.data.data.token);
+        setRoles(tokenRefreshResponse.data.data.roles);
+        if (tokenRefreshResponse.data.data.roles.length == 1) {
+          setCurrentRole(tokenRefreshResponse.data.data.roles[0]);
+        }
         failedRequest.response.config.headers["Authorization"] =
           "Bearer " + token;
         return Promise.resolve();
+      })
+      .catch((err) => {
+        console.log("refresh loi ne");
+        // const urlParts = window.location.href.split("/");
+        // if (urlParts[urlParts.length - 1] !== "login") {
+        //   clearToken();
+        //   clearUser();
+        // }
+        clearToken();
+        clearUser();
+        logout();
       });
 
   createAuthRefreshInterceptor(axiosInstance, refreshAuthLogic, {
@@ -30,33 +49,13 @@ export default defineNuxtPlugin(() => {
 
   axiosInstance.interceptors.request.use(
     (config) => {
-      const token = useAuthStore().token;
-      console.log(`token: ${token}`);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      console.log(`token: ${token.value}`);
+      if (token.value) {
+        config.headers.Authorization = `Bearer ${token.value}`;
       }
       return config;
     },
     (error) => {
-      return Promise.reject(error);
-    },
-  );
-
-  axiosInstance.interceptors.response.use(
-    (response) => {
-      return response;
-    },
-    (error) => {
-      if (
-        error.response &&
-        error.response.data?.code === STATUS_CODE.TOKEN_INVALID
-      ) {
-        useAuthStore().clearToken();
-        const urlParts = window.location.href.split("/");
-        if (urlParts[urlParts.length - 1] !== "login") {
-          window.location.reload();
-        }
-      }
       return Promise.reject(error);
     },
   );

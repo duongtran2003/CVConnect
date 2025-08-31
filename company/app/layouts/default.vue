@@ -7,7 +7,46 @@
   </div>
 </template>
 <script setup lang="ts">
-const { token, clearToken } = useAuthStore();
+const authStore = useAuthStore();
+const { token, currentRole, roles } = storeToRefs(authStore);
+const { setCurrentRole } = authStore;
+const { setUser } = useUserStore();
+const { getMe, verifyToken } = useAuth();
+const router = useRouter();
+const route = useRoute();
+
+watch(token, (newVal) => {
+  if (newVal === null) {
+    router.push({ name: "auth-login" });
+  }
+});
+
+onBeforeMount(async () => {
+  await verifyToken();
+  const defaultRole = getDefaultRole();
+  if (defaultRole) {
+    const role = roles.value.find((role) => role.id == defaultRole.id);
+    if (role) {
+      setCurrentRole(defaultRole);
+    } else {
+      clearDefaultRole();
+    }
+  }
+
+  if (!currentRole.value) {
+    router.push({
+      name: "role-select",
+      query: { redirect: route.fullPath },
+    });
+  }
+  if (currentRole.value) {
+    const res = await getMe(currentRole.value, { isSilent: true });
+    if (res) {
+      setUser(res.data.data);
+      console.log(res.data.data);
+    }
+  }
+});
 </script>
 <style lang="scss" scoped>
 .main-layout {

@@ -95,7 +95,7 @@ const isTextHidden = ref(true);
     }
   }
   .input-wrapper {
-    border-radius: 8px;
+    border-radius: 12px;
     border: 3px solid transparent;
     display: flex;
     transition-duration: 200ms;
@@ -116,7 +116,7 @@ const isTextHidden = ref(true);
     }
 
     .input {
-      border-radius: 6px;
+      border-radius: 10px;
       padding: 8px 10px;
       border: 2px solid rgba($color-primary-800, 0.1);
       flex: 1;

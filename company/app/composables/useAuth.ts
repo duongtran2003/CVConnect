@@ -7,12 +7,13 @@ export type TLoginCredentials = {
 
 export const useAuth = () => {
   const { $axios } = useNuxtApp();
-  const { setToken, setRoles, token } = useAuthStore();
+  const { setToken, setRoles, setCurrentRole } = useAuthStore();
+  const authStore = useAuthStore();
+  const { roles, token, currentRole } = storeToRefs(authStore);
   const toast = useToast();
 
   const login = async (credentials: TLoginCredentials) => {
     try {
-      console.log('call login')
       const res = await $axios.post("/_api/user/auth/login", credentials);
       toast.add({
         title: res.data.message,
@@ -20,6 +21,9 @@ export const useAuth = () => {
       });
       setToken(res.data.data.token);
       setRoles(res.data.data.roles);
+      if (res.data.data.roles.length == 1) {
+        setCurrentRole(res.data.data.roles[0]);
+      }
       return true;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -33,11 +37,29 @@ export const useAuth = () => {
     }
   };
 
-  const getMe = async (option?: TApiOption) => {
+  const logout = async () => {
     try {
-      console.log("run get me");
-      const res = await $axios.get(`/_api/user/user/my-info`);
-      return res
+      await $axios.post("/_api/user/auth/logout");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const verifyToken = async () => {
+    try {
+      const res = await $axios.post(`/_api/user/auth/verify`, {
+        token: token.value,
+      });
+    } catch (err: any) {
+      return null;
+    }
+  };
+
+  const getMe = async (role: TAccountRole, option?: TApiOption) => {
+    try {
+      console.log("run get me", role);
+      const res = await $axios.get(`/_api/user/user/my-info/${role.id}`);
+      return res;
     } catch (err: any) {
       if (!option?.isSilent && err.response && err.response.data) {
         toast.add({
@@ -45,14 +67,14 @@ export const useAuth = () => {
           color: "error",
         });
       }
-      return null
+      return null;
     }
   };
 
-  const getMenus = async (roleId: number) => {
+  const getMenus = async (role: TAccountRole) => {
     try {
-      const res = await $axios.get(`/user/menu/menu-by-role/${roleId}`);
-      console.log(res);
+      console.log("run get menus", role);
+      const res = await $axios.get(`/_api/user/menu/menu-by-role/${role.id}`);
       return res.data.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -62,9 +84,9 @@ export const useAuth = () => {
         });
       }
       console.error(err);
-      return [];
+      return null;
     }
   };
 
-  return { login, getMe };
+  return { login, logout, getMe, getMenus, verifyToken };
 };
