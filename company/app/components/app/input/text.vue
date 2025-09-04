@@ -1,7 +1,12 @@
 <template>
   <label class="text-input" :class="{ disabled: isDisabled }">
     <div class="label">
-      <div class="name">{{ label }}</div>
+      <div class="name">
+        <span>{{ label }}</span>
+        <UTooltip v-if="tooltip" :text="props.tooltip">
+          <Icon v-if="tooltip" name="mdi:help-circle-outline" class="tooltip"></Icon>
+        </UTooltip>
+      </div>
       <div v-if="required" class="required">Bắt buộc</div>
     </div>
     <div v-if="desc" class="desc">
@@ -27,7 +32,7 @@
         />
       </div>
     </div>
-    <div class="error-message">{{ error }}</div>
+    <div class="error-message">{{ props.showError ? error : "" }}</div>
   </label>
 </template>
 <script setup lang="ts">
@@ -41,6 +46,8 @@ export type TInputTextProps = {
   isDisabled?: boolean;
   maxLength?: number;
   placeholder?: string;
+  showError?: boolean;
+  tooltip?: string;
 };
 
 const emit = defineEmits<{
@@ -54,6 +61,8 @@ const props = withDefaults(defineProps<TInputTextProps>(), {
   isSecured: false,
   isDisabled: false,
   maxLength: 80,
+  showError: true,
+  tooltip: "",
   placeholder: "",
 });
 
@@ -87,6 +96,14 @@ const isTextHidden = ref(true);
     .name {
       font-size: 14px;
       color: $text-light;
+      display: flex;
+      align-items: center;
+
+      .tooltip {
+        margin-left: 4px;
+        cursor: pointer;
+        display: inline-block;
+      }
     }
     .required {
       font-size: 12px;

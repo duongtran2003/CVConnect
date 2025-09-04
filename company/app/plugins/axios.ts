@@ -1,6 +1,5 @@
 import axios from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
-import { STATUS_CODE } from "~/const/api";
 
 export type TApiOption = {
   isSilent: boolean;
@@ -50,7 +49,7 @@ export default defineNuxtPlugin(() => {
   axiosInstance.interceptors.request.use(
     (config) => {
       console.log(`token: ${token.value}`);
-      if (token.value) {
+      if (token.value && !config.skipAuth) {
         config.headers.Authorization = `Bearer ${token.value}`;
       }
       return config;

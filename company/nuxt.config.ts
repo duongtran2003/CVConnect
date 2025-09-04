@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "@pinia/nuxt",
     "@vueuse/nuxt",
+    "pinia-plugin-persistedstate/nuxt",
   ],
   devServer: {
     host: "0.0.0.0",
@@ -18,6 +19,7 @@ export default defineNuxtConfig({
       link: [{ rel: "icon", type: "image/svg+xml", href: "/favicon-icon.svg" }],
     },
   },
+  ssr: false,
   css: ["~/assets/main.css"],
   vite: {
     server: {

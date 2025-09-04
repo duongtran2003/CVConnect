@@ -1,45 +1,74 @@
 <template>
   <div class="login-page">
-    <div class="login-form">
-      <div class="form-header">
-        <div class="logo">
-          <img src="/logo-horizontal.svg" />
+    <div class="form-wrapper">
+      <div class="login-form">
+        <div class="form-header">
+          <div class="logo">
+            <img src="/logo-horizontal.svg" />
+          </div>
+          <div class="welcome-message">Đăng nhập</div>
+          <div class="welcome-desc">
+            Đăng nhập với tên đăng nhập và mật khẩu
+          </div>
         </div>
-        <div class="welcome-message">Đăng nhập</div>
-        <div class="welcome-desc">Đăng nhập với tên đăng nhập và mật khẩu</div>
+        <div class="form-content">
+          <AppInputText
+            :value="formInput.username"
+            :label="'Tên đăng nhập'"
+            :required="true"
+            :error="formError.username"
+            @input="handleInput('username', $event)"
+            @blur="validateKey('username')"
+          />
+          <AppInputText
+            :value="formInput.password"
+            :label="'Mật khẩu'"
+            :required="true"
+            :error="formError.password"
+            :is-secured="true"
+            @input="handleInput('password', $event)"
+            @blur="validateKey('password')"
+          />
+          <AppButton
+            class="login-button"
+            :is-loading="isLoading"
+            :text="'Đăng nhập'"
+            :is-disabled="!isFormValid"
+            @click="handleLoginClick"
+          />
+        </div>
+        <div class="form-footer">
+          <NuxtLink to="/account/request-recovery" class="forgot-password"
+            >Quên mật khẩu?</NuxtLink
+          >
+          <div class="divider">
+            <div class="line"></div>
+            <div class="text">Hoặc</div>
+          </div>
+          <AppButton
+            class="login-with-google-button"
+            :is-loading="isLoading"
+            :text="'Đăng nhập với Google'"
+            :is-disabled="!isFormValid"
+            @click="handleLoginWithGoogleClick"
+          >
+            <template #icon>
+              <Icon class="icon" name="flowbite:google-solid" />
+            </template>
+          </AppButton>
+          <div class="create-account">
+            Bạn chưa có tài khoản?
+            <NuxtLink to="/auth/register" class="link">Đăng ký ngay</NuxtLink>
+          </div>
+        </div>
       </div>
-      <div class="form-content">
-        <AppInputText
-          :value="formInput.username"
-          :label="'Tên đăng nhập'"
-          :required="true"
-          :error="formError.username"
-          @input="handleInput('username', $event)"
-          @blur="validateKey('username')"
-        />
-        <AppInputText
-          :value="formInput.password"
-          :label="'Mật khẩu'"
-          :required="true"
-          :error="formError.password"
-          :is-secured="true"
-          @input="handleInput('password', $event)"
-          @blur="validateKey('password')"
-        />
-        <AppButton
-          class="login-button"
-          :is-loading="isLoading"
-          :text="'Đăng nhập'"
-          :is-disabled="!isFormValid"
-          @click="handleLoginClick"
-        />
-      </div>
-      <div class="form-footer">
-        <div class="forgot-password">Quên mật khẩu</div>
-      </div>
+      <NuxtLink to="/account/request-verify-email" class="re-send-email"
+        >Tôi chưa nhận được email xác thực</NuxtLink
+      >
     </div>
     <div class="image">
       <img
+        class="wall-image"
         src="https://res.cloudinary.com/daygzzzwz/image/upload/v1756545359/cv-connect/background-login-small_tm858w.png"
       />
     </div>
@@ -113,6 +142,9 @@ const validateKey = (key: keyof typeof formInput.value) => {
   }
 };
 
+const handleLoginWithGoogleClick = () => {
+  console.log("login with google");
+};
 const handleLoginClick = async () => {
   // if able, validate before calling api
   validateForm();
@@ -141,84 +173,157 @@ const isLoading = ref(false);
 .login-page {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   height: 100vh;
-  .login-form {
-    align-items: center;
+  .form-wrapper {
+    width: 40vw;
     min-width: 450px;
-    padding: 32px 60px;
-    height: fit-content;
-    width: 360px;
-    margin: auto;
-    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 
-    .form-header {
+    .login-form {
+      justify-content: center;
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      .welcome-message {
-        text-align: center;
-        font-weight: 900;
-        font-size: 24px;
-        color: $color-primary-500;
-        line-height: 24px;
-      }
-      .welcome-desc {
-        font-size: 13px;
-        text-align: center;
-        color: $text-light;
-        margin-top: -8px;
-        margin-bottom: 24px;
-      }
-      .logo {
+      min-width: 450px;
+      padding: 32px 60px 0px 60px;
+      flex: 1;
+      width: 360px;
+      margin: auto;
+      border-radius: 16px;
+
+      .form-header {
         display: flex;
-        justify-content: center;
-        margin-bottom: 12px;
-        img {
-          height: 72px;
+        flex-direction: column;
+        gap: 16px;
+        .welcome-message {
+          text-align: center;
+          font-weight: 900;
+          font-size: 24px;
+          color: $color-primary-500;
+          line-height: 24px;
+        }
+        .welcome-desc {
+          font-size: 13px;
+          text-align: center;
+          color: $text-light;
+          margin-top: -8px;
+          margin-bottom: 24px;
+        }
+        .logo {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 12px;
+          img {
+            height: 72px;
+          }
         }
       }
-    }
 
-    .form-content {
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-
-      .login-button {
+      .form-content {
         margin-top: 12px;
-        background-color: $color-primary-500;
-        border-radius: 8px;
-        color: $text-dark;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
 
-        &.disabled {
-          background-color: $color-gray-400;
+        .login-button {
+          margin-top: 12px;
+          background-color: $color-primary-500;
+          border-radius: 8px;
+          color: $text-dark;
+
+          &.disabled {
+            background-color: $color-gray-400;
+          }
+        }
+      }
+
+      .form-footer {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 100%;
+        gap: 4px;
+        align-items: flex-end;
+
+        .forgot-password {
+          color: $color-primary-400;
+          font-size: 13px;
+          margin-top: 4px;
+          cursor: pointer;
+        }
+
+        .create-account {
+          color: $text-light;
+          font-size: 13px;
+          margin-top: 4px;
+          align-self: center;
+          .link {
+            cursor: pointer;
+            color: $color-primary-400;
+          }
+        }
+
+        .login-with-google-button {
+          border-radius: 8px;
+          margin-top: 8px;
+          width: 100%;
+          background-color: $color-google-green;
+          .icon {
+            display: inline-block;
+          }
+        }
+
+        .divider {
+          position: relative;
+          height: 20px;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          .text {
+            font-size: 14px;
+            line-height: 20px;
+            color: $color-gray-400;
+            width: fit-content;
+            z-index: 2;
+            background-color: $color-gray-100;
+            position: relative;
+            padding: 0px 4px;
+          }
+          .line {
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            display: block;
+            top: 10px;
+            z-index: 1;
+            background-color: $color-gray-200;
+          }
         }
       }
     }
 
-    .form-footer {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      align-items: flex-end;
-
-      .forgot-password {
-        color: $color-primary-400;
-        font-size: 13px;
-        font-style: italic;
-      }
+    .re-send-email {
+      font-size: 13px;
+      margin-top: 4px;
+      align-self: center;
+      cursor: pointer;
+      text-decoration: underline;
+      color: $text-light;
+      margin-bottom: 8px;
     }
   }
+
   .image {
-    @media (max-width: 900px) {
+    max-width: 60vw;
+    @media (max-width: 850px) {
       display: none;
     }
-    object-fit: cover;
-    overflow: hidden;
-    img {
-      width: 100%;
+    img.wall-image {
       height: 100%;
+      width: 100%;
       object-fit: cover;
     }
   }

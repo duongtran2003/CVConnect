@@ -34,10 +34,14 @@ onBeforeMount(async () => {
   }
 
   if (!currentRole.value) {
-    router.push({
-      name: "role-select",
-      query: { redirect: route.fullPath },
-    });
+    if (roles.value.length > 1) {
+      router.push({
+        name: "role-select",
+        query: { redirect: route.fullPath },
+      });
+    } else if (roles.value.length == 1) {
+      setCurrentRole(roles.value[0]!);
+    }
   }
   if (currentRole.value) {
     const res = await getMe(currentRole.value, { isSilent: true });

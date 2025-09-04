@@ -5,6 +5,7 @@
     :disabled="isDisabled"
     @click="handleClick"
   >
+    <slot name="icon" />
     <div class="button-text">{{ text }}</div>
     <div v-if="isLoading" class="loading-icon">
       <Icon :name="'line-md:loading-twotone-loop'" />

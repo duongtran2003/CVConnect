@@ -164,9 +164,9 @@ const handleButtonClick = () => {
         border: 2px solid $color-gray-200;
 
         &.isSelected {
-          background: rgba(128, 204, 35, 0.1);
-          box-shadow: rgba($color-primary-300, 0.2) 0px 8px 24px;
-          border: 2px solid rgba(128, 204, 35, 0.8);
+          background: rgba($color-lime, 0.1);
+          box-shadow: rgba($color-lime, 0.2) 0px 8px 24px;
+          border: 2px solid rgba($color-lime, 0.8);
         }
 
         width: 220px;

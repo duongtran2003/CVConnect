@@ -1,0 +1,455 @@
+<template>
+  <div class="register-page">
+    <div class="form-wrapper">
+      <div class="register-form">
+        <div class="form-header">
+          <div class="logo">
+            <img src="/logo-horizontal.svg" />
+          </div>
+          <div class="welcome-message">Đăng ký</div>
+          <div class="welcome-desc">
+            Đăng ký ngay để kết nối nhiều cơ hội hơn
+          </div>
+        </div>
+        <div class="form-content">
+          <div class="form-content__column">
+            <div class="column">
+              <AppInputText
+                :value="formInput.fullName"
+                :label="'Tên đầy đủ'"
+                :required="true"
+                :error="formError.fullName"
+                @input="handleInput('fullName', $event)"
+                @blur="validateKey('fullName')"
+              />
+              <AppInputText
+                :value="formInput.username"
+                :label="'Tên đăng nhập'"
+                :required="true"
+                :error="formError.username"
+                @input="handleInput('username', $event)"
+                @blur="validateKey('username')"
+              />
+            </div>
+            <div class="column">
+              <AppInputText
+                :value="formInput.email"
+                :label="'Email'"
+                :required="true"
+                :error="formError.email"
+                :tooltip="'Email này được dùng để xác thực tài khoản của bạn'"
+                @input="handleInput('email', $event)"
+                @blur="validateKey('email')"
+              />
+              <AppInputText
+                :value="formInput.password"
+                :label="'Mật khẩu'"
+                :required="true"
+                :error="formError.password"
+                :is-secured="true"
+                :show-error="false"
+                @input="handleInput('password', $event)"
+                @blur="validateKey('password')"
+              />
+              <AppInputText
+                :value="formInput.passwordConfirm"
+                :label="'Xác nhận mật khẩu'"
+                :required="true"
+                :error="formError.passwordConfirm"
+                :is-secured="true"
+                @input="handleInput('passwordConfirm', $event)"
+                @blur="validateKey('passwordConfirm')"
+              />
+              <div class="password-checklist">
+                <div
+                  v-for="check of passwordChecklist"
+                  :key="check.key"
+                  class="checklist__item"
+                  :class="{ done: check.isDone }"
+                >
+                  <Icon
+                    :name="check.isDone ? 'mdi:check' : 'mdi:close'"
+                    class="icon"
+                  />
+                  <div class="text">{{ check.text }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <AppButton
+            class="register-button"
+            :is-loading="isLoading"
+            :text="'Đăng ký'"
+            :is-disabled="!isFormValid"
+            @click="handleRegisterClick"
+          />
+        </div>
+        <div class="form-footer">
+          <div class="forgot-password">
+            Bạn đã có tài khoản?<NuxtLink class="link" to="/auth/login">
+              Đăng nhập ngay
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+      <NuxtLink to="/account/request-verify-email" class="re-send-email"
+        >Tôi chưa nhận được email xác thực</NuxtLink
+      >
+    </div>
+    <div class="image">
+      <img
+        src="https://res.cloudinary.com/daygzzzwz/image/upload/v1756545359/cv-connect/background-login-small_tm858w.png"
+      />
+    </div>
+  </div>
+</template>
+<script setup lang="ts">
+import { EMAIL_REGEX, PASSWORD_REGEX } from "~/const/auth";
+
+definePageMeta({ layout: "auth" });
+useHead({
+  title: "Đăng kí",
+});
+const { register } = useAuth();
+const router = useRouter();
+const formInput = ref({
+  fullName: "",
+  email: "",
+  username: "",
+  password: "",
+  passwordConfirm: "",
+});
+
+const formError = ref({
+  fullName: "",
+  email: "",
+  username: "",
+  password: "",
+  passwordConfirm: "",
+});
+
+const passwordChecklist = ref([
+  {
+    key: "lowercase",
+    text: "Ít nhất 1 chữ thường",
+    regex: /\p{Ll}/u,
+    isDone: false,
+  },
+  {
+    key: "uppercase",
+    text: "Ít nhất 1 chữ hoa",
+    regex: /\p{Lu}/u,
+    isDone: false,
+  },
+  {
+    key: "digit",
+    text: "Ít nhất 1 chữ số",
+    regex: /\d/,
+    isDone: false,
+  },
+  {
+    key: "length",
+    text: "Độ dài từ 8 đến 20 ký tự",
+    regex: /^.{8,20}$/,
+    isDone: false,
+  },
+  {
+    key: "nospace",
+    text: "Không chứa khoảng trắng",
+    regex: /^\S*$/,
+    isDone: false,
+  },
+]);
+
+const formRules = {
+  fullName: [
+    (input: string) => {
+      if (!input.trim()) {
+        formError.value.fullName = "Mời nhập tên đầy đủ";
+        return false;
+      }
+      return true;
+    },
+  ],
+  email: [
+    (input: string) => {
+      if (!input.trim()) {
+        formError.value.email = "Mời nhập email";
+        return false;
+      }
+      return true;
+    },
+    (input: string) => {
+      const isValid = EMAIL_REGEX.test(input);
+      if (!isValid) {
+        formError.value.email = "Email không hợp lệ";
+        return false;
+      }
+      return true;
+    },
+  ],
+  username: [
+    (input: string) => {
+      if (!input.trim()) {
+        formError.value.username = "Mời nhập tên đăng nhập";
+        return false;
+      }
+      return true;
+    },
+  ],
+  password: [
+    (input: string) => {
+      if (!input.trim()) {
+        formError.value.password = "Mời nhập mật khẩu";
+        return false;
+      }
+      return true;
+    },
+    (input: string) => {
+      const isValid = PASSWORD_REGEX.test(input);
+      if (!isValid) {
+        formError.value.password =
+          "Mật khẩu phải từ 8 đến 20 kí tự, ít nhất 1 kí tự hoa, thường, số và không chứa khoảng trắng";
+        return false;
+      }
+      return true;
+    },
+  ],
+  passwordConfirm: [
+    (input: string) => {
+      if (!input.trim()) {
+        formError.value.passwordConfirm = "Mời xác nhận mật khẩu";
+        return false;
+      }
+      return true;
+    },
+    (input: string) => {
+      if (
+        formInput.value.password.trim() &&
+        formInput.value.password.trim() !== input.trim()
+      ) {
+        formError.value.passwordConfirm = "Mật khẩu không trùng khớp";
+        return false;
+      }
+      return true;
+    },
+  ],
+};
+
+const isFormValid = computed(() => {
+  for (const key of Object.keys(
+    formError.value,
+  ) as (keyof typeof formError.value)[]) {
+    if (formError.value[key]) {
+      return false;
+    }
+  }
+  return true;
+});
+
+const validateForm = () => {
+  for (const key of Object.keys(
+    formInput.value,
+  ) as (keyof typeof formInput.value)[]) {
+    validateKey(key);
+  }
+};
+
+const validateKey = (key: keyof typeof formInput.value) => {
+  const input = formInput.value[key];
+  const rules = formRules[key as keyof typeof formRules];
+  for (const rule of rules) {
+    const ok = rule(input);
+    if (!ok) {
+      break;
+    }
+  }
+};
+
+const handleRegisterClick = async () => {
+  // if able, validate before calling api
+  validateForm();
+  if (isFormValid.value) {
+    const registerCredentials: TRegisterCredentials = {
+      username: formInput.value.username,
+      password: formInput.value.password,
+      email: formInput.value.email,
+      fullName: formInput.value.fullName,
+    };
+    isLoading.value = true;
+    const isSuccess = await register(registerCredentials);
+    if (isSuccess) {
+      // Show cái trang yêu cầu confirm ở đây
+    }
+    isLoading.value = false;
+  }
+};
+
+const handleInput = (key: string, value: string) => {
+  formInput.value[key as keyof typeof formInput.value] = value;
+  formError.value[key as keyof typeof formError.value] = "";
+};
+
+const isLoading = ref(false);
+
+watch(formInput.value, (val) => {
+  console.log(val);
+  passwordChecklist.value = passwordChecklist.value.map((rule) => {
+    if (!val.password) {
+      return {
+        ...rule,
+        isDone: false,
+      };
+    }
+    return {
+      ...rule,
+      isDone: rule.regex.test(val.password),
+    };
+  });
+});
+</script>
+<style lang="scss" scoped>
+.register-page {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  .form-wrapper {
+    width: 40vw;
+    min-width: 650px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .register-form {
+      align-items: center;
+      padding: 32px 60px 0px 60px;
+      height: fit-content;
+      margin: auto;
+      border-radius: 16px;
+
+      .form-header {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        .welcome-message {
+          text-align: center;
+          font-weight: 900;
+          font-size: 24px;
+          color: $color-primary-500;
+          line-height: 24px;
+        }
+        .welcome-desc {
+          font-size: 13px;
+          text-align: center;
+          color: $text-light;
+          margin-top: -8px;
+          margin-bottom: 24px;
+        }
+        .logo {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 12px;
+          img {
+            height: 72px;
+          }
+        }
+      }
+
+      .form-content {
+        margin-top: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        .password-checklist {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          font-size: 12px;
+          line-height: 14px;
+          padding-left: 8px;
+
+          .checklist__item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 4px;
+            color: $color-danger;
+
+            &.done {
+              color: $color-success;
+            }
+
+            .icon {
+              display: inline-block;
+            }
+          }
+        }
+
+        &__column {
+          display: flex;
+          flex-direction: row;
+          gap: 8px;
+          .column {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+          }
+        }
+
+        .register-button {
+          margin-top: 12px;
+          background-color: $color-primary-500;
+          border-radius: 8px;
+          color: $text-dark;
+
+          &.disabled {
+            background-color: $color-gray-400;
+          }
+        }
+      }
+
+      .form-footer {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-end;
+
+        .forgot-password {
+          .link {
+            color: $color-primary-400;
+            cursor: pointer;
+            font-style: underline;
+          }
+          color: $text-light;
+          margin-top: 4px;
+          font-size: 13px;
+        }
+      }
+    }
+
+    .re-send-email {
+      font-size: 13px;
+      margin-top: 4px;
+      align-self: center;
+      cursor: pointer;
+      text-decoration: underline;
+      color: $text-light;
+      margin-bottom: 8px;
+    }
+  }
+  .image {
+    @media (max-width: 900px) {
+      display: none;
+    }
+    object-fit: cover;
+    overflow: hidden;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}
+</style>

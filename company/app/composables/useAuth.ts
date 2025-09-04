@@ -5,16 +5,26 @@ export type TLoginCredentials = {
   password: string;
 };
 
+export type TRegisterCredentials = {
+  fullName: string;
+  email: string;
+  username: string;
+  password: string;
+};
+
 export const useAuth = () => {
   const { $axios } = useNuxtApp();
   const { setToken, setRoles, setCurrentRole } = useAuthStore();
   const authStore = useAuthStore();
-  const { roles, token, currentRole } = storeToRefs(authStore);
+  const { token } = storeToRefs(authStore);
   const toast = useToast();
 
   const login = async (credentials: TLoginCredentials) => {
     try {
-      const res = await $axios.post("/_api/user/auth/login", credentials);
+      const res = await $axios.post("/_api/user/auth/login", credentials, {
+        skipAuth: true,
+        skipAuthRefresh: true,
+      });
       toast.add({
         title: res.data.message,
         color: "success",
@@ -24,6 +34,32 @@ export const useAuth = () => {
       if (res.data.data.roles.length == 1) {
         setCurrentRole(res.data.data.roles[0]);
       }
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  const register = async (credentials: TRegisterCredentials) => {
+    try {
+      const res = await $axios.post(
+        "/_api/user/auth/register-candidate",
+        credentials,
+        {
+          skipAuth: true,
+        },
+      );
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
       return true;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -88,5 +124,5 @@ export const useAuth = () => {
     }
   };
 
-  return { login, logout, getMe, getMenus, verifyToken };
+  return { login, logout, getMe, getMenus, verifyToken, register };
 };
