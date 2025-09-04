@@ -33,8 +33,26 @@
           :title="isExpanded ? '' : role.name"
           :class="{ isActive: isCurrentRole(role) }"
           class="role-item"
-          @click="handleSetRole(role)"
         >
+          <div
+            class="float"
+            :class="{ expanded: isExpanded, hidden: !isExpanded }"
+          >
+            <div class="wrapper">
+              <div class="menu-child" @click.stop="handleSetRole(role)">
+                Chuyển đổi vai trò
+              </div>
+              <div
+                class="menu-child"
+                :class="{ default: isSetDefault(role) }"
+                @click.stop="
+                  isSetDefault(role) ? () => {} : handleSetRoleDefault(role)
+                "
+              >
+                {{ isSetDefault(role) ? "Mặc định" : "Đặt làm mặc định" }}
+              </div>
+            </div>
+          </div>
           <Icon class="role-icon" :name="roleIcon(role.code)" />
           <div v-if="isExpanded">{{ role.name }}</div>
         </div>
@@ -44,7 +62,10 @@
         class="role-switcher"
         @click="() => (isAllRolesShow = !isAllRolesShow)"
       >
-        <div class="role-item" :title="isExpanded ? '' : 'Chuyển đổi vai trò'">
+        <div
+          class="role-item toggler"
+          :title="isExpanded ? '' : 'Chuyển đổi vai trò'"
+        >
           <Icon class="role-icon" name="mdi:account-convert" />
           <div v-if="isExpanded">Chuyển đổi vai trò</div>
         </div>
@@ -63,22 +84,37 @@ const authStore = useAuthStore();
 const { setCurrentRole } = authStore;
 const { currentRole, roles } = storeToRefs(authStore);
 const { getMenus } = useAuth();
+const toast = useToast();
 
 const isAllRolesShow = ref(false);
 
-watch(currentRole, async (newRole) => {
-  if (newRole) {
-    console.log("get new role ne");
-    const menus = await getMenus(newRole);
-    if (menus) {
-      setMenus(menus);
+watch(
+  currentRole,
+  async (newRole) => {
+    if (newRole) {
+      console.log("get new role ne");
+      const menus = await getMenus(newRole);
+      if (menus) {
+        setMenus(menus);
+      }
     }
-  }
-});
+  },
+  { immediate: true },
+);
 
 const isCurrentRole = computed(() => {
   return (role: TAccountRole) => {
     return role.id === currentRole.value?.id;
+  };
+});
+
+const isSetDefault = computed(() => {
+  return (role: TAccountRole) => {
+    const _role = getDefaultRole();
+    if (_role && _role.id == role.id) {
+      return true;
+    }
+    return false;
   };
 });
 
@@ -92,8 +128,28 @@ const roleIcon = computed(() => {
 });
 
 const handleSetRole = (role: TAccountRole) => {
+  if (currentRole.value && currentRole.value.id == role.id) {
+    return;
+  }
   setCurrentRole(role);
   isAllRolesShow.value = false;
+  toast.add({
+    title: "Chuyển đổi vai trò thành công",
+    color: "success",
+  });
+};
+
+const handleSetRoleDefault = (role: TAccountRole) => {
+  console.log("child click");
+  setDefaultRole(role);
+  isAllRolesShow.value = false;
+  toast.add({
+    title: "Đặt vai trò làm mặc định thành công",
+    color: "success",
+  });
+  if (currentRole.value && currentRole.value.id !== role.id) {
+    setCurrentRole(role);
+  }
 };
 
 const handleItemExpand = ({ id, state }: TSidebarItemExpandPayload) => {
@@ -203,13 +259,74 @@ const isExpanded = ref(true);
       border-radius: 8px;
       font-weight: 600;
       transition: background-color 200ms;
+      position: relative;
 
-      &.isActive {
-        background-color: rgba($color-primary-100, 0.6);
-        color: $color-primary-400;
+      &.toggler {
+        &:hover {
+          background-color: rgba($color-primary-100, 0.6);
+          color: $color-primary-400;
+        }
       }
 
-      &:hover {
+      .float {
+        display: none;
+        position: absolute;
+        padding-left: 12px;
+
+        .wrapper {
+          padding: 4px;
+          border-radius: 8px;
+          min-width: 180px;
+          background-color: white;
+          box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+
+          .menu-child {
+            font-size: 14px;
+            line-height: 20px;
+            color: $text-light;
+            display: flex;
+            flex-direction: row;
+            gap: 16px;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 200ms;
+            position: relative;
+
+            &.default {
+              cursor: default;
+            }
+
+            &.active:not(.default) {
+              background-color: rgba($color-primary-100, 0.6);
+              color: $color-primary-400;
+            }
+
+            &:hover:not(.default) {
+              background-color: rgba($color-primary-100, 0.6);
+              color: $color-primary-400;
+            }
+          }
+        }
+
+        top: -4px;
+        &.expanded {
+          margin-left: 216px;
+        }
+        &.hidden {
+          margin-left: 27px;
+        }
+      }
+
+      &:hover > .float,
+      &:hover .float,
+      .float:hover {
+        display: block;
+      }
+
+      &.isActive {
         background-color: rgba($color-primary-100, 0.6);
         color: $color-primary-400;
       }

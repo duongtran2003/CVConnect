@@ -50,6 +50,7 @@ export const useAuthStore = defineStore(
   {
     persist: {
       storage: localStorage,
+      omit: ["currentRole"],
     },
   },
 );

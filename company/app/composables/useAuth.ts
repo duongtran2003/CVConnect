@@ -86,6 +86,7 @@ export const useAuth = () => {
       const res = await $axios.post(`/_api/user/auth/verify`, {
         token: token.value,
       });
+      return res.data;
     } catch (err: any) {
       return null;
     }

@@ -31,9 +31,9 @@
           />
           <AppButton
             class="login-button"
-            :is-loading="isLoading"
+            :is-loading="isLoading.loginButton"
             :text="'Đăng nhập'"
-            :is-disabled="!isFormValid"
+            :is-disabled="!isFormValid || isLoading.loginWithGoogle"
             @click="handleLoginClick"
           />
         </div>
@@ -47,9 +47,9 @@
           </div>
           <AppButton
             class="login-with-google-button"
-            :is-loading="isLoading"
+            :is-loading="isLoading.loginWithGoogle"
             :text="'Đăng nhập với Google'"
-            :is-disabled="!isFormValid"
+            :is-disabled="isLoading.loginButton"
             @click="handleLoginWithGoogleClick"
           >
             <template #icon>
@@ -79,8 +79,16 @@ definePageMeta({ layout: "auth" });
 useHead({
   title: "Đăng nhập",
 });
-const { login } = useAuth();
+const { login, verifyToken } = useAuth();
 const router = useRouter();
+
+onBeforeMount(async () => {
+  const res = await verifyToken();
+  if (res.data.isValid) {
+    router.push({ path: "/dashboard" });
+  }
+});
+
 const formInput = ref({
   username: "",
   password: "",
@@ -153,12 +161,12 @@ const handleLoginClick = async () => {
       username: formInput.value.username,
       password: formInput.value.password,
     };
-    isLoading.value = true;
+    isLoading.value.loginButton = true;
     const isSuccess = await login(loginCredentials);
     if (isSuccess) {
       router.push({ name: "dashboard" });
     }
-    isLoading.value = false;
+    isLoading.value.loginButton = false;
   }
 };
 
@@ -167,7 +175,10 @@ const handleInput = (key: string, value: string) => {
   formError.value[key as keyof typeof formError.value] = "";
 };
 
-const isLoading = ref(false);
+const isLoading = ref({
+  loginButton: false,
+  loginWithGoogle: false,
+});
 </script>
 <style lang="scss" scoped>
 .login-page {
@@ -273,6 +284,10 @@ const isLoading = ref(false);
           background-color: $color-google-green;
           .icon {
             display: inline-block;
+          }
+
+          &.disabled {
+            background-color: $color-gray-400;
           }
         }
 
