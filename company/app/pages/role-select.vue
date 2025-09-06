@@ -92,9 +92,16 @@ const handleButtonClick = () => {
   }
 
   const redirectTo = route.query.redirect as string;
-  router.push({
-    path: redirectTo || "",
-  });
+  const defaultRoute = getDefaultRoute(selectedRole.value)
+  if (redirectTo) {
+    router.push({
+      path: redirectTo,
+    });
+  } else {
+    router.push({
+      path: defaultRoute,
+    });
+  }
 };
 </script>
 <style lang="scss" scoped>
@@ -197,7 +204,7 @@ const handleButtonClick = () => {
             color: $text-light;
           }
           :deep(.iconify) {
-            color: $text-dark
+            color: $text-dark;
           }
         }
       }

@@ -15,7 +15,7 @@ useHead({
   },
 });
 const toasterConfig: ToasterProps = {
-  position: "top-right",
+  position: "bottom-right",
   progress: false,
 };
 </script>
