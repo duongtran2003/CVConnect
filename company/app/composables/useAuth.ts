@@ -15,6 +15,7 @@ export type TRegisterCredentials = {
 export const useAuth = () => {
   const { $axios } = useNuxtApp();
   const { setToken, setRoles, setCurrentRole, clearToken } = useAuthStore();
+  const { clearUser } = useUserStore();
   const authStore = useAuthStore();
   const { token } = storeToRefs(authStore);
   const toast = useToast();
@@ -98,12 +99,75 @@ export const useAuth = () => {
     }
   };
 
+  const verifyEmail = async (token: string) => {
+    try {
+      const res = await $axios.put(
+        `/_api/user/auth/verify-email/${token}`,
+        {},
+        { skipAuth: true },
+      );
+      return res.data;
+    } catch (err: any) {
+      console.error(err);
+      return false;
+    }
+  };
+
   const logout = async () => {
     try {
       await $axios.post("/_api/user/auth/logout");
       clearToken();
+      clearUser();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const requestResetPassword = async (identifier: string) => {
+    try {
+      const res = await $axios.get(
+        `/_api/user/auth/request-reset-password?identifier=${identifier}`,
+        {
+          skipAuth: true,
+        },
+      );
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  const resetPassword = async (token: string, newPassword: string) => {
+    try {
+      const res = await $axios.put(
+        `/_api/user/auth/reset-password`,
+        {
+          token,
+          newPassword,
+        },
+        { skipAuth: true },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
     }
   };
 
@@ -159,5 +223,8 @@ export const useAuth = () => {
     verifyToken,
     register,
     requestResendVerifyEmail,
+    verifyEmail,
+    requestResetPassword,
+    resetPassword,
   };
 };

@@ -11,6 +11,12 @@
             Lấy lại mật khẩu với tên đăng nhập hoặc email
           </div>
         </div>
+        <div
+          v-if="noticeMessage"
+          class="notice"
+          :class="{ error: isError }"
+          v-html="noticeMessage"
+        ></div>
         <div class="form-content">
           <AppInputText
             :value="formInput.identifier"
@@ -23,8 +29,8 @@
           <AppButton
             class="recovery-button"
             :is-loading="isLoading"
-            :text="'Đồng ý'"
-            :is-disabled="!isFormValid"
+            :text="buttonText"
+            :is-disabled="isButtonDisabled"
             @click="handleRecoveryClick"
           />
           <NuxtLink to="/auth/login" class="link">Trở về đăng nhập</NuxtLink>
@@ -44,6 +50,7 @@ definePageMeta({ layout: "auth" });
 useHead({
   title: "Lấy lại mật khẩu",
 });
+const { requestResetPassword } = useAuth();
 const formInput = ref({
   identifier: "",
 });
@@ -53,25 +60,27 @@ const formError = ref({
 });
 
 const formRules = {
-  username: [
+  identifier: [
     (input: string) => {
       if (!input.trim()) {
-        formError.value.username = "Mời nhập tên đăng nhập";
-        return false;
-      }
-      return true;
-    },
-  ],
-  password: [
-    (input: string) => {
-      if (!input.trim()) {
-        formError.value.password = "Mời nhập mật khẩu";
+        formError.value.identifier = "Mời nhập tên đăng nhập hoặc mật khẩu";
         return false;
       }
       return true;
     },
   ],
 };
+
+const buttonText = computed(() => {
+  if (countdown.value === 0) {
+    return "Đồng ý";
+  }
+  return `Gửi lại sau ${countdown.value} giây`;
+});
+
+const isButtonDisabled = computed(() => {
+  return countdown.value > 0 || !isFormValid.value;
+});
 
 const isFormValid = computed(() => {
   for (const key of Object.keys(
@@ -103,12 +112,55 @@ const validateKey = (key: keyof typeof formInput.value) => {
   }
 };
 
+const countdown = ref(0);
+const countdownRef = ref<number | null>(null);
+
+const isError = ref<boolean>(false);
+const noticeMessage = ref<string>("");
+
+const handleRecoveryClick = async () => {
+  validateForm();
+  if (!isFormValid.value) {
+    return
+  }
+  isLoading.value = true
+  const res = await requestResetPassword(formInput.value.identifier);
+  isLoading.value = false
+  if (res) {
+    noticeMessage.value = `Hệ thống đã gửi thông báo yêu cầu đổi mật khẩu vào địa chỉ <strong>${res.data.email}</strong>.
+          Vui lòng kiểm tra và làm theo hướng dẫn. Nếu chưa thấy, hãy tìm trong
+          hòm thư rác. Thông báo xác nhận có hiệu lực trong vòng
+          <strong>${res.data.duration / 60 / 60} giờ</strong>`;
+
+    isError.value = false;
+  } else {
+    noticeMessage.value = `Có lỗi xảy ra, vui lòng kiểm tra lại tên đăng nhập/email vừa nhập`;
+    isError.value = true;
+  }
+
+  countdown.value = 60;
+  countdownRef.value = window.setInterval(() => {
+    if (countdown.value === 0 && countdownRef.value) {
+      window.clearInterval(countdownRef.value);
+      countdownRef.value = null;
+      return;
+    }
+    countdown.value -= 1;
+  }, 1000);
+};
+
 const handleInput = (key: string, value: string) => {
   formInput.value[key as keyof typeof formInput.value] = value;
   formError.value[key as keyof typeof formError.value] = "";
 };
 
 const isLoading = ref(false);
+
+onBeforeUnmount(() => {
+  if (countdownRef.value) {
+    window.clearInterval(countdownRef.value);
+  }
+});
 </script>
 <style lang="scss" scoped>
 .recovery-page {
@@ -186,6 +238,21 @@ const isLoading = ref(false);
           margin-top: -4px;
           cursor: pointer;
           align-self: flex-end;
+        }
+      }
+
+      .notice {
+        border: 2px dashed $color-success;
+        padding: 28px;
+        border-radius: 8px;
+        text-align: left;
+        color: $color-success;
+        background-color: rgba($color-success, 0.1);
+
+        &.error {
+          border: 2px dashed $color-danger;
+          color: $color-danger;
+          background-color: rgba($color-danger, 0.1);
         }
       }
     }

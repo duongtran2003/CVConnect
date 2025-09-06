@@ -17,7 +17,7 @@
           v-html="
             `Hệ thống đã gửi thông báo xác nhận vào hòm thư điện tử của bạn.
           Vui lòng kiểm tra và làm theo hướng dẫn. Nếu chưa thấy, hãy tìm trong
-          hòm thư rác. Thông báo xác nhận có hiêu lực trong vòng
+          hòm thư rác. Thông báo xác nhận có hiệu lực trong vòng
           <strong>${duration} giờ</strong>`
           "
         ></div>

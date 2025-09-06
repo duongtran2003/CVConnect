@@ -32,11 +32,13 @@ const tempStatus = ref<TStatus>("pending");
 const counter = ref(5);
 const stage = ref(0);
 const redirectInterval = ref<number | null>(null);
-const minimumTimeout = ref<number|null>(null)
+const minimumTimeout = ref<number | null>(null);
+const username = ref<string>("")
 const route = useRoute();
 const router = useRouter();
+const { verifyEmail } = useAuth();
 
-onMounted(() => {
+onMounted(async () => {
   const token = route.query.token;
   if (!token) {
     tempStatus.value = "error";
@@ -44,17 +46,19 @@ onMounted(() => {
     return;
   }
   // call api verify
-  window.setTimeout(() => {
-    stage.value += 1;
-    tempStatus.value = "success";
 
-    redirectInterval.value = window.setInterval(() => {
-      counter.value -= 1;
-    }, 1000);
-  }, 6000);
   minimumTimeout.value = window.setTimeout(() => {
     stage.value += 1;
   }, 6000);
+  const res = await verifyEmail(token as string);
+  stage.value += 1;
+
+  if (res) {
+    tempStatus.value = "success";
+    username.value = res.data.username;
+  } else {
+    tempStatus.value = "error";
+  }
 });
 
 onBeforeUnmount(() => {
@@ -70,13 +74,19 @@ onBeforeUnmount(() => {
 watch(stage, (newVal) => {
   if (newVal == 2) {
     status.value = tempStatus.value;
+    if (tempStatus.value === "success") {
+      counter.value = 6;
+      redirectInterval.value = window.setInterval(() => {
+        counter.value -= 1;
+      }, 1000);
+    }
   }
 });
 
 watch(counter, (newVal) => {
   if (newVal == 0 && redirectInterval.value != null) {
     clearInterval(redirectInterval.value);
-    router.push({ path: "/auth/login" });
+    router.push({ path: "/auth/login", query: { username: username.value } });
   }
 });
 

@@ -62,7 +62,9 @@
           </div>
         </div>
       </div>
-      <NuxtLink to="/account/request-verify-email?redirect=/auth/login" class="re-send-email"
+      <NuxtLink
+        to="/account/request-verify-email?redirect=/auth/login"
+        class="re-send-email"
         >Tôi chưa nhận được email xác thực</NuxtLink
       >
     </div>
@@ -81,11 +83,16 @@ useHead({
 });
 const { login, verifyToken } = useAuth();
 const router = useRouter();
+const route = useRoute();
 
 onBeforeMount(async () => {
   const res = await verifyToken();
   if (res.data.isValid) {
     router.push({ path: "/dashboard" });
+  }
+  const username = route.query.username as string;
+  if (username) {
+    formInput.value.username = username;
   }
 });
 

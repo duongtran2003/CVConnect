@@ -71,11 +71,16 @@ const noticeMessage = ref<string>("");
 
 const handleRequestEmail = async () => {
   validateForm();
+  if (!isFormValid.value) {
+    return
+  }
+  isLoading.value = true;
   const res = await requestResendVerifyEmail(formInput.value.identifier);
+  isLoading.value = false;
   if (res) {
     noticeMessage.value = `Hệ thống đã gửi thông báo xác nhận vào địa chỉ <strong>${res.data.email}</strong>.
           Vui lòng kiểm tra và làm theo hướng dẫn. Nếu chưa thấy, hãy tìm trong
-          hòm thư rác. Thông báo xác nhận có hiêu lực trong vòng
+          hòm thư rác. Thông báo xác nhận có hiệu lực trong vòng
           <strong>${res.data.duration / 60 / 60} giờ</strong>`;
 
     isError.value = false;
