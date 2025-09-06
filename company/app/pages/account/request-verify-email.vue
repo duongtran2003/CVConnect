@@ -9,6 +9,12 @@
           <div class="welcome-message">Gửi lại email xác thực</div>
           <div class="welcome-desc">Yêu cầu gửi lại email xác thực</div>
         </div>
+        <div
+          v-if="noticeMessage"
+          class="notice"
+          :class="{ error: isError }"
+          v-html="noticeMessage"
+        ></div>
         <div class="form-content">
           <AppInputText
             :value="formInput.identifier"
@@ -25,7 +31,7 @@
             :is-disabled="isButtonDisabled"
             @click="handleRequestEmail"
           />
-          <NuxtLink to="/auth/login" class="link">Trở về đăng nhập</NuxtLink>
+          <div class="link" @click="handleGoBack">Đưa tôi trở về</div>
         </div>
       </div>
     </div>
@@ -40,8 +46,9 @@
 <script setup lang="ts">
 definePageMeta({ layout: "auth" });
 useHead({
-  title: "Lấy lại mật khẩu",
+  title: "Xác nhận email",
 });
+const { requestResendVerifyEmail } = useAuth();
 const formInput = ref({
   identifier: "",
 });
@@ -50,9 +57,6 @@ const formError = ref({
   identifier: "",
 });
 
-const isButtonDisabled = computed(() => {
-  return countdown.value > 0;
-});
 const buttonText = computed(() => {
   if (countdown.value === 0) {
     return "Đồng ý";
@@ -62,16 +66,51 @@ const buttonText = computed(() => {
 const countdown = ref(0);
 const countdownRef = ref<number | null>(null);
 
-const handleRequestEmail = () => {
-  countdown.value = 5;
+const isError = ref<boolean>(false);
+const noticeMessage = ref<string>("");
+
+const handleRequestEmail = async () => {
+  validateForm();
+  const res = await requestResendVerifyEmail(formInput.value.identifier);
+  if (res) {
+    noticeMessage.value = `Hệ thống đã gửi thông báo xác nhận vào địa chỉ <strong>${res.data.email}</strong>.
+          Vui lòng kiểm tra và làm theo hướng dẫn. Nếu chưa thấy, hãy tìm trong
+          hòm thư rác. Thông báo xác nhận có hiêu lực trong vòng
+          <strong>${res.data.duration / 60 / 60} giờ</strong>`;
+
+    isError.value = false;
+  } else {
+    noticeMessage.value = `Có lỗi xảy ra, vui lòng kiểm tra lại tên đăng nhập/email vừa nhập`;
+    isError.value = true;
+  }
+
+  countdown.value = 60;
   countdownRef.value = window.setInterval(() => {
     if (countdown.value === 0 && countdownRef.value) {
       window.clearInterval(countdownRef.value);
       countdownRef.value = null;
-      return
+      return;
     }
     countdown.value -= 1;
   }, 1000);
+};
+
+onBeforeUnmount(() => {
+  if (countdownRef.value) {
+    window.clearInterval(countdownRef.value);
+  }
+});
+
+const formRules = {
+  identifier: [
+    (input: string) => {
+      if (!input.trim()) {
+        formError.value.identifier = "Mời nhập tên đăng nhập hoặc mật khẩu";
+        return false;
+      }
+      return true;
+    },
+  ],
 };
 
 const isFormValid = computed(() => {
@@ -103,6 +142,18 @@ const validateKey = (key: keyof typeof formInput.value) => {
     }
   }
 };
+
+const router = useRouter();
+const route = useRoute();
+
+const handleGoBack = () => {
+  const redirect = (route.query.redirect as string) || "/auth/login";
+  router.push({ path: redirect });
+};
+
+const isButtonDisabled = computed(() => {
+  return countdown.value > 0 || !isFormValid.value;
+});
 
 const handleInput = (key: string, value: string) => {
   formInput.value[key as keyof typeof formInput.value] = value;
@@ -187,6 +238,21 @@ const isLoading = ref(false);
           margin-top: -4px;
           cursor: pointer;
           align-self: flex-end;
+        }
+      }
+
+      .notice {
+        border: 2px dashed $color-success;
+        padding: 28px;
+        border-radius: 8px;
+        text-align: left;
+        color: $color-success;
+        background-color: rgba($color-success, 0.1);
+
+        &.error {
+          border: 2px dashed $color-danger;
+          color: $color-danger;
+          background-color: rgba($color-danger, 0.1);
         }
       }
     }

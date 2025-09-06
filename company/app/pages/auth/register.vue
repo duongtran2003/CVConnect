@@ -11,7 +11,17 @@
             Đăng ký ngay để kết nối nhiều cơ hội hơn
           </div>
         </div>
-        <div class="form-content">
+        <div
+          v-if="mode === 'confirming'"
+          class="notice"
+          v-html="
+            `Hệ thống đã gửi thông báo xác nhận vào hòm thư điện tử của bạn.
+          Vui lòng kiểm tra và làm theo hướng dẫn. Nếu chưa thấy, hãy tìm trong
+          hòm thư rác. Thông báo xác nhận có hiêu lực trong vòng
+          <strong>${duration} giờ</strong>`
+          "
+        ></div>
+        <div v-if="mode === 'registering'" class="form-content">
           <div class="form-content__column">
             <div class="column">
               <AppInputText
@@ -85,14 +95,21 @@
           />
         </div>
         <div class="form-footer">
-          <div class="forgot-password">
+          <div v-if="mode === 'registering'" class="forgot-password">
             Bạn đã có tài khoản?<NuxtLink class="link" to="/auth/login">
               Đăng nhập ngay
             </NuxtLink>
           </div>
+          <div
+            v-if="mode === 'confirming'"
+            class="link continue-register"
+            @click="handleSwitchToRegister"
+          >
+            Tiếp tục tạo tài khoản
+          </div>
         </div>
       </div>
-      <NuxtLink to="/account/request-verify-email" class="re-send-email"
+      <NuxtLink to="/account/request-verify-email?redirect=/auth/register" class="re-send-email"
         >Tôi chưa nhận được email xác thực</NuxtLink
       >
     </div>
@@ -112,6 +129,7 @@ useHead({
 });
 const { register } = useAuth();
 const router = useRouter();
+const duration = ref<number>(0);
 const formInput = ref({
   fullName: "",
   email: "",
@@ -236,6 +254,9 @@ const formRules = {
   ],
 };
 
+type TRegisteringMode = "confirming" | "registering";
+const mode = ref<TRegisteringMode>("registering");
+
 const isFormValid = computed(() => {
   for (const key of Object.keys(
     formError.value,
@@ -246,6 +267,16 @@ const isFormValid = computed(() => {
   }
   return true;
 });
+
+const handleSwitchToRegister = () => {
+  mode.value = "registering";
+  formInput.value.fullName = "";
+  formInput.value.email = "";
+  formInput.value.username = "";
+  formInput.value.password = "";
+  formInput.value.passwordConfirm = "";
+  duration.value = 0;
+};
 
 const validateForm = () => {
   for (const key of Object.keys(
@@ -277,9 +308,10 @@ const handleRegisterClick = async () => {
       fullName: formInput.value.fullName,
     };
     isLoading.value = true;
-    const isSuccess = await register(registerCredentials);
-    if (isSuccess) {
-      // Show cái trang yêu cầu confirm ở đây
+    const res = await register(registerCredentials);
+    if (res) {
+      duration.value = res.data.duration / 60 / 60;
+      mode.value = 'confirming'
     }
     isLoading.value = false;
   }
@@ -319,6 +351,8 @@ watch(formInput.value, (val) => {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin: auto;
+    height: 100%;
 
     .register-form {
       align-items: center;
@@ -416,12 +450,18 @@ watch(formInput.value, (val) => {
         gap: 4px;
         align-items: flex-end;
 
+        .link {
+          color: $color-primary-400;
+          cursor: pointer;
+          font-style: underline;
+        }
+
+        .continue-register {
+          margin-top: 16px;
+          align-self: center;
+        }
+
         .forgot-password {
-          .link {
-            color: $color-primary-400;
-            cursor: pointer;
-            font-style: underline;
-          }
           color: $text-light;
           margin-top: 4px;
           font-size: 13px;
@@ -437,6 +477,15 @@ watch(formInput.value, (val) => {
       text-decoration: underline;
       color: $text-light;
       margin-bottom: 8px;
+    }
+
+    .notice {
+      border: 2px dashed $color-success;
+      padding: 28px;
+      border-radius: 8px;
+      text-align: left;
+      color: $color-success;
+      background-color: rgba($color-success, 0.10);
     }
   }
   .image {

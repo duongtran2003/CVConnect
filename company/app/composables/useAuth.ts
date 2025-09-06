@@ -60,7 +60,32 @@ export const useAuth = () => {
         title: res.data.message,
         color: "success",
       });
-      return true;
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  const requestResendVerifyEmail = async (identifier: string) => {
+    try {
+      const res = await $axios.get(
+        `/_api/user/auth/request-resend-verify-email?identifier=${identifier}`,
+        {
+          skipAuth: true,
+        },
+      );
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
@@ -126,5 +151,13 @@ export const useAuth = () => {
     }
   };
 
-  return { login, logout, getMe, getMenus, verifyToken, register };
+  return {
+    login,
+    logout,
+    getMe,
+    getMenus,
+    verifyToken,
+    register,
+    requestResendVerifyEmail,
+  };
 };

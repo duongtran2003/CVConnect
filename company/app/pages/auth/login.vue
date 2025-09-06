@@ -62,7 +62,7 @@
           </div>
         </div>
       </div>
-      <NuxtLink to="/account/request-verify-email" class="re-send-email"
+      <NuxtLink to="/account/request-verify-email?redirect=/auth/login" class="re-send-email"
         >Tôi chưa nhận được email xác thực</NuxtLink
       >
     </div>
