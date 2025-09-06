@@ -14,7 +14,7 @@ export type TRegisterCredentials = {
 
 export const useAuth = () => {
   const { $axios } = useNuxtApp();
-  const { setToken, setRoles, setCurrentRole } = useAuthStore();
+  const { setToken, setRoles, setCurrentRole, clearToken } = useAuthStore();
   const authStore = useAuthStore();
   const { token } = storeToRefs(authStore);
   const toast = useToast();
@@ -76,6 +76,7 @@ export const useAuth = () => {
   const logout = async () => {
     try {
       await $axios.post("/_api/user/auth/logout");
+      clearToken();
     } catch (err) {
       console.error(err);
     }

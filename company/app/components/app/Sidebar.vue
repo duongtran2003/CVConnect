@@ -39,8 +39,12 @@
             :class="{ expanded: isExpanded, hidden: !isExpanded }"
           >
             <div class="wrapper">
-              <div class="menu-child" @click.stop="handleSetRole(role)">
-                Chuyển đổi vai trò
+              <div
+                class="menu-child"
+                :class="{ default: isCurrentRole(role) }"
+                @click.stop="handleSetRole(role)"
+              >
+                Đổi vai trò
               </div>
               <div
                 class="menu-child"
@@ -49,12 +53,18 @@
                   isSetDefault(role) ? () => {} : handleSetRoleDefault(role)
                 "
               >
-                {{ isSetDefault(role) ? "Mặc định" : "Đặt làm mặc định" }}
+                {{ isSetDefault(role) ? "Mặc định" : "Đặt mặc định" }}
               </div>
             </div>
           </div>
           <Icon class="role-icon" :name="roleIcon(role.code)" />
-          <div v-if="isExpanded">{{ role.name }}</div>
+          <div v-if="isExpanded" class="role-name">{{ role.name }}</div>
+          <Icon
+            v-if="isSetDefault(role)"
+            class="star-icon"
+            :class="{ small: !isExpanded }"
+            name="material-symbols:star-rounded"
+          />
         </div>
       </div>
       <div v-if="isAllRolesShow" class="divider"></div>
@@ -83,6 +93,7 @@ const { sidebarData } = storeToRefs(sidebarStore);
 const authStore = useAuthStore();
 const { setCurrentRole } = authStore;
 const { currentRole, roles } = storeToRefs(authStore);
+const { setLoading } = useLoadingStore();
 const { getMenus } = useAuth();
 const toast = useToast();
 
@@ -93,7 +104,11 @@ watch(
   async (newRole) => {
     if (newRole) {
       console.log("get new role ne");
+
+      setLoading(true)
       const menus = await getMenus(newRole);
+      setLoading(false)
+
       if (menus) {
         setMenus(menus);
       }
@@ -261,6 +276,23 @@ const isExpanded = ref(true);
       transition: background-color 200ms;
       position: relative;
 
+      .role-name {
+        flex: 1;
+      }
+
+      .star-icon {
+        display: flex;
+        color: $color-goldenrod;
+        font-size: 24px;
+
+        &.small {
+          position: absolute;
+          font-size: 18px;
+          top: 2px;
+          right: 2px;
+        }
+      }
+
       &.toggler {
         &:hover {
           background-color: rgba($color-primary-100, 0.6);
@@ -275,8 +307,8 @@ const isExpanded = ref(true);
 
         .wrapper {
           padding: 4px;
-          border-radius: 8px;
-          min-width: 180px;
+          border-radius: 12px;
+          min-width: 120px;
           background-color: white;
           box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 
@@ -297,6 +329,7 @@ const isExpanded = ref(true);
 
             &.default {
               cursor: default;
+              color: $color-gray-300;
             }
 
             &.active:not(.default) {

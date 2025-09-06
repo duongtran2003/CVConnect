@@ -1,7 +1,11 @@
 <template>
   <div class="main-layout">
+    <div v-if="isLoading" class="loading-overlay">
+      <AppSpinnerHalfCircle class="spinner" />
+    </div>
     <AppSidebar />
     <div class="main-content">
+      <AppHeader />
       <slot />
     </div>
   </div>
@@ -12,6 +16,9 @@ const { token, currentRole, roles } = storeToRefs(authStore);
 const { setCurrentRole } = authStore;
 const { setUser } = useUserStore();
 const { getMe, verifyToken } = useAuth();
+const loadingStore = useLoadingStore();
+const { setLoading } = loadingStore;
+const { isLoading } = storeToRefs(loadingStore);
 const router = useRouter();
 const route = useRoute();
 
@@ -22,7 +29,14 @@ watch(token, (newVal) => {
 });
 
 onBeforeMount(async () => {
+  console.log(token);
+  if (!token.value) {
+    router.push({ name: "auth-login" });
+    return;
+  }
+  setLoading(true);
   await verifyToken();
+  setLoading(false);
   const defaultRole = getDefaultRole();
   if (defaultRole) {
     const role = roles.value.find((role) => role.id == defaultRole.id);
@@ -44,7 +58,9 @@ onBeforeMount(async () => {
     }
   }
   if (currentRole.value) {
+    setLoading(true);
     const res = await getMe(currentRole.value, { isSilent: true });
+    setLoading(false);
     if (res) {
       setUser(res.data.data);
       console.log(res.data.data);
@@ -59,13 +75,28 @@ onBeforeMount(async () => {
   height: 100vh;
   background-color: $color-gray-100;
 
+  .loading-overlay {
+    position: fixed;
+    z-index: 999;
+    background-color: rgba(black, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+
+    .spinner {
+      display: block;
+      font-size: 32px;
+    }
+  }
+
   .main-content {
     max-height: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
-    padding: 0px 6%;
+    padding: 12px 12px;
     flex: 1;
-    background-color: $color-gray-100;
   }
 }
 </style>

@@ -35,6 +35,8 @@ export const useAuthStore = defineStore(
 
     const clearToken = () => {
       token.value = null;
+      currentRole.value = null;
+      roles.value = [];
     };
 
     return {
