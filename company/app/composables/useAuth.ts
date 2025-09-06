@@ -184,7 +184,6 @@ export const useAuth = () => {
 
   const getMe = async (role: TAccountRole, option?: TApiOption) => {
     try {
-      console.log("run get me", role);
       const res = await $axios.get(`/_api/user/user/my-info/${role.id}`);
       return res;
     } catch (err: any) {
@@ -200,7 +199,6 @@ export const useAuth = () => {
 
   const getMenus = async (role: TAccountRole) => {
     try {
-      console.log("run get menus", role);
       const res = await $axios.get(`/_api/user/menu/menu-by-role/${role.id}`);
       return res.data.data;
     } catch (err: any) {

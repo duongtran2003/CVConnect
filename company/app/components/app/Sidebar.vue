@@ -103,11 +103,9 @@ watch(
   currentRole,
   async (newRole) => {
     if (newRole) {
-      console.log("get new role ne");
-
-      setLoading(true)
+      setLoading(true);
       const menus = await getMenus(newRole);
-      setLoading(false)
+      setLoading(false);
 
       if (menus) {
         setMenus(menus);
@@ -155,8 +153,6 @@ const handleSetRole = (role: TAccountRole) => {
 };
 
 const handleSetRoleDefault = (role: TAccountRole) => {
-  console.log("child click");
-  setDefaultRole(role);
   isAllRolesShow.value = false;
   toast.add({
     title: "Đặt vai trò làm mặc định thành công",
@@ -165,6 +161,7 @@ const handleSetRoleDefault = (role: TAccountRole) => {
   if (currentRole.value && currentRole.value.id !== role.id) {
     setCurrentRole(role);
   }
+  setDefaultRole(role);
 };
 
 const handleItemExpand = ({ id, state }: TSidebarItemExpandPayload) => {

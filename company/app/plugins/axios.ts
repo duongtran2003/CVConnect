@@ -20,7 +20,6 @@ export default defineNuxtPlugin(() => {
     axios
       .post(`/_api/user/auth/refresh`, {}, { withCredentials: true })
       .then((tokenRefreshResponse) => {
-        console.log(tokenRefreshResponse);
         setToken(tokenRefreshResponse.data.data.token);
         setRoles(tokenRefreshResponse.data.data.roles);
         if (tokenRefreshResponse.data.data.roles.length == 1) {
@@ -31,7 +30,6 @@ export default defineNuxtPlugin(() => {
         return Promise.resolve();
       })
       .catch((err) => {
-        console.log("refresh loi ne");
         // const urlParts = window.location.href.split("/");
         // if (urlParts[urlParts.length - 1] !== "login") {
         //   clearToken();
@@ -48,7 +46,6 @@ export default defineNuxtPlugin(() => {
 
   axiosInstance.interceptors.request.use(
     (config) => {
-      console.log(`token: ${token.value}`);
       if (token.value && !config.skipAuth) {
         config.headers.Authorization = `Bearer ${token.value}`;
       }

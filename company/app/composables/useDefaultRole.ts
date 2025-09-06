@@ -1,10 +1,15 @@
 export const useDefaultRole = () => {
   const authStore = useAuthStore();
   const { currentRole, roles } = storeToRefs(authStore);
-  const { setCurrentRole } = authStore;
+  const { setCurrentRole, clearToken } = authStore;
+  const { setLoading } = useLoadingStore();
   const router = useRouter();
+  const { logout } = useAuth();
 
   const handleRoleValidation = (redirect?: string) => {
+    if (currentRole.value) {
+      return
+    }
     const defaultRole = getDefaultRole();
     if (defaultRole) {
       const role = roles.value.find((role) => role.id == defaultRole.id);
@@ -15,7 +20,7 @@ export const useDefaultRole = () => {
         if (!redirect) {
           router.push({ path: defaultRoute });
         } else if (redirect !== defaultRoute) {
-          router.push({ path: redirect });
+          router.push(redirect);
         }
       } else {
         clearDefaultRole();
@@ -34,5 +39,14 @@ export const useDefaultRole = () => {
     }
   };
 
-  return { handleRoleValidation };
+  const checkPermission = async (requiredRole: TRole) => {
+    if (currentRole.value && currentRole.value.code !== requiredRole) {
+      setLoading(true);
+      await logout();
+      clearToken();
+      setLoading(false);
+    }
+  };
+
+  return { handleRoleValidation, checkPermission };
 };

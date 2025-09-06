@@ -99,15 +99,14 @@ const handleExpand = (payload: TSidebarItemExpandPayload) => {
 
 const route = useRoute();
 const hasActiveChild = (children?: TSidebarItem[]): boolean => {
-  return false;
-  // if (!children) return false;
-  //
-  // return children.some((child) => {
-  //   if (child.menuUrl && route.path === child.menuUrl) {
-  //     return true;
-  //   }
-  //   return hasActiveChild(child.children);
-  // });
+  if (!children) return false;
+
+  return children.some((child) => {
+    if (child.menuUrl && route.path === child.menuUrl) {
+      return true;
+    }
+    return hasActiveChild(child.children);
+  });
 };
 const hasChildActive = computed(() => hasActiveChild(props.item.children));
 </script>
@@ -202,7 +201,7 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
   }
 
   &.expanded {
-    background-color: $color-gray-100;
+    // background-color: $color-gray-100;
   }
 }
 </style>

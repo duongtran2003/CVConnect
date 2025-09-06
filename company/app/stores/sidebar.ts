@@ -36,7 +36,6 @@ export const useSidebarStore = defineStore("sidebar", () => {
   const setDefaultExpand = (items: TSidebarItem[]) => {
     for (const item of items) {
       if (item.children?.length) {
-        console.log('go deep', item)
         item.isExpanded = false;
         setDefaultExpand(item.children);
       }
@@ -46,7 +45,6 @@ export const useSidebarStore = defineStore("sidebar", () => {
   const setMenus = (menus: TSidebarItem[]) => {
     sidebarData.value = menus;
     setDefaultExpand(sidebarData.value)
-    console.log(sidebarData.value)
   };
 
   return {

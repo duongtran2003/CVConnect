@@ -11,9 +11,12 @@
   </div>
 </template>
 <script setup lang="ts">
+import { isEmpty } from "lodash";
+
+const permittedRole: TRole = "SYSTEM_ADMIN";
+
 const authStore = useAuthStore();
-const { token, currentRole, roles } = storeToRefs(authStore);
-const { setCurrentRole } = authStore;
+const { token, currentRole } = storeToRefs(authStore);
 const { setUser } = useUserStore();
 const { getMe, verifyToken } = useAuth();
 const loadingStore = useLoadingStore();
@@ -21,6 +24,7 @@ const { setLoading } = loadingStore;
 const { isLoading } = storeToRefs(loadingStore);
 const router = useRouter();
 const route = useRoute();
+const { handleRoleValidation, checkPermission } = useDefaultRole();
 
 watch(token, (newVal) => {
   if (newVal === null) {
@@ -28,8 +32,17 @@ watch(token, (newVal) => {
   }
 });
 
+watch(currentRole, async (newRole) => {
+  if (!newRole || isEmpty(newRole)) {
+    await checkPermission(permittedRole);
+    return;
+  }
+
+  const defaultRoute = getDefaultRoute(newRole);
+  router.push({ path: defaultRoute });
+});
+
 onBeforeMount(async () => {
-  console.log(token);
   if (!token.value) {
     router.push({ name: "auth-login" });
     return;
@@ -37,33 +50,16 @@ onBeforeMount(async () => {
   setLoading(true);
   await verifyToken();
   setLoading(false);
-  const defaultRole = getDefaultRole();
-  if (defaultRole) {
-    const role = roles.value.find((role) => role.id == defaultRole.id);
-    if (role) {
-      setCurrentRole(defaultRole);
-    } else {
-      clearDefaultRole();
-    }
-  }
 
-  if (!currentRole.value) {
-    if (roles.value.length > 1) {
-      router.push({
-        name: "role-select",
-        query: { redirect: route.fullPath },
-      });
-    } else if (roles.value.length == 1) {
-      setCurrentRole(roles.value[0]!);
-    }
-  }
+  handleRoleValidation(route.fullPath);
+
   if (currentRole.value) {
+    await checkPermission(permittedRole);
     setLoading(true);
     const res = await getMe(currentRole.value, { isSilent: true });
     setLoading(false);
     if (res) {
       setUser(res.data.data);
-      console.log(res.data.data);
     }
   }
 });

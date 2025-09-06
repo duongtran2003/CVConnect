@@ -17,7 +17,7 @@ export const ROLE_COLORED_ICON_MAP: Record<TRole, string> = {
 export const ROLE_COLORED_ICON_DEFAULT = "fluent-color:person-32";
 export const DEFAULT_ROLE_VIEW: Record<TRole, string> = {
   SYSTEM_ADMIN: "/admin-system/report/candidate",
-  CANDIDATE: "",
+  CANDIDATE: "/dashboard",
   HR: "",
   ORG_ADMIN: "",
   INTERVIEWER: "",

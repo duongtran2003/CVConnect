@@ -11,9 +11,12 @@
   </div>
 </template>
 <script setup lang="ts">
+import { isEmpty } from "lodash";
+
+const permittedRole: TRole = "CANDIDATE";
+
 const authStore = useAuthStore();
-const { token, currentRole, roles } = storeToRefs(authStore);
-const { setCurrentRole } = authStore;
+const { token, currentRole } = storeToRefs(authStore);
 const { setUser } = useUserStore();
 const { getMe, verifyToken } = useAuth();
 const loadingStore = useLoadingStore();
@@ -21,7 +24,7 @@ const { setLoading } = loadingStore;
 const { isLoading } = storeToRefs(loadingStore);
 const router = useRouter();
 const route = useRoute();
-const { handleRoleValidation } = useDefaultRole();
+const { handleRoleValidation, checkPermission } = useDefaultRole();
 
 watch(token, (newVal) => {
   if (newVal === null) {
@@ -29,8 +32,17 @@ watch(token, (newVal) => {
   }
 });
 
+watch(currentRole, async (newRole) => {
+  if (!newRole || isEmpty(newRole)) {
+    await checkPermission(permittedRole);
+    return;
+  }
+
+  const defaultRoute = getDefaultRoute(newRole);
+  router.push({ path: defaultRoute });
+});
+
 onBeforeMount(async () => {
-  console.log(token);
   if (!token.value) {
     router.push({ name: "auth-login" });
     return;
@@ -42,12 +54,12 @@ onBeforeMount(async () => {
   handleRoleValidation(route.fullPath);
 
   if (currentRole.value) {
+    await checkPermission(permittedRole);
     setLoading(true);
     const res = await getMe(currentRole.value, { isSilent: true });
     setLoading(false);
     if (res) {
       setUser(res.data.data);
-      console.log(res.data.data);
     }
   }
 });

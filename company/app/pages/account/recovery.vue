@@ -228,7 +228,6 @@ const handleInput = (key: string, value: string) => {
 };
 
 watch(formInput.value, (val) => {
-  console.log(val);
   passwordChecklist.value = passwordChecklist.value.map((rule) => {
     if (!val.password) {
       return {

@@ -325,7 +325,6 @@ const handleInput = (key: string, value: string) => {
 const isLoading = ref(false);
 
 watch(formInput.value, (val) => {
-  console.log(val);
   passwordChecklist.value = passwordChecklist.value.map((rule) => {
     if (!val.password) {
       return {
