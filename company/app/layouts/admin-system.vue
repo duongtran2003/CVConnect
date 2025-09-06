@@ -1,5 +1,5 @@
 <template>
-  <div class="main-layout">
+  <div class="admin-system-layout">
     <div v-if="isLoading" class="loading-overlay">
       <AppSpinnerHalfCircle class="spinner" />
     </div>
@@ -21,7 +21,6 @@ const { setLoading } = loadingStore;
 const { isLoading } = storeToRefs(loadingStore);
 const router = useRouter();
 const route = useRoute();
-const { handleRoleValidation } = useDefaultRole();
 
 watch(token, (newVal) => {
   if (newVal === null) {
@@ -38,9 +37,26 @@ onBeforeMount(async () => {
   setLoading(true);
   await verifyToken();
   setLoading(false);
+  const defaultRole = getDefaultRole();
+  if (defaultRole) {
+    const role = roles.value.find((role) => role.id == defaultRole.id);
+    if (role) {
+      setCurrentRole(defaultRole);
+    } else {
+      clearDefaultRole();
+    }
+  }
 
-  handleRoleValidation(route.fullPath);
-
+  if (!currentRole.value) {
+    if (roles.value.length > 1) {
+      router.push({
+        name: "role-select",
+        query: { redirect: route.fullPath },
+      });
+    } else if (roles.value.length == 1) {
+      setCurrentRole(roles.value[0]!);
+    }
+  }
   if (currentRole.value) {
     setLoading(true);
     const res = await getMe(currentRole.value, { isSilent: true });
@@ -53,7 +69,7 @@ onBeforeMount(async () => {
 });
 </script>
 <style lang="scss" scoped>
-.main-layout {
+.admin-system-layout {
   display: flex;
   min-height: 100vh;
   height: 100vh;

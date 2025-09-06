@@ -198,7 +198,7 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
 
   .children {
     margin-top: 4px;
-    padding-left: 4px;
+    padding-left: 12px;
   }
 
   &.expanded {

@@ -81,6 +81,9 @@ definePageMeta({ layout: "auth" });
 useHead({
   title: "Đăng nhập",
 });
+
+const { handleRoleValidation } = useDefaultRole();
+
 const { login, verifyToken } = useAuth();
 const router = useRouter();
 const route = useRoute();
@@ -88,7 +91,7 @@ const route = useRoute();
 onBeforeMount(async () => {
   const res = await verifyToken();
   if (res.data.isValid) {
-    router.push({ path: "/dashboard" });
+    handleRoleValidation();
   }
   const username = route.query.username as string;
   if (username) {
@@ -171,7 +174,7 @@ const handleLoginClick = async () => {
     isLoading.value.loginButton = true;
     const isSuccess = await login(loginCredentials);
     if (isSuccess) {
-      router.push({ name: "dashboard" });
+      handleRoleValidation();
     }
     isLoading.value.loginButton = false;
   }

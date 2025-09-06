@@ -15,3 +15,10 @@ export const ROLE_COLORED_ICON_MAP: Record<TRole, string> = {
   INTERVIEWER: "fluent-color:person-feedback-32",
 };
 export const ROLE_COLORED_ICON_DEFAULT = "fluent-color:person-32";
+export const DEFAULT_ROLE_VIEW: Record<TRole, string> = {
+  SYSTEM_ADMIN: "/admin-system/report/candidate",
+  CANDIDATE: "",
+  HR: "",
+  ORG_ADMIN: "",
+  INTERVIEWER: "",
+};
