@@ -109,7 +109,9 @@
           </div>
         </div>
       </div>
-      <NuxtLink to="/account/request-verify-email?redirect=/auth/register" class="re-send-email"
+      <NuxtLink
+        to="/account/request-verify-email?redirect=/auth/register"
+        class="re-send-email"
         >Tôi chưa nhận được email xác thực</NuxtLink
       >
     </div>
@@ -310,8 +312,14 @@ const handleRegisterClick = async () => {
     isLoading.value = true;
     const res = await register(registerCredentials);
     if (res) {
-      duration.value = res.data.duration / 60 / 60;
-      mode.value = 'confirming'
+      if (res.data.needVerifyEmail) {
+        duration.value = res.data.duration / 60 / 60;
+        mode.value = "confirming";
+      } else {
+        const username = res.data.username || "";
+        isLoading.value = false;
+        router.push({ path: "/auth/login", query: { username } });
+      }
     }
     isLoading.value = false;
   }
@@ -484,7 +492,7 @@ watch(formInput.value, (val) => {
       border-radius: 8px;
       text-align: left;
       color: $color-success;
-      background-color: rgba($color-success, 0.10);
+      background-color: rgba($color-success, 0.1);
     }
   }
   .image {
