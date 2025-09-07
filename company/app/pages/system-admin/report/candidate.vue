@@ -1,6 +1,7 @@
 <template>
   <div class="candidate-content">
     <AppTableDataTable :table-data="tableData" />
+    <AppNoData />
   </div>
 </template>
 
