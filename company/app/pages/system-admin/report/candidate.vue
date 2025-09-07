@@ -9,6 +9,9 @@
 definePageMeta({
   layout: "system-admin",
 });
+useHead({
+  title: 'Ứng viên'
+})
 const tableData = ref([]);
 </script>
 

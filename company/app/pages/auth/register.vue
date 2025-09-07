@@ -129,7 +129,7 @@ definePageMeta({ layout: "auth" });
 useHead({
   title: "Đăng kí",
 });
-const { register } = useAuth();
+const { register, verifyToken } = useAuth();
 const router = useRouter();
 const duration = ref<number>(0);
 const formInput = ref({
@@ -146,6 +146,14 @@ const formError = ref({
   username: "",
   password: "",
   passwordConfirm: "",
+});
+
+const { handleRoleValidation } = useDefaultRole();
+onBeforeMount(async () => {
+  const res = await verifyToken();
+  if (res.data.isValid) {
+    handleRoleValidation();
+  }
 });
 
 const passwordChecklist = ref([
