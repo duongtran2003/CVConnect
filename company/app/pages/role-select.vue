@@ -162,7 +162,7 @@ const handleButtonClick = () => {
         padding: 16px;
         color: $text-light;
         font-weight: 600;
-        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+        @include box-shadow;
         transition:
           box-shadow 200ms,
           background-color 200ms;
@@ -183,7 +183,7 @@ const handleButtonClick = () => {
         }
 
         &:hover {
-          box-shadow: rgba(99, 99, 99, 0.2) 0px 8px 24px;
+          @include box-shadow;
           cursor: pointer;
         }
       }

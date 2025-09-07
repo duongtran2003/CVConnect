@@ -115,7 +115,7 @@ const monogramColor = computed(() => {
     padding: 4px;
     display: flex;
     flex-direction: column;
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    @include box-shadow;
     gap: 4px;
     border-radius: 12px;
 

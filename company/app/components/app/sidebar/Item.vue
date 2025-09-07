@@ -127,6 +127,7 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
     flex-direction: row;
     background-color: transparent;
     position: fixed;
+    z-index: 3;
     margin-left: 216px;
     margin-top: -40px;
 
@@ -140,7 +141,7 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
       padding: 4px;
       background-color: white;
       border-radius: 12px;
-      box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+      @include box-shadow;
       width: 224px;
     }
 
@@ -198,10 +199,9 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
   .children {
     margin-top: 4px;
     padding-left: 12px;
-  }
-
-  &.expanded {
-    // background-color: $color-gray-100;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 }
 </style>

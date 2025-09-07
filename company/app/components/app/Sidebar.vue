@@ -7,7 +7,11 @@
       <div v-else class="small-logo">
         <img src="/favicon-icon.svg" />
       </div>
-      <div class="main-section">
+      <div
+        ref="mainSection"
+        class="main-section"
+        :class="{ expanded: isExpanded, 'has-scrollbar': hasMainSidebarScrollbar }"
+      >
         <AppSidebarItem
           v-for="menu in sidebarData"
           :key="menu.id"
@@ -98,6 +102,29 @@ const { getMenus } = useAuth();
 const toast = useToast();
 
 const isAllRolesShow = ref(false);
+const mainSection = useTemplateRef("mainSection");
+const hasMainSidebarScrollbar = ref<boolean>(false);
+
+const observer = ref<ResizeObserver | null>(null);
+
+onMounted(() => {
+  observer.value = new ResizeObserver(() => {
+    if (mainSection.value) {
+      hasMainSidebarScrollbar.value =
+        mainSection.value.scrollHeight > mainSection.value.clientHeight;
+    }
+  });
+
+  if (mainSection.value) {
+    observer.value.observe(mainSection.value);
+  }
+});
+
+onBeforeUnmount(() => {
+  if (observer.value && mainSection.value) {
+    observer.value.unobserve(mainSection.value);
+  }
+});
 
 watch(
   currentRole,
@@ -172,8 +199,9 @@ const isExpanded = ref(true);
 </script>
 <style lang="scss" scoped>
 .sidebar {
-  padding: 12px;
+  padding: 16px 8px 16px 16px;
   height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -181,11 +209,13 @@ const isExpanded = ref(true);
     border-radius: 8px;
     flex: 1;
     margin-bottom: 18px;
+    min-height: 0px;
     .logo {
       padding: 16px;
     }
     .small-logo {
       padding: 4px;
+      margin-bottom: 8px;
     }
 
     .main-section {
@@ -196,6 +226,10 @@ const isExpanded = ref(true);
       gap: 4px;
       overflow-y: auto;
       overflow-x: hidden;
+
+      &.has-scrollbar {
+        margin-right: -4px;
+      }
     }
 
     .expand-button {
@@ -241,9 +275,11 @@ const isExpanded = ref(true);
     background-color: white;
     box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     width: 52px;
+    max-height: fit-content;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex: 1;
 
     .role-list {
       display: flex;
@@ -300,6 +336,7 @@ const isExpanded = ref(true);
       .float {
         display: none;
         position: absolute;
+        z-index: 3;
         padding-left: 12px;
 
         .wrapper {

@@ -1,5 +1,6 @@
 <template>
   <div class="header">
+    <AppBreadcrumb />
     <AppHeaderSearch />
     <AppHeaderNotificationBell />
     <AppHeaderAvatar />
@@ -19,5 +20,7 @@
   justify-content: flex-end;
   align-items: center;
   top: 0px;
+  padding-right: 20px;
+  padding-left: 20px;
 } 
 </style>
