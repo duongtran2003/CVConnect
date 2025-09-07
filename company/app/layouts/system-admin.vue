@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-system-layout">
+  <div class="system-admin-layout">
     <div v-if="isLoading" class="loading-overlay">
       <AppSpinnerHalfCircle class="spinner" />
     </div>
@@ -65,7 +65,7 @@ onBeforeMount(async () => {
 });
 </script>
 <style lang="scss" scoped>
-.admin-system-layout {
+.system-admin-layout {
   display: flex;
   min-height: 100vh;
   height: 100vh;

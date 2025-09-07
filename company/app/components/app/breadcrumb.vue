@@ -30,7 +30,7 @@ const items = [
   {
     name: "",
     icon: "mdi:home",
-    url: "/admin-system/report/candidate",
+    url: "/system-admin/report/candidate",
   },
   {
     name: "Báo cáo",
@@ -40,7 +40,7 @@ const items = [
   {
     name: "Ứng viên",
     icon: "",
-    url: "/admin-system/report/candidate",
+    url: "/system-admin/report/candidate",
   },
 ];
 </script>
