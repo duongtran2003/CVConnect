@@ -44,12 +44,31 @@ export const useSidebarStore = defineStore("sidebar", () => {
 
   const setMenus = (menus: TSidebarItem[]) => {
     sidebarData.value = menus;
-    setDefaultExpand(sidebarData.value)
+    setDefaultExpand(sidebarData.value);
+  };
+
+  const getMenuItem = (
+    url: string,
+    items: TSidebarItem[] = sidebarData.value,
+  ): TSidebarItem | null => {
+    for (const item of items) {
+      if (item.menuUrl === url) {
+        return item;
+      }
+      if (item.children?.length) {
+        const found = getMenuItem(url, item.children);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return null;
   };
 
   return {
     sidebarData,
     expandItem,
     setMenus,
+    getMenuItem,
   };
 });

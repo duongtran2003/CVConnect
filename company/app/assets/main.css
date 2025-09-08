@@ -1,6 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 @import "@nuxt/ui";
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+--color-red-50:  #f9e6e8;
+  --color-red-100: #f2ccd1;
+  --color-red-200: #e699a3;
+  --color-red-300: #d96675;
+  --color-red-400: #c90a1f;
+  --color-red-500: #990011; /* main brand red */
+  --color-red-600: #80000f;
+  --color-red-700: #66000c;
+  --color-red-800: #4d0009;
+  --color-red-900: #330006; /* deep wine red */
+  --color-red-950: #1a0003; /* extended darkest shade */
+}
 
 html,
 body {

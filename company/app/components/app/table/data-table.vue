@@ -1,37 +1,425 @@
 <template>
-  <div class="data-table">
-    <UTable class="data-table" sticky :data="props.tableData" />
+  <div class="data-table-wrapper">
+    <div v-if="props.isLoading" class="spinner">
+      <AppSpinnerHalfCircle />
+    </div>
+    <div id="datepicker-target" class="absolute top-0 left-0 w-full h-0"></div>
+    <UTable
+      ref="table"
+      class="data-table"
+      :columns="columns"
+      :data="props.tableData"
+      :loading="props.isLoading"
+    >
+      <template v-if="props.showCheckbox" #checkbox-header="{ table }">
+        <UCheckbox
+          size="lg"
+          :model-value="checkAllBoxValue(table)"
+          @update:model-value="handleCheckAll($event, table)"
+        />
+      </template>
+      <template v-if="props.showCheckbox" #checkbox-cell="{ row }">
+        <UCheckbox
+          size="lg"
+          :model-value="isRowSelected(row)"
+          @update:model-value="handleCheck($event, row)"
+        />
+      </template>
+      <template v-if="props.allowActions" #action-header="">
+        Hành động
+      </template>
+      <template v-if="props.allowActions" #action-cell="{ row }">
+        <div class="action-wrapper">
+          <Icon
+            v-if="havePermission('VIEW')"
+            title="'Xem'"
+            class="icon"
+            name="mdi:eye-outline"
+          />
+          <Icon
+            v-if="havePermission('UPDATE')"
+            class="icon"
+            title="'Chỉnh sửa'"
+            name="mdi:pencil-outline"
+            @click="handleActionClick(row, 'edit')"
+          />
+          <Icon
+            v-if="havePermission('DELETE')"
+            class="icon"
+            title="'Xóa'"
+            name="mdi:delete-outline"
+            :class="{ disabled: !row.original.canDelete }"
+            @click="
+              row.original.canDelete
+                ? handleActionClick(row, 'delete')
+                : () => {}
+            "
+          />
+        </div>
+      </template>
+      <template
+        v-for="col in excludedColumns"
+        :key="col.accessorKey"
+        #[`${col.accessorKey}-header`]="{ column }"
+      >
+        <div class="header-cell">
+          <div class="name">
+            {{ col.header }}
+            <Icon
+              v-if="col.isSortable && !getCurrentSort(column)"
+              name="mdi:sort"
+              class="icon"
+              @click="handleSort(columnKey(column), undefined)"
+            />
+            <Icon
+              v-if="col.isSortable && getCurrentSort(column) === 'ASC'"
+              name="mdi:sort-ascending"
+              class="icon"
+              @click="handleSort(columnKey(column), 'ASC')"
+            />
+            <Icon
+              v-if="col.isSortable && getCurrentSort(column) === 'DESC'"
+              name="mdi:sort-descending"
+              class="icon"
+              @click="handleSort(columnKey(column), 'DESC')"
+            />
+          </div>
+          <div v-if="col.allowFilter" class="filter">
+            <UInput
+              v-if="col.filterType == 'text'"
+              class="text-input"
+              variant="none"
+            />
+            <VueDatePicker
+              v-if="col.filterType == 'date'"
+              v-model="range"
+              :hide-navigation="['time', 'minutes', 'hours', 'seconds']"
+              :enable-time-picker="false"
+              range
+              class="date-input"
+              :teleport="true"
+            />
+          </div>
+        </div>
+      </template>
+      <template #empty>
+        <AppNoData />
+      </template>
+    </UTable>
   </div>
 </template>
 <script setup lang="ts">
+import type { TableColumn } from "@nuxt/ui";
+import { cloneDeep } from "lodash";
+import type { TSort, TSortType } from "~/types/common";
+const range = ref<any>(null);
+
+export type TDataTableColumn<T> = TableColumn<T> & {
+  isSortable?: boolean;
+  accessorKey: string;
+  allowFilter?: boolean;
+  filterType?: TFilterType;
+};
+
 export type TDataTableProps = {
   tableData: any;
+  columns: TDataTableColumn<any>[];
+  selectionList?: number[];
   isLoading?: boolean;
+  showCheckbox?: boolean;
+  showActions?: boolean;
+  allowActions?: TPermission[];
+  sort?: TSort | null;
 };
+
+export type TFilterType = "date" | "text" | "select";
 
 const props = withDefaults(defineProps<TDataTableProps>(), {
   isLoading: false,
+  showCheckbox: false,
+  showActions: false,
+  allowActions: (): TPermission[] => [],
+  selectionList: (): number[] => [],
+  sort: null,
 });
+
+const havePermission = (permission: TPermission) => {
+  const perm = props.allowActions.find((action) => action === permission);
+  return perm;
+};
+
+const columns = ref<TDataTableColumn<any>[]>(cloneDeep(props.columns));
+const columnKey = computed(() => {
+  return (column: any) => {
+    return column.columnDef.accessorKey;
+  };
+});
+const excludedColumns = computed(() => {
+  return columns.value.filter(
+    (col) => col.accessorKey != "checkbox" && col.accessorKey != "action",
+  );
+});
+
+onBeforeMount(() => {
+  const actionColumn = {
+    id: "action",
+    meta: {
+      class: {
+        th: "header-action",
+        td: "body-action",
+      },
+    },
+  };
+  const checkboxColumn = {
+    accessorKey: "checkbox",
+    meta: {
+      class: {
+        th: "header-select",
+        td: "body-select",
+      },
+    },
+    enableSorting: true,
+  };
+
+  if (props.showCheckbox) {
+    columns.value.unshift(checkboxColumn);
+  }
+  if (props.showActions) {
+    columns.value.splice(2, 0, actionColumn as TDataTableColumn<any>);
+  }
+});
+
+export type TTableAction = "edit" | "delete" | "view";
+const emit = defineEmits<{
+  (e: "selectionUpdate", selectionList: number[]): void;
+  (e: TTableAction, id: number): void;
+  (e: "sort", sort: TSort): void;
+}>();
+
+const getCurrentSort = computed(() => {
+  return (column: any) => {
+    const key = column.columnDef.accessorKey;
+    if (props.sort && props.sort.key === key) {
+      return props.sort.type;
+    }
+    return undefined;
+  };
+});
+
+const nextSortState = computed(() => {
+  return (state: TSortType) => {
+    if (state === "ASC") {
+      return "DESC";
+    }
+    if (state === "DESC") {
+      return undefined;
+    }
+    return "ASC";
+  };
+});
+
+const handleSort = (key: string, currentState: TSortType) => {
+  // if sorting a new column -> always start with ASC
+  if (!props.sort || props.sort.key !== key) {
+    emit("sort", { key, type: "ASC" });
+    return;
+  }
+
+  // if clicking the same column -> cycle its state
+  emit("sort", { key, type: nextSortState.value(currentState) });
+};
+
+const checkAllBoxValue = computed(() => {
+  return (table: any) => {
+    const selectedRows = cloneDeep(props.selectionList);
+    const allRows = table.getRowModel().rows;
+    if (selectedRows.length && selectedRows.length < allRows.length) {
+      console.log("indeterminate");
+      return "indeterminate";
+    }
+    if (selectedRows.length == 0) {
+      return false;
+    }
+    return true;
+  };
+});
+
+const handleCheckAll = (e: any, table: any) => {
+  const selections: number[] = [];
+
+  if (e) {
+    // Collect all row IDs
+    const allRows = table.getRowModel().rows;
+    allRows.forEach((row: any) => {
+      selections.push(row.original.id);
+    });
+    console.log(selections);
+  }
+
+  emit("selectionUpdate", selections);
+};
+
+const handleCheck = (e: any, row: any) => {
+  const selections = cloneDeep(props.selectionList);
+  if (e) {
+    const rowId = row.original.id;
+    const currentRow = selections.find((selection) => selection === rowId);
+    if (!currentRow) {
+      selections.push(rowId);
+    }
+  } else {
+    const rowId = row.original.id;
+    const currentRowIndex = selections.indexOf(rowId);
+    if (currentRowIndex !== -1) {
+      selections.splice(currentRowIndex, 1);
+    }
+  }
+  emit("selectionUpdate", selections);
+};
+
+const isRowSelected = computed(() => {
+  return (row: any) => {
+    const rowId = row.original.id;
+    const isPresent = props.selectionList.find(
+      (selection) => selection == rowId,
+    );
+    console.log(isPresent != undefined);
+    if (isPresent !== undefined) {
+      return true;
+    }
+    return false;
+  };
+});
+
+const handleActionClick = (row: any, action: TTableAction) => {
+  const rowId = row.original.id;
+  emit(action, rowId);
+};
 </script>
 <style lang="scss" scoped>
-.data-table {
+.data-table-wrapper {
   overflow-x: auto;
-  width: 100%;
-  border: 1px solid $color-gray-300;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  // border: 1px solid $color-gray-300;
   border-radius: 4px;
+  position: relative;
+  .spinner {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    z-index: 3;
+    background-color: rgba(black, 0.15);
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+
+    .icon {
+      color: $color-primary-400;
+    }
+  }
 
   .data-table {
-    max-height: 240px;
+    max-height: 520px;
+    max-width: 100%;
     @include custom-scrollbar;
 
     :deep(table) {
-      thead {
-        tr:last-child {
-          background-color: $color-gray-300;
-          height: 1px;
+      border-radius: 4px;
+
+      .header-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        .name {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 8px;
+          .icon {
+            display: block;
+            font-size: 20px;
+            z-index: 0;
+            cursor: pointer;
+          }
+        }
+        .filter {
+          .text-input {
+            input {
+              border: 1px solid $color-primary-200 !important;
+              border-radius: 10px !important;
+              padding: 4px 10px !important;
+              font-weight: 500 !important;
+              color: $color-gray-600 !important;
+              font-size: 13px;
+              line-height: 20px;
+              background-color: $color-gray-100 !important;
+            }
+          }
+
+          .date-input {
+            .dp__input_wrap {
+              .dp__input {
+                width: 238px;
+                border: 1px solid $color-primary-200 !important;
+                border-radius: 10px !important;
+                padding: 4px 32px !important;
+                font-weight: 500 !important;
+                color: $color-gray-600 !important;
+                font-size: 13px;
+                line-height: 20px;
+                background-color: $color-gray-100 !important;
+              }
+            }
+          }
         }
       }
 
+      .header-select,
+      .body-select {
+        width: 50px;
+        min-width: 50px;
+      }
+
+      .header-action,
+      .body-action {
+        width: 108px;
+        min-width: 108px;
+        .action-wrapper {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          .icon {
+            cursor: pointer;
+            display: block;
+            font-size: 20px;
+            transition: color 200ms;
+
+            &.disabled {
+              opacity: 0.2;
+              cursor: default;
+            }
+
+            &:hover:not(.disabled) {
+              color: $color-primary-600;
+            }
+          }
+        }
+      }
+
+      // Header border
+      thead {
+        tr:last-child {
+          background-color: $color-gray-300;
+          height: 0px;
+        }
+      }
+
+      // Row border
       tbody {
         &.divide-y {
           tr:not(:last-child) {
@@ -42,31 +430,59 @@ const props = withDefaults(defineProps<TDataTableProps>(), {
 
       tr {
         background-color: $color-primary-50;
-        font-weight: 600;
+        font-weight: 500;
         th {
           background-color: $color-primary-50;
           color: $color-primary-400;
+          position: sticky;
+          top: 0px;
+          font-weight: 600;
+          &::before {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 0px;
+            width: 100%;
+            height: 1px;
+            background-color: $color-gray-300;
+          }
         }
         td {
           color: $text-light;
         }
-        th:last-child {
-          position: sticky;
-          right: 0px;
-          &::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -1px;
-            width: 1px;
-            height: 100%;
-            background-color: $color-gray-300;
-            display: block;
-          }
+
+        th:nth-child(1),
+        th:nth-child(2),
+        th:nth-child(3) {
+          z-index: 2;
         }
-        th:first-child {
+        td:nth-child(1),
+        td:nth-child(2),
+        td:nth-child(3) {
+          z-index: 1;
+        }
+
+        th:nth-child(1),
+        th:nth-child(2),
+        th:nth-child(3),
+        td:nth-child(1),
+        td:nth-child(2),
+        td:nth-child(3) {
           position: sticky;
+          top: 0px;
+        }
+
+        th:nth-child(1),
+        td:nth-child(1) {
           left: 0px;
+        }
+        th:nth-child(2),
+        td:nth-child(2) {
+          left: 50px;
+        }
+        th:nth-child(3),
+        td:nth-child(3) {
+          left: 106px;
           &::after {
             content: "";
             position: absolute;
@@ -79,36 +495,6 @@ const props = withDefaults(defineProps<TDataTableProps>(), {
           }
         }
 
-        td:last-child {
-          position: sticky;
-          right: 0px;
-          background-color: white;
-          &::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -1px;
-            width: 1px;
-            height: 100%;
-            background-color: $color-gray-300;
-            display: block;
-          }
-        }
-        td:first-child {
-          position: sticky;
-          left: 0px;
-          background-color: white;
-          &::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            right: -1px;
-            width: 1px;
-            height: 100%;
-            background-color: $color-gray-300;
-            display: block;
-          }
-        }
         td {
           background-color: white;
         }

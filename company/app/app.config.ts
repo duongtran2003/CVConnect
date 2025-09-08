@@ -1,5 +1,14 @@
 export default defineAppConfig({
   ui: {
+    strategy: "override",
+    colors: {
+      primary: "red",
+    },
+    checkbox: {
+      slots: {
+        indicator: "text-white",
+      },
+    },
     toast: {
       slots: {
         root: "bg-white toaster absolute !right-2 rounded-[2px] shadow-md border-none ring-none ring-0",

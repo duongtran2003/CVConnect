@@ -127,7 +127,7 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
     flex-direction: row;
     background-color: transparent;
     position: fixed;
-    z-index: 3;
+    z-index: 4;
     margin-left: 216px;
     margin-top: -40px;
 

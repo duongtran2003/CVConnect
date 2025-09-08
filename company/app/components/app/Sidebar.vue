@@ -336,7 +336,7 @@ const isExpanded = ref(true);
       .float {
         display: none;
         position: absolute;
-        z-index: 3;
+        z-index: 4;
         padding-left: 12px;
 
         .wrapper {

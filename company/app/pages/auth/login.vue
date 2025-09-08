@@ -292,8 +292,13 @@ const isLoading = ref({
           margin-top: 8px;
           width: 100%;
           background-color: $color-google-green;
-          .icon {
+          :deep(.icon) {
             display: inline-block;
+            color: $text-dark;
+          }
+
+          :deep(.button-text) {
+            color: $text-dark;
           }
 
           &.disabled {

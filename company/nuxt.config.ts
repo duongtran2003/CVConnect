@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     "@pinia/nuxt",
     "@vueuse/nuxt",
     "pinia-plugin-persistedstate/nuxt",
+    "@nuxtjs/color-mode",
   ],
   devServer: {
     host: "0.0.0.0",
@@ -18,6 +19,12 @@ export default defineNuxtConfig({
     head: {
       link: [{ rel: "icon", type: "image/svg+xml", href: "/favicon-icon.svg" }],
     },
+  },
+  colorMode: {
+    preference: "light",
+    fallback: "light",
+    classSuffix: "",
+    storageKey: "nuxt-color-mode",
   },
   ssr: false,
   css: ["~/assets/main.css"],
@@ -39,5 +46,8 @@ export default defineNuxtConfig({
         },
       },
     },
+  },
+  build: {
+    transpile: ["@vuepic/vue-datepicker"],
   },
 });

@@ -33,13 +33,7 @@ watch(token, (newVal) => {
 });
 
 watch(currentRole, async (newRole) => {
-  if (!newRole || isEmpty(newRole)) {
     await checkPermission(permittedRole);
-    return;
-  }
-
-  const defaultRoute = getDefaultRoute(newRole);
-  router.push({ path: defaultRoute });
 });
 
 onBeforeMount(async () => {

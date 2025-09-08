@@ -1,7 +1,6 @@
 <template>
   <div class="candidate-content">
-    <AppTableDataTable :table-data="tableData" />
-    <AppNoData />
+    màn hình candidate
   </div>
 </template>
 
@@ -10,9 +9,8 @@ definePageMeta({
   layout: "system-admin",
 });
 useHead({
-  title: 'Ứng viên'
-})
-const tableData = ref([]);
+  title: "Ứng viên",
+});
 </script>
 
 <style lang="scss" scoped>

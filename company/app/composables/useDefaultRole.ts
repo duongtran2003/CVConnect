@@ -40,7 +40,10 @@ export const useDefaultRole = () => {
   };
 
   const checkPermission = async (requiredRole: TRole) => {
+
+    console.log(currentRole.value, currentRole.value?.code, requiredRole)
     if (currentRole.value && currentRole.value.code !== requiredRole) {
+      console.log('ko co dieu kien')
       setLoading(true);
       await logout();
       clearToken();

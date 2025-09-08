@@ -25,11 +25,12 @@ const handleSearchClick = () => {
     align-items: center;
     padding: 6px 12px;
     border-radius: 999px;
-    border: 2px solid $color-gray-200;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     transition: border 200ms;
+    background-color: white;
 
     &:focus-within {
-      border: 2px solid $color-gray-300;
+      border: 1px solid $color-gray-400;
     }
 
     input {

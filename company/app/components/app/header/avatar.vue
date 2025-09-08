@@ -88,8 +88,10 @@ const monogramColor = computed(() => {
 <style lang="scss" scoped>
 .user-avatar {
   position: relative;
+  z-index: 3;
   .avatar {
     height: 36px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     min-height: 36px;
     width: 36px;
     min-width: 36px;
@@ -98,6 +100,7 @@ const monogramColor = computed(() => {
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    color: white;
     .text {
       height: 16px;
       font-weight: 600;
@@ -109,6 +112,7 @@ const monogramColor = computed(() => {
   .dropdown {
     background-color: white;
     position: absolute;
+    z-index: 3;
     top: 40px;
     width: 180px;
     right: 0px;

@@ -4,7 +4,7 @@
       <Icon
         class="icon"
         :class="{ unread: hasUnread }"
-        :name="hasUnread ? 'mdi:bell-badge-outline' : 'mdi:bell-outline'"
+        :name="'mdi:bell-outline'"
       />
     </div>
   </div>
@@ -16,11 +16,12 @@ const hasUnread = ref<boolean>(true);
 .wrapper {
   .bell {
     cursor: pointer;
-    background-color: $color-gray-200;
+    background-color: white;
     border-radius: 999px;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     height: 36px;
     width: 36px;
 

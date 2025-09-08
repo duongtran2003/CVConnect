@@ -13,7 +13,6 @@
 .header {
   width: 100%;
   height: 48px;
-  position: sticky;
   display: flex;
   gap: 12px;
   flex-direction: row;

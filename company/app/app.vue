@@ -13,6 +13,9 @@ useHead({
   titleTemplate: (title) => {
     return title ? `${title} - CVConnect` : "CVConnect";
   },
+  bodyAttrs: {
+    class: "light",
+  },
 });
 const toasterConfig: ToasterProps = {
   position: "bottom-right",
