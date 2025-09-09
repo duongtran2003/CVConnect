@@ -27,3 +27,10 @@ export function formatDateTime(
 
   return m.format(format);
 }
+
+export function toUtcDate(dateString: string): string {
+  return moment(dateString)
+    .utc() // convert to UTC
+    .startOf("day") // set time to 00:00:00
+    .format("YYYY-MM-DDTHH:mm:ss[Z]");
+}

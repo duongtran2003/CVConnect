@@ -11,27 +11,30 @@
         :is-loading="isFetchingData"
         :selection-list="selectedRows"
         :sort="sort"
+        :select-options="memberTypeSelectOptions"
+        :filter="filter"
         @selection-update="handleSelectionsUpdate"
         @delete="handleTableActionClick($event, 'delete')"
         @edit="handleTableActionClick($event, 'edit')"
         @sort="handleSort"
-      >
-      </AppTableDataTable>
+        @filter="handleFilter"
+      />
     </div>
     <div class="top-section">
       <UPagination
         :show-edges="true"
         :sibling-count="1"
         :variant="'ghost'"
-        :items-per-page="pageOption.pageSize"
-        :total="10"
+        :items-per-page="pageSize"
+        :page="pageIndex"
+        :total="totalItems"
         @update:page="handlePageIndexChange($event)"
       />
       <USelect
         variant="subtle"
         :items="pageSizeOpts"
         class="w-fit bg-white text-[#333333]"
-        :model-value="pageOption.pageSize"
+        :model-value="pageSize"
         @update:model-value="handlePageSizeChange($event)"
       />
     </div>
@@ -45,7 +48,7 @@ import {
   pageSizeOptions,
 } from "~/const/views/system-admin/user-group";
 import type { TSort } from "~/types/common";
-import { cloneDeep } from "lodash";
+import { cloneDeep, debounce } from "lodash";
 
 definePageMeta({
   layout: "system-admin",
@@ -55,8 +58,12 @@ useHead({
 });
 
 const route = useRoute();
+const router = useRouter();
 const isFetchingData = ref<boolean>(false);
 const fetchRoleController = ref<AbortController | null>();
+const memberTypes = ref<any>([]);
+const filter = ref<Record<string, any>>({});
+const totalItems = ref<number>(0);
 const allowActions = computed(() => {
   const url = route.path;
   const menuItem = getMenuItem(url);
@@ -65,20 +72,108 @@ const allowActions = computed(() => {
 });
 
 const { getMenuItem } = useSidebarStore();
-const { getRoles } = useRoleApi();
+const { getRoles, getMemberTypes } = useRoleApi();
 onBeforeMount(async () => {
-  await fetchData();
+  const res = await getMemberTypes();
+  memberTypes.value = res.data.map((memberType: any) => ({
+    label: memberType.name,
+    value: memberType.code,
+  }));
+
+  const query = route.query;
+  let restoredFilter: Record<string, any> = {};
+
+  restoredFilter = {
+    ...restoredFilter,
+    ...query,
+  };
+
+  const createdAt: (Date | null)[] = [];
+  if (query.createdAtStart) {
+    const start = new Date(query.createdAtStart as string);
+    if (!isNaN(start.getTime())) {
+      createdAt.push(start);
+    } else {
+      createdAt.push(null);
+    }
+  }
+  if (query.createdAtEnd) {
+    const end = new Date(query.createdAtEnd as string);
+    if (!isNaN(end.getTime())) {
+      createdAt.push(end);
+    } else {
+      createdAt.push(null);
+    }
+  }
+  if (createdAt.length) {
+    restoredFilter.createdAt = createdAt;
+  }
+
+  const updatedAt: (Date | null)[] = [];
+  if (query.updatedAtStart) {
+    const start = new Date(query.updatedAtStart as string);
+    if (!isNaN(start.getTime())) {
+      updatedAt.push(start);
+    } else {
+      updatedAt.push(null);
+    }
+  }
+  if (query.updatedAtEnd) {
+    const end = new Date(query.updatedAtEnd as string);
+    if (!isNaN(end.getTime())) {
+      updatedAt.push(end);
+    } else {
+      updatedAt.push(null);
+    }
+  }
+  if (updatedAt.length) {
+    restoredFilter.updatedAt = updatedAt;
+  }
+
+  if (query.memberType) {
+    const values = (query.memberType as string).split(",");
+    restoredFilter.memberType = values
+      .map((val) => memberTypes.value.find((opt: any) => opt.value === val))
+      .filter(Boolean);
+  }
+
+  delete restoredFilter.createdAtStart;
+  delete restoredFilter.createdAtEnd;
+  delete restoredFilter.updatedAtStart;
+  delete restoredFilter.updatedAtEnd;
+
+  filter.value = restoredFilter;
+
+  memberTypes.value = res.data.map((memberType: any) => ({
+    label: memberType.name,
+    value: memberType.code,
+  }));
 });
 
-const sort = ref<TSort | null>(null);
-const pageOption = ref({
-  pageIndex: 1,
-  pageSize: 10,
-  totalElements: 0,
+const sort = computed(() => {
+  return {
+    key: filter.value.sortBy,
+    type: filter.value.sortDirection ? filter.value.sortDirection : undefined,
+  };
 });
+
+const pageIndex = computed(() => {
+  return !isNaN(filter.value.pageIndex) ? +filter.value.pageIndex + 1 : 1;
+});
+
+const pageSize = computed(() => {
+  return filter.value.pageSize ? +filter.value.pageSize : 10;
+});
+
 const handleSort = (e: TSort) => {
-  sort.value = e;
-  fetchData();
+  filter.value = {
+    ...filter.value,
+    sortBy: e.type ? e.key : undefined,
+    sortDirection: e.type ? e.type : undefined,
+  };
+};
+const handleFilter = (e: any) => {
+  filter.value = e;
 };
 
 const fetchData = async () => {
@@ -87,22 +182,15 @@ const fetchData = async () => {
   }
 
   fetchRoleController.value = new AbortController();
-  const { pageIndex, pageSize } = cloneDeep(pageOption.value);
-  const paramsObject = {
-    pageIndex: pageIndex - 1,
-    pageSize,
-    sortBy: sort.value && sort.value.type ? sort.value.key : undefined,
-    sortDirection: sort.value && sort.value.type ? sort.value.type : undefined,
-  };
   isFetchingData.value = true;
-  const res = await getRoles(paramsObject, fetchRoleController.value);
+  const query = route.query;
+  const res = await getRoles(query, fetchRoleController.value);
   if (res === null) {
     return;
   }
   isFetchingData.value = false;
   const data = res.data.data;
-  pageOption.value = res.data.pageInfo;
-  pageOption.value.pageIndex = pageOption.value.pageIndex + 1;
+  totalItems.value = res.data.pageInfo.totalElements;
 
   for (const [index, entry] of data.entries()) {
     entry.index = index + 1;
@@ -112,21 +200,25 @@ const fetchData = async () => {
   }
   tableData.value = data;
 };
+const debouncedFetchData = debounce(fetchData, 500);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
   selectedRows.value = selectionList;
-  console.log(selectedRows.value);
 };
 
 const handlePageSizeChange = (e: any) => {
-  pageOption.value.pageSize = e;
-  pageOption.value.pageIndex = 1;
-  fetchData();
+  filter.value = {
+    ...filter.value,
+    pageIndex: 0,
+    pageSize: e,
+  };
 };
 
 const handlePageIndexChange = (e: any) => {
-  pageOption.value.pageIndex = e;
-  fetchData();
+  filter.value = {
+    ...filter.value,
+    pageIndex: e - 1,
+  };
 };
 
 const handleTableActionClick = (id: number, action: TTableAction) => {
@@ -139,6 +231,55 @@ const tableColumns = computed(() => {
 });
 const pageSizeOpts = computed(() => {
   return pageSizeOptions;
+});
+const memberTypeSelectOptions = computed(() => {
+  return {
+    memberType: memberTypes.value,
+  };
+});
+
+watch(filter, (newVal) => {
+  const normalizedFilter = cloneDeep(newVal);
+  if (normalizedFilter.createdAt) {
+    const startDate = normalizedFilter.createdAt[0];
+    const endDate = normalizedFilter.createdAt[1];
+    delete normalizedFilter.createdAt;
+    if (startDate) {
+      normalizedFilter.createdAtStart = toUtcDate(startDate);
+    }
+    if (endDate) {
+      normalizedFilter.createdAtEnd = toUtcDate(endDate);
+    }
+  }
+  if (normalizedFilter.updatedAt) {
+    const startDate = normalizedFilter.updatedAt[0];
+    const endDate = normalizedFilter.updatedAt[1];
+    delete normalizedFilter.updatedAt;
+    if (startDate) normalizedFilter.updatedAtStart = toUtcDate(startDate);
+    if (endDate) normalizedFilter.updatedAtEnd = toUtcDate(endDate);
+  }
+  if (normalizedFilter.memberType && normalizedFilter.memberType.length) {
+    normalizedFilter.memberType = normalizedFilter.memberType.map(
+      (memberType: any) => memberType.value,
+    );
+  } else {
+    delete normalizedFilter.memberType
+  }
+
+  const queryForUrl: Record<string, any> = {
+    ...normalizedFilter,
+  };
+
+  if (Array.isArray(queryForUrl.memberType)) {
+    queryForUrl.memberType = queryForUrl.memberType.join(",");
+  }
+
+  router.replace({
+    query: {
+      ...truncateQueryObject(queryForUrl),
+    },
+  });
+  debouncedFetchData();
 });
 </script>
 

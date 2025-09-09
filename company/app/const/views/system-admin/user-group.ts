@@ -14,15 +14,23 @@ export const userGroupTableHeaders = [
     allowFilter: true,
     filterType: 'text',
     isSortable: true,
+    meta: {
+      class: {
+        th: "min-w-[200px] pl-[32px] max-w-[280px] truncate",
+        td: "pl-[32px] max-w-[280px] truncate"
+      },
+    },
   },
   {
     accessorKey: "memberType",
     header: "Nhóm người dùng",
     isSortable: true,
     allowFilter: true,
+    filterType: 'select',
     meta: {
       class: {
-        th: "min-w-[188px]",
+        th: "min-w-[200px] max-w-[280px] truncate",
+        td: "max-w-[280px] truncate"
       },
     },
   },
@@ -34,7 +42,8 @@ export const userGroupTableHeaders = [
     filterType: 'date',
     meta: {
       class: {
-        th: "min-w-[136px]",
+        th: "min-w-[248px] max-w-[248px] truncate",
+        td: "max-w-[248px] truncate"
       },
     },
   },
@@ -46,7 +55,8 @@ export const userGroupTableHeaders = [
     filterType: 'text',
     meta: {
       class: {
-        th: "min-w-[136px]",
+        th: "min-w-[136px] max-w-[176px] truncate",
+        td: "max-w-[176px] truncate",
       },
     },
   },
@@ -58,7 +68,8 @@ export const userGroupTableHeaders = [
     allowFilter: true,
     meta: {
       class: {
-        th: "min-w-[160px]",
+        th: "min-w-[248px] max-w-[248px] truncate",
+        td: "max-w-[248px] truncate"
       },
     },
   },
@@ -70,7 +81,8 @@ export const userGroupTableHeaders = [
     allowFilter: true,
     meta: {
       class: {
-        th: "min-w-[168px]",
+        th: "min-w-[168px] max-w-[198px] truncate",
+        td: "max-w-[198px] truncate"
       },
     },
   },

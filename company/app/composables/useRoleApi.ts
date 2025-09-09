@@ -27,5 +27,21 @@ export const useRoleApi = () => {
     }
   };
 
-  return { getRoles };
+  const getMemberTypes = async () => {
+    try {
+      const res = await $axios.get(`/_api/user/role/member-type`);
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return [];
+    }
+  }
+
+  return { getRoles, getMemberTypes };
 };

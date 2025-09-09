@@ -89,18 +89,65 @@
               v-if="col.filterType == 'text'"
               class="text-input"
               variant="none"
+              :model-value="filter ? filter[col.accessorKey] : ''"
+              placeholder="Nhập giá trị"
+              @update:model-value="handleFilterUpdate(col.accessorKey, $event)"
             />
             <VueDatePicker
               v-if="col.filterType == 'date'"
-              v-model="range"
               :hide-navigation="['time', 'minutes', 'hours', 'seconds']"
               :enable-time-picker="false"
               range
               class="date-input"
               :teleport="true"
+              :model-value="filter ? filter[col.accessorKey] : ''"
+              placeholder="Chọn ngày"
+              @update:model-value="handleFilterUpdate(col.accessorKey, $event)"
+            />
+            <USelectMenu
+              v-if="col.filterType == 'select'"
+              multiple
+              class="select-input"
+              variant="none"
+              autocomplete="autocomplete"
+              placeholder="Chọn giá trị"
+              :search-input="{
+                placeholder: 'Tìm kiếm',
+              }"
+              :ui="{
+                trailingIcon:
+                  'group-data-[state=open]:rotate-180 transition-transform duration-200',
+              }"
+              :items="
+                props.selectOptions && props.selectOptions[col.accessorKey]
+                  ? props.selectOptions[col.accessorKey]
+                  : []
+              "
+              :model-value="filter ? filter[col.accessorKey] : ''"
+              @update:model-value="handleFilterUpdate(col.accessorKey, $event)"
+            />
+            <Icon
+              v-if="
+                col.filterType == 'select' &&
+                filter &&
+                filter[col.accessorKey] &&
+                filter[col.accessorKey].length
+              "
+              name="ic:outline-clear"
+              class="clear-icon"
+              @click="handleFilterUpdate(col.accessorKey, [])"
             />
           </div>
         </div>
+      </template>
+      <template
+        v-for="col in excludedColumns"
+        :key="col.accessorKey"
+        #[`${col.accessorKey}-cell`]="{ row }"
+      >
+        <span class="" :title="row.original[col.accessorKey]">
+          {{ row.original[col.accessorKey] }}
+        </span>
       </template>
       <template #empty>
         <AppNoData />
@@ -109,27 +156,20 @@
   </div>
 </template>
 <script setup lang="ts">
-import type { TableColumn } from "@nuxt/ui";
 import { cloneDeep } from "lodash";
 import type { TSort, TSortType } from "~/types/common";
-const range = ref<any>(null);
-
-export type TDataTableColumn<T> = TableColumn<T> & {
-  isSortable?: boolean;
-  accessorKey: string;
-  allowFilter?: boolean;
-  filterType?: TFilterType;
-};
 
 export type TDataTableProps = {
   tableData: any;
-  columns: TDataTableColumn<any>[];
+  columns: any[];
   selectionList?: number[];
   isLoading?: boolean;
   showCheckbox?: boolean;
   showActions?: boolean;
   allowActions?: TPermission[];
   sort?: TSort | null;
+  filter?: Record<string, any> | null;
+  selectOptions?: Record<string, { label: string; value: string }[]> | null;
 };
 
 export type TFilterType = "date" | "text" | "select";
@@ -141,6 +181,8 @@ const props = withDefaults(defineProps<TDataTableProps>(), {
   allowActions: (): TPermission[] => [],
   selectionList: (): number[] => [],
   sort: null,
+  filter: null,
+  selectOptions: null,
 });
 
 const havePermission = (permission: TPermission) => {
@@ -148,7 +190,7 @@ const havePermission = (permission: TPermission) => {
   return perm;
 };
 
-const columns = ref<TDataTableColumn<any>[]>(cloneDeep(props.columns));
+const columns = ref<any[]>(cloneDeep(props.columns));
 const columnKey = computed(() => {
   return (column: any) => {
     return column.columnDef.accessorKey;
@@ -185,7 +227,7 @@ onBeforeMount(() => {
     columns.value.unshift(checkboxColumn);
   }
   if (props.showActions) {
-    columns.value.splice(2, 0, actionColumn as TDataTableColumn<any>);
+    columns.value.splice(2, 0, actionColumn);
   }
 });
 
@@ -194,6 +236,7 @@ const emit = defineEmits<{
   (e: "selectionUpdate", selectionList: number[]): void;
   (e: TTableAction, id: number): void;
   (e: "sort", sort: TSort): void;
+  (e: "filter", filter: Record<string, any>): void;
 }>();
 
 const getCurrentSort = computed(() => {
@@ -218,14 +261,32 @@ const nextSortState = computed(() => {
   };
 });
 
+const handleFilterUpdate = (accessorKey: string, value: any) => {
+  console.log(
+    "caught key: ",
+    accessorKey,
+    " with value ",
+    JSON.stringify(value),
+  );
+  if (props.filter) {
+    const newFilter = {
+      ...props.filter,
+      [accessorKey]: value,
+    };
+    emit("filter", newFilter);
+  } else {
+    emit("filter", {
+      [accessorKey]: value,
+    });
+  }
+};
+
 const handleSort = (key: string, currentState: TSortType) => {
-  // if sorting a new column -> always start with ASC
   if (!props.sort || props.sort.key !== key) {
     emit("sort", { key, type: "ASC" });
     return;
   }
 
-  // if clicking the same column -> cycle its state
   emit("sort", { key, type: nextSortState.value(currentState) });
 };
 
@@ -234,7 +295,6 @@ const checkAllBoxValue = computed(() => {
     const selectedRows = cloneDeep(props.selectionList);
     const allRows = table.getRowModel().rows;
     if (selectedRows.length && selectedRows.length < allRows.length) {
-      console.log("indeterminate");
       return "indeterminate";
     }
     if (selectedRows.length == 0) {
@@ -253,7 +313,6 @@ const handleCheckAll = (e: any, table: any) => {
     allRows.forEach((row: any) => {
       selections.push(row.original.id);
     });
-    console.log(selections);
   }
 
   emit("selectionUpdate", selections);
@@ -283,7 +342,6 @@ const isRowSelected = computed(() => {
     const isPresent = props.selectionList.find(
       (selection) => selection == rowId,
     );
-    console.log(isPresent != undefined);
     if (isPresent !== undefined) {
       return true;
     }
@@ -330,6 +388,10 @@ const handleActionClick = (row: any, action: TTableAction) => {
       border-radius: 4px;
 
       .header-cell {
+        &.padding-cell:nth-of-type(1) {
+          // background-color: red;
+        }
+
         display: flex;
         flex-direction: column;
         gap: 4px;
@@ -346,8 +408,20 @@ const handleActionClick = (row: any, action: TTableAction) => {
           }
         }
         .filter {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          width: fit-content;
+          position: relative;
+          gap: 4px;
           .text-input {
             input {
+              &::placeholder {
+                font-size: 13px;
+                color: $color-gray-400;
+                font-weight: 400;
+              }
+
               border: 1px solid $color-primary-200 !important;
               border-radius: 10px !important;
               padding: 4px 10px !important;
@@ -359,13 +433,46 @@ const handleActionClick = (row: any, action: TTableAction) => {
             }
           }
 
+          .clear-icon {
+            cursor: pointer;
+            position: absolute;
+            right: 36px;
+          }
+
+          button.select-input {
+            border: 1px solid $color-primary-200 !important;
+            border-radius: 10px !important;
+            padding: 4px 48px 4px 10px !important;
+            font-weight: 500 !important;
+            color: $color-gray-600 !important;
+            height: 29px;
+            font-size: 13px;
+            line-height: 20px;
+            background-color: $color-gray-100 !important;
+            min-width: 240px;
+            max-width: 240px;
+
+            .text-dimmed {
+              font-size: 13px;
+              color: $color-gray-400;
+              font-weight: 400;
+            }
+          }
+
           .date-input {
             .dp__input_wrap {
+              width: 218px;
+              input::placeholder {
+                color: $color-gray-500;
+                font-weight: 400;
+                font-size: 14px;
+              }
               .dp__input {
-                width: 238px;
+                width: 218px;
                 border: 1px solid $color-primary-200 !important;
                 border-radius: 10px !important;
-                padding: 4px 32px !important;
+                padding-top: 4px;
+                padding-bottom: 4px;
                 font-weight: 500 !important;
                 color: $color-gray-600 !important;
                 font-size: 13px;
@@ -415,7 +522,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
       thead {
         tr:last-child {
           background-color: $color-gray-300;
-          height: 0px;
+          height: 1px;
         }
       }
 
