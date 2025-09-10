@@ -13,6 +13,7 @@
         :sort="sort"
         :select-options="memberTypeSelectOptions"
         :filter="filter"
+        :is-table-empty="isNoData"
         @selection-update="handleSelectionsUpdate"
         @delete="handleTableActionClick($event, 'delete')"
         @edit="handleTableActionClick($event, 'edit')"
@@ -64,6 +65,7 @@ const fetchRoleController = ref<AbortController | null>();
 const memberTypes = ref<any>([]);
 const filter = ref<Record<string, any>>({});
 const totalItems = ref<number>(0);
+const isNoData = ref<boolean>(false);
 const allowActions = computed(() => {
   const url = route.path;
   const menuItem = getMenuItem(url);
@@ -73,13 +75,9 @@ const allowActions = computed(() => {
 
 const { getMenuItem } = useSidebarStore();
 const { getRoles, getMemberTypes } = useRoleApi();
-onBeforeMount(async () => {
-  const res = await getMemberTypes();
-  memberTypes.value = res.data.map((memberType: any) => ({
-    label: memberType.name,
-    value: memberType.code,
-  }));
 
+// NOTE: From query string to filter
+const convertQuery = () => {
   const query = route.query;
   let restoredFilter: Record<string, any> = {};
 
@@ -142,7 +140,18 @@ onBeforeMount(async () => {
   delete restoredFilter.updatedAtStart;
   delete restoredFilter.updatedAtEnd;
 
-  filter.value = restoredFilter;
+  return restoredFilter
+}
+
+onBeforeMount(async () => {
+  const res = await getMemberTypes();
+  memberTypes.value = res.data.map((memberType: any) => ({
+    label: memberType.name,
+    value: memberType.code,
+  }));
+
+
+  filter.value = convertQuery();
 
   memberTypes.value = res.data.map((memberType: any) => ({
     label: memberType.name,
@@ -185,6 +194,12 @@ const fetchData = async () => {
   isFetchingData.value = true;
   const query = route.query;
   const res = await getRoles(query, fetchRoleController.value);
+  if (res.data.data.length == 0) {
+    isNoData.value = true
+    console.log('empty!')
+  } else {
+    isNoData.value = false
+  }
   if (res === null) {
     return;
   }
@@ -200,7 +215,7 @@ const fetchData = async () => {
   }
   tableData.value = data;
 };
-const debouncedFetchData = debounce(fetchData, 500);
+const debouncedFetchData = debounce(fetchData, 400);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
   selectedRows.value = selectionList;
@@ -238,8 +253,9 @@ const memberTypeSelectOptions = computed(() => {
   };
 });
 
-watch(filter, (newVal) => {
-  const normalizedFilter = cloneDeep(newVal);
+// NOTE: From filter to query string
+const normalizeFilter = (filter: any) => {
+  const normalizedFilter = cloneDeep(filter);
   if (normalizedFilter.createdAt) {
     const startDate = normalizedFilter.createdAt[0];
     const endDate = normalizedFilter.createdAt[1];
@@ -273,6 +289,12 @@ watch(filter, (newVal) => {
   if (Array.isArray(queryForUrl.memberType)) {
     queryForUrl.memberType = queryForUrl.memberType.join(",");
   }
+
+  return queryForUrl
+}
+
+watch(filter, (newVal) => {
+  const queryForUrl = normalizeFilter(newVal)
 
   router.replace({
     query: {

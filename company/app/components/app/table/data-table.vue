@@ -1,5 +1,6 @@
 <template>
-  <div class="data-table-wrapper">
+  <div class="data-table-wrapper" :class="{ hasNodata: props.isTableEmpty }">
+    <AppNoData v-if="props.isTableEmpty" class="nodata" />
     <div v-if="props.isLoading" class="spinner">
       <AppSpinnerHalfCircle />
     </div>
@@ -32,21 +33,21 @@
         <div class="action-wrapper">
           <Icon
             v-if="havePermission('VIEW')"
-            title="'Xem'"
+            title="Xem"
             class="icon"
             name="mdi:eye-outline"
           />
           <Icon
             v-if="havePermission('UPDATE')"
             class="icon"
-            title="'Chỉnh sửa'"
+            title="Chỉnh sửa"
             name="mdi:pencil-outline"
             @click="handleActionClick(row, 'edit')"
           />
           <Icon
             v-if="havePermission('DELETE')"
             class="icon"
-            title="'Xóa'"
+            title="Xóa"
             name="mdi:delete-outline"
             :class="{ disabled: !row.original.canDelete }"
             @click="
@@ -150,7 +151,8 @@
         </span>
       </template>
       <template #empty>
-        <AppNoData />
+        <!-- <AppNoData v-if="props.isTableEmpty" /> -->
+        <div class="blank"></div>
       </template>
     </UTable>
   </div>
@@ -170,6 +172,7 @@ export type TDataTableProps = {
   sort?: TSort | null;
   filter?: Record<string, any> | null;
   selectOptions?: Record<string, { label: string; value: string }[]> | null;
+  isTableEmpty?: boolean;
 };
 
 export type TFilterType = "date" | "text" | "select";
@@ -183,6 +186,7 @@ const props = withDefaults(defineProps<TDataTableProps>(), {
   sort: null,
   filter: null,
   selectOptions: null,
+  isTableEmpty: false,
 });
 
 const havePermission = (permission: TPermission) => {
@@ -526,8 +530,22 @@ const handleActionClick = (row: any, action: TTableAction) => {
         }
       }
 
+      tr {
+        .body-select,
+        .header-select {
+          button:hover {
+            cursor: pointer;
+          }
+        }
+      }
+
       // Row border
       tbody {
+        tr:hover {
+          td {
+            background-color: $color-gray-50;
+          }
+        }
         &.divide-y {
           tr:not(:last-child) {
             border-bottom: 1px solid $color-gray-300;
@@ -606,6 +624,25 @@ const handleActionClick = (row: any, action: TTableAction) => {
           background-color: white;
         }
       }
+    }
+  }
+
+  .blank {
+    display: block;
+    height: 132px;
+    width: 100%;
+  }
+  .nodata {
+    top: 98px;
+    right: 50%;
+    transform: translateX(50%);
+    z-index: 2;
+    position: absolute;
+  }
+
+  &.hasNodata {
+    :deep(tbody) {
+      height: 132px;
     }
   }
 }

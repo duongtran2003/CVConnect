@@ -22,6 +22,19 @@ export const userGroupTableHeaders = [
     },
   },
   {
+    accessorKey: "code",
+    header: "Mã",
+    allowFilter: true,
+    filterType: 'text',
+    isSortable: true,
+    meta: {
+      class: {
+        th: "min-w-[200px] pl-[32px] max-w-[280px] truncate",
+        td: "pl-[32px] max-w-[280px] truncate"
+      },
+    },
+  },
+  {
     accessorKey: "memberType",
     header: "Nhóm người dùng",
     isSortable: true,
@@ -55,8 +68,8 @@ export const userGroupTableHeaders = [
     filterType: 'text',
     meta: {
       class: {
-        th: "min-w-[136px] max-w-[176px] truncate",
-        td: "max-w-[176px] truncate",
+        th: "min-w-[168px] max-w-[168px] truncate",
+        td: "max-w-[168px] truncate",
       },
     },
   },
@@ -81,8 +94,8 @@ export const userGroupTableHeaders = [
     allowFilter: true,
     meta: {
       class: {
-        th: "min-w-[168px] max-w-[198px] truncate",
-        td: "max-w-[198px] truncate"
+        th: "min-w-[168px] max-w-[168px] truncate",
+        td: "max-w-[168px] truncate"
       },
     },
   },
