@@ -37,6 +37,7 @@ export default defineNuxtPlugin(() => {
         // }
         clearToken();
         clearUser();
+        console.log("logout when refresh fail");
         logout();
       });
 

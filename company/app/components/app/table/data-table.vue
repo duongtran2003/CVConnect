@@ -4,7 +4,6 @@
     <div v-if="props.isLoading" class="spinner">
       <AppSpinnerHalfCircle />
     </div>
-    <div id="datepicker-target" class="absolute top-0 left-0 w-full h-0"></div>
     <UTable
       ref="table"
       class="data-table"
@@ -365,6 +364,8 @@ const handleActionClick = (row: any, action: TTableAction) => {
   // border: 1px solid $color-gray-300;
   border-radius: 4px;
   position: relative;
+
+
   .spinner {
     position: absolute;
     display: flex;

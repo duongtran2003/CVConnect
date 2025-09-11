@@ -41,7 +41,27 @@ export const useRoleApi = () => {
       console.error(err);
       return [];
     }
-  }
+  };
 
-  return { getRoles, getMemberTypes };
+  const createUserGroup = async (payload: any) => {
+    try {
+      const res = await $axios.post(`/_api/user/role/create`, payload);
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false
+    }
+  };
+
+  return { getRoles, getMemberTypes, createUserGroup };
 };

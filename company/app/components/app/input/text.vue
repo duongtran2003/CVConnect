@@ -92,7 +92,7 @@ const isTextHidden = ref(true);
     display: flex;
     flex-direction: row;
     gap: 8px;
-    align-items: flex-end;
+    align-items: center;
     .name {
       font-size: 14px;
       color: $text-light;
@@ -152,15 +152,19 @@ const isTextHidden = ref(true);
         font-size: 16px;
         outline: none;
         border: none;
+
+        &::placeholder {
+          color: $color-gray-300;
+        }
       }
 
       &:hover:not(.disabled),
       &:focus-within:not(.disabled) {
-        border: 2px solid rgba($color-primary-600, 1);
+        border: 2px solid rgba($color-primary-400, 1);
       }
     }
     &:focus-within {
-      border: 3px solid rgba($color-primary-700, 0.3);
+      border: 3px solid rgba($color-primary-400, 0.4);
     }
   }
 

@@ -3,7 +3,7 @@
     class="button"
     :class="{ disabled: isDisabled, loading: isLoading }"
     :disabled="isDisabled"
-    @click="handleClick"
+    @click="handleClick($event)"
   >
     <slot name="icon" />
     <div class="button-text">{{ text }}</div>
@@ -28,12 +28,12 @@ const emit = defineEmits<{
   (e: "click"): void;
 }>();
 
-const handleClick = () => {
+const handleClick = (event) => {
   if (props.isLoading || props.isDisabled) {
     return;
   }
 
-  emit("click");
+  emit("click", event);
 };
 </script>
 <style lang="scss" scoped>

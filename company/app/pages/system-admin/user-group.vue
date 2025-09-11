@@ -1,6 +1,35 @@
 <template>
   <div class="user-group-content">
     <div class="title">Quản lí nhóm người dùng</div>
+    <div class="table-top">
+      <AppButton
+        :text="'Xóa bỏ'"
+        :is-disabled="isDeleteAllDisabled"
+        class="delete-button"
+      >
+        <template #icon>
+          <Icon name="material-symbols:delete-outline-rounded" />
+        </template>
+      </AppButton>
+
+      <UModal
+        v-model:open="isCreateModalOpen"
+        title="Thêm mới nhóm người dùng"
+        :ui="{ content: 'w-[840px] max-w-[840px] max-h-[100vh]' }"
+      >
+        <AppButton :text="'Thêm mới'" class="add-button">
+          <template #icon>
+            <Icon name="material-symbols:add-2-rounded" />
+          </template>
+        </AppButton>
+        <template #body>
+          <FormCreateUserGroup
+            @close-modal="closeModal"
+            @submit="handleModalSubmit"
+          />
+        </template>
+      </UModal>
+    </div>
     <div class="table-section">
       <AppTableDataTable
         :table-data="tableData"
@@ -26,6 +55,7 @@
         :show-edges="true"
         :sibling-count="1"
         :variant="'ghost'"
+        active-variant="subtle"
         :items-per-page="pageSize"
         :page="pageIndex"
         :total="totalItems"
@@ -60,6 +90,7 @@ useHead({
 
 const route = useRoute();
 const router = useRouter();
+const isCreateModalOpen = ref<boolean>(false);
 const isFetchingData = ref<boolean>(false);
 const fetchRoleController = ref<AbortController | null>();
 const memberTypes = ref<any>([]);
@@ -140,8 +171,8 @@ const convertQuery = () => {
   delete restoredFilter.updatedAtStart;
   delete restoredFilter.updatedAtEnd;
 
-  return restoredFilter
-}
+  return restoredFilter;
+};
 
 onBeforeMount(async () => {
   const res = await getMemberTypes();
@@ -149,7 +180,6 @@ onBeforeMount(async () => {
     label: memberType.name,
     value: memberType.code,
   }));
-
 
   filter.value = convertQuery();
 
@@ -159,6 +189,28 @@ onBeforeMount(async () => {
   }));
 });
 
+const handleModalSubmit = () => {
+  closeModal();
+  fetchData();
+};
+const closeModal = () => {
+  console.log("close");
+  isCreateModalOpen.value = false;
+};
+
+const isDeleteAllDisabled = computed(() => {
+  const selectedRowsId = selectedRows.value;
+  if (selectedRowsId.length == 0) {
+    return true;
+  }
+  const rowData: any[] = [];
+  for (const row of tableData.value) {
+    if (selectedRowsId.includes(row.id)) {
+      rowData.push(row);
+    }
+  }
+  return rowData.some((row) => !row.canDelete);
+});
 const sort = computed(() => {
   return {
     key: filter.value.sortBy,
@@ -195,10 +247,10 @@ const fetchData = async () => {
   const query = route.query;
   const res = await getRoles(query, fetchRoleController.value);
   if (res.data.data.length == 0) {
-    isNoData.value = true
-    console.log('empty!')
+    isNoData.value = true;
+    console.log("empty!");
   } else {
-    isNoData.value = false
+    isNoData.value = false;
   }
   if (res === null) {
     return;
@@ -279,7 +331,7 @@ const normalizeFilter = (filter: any) => {
       (memberType: any) => memberType.value,
     );
   } else {
-    delete normalizedFilter.memberType
+    delete normalizedFilter.memberType;
   }
 
   const queryForUrl: Record<string, any> = {
@@ -290,11 +342,11 @@ const normalizeFilter = (filter: any) => {
     queryForUrl.memberType = queryForUrl.memberType.join(",");
   }
 
-  return queryForUrl
-}
+  return queryForUrl;
+};
 
 watch(filter, (newVal) => {
-  const queryForUrl = normalizeFilter(newVal)
+  const queryForUrl = normalizeFilter(newVal);
 
   router.replace({
     query: {
@@ -317,11 +369,41 @@ watch(filter, (newVal) => {
   display: flex;
   flex-direction: column;
 
+  .table-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    .button {
+      padding: 4px 14px 4px 10px;
+
+      :deep(.button-text) {
+        font-size: 14px;
+      }
+    }
+    .add-button {
+      background-color: $color-primary-400;
+      color: $text-dark;
+    }
+    .delete-button {
+      background-color: white;
+      color: $color-primary-400;
+      border: 1px solid $color-primary-400;
+
+      &.disabled {
+        border: 1px solid $color-gray-400;
+        color: $color-gray-400;
+      }
+    }
+  }
+
   .title {
     font-weight: 700;
     font-size: 16px;
     line-height: 20px;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
   }
   .top-section {
     margin-top: 18px;

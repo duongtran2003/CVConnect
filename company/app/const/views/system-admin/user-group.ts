@@ -36,7 +36,7 @@ export const userGroupTableHeaders = [
   },
   {
     accessorKey: "memberType",
-    header: "Nhóm người dùng",
+    header: "Loại thành viên",
     isSortable: true,
     allowFilter: true,
     filterType: 'select',

@@ -8,7 +8,7 @@ export const useDefaultRole = () => {
 
   const handleRoleValidation = (redirect?: string) => {
     if (currentRole.value) {
-      return
+      return;
     }
     const defaultRole = getDefaultRole();
     if (defaultRole) {
@@ -42,6 +42,12 @@ export const useDefaultRole = () => {
   const checkPermission = async (requiredRole: TRole) => {
     if (currentRole.value && currentRole.value.code !== requiredRole) {
       setLoading(true);
+      console.log(
+        "logout when check permission failed",
+        currentRole.value,
+        currentRole.value.code,
+        requiredRole,
+      );
       await logout();
       clearToken();
       setLoading(false);
