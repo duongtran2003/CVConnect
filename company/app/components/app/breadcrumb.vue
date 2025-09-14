@@ -26,23 +26,67 @@
   </div>
 </template>
 <script setup lang="ts">
-const items = [
-  {
+export type TBreadcumbItem = {
+  name: string;
+  icon?: string;
+  url?: string;
+};
+
+const route = useRoute();
+const sidebarStore = useSidebarStore();
+const { sidebarData } = storeToRefs(sidebarStore);
+const items = computed<TBreadcumbItem[]>(() => {
+  const menuItems = sidebarData.value;
+  const menuMap: Map<number, TSidebarItem> = new Map();
+  let currentItem: TSidebarItem | undefined;
+
+  const flatten = (items: TSidebarItem[], map: Map<number, TSidebarItem>) => {
+    for (const item of items) {
+      if (item.menuUrl && item.menuUrl === route.path) {
+        currentItem = item;
+      }
+      if (!map.has(item.id)) {
+        map.set(item.id, item);
+      }
+      if (item.children) {
+        flatten(item.children, map);
+      }
+    }
+  };
+
+  const traverse = (targetId: number, breadcrumbs: TBreadcumbItem[]) => {
+    const target = menuMap.get(targetId);
+    if (!target) return;
+
+    const newItem: TBreadcumbItem = {
+      name: target.menuLabel,
+      icon:
+        target.menuIcon === "mdi:circle-medium" ? undefined : target.menuIcon,
+      url: target.menuUrl,
+    };
+    console.log(target.menuIcon)
+
+    breadcrumbs.unshift(newItem);
+    if (target.parentId) {
+      traverse(target.parentId, breadcrumbs);
+    }
+  };
+
+  flatten(menuItems, menuMap);
+
+  const breadcrumbItems: TBreadcumbItem[] = [];
+  if (currentItem) {
+    traverse(currentItem.id, breadcrumbItems);
+  }
+
+  breadcrumbItems.unshift({
     name: "",
     icon: "mdi:home",
-    url: "/system-admin/report/candidate",
-  },
-  {
-    name: "Báo cáo",
-    icon: "",
     url: "",
-  },
-  {
-    name: "Ứng viên",
-    icon: "",
-    url: "/system-admin/report/candidate",
-  },
-];
+  });
+
+  return breadcrumbItems;
+});
 </script>
 <style lang="scss" scoped>
 .breadcrumb {
@@ -64,6 +108,10 @@ const items = [
     color: $text-light;
     transition: color 200ms;
     font-weight: 700;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
 
     .icon {
       display: block;

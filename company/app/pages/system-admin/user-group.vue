@@ -1,73 +1,97 @@
 <template>
-  <div class="user-group-content">
-    <div class="title">Quản lí nhóm người dùng</div>
-    <div class="table-top">
-      <AppButton
-        :text="'Xóa bỏ'"
-        :is-disabled="isDeleteAllDisabled"
-        class="delete-button"
-      >
-        <template #icon>
-          <Icon name="material-symbols:delete-outline-rounded" />
-        </template>
-      </AppButton>
-
-      <UModal
-        v-model:open="isCreateModalOpen"
-        title="Thêm mới nhóm người dùng"
-        :ui="{ content: 'w-[840px] max-w-[840px] max-h-[100vh]' }"
-      >
-        <AppButton :text="'Thêm mới'" class="add-button">
+  <div class="wrapper">
+    <div class="user-group-content">
+      <div class="title">Quản lí nhóm người dùng</div>
+      <div class="table-top">
+        <AppButton
+          :text="'Xóa bỏ'"
+          :is-disabled="isDeleteAllDisabled"
+          class="delete-button"
+          @click="handleDeleteClick(selectedRows)"
+        >
           <template #icon>
-            <Icon name="material-symbols:add-2-rounded" />
+            <Icon name="material-symbols:delete-outline-rounded" />
           </template>
         </AppButton>
-        <template #body>
-          <FormCreateUserGroup
-            @close-modal="closeModal"
-            @submit="handleModalSubmit"
-          />
-        </template>
-      </UModal>
-    </div>
-    <div class="table-section">
-      <AppTableDataTable
-        :table-data="tableData"
-        :columns="tableColumns"
-        :allow-actions="allowActions"
-        :show-checkbox="true"
-        :show-actions="true"
-        :is-loading="isFetchingData"
-        :selection-list="selectedRows"
-        :sort="sort"
-        :select-options="memberTypeSelectOptions"
-        :filter="filter"
-        :is-table-empty="isNoData"
-        @selection-update="handleSelectionsUpdate"
-        @delete="handleTableActionClick($event, 'delete')"
-        @edit="handleTableActionClick($event, 'edit')"
-        @sort="handleSort"
-        @filter="handleFilter"
-      />
-    </div>
-    <div class="top-section">
-      <UPagination
-        :show-edges="true"
-        :sibling-count="1"
-        :variant="'ghost'"
-        active-variant="subtle"
-        :items-per-page="pageSize"
-        :page="pageIndex"
-        :total="totalItems"
-        @update:page="handlePageIndexChange($event)"
-      />
-      <USelect
-        variant="subtle"
-        :items="pageSizeOpts"
-        class="w-fit bg-white text-[#333333]"
-        :model-value="pageSize"
-        @update:model-value="handlePageSizeChange($event)"
-      />
+
+        <UModal
+          :open="isDeleteModalOpen"
+          title="Xóa nhóm người dùng"
+          :ui="{ content: 'w-[840px] max-w-[840px]' }"
+          @update:open="handleDeleteModalOpenUpdate"
+          @after:leave="clearDeleteList"
+        >
+          <template #body>
+            <ModalsDeleteConfirm :delete-list="deleteListNames">
+              <template #footer>
+                <AppButton
+                  :text="'Đồng ý'"
+                  class="modal-delete-submit"
+                  :is-loading="isDeleting"
+                  @click="handleDelete"
+                />
+              </template>
+            </ModalsDeleteConfirm>
+          </template>
+        </UModal>
+
+        <UModal
+          v-model:open="isCreateModalOpen"
+          title="Thêm mới nhóm người dùng"
+          :ui="{ content: 'w-[840px] max-w-[840px] max-h-[100vh]' }"
+        >
+          <AppButton :text="'Thêm mới'" class="add-button">
+            <template #icon>
+              <Icon name="material-symbols:add-2-rounded" />
+            </template>
+          </AppButton>
+          <template #body>
+            <FormCreateUserGroup
+              @close-modal="closeModal"
+              @submit="handleModalSubmit"
+            />
+          </template>
+        </UModal>
+      </div>
+      <div class="table-section">
+        <AppTableDataTable
+          :table-data="tableData"
+          :columns="tableColumns"
+          :allow-actions="allowActions"
+          :show-checkbox="true"
+          :show-actions="true"
+          :is-loading="isFetchingData"
+          :selection-list="selectedRows"
+          :sort="sort"
+          :select-options="memberTypeSelectOptions"
+          :filter="filter"
+          :is-table-empty="isNoData"
+          @selection-update="handleSelectionsUpdate"
+          @delete="handleTableActionClick($event, 'delete')"
+          @edit="handleTableActionClick($event, 'edit')"
+          @sort="handleSort"
+          @filter="handleFilter"
+        />
+      </div>
+      <div class="top-section">
+        <UPagination
+          :show-edges="true"
+          :sibling-count="1"
+          :variant="'ghost'"
+          active-variant="subtle"
+          :items-per-page="pageSize"
+          :page="pageIndex"
+          :total="totalItems"
+          @update:page="handlePageIndexChange($event)"
+        />
+        <USelect
+          variant="subtle"
+          :items="pageSizeOpts"
+          class="w-fit bg-white text-[#333333]"
+          :model-value="pageSize"
+          @update:model-value="handlePageSizeChange($event)"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -88,15 +112,19 @@ useHead({
   title: "Cài đặt nhóm người dùng",
 });
 
+const toast = useToast();
 const route = useRoute();
 const router = useRouter();
 const isCreateModalOpen = ref<boolean>(false);
+const isDeleteModalOpen = ref<boolean>(false);
 const isFetchingData = ref<boolean>(false);
 const fetchRoleController = ref<AbortController | null>();
 const memberTypes = ref<any>([]);
 const filter = ref<Record<string, any>>({});
 const totalItems = ref<number>(0);
 const isNoData = ref<boolean>(false);
+const isDeleting = ref<boolean>(false);
+const deleteList = ref<any[]>([]);
 const allowActions = computed(() => {
   const url = route.path;
   const menuItem = getMenuItem(url);
@@ -105,7 +133,7 @@ const allowActions = computed(() => {
 });
 
 const { getMenuItem } = useSidebarStore();
-const { getRoles, getMemberTypes } = useRoleApi();
+const { getRoles, getMemberTypes, deleteUserGroup } = useRoleApi();
 
 // NOTE: From query string to filter
 const convertQuery = () => {
@@ -189,14 +217,48 @@ onBeforeMount(async () => {
   }));
 });
 
+const handleDeleteClick = (items: any[]) => {
+  deleteList.value = items;
+  isDeleteModalOpen.value = true;
+};
+
+const clearDeleteList = () => {
+  deleteList.value = [];
+};
+
+const handleDeleteModalOpenUpdate = (event: boolean) => {
+  if (!event) {
+    isDeleteModalOpen.value = false;
+  }
+};
+
+const handleDelete = async () => {
+  isDeleting.value = true;
+  const isSuccess = await deleteUserGroup({ ids: deleteList.value });
+  isDeleting.value = false;
+  if (isSuccess) {
+    handleDeleteModalOpenUpdate(false);
+    toast.add({
+      title: "Xóa thành công",
+      color: "success",
+    });
+    fetchData();
+  }
+};
+
 const handleModalSubmit = () => {
   closeModal();
   fetchData();
 };
 const closeModal = () => {
-  console.log("close");
   isCreateModalOpen.value = false;
 };
+
+const deleteListNames = computed(() => {
+  return tableData.value
+    .filter((data: any) => deleteList.value.includes(data.id))
+    .map((data: any) => data.name);
+});
 
 const isDeleteAllDisabled = computed(() => {
   const selectedRowsId = selectedRows.value;
@@ -248,7 +310,6 @@ const fetchData = async () => {
   const res = await getRoles(query, fetchRoleController.value);
   if (res.data.data.length == 0) {
     isNoData.value = true;
-    console.log("empty!");
   } else {
     isNoData.value = false;
   }
@@ -289,7 +350,9 @@ const handlePageIndexChange = (e: any) => {
 };
 
 const handleTableActionClick = (id: number, action: TTableAction) => {
-  console.log(`trigger action ${action} on record id ${id}`);
+  if (action === "delete") {
+    handleDeleteClick([id]);
+  }
 };
 
 const tableData = ref([]);
@@ -358,16 +421,25 @@ watch(filter, (newVal) => {
 </script>
 
 <style lang="scss" scoped>
-.user-group-content {
-  background-color: white;
+.wrapper {
+  overflow: hidden;
+  min-height: 0;
+  flex: 1;
   border-radius: 8px;
   margin-top: 8px;
+}
+.user-group-content {
+  background-color: white;
   min-height: calc(100% - 48px - 8px);
   @include box-shadow;
   color: $text-light;
   padding: 20px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  @include custom-scrollbar;
+  height: 100%;
 
   .table-top {
     display: flex;

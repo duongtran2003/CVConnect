@@ -50,18 +50,42 @@ export const useRoleApi = () => {
         title: res.data.message,
         color: "success",
       });
-      return true
+      return true;
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message,
+          title: err.response.data.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
       console.error(err);
-      return false
+      return false;
     }
   };
 
-  return { getRoles, getMemberTypes, createUserGroup };
+  const deleteUserGroup = async (payload: any) => {
+    try {
+      const res = await $axios.delete(`/_api/user/role/delete`, {
+        data: payload.ids,
+      });
+      if (res.data.message) {
+        toast.add({
+          title: res.data.message,
+          color: "success",
+        });
+      }
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  return { getRoles, getMemberTypes, createUserGroup, deleteUserGroup };
 };
