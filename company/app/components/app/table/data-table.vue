@@ -35,6 +35,7 @@
             title="Xem"
             class="icon"
             name="mdi:eye-outline"
+            @click="handleActionClick(row, 'view')"
           />
           <Icon
             v-if="havePermission('UPDATE')"

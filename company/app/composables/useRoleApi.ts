@@ -27,6 +27,22 @@ export const useRoleApi = () => {
     }
   };
 
+  const getUserGroupDetail = async (id: number) => {
+    try {
+      const res = await $axios.get(`/_api/user/role/detail/${id}`);
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   const getMemberTypes = async () => {
     try {
       const res = await $axios.get(`/_api/user/role/member-type`);
@@ -87,5 +103,11 @@ export const useRoleApi = () => {
     }
   };
 
-  return { getRoles, getMemberTypes, createUserGroup, deleteUserGroup };
+  return {
+    getRoles,
+    getMemberTypes,
+    createUserGroup,
+    deleteUserGroup,
+    getUserGroupDetail,
+  };
 };

@@ -1,5 +1,8 @@
 <template>
   <NuxtLayout>
+    <div v-if="isLoading" class="loading-overlay">
+      <AppSpinnerHalfCircle class="spinner" />
+    </div>
     <NuxtLoadingIndicator color="#38b2ac" />
     <UApp :toaster="toasterConfig">
       <NuxtPage />
@@ -17,8 +20,27 @@ useHead({
     class: "light",
   },
 });
+const loadingStore = useLoadingStore();
+const { isLoading } = storeToRefs(loadingStore);
 const toasterConfig: ToasterProps = {
   position: "bottom-right",
   progress: false,
 };
 </script>
+<style lang="scss" scoped>
+.loading-overlay {
+  position: fixed;
+  z-index: 999;
+  background-color: rgba(black, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+
+  .spinner {
+    display: block;
+    font-size: 32px;
+  }
+}
+</style>

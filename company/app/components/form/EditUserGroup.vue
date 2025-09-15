@@ -1,5 +1,8 @@
 <template>
-  <div class="create-user-group">
+  <div class="edit-user-group">
+    <div v-if="isLoading" class="loading-overlay">
+      <AppSpinnerHalfCircle class="spinner" />
+    </div>
     <form class="form-block">
       <div class="line">
         <AppInputText
@@ -7,7 +10,10 @@
           :required="true"
           :error="formError.code"
           :placeholder="'Mời nhập mã'"
-          :value="formInput.code"
+          :value="
+            currentMode == 'view' ? userGroupDetail?.code || '' : formInput.code
+          "
+          :is-disabled="currentMode == 'view'"
           class="text-input"
           @input="handleInput('code', $event)"
           @blur="validateKey('code')"
@@ -22,8 +28,13 @@
             placeholder="Mời chọn loại thành viên"
             :class="{ error: formError.memberType }"
             class="select"
+            :disabled="currentMode == 'view'"
             :model-value="
-              formInput.memberType ? formInput.memberType : undefined
+              currentMode == 'view'
+                ? userGroupDetail?.memberTypeDto?.code || undefined
+                : formInput.memberType
+                  ? formInput.memberType
+                  : undefined
             "
             @update:model-value="handleMemberTypeChange($event)"
             @update:open="
@@ -41,7 +52,10 @@
           :required="true"
           :error="formError.name"
           :placeholder="'Mời nhập tên'"
-          :value="formInput.name"
+          :value="
+            currentMode == 'view' ? userGroupDetail?.name || '' : formInput.name
+          "
+          :is-disabled="currentMode == 'view'"
           class="text-input"
           @input="handleInput('name', $event)"
           @blur="validateKey('name')"
@@ -49,33 +63,71 @@
       </div>
       <FormRoleMenuSelect
         :menus="menus"
+        :is-disabled="currentMode == 'view'"
+        :initial-perm-map="permMap"
         @perm-change="handlePermChange($event)"
       />
     </form>
     <FormCreateUserGroupFooter>
       <div class="buttons">
-        <AppButton
-          :text="'Hủy bỏ'"
-          class="cancel-button"
-          @click.prevent="handleCancelClick($event)"
-        />
-        <AppButton
-          :is-disabled="!isFormValid"
-          :text="'Tạo mới'"
-          :is-loading="isSubmiting"
-          class="submit-button"
-          @click="handleSubmit"
-        />
+        <template v-if="currentMode == 'view'">
+          <AppButton
+            :text="'Đóng'"
+            class="cancel-button"
+            @click.prevent="handleCancelClick($event)"
+          />
+          <AppButton
+            v-if="props.allowEdit"
+            :is-disabled="!isFormValid"
+            :text="'Chỉnh sửa'"
+            class="submit-button"
+            @click="handleSwitchMode('edit')"
+          />
+        </template>
+        <template v-else>
+          <AppButton
+            :text="'Hủy bỏ'"
+            class="cancel-button"
+            @click.prevent="
+              props.initialMode == 'view'
+                ? handleSwitchMode('view')
+                : handleCancelClick($event)
+            "
+          />
+          <AppButton
+            :is-disabled="!isFormValid"
+            :text="'Lưu'"
+            :is-loading="isSubmiting"
+            class="submit-button"
+            @click="handleSubmit"
+          />
+        </template>
       </div>
     </FormCreateUserGroupFooter>
   </div>
 </template>
 <script setup lang="ts">
+import { cloneDeep } from "lodash";
+
 type TCreateForm = {
   code: string;
   name: string;
   memberType: string;
 };
+type TMode = "edit" | "view";
+type TProps = {
+  initialMode?: TMode;
+  id: number;
+  allowEdit?: boolean;
+};
+
+const props = withDefaults(defineProps<TProps>(), {
+  initialMode: "view",
+  allowEdit: false,
+});
+
+const currentMode = ref<TMode>("view");
+
 const formInput = ref<TCreateForm>({
   code: "",
   name: "",
@@ -122,8 +174,11 @@ const formRules = {
 const memberTypes = ref<TAccountRole[]>([]);
 const menus = ref<TSidebarItem[]>([]);
 const isSubmiting = ref<boolean>(false);
+const userGroupDetail = ref<any>(null);
+const permMap = ref<any>({});
+const isLoading = ref<boolean>(false);
 
-const { getMemberTypes, createUserGroup } = useRoleApi();
+const { getMemberTypes, createUserGroup, getUserGroupDetail } = useRoleApi();
 const { getAllMenus } = useMenuApi();
 
 const emit = defineEmits<{
@@ -132,10 +187,33 @@ const emit = defineEmits<{
 }>();
 
 onBeforeMount(async () => {
-  const res = await getMemberTypes();
-  const menusRes = await getAllMenus();
-  memberTypes.value = res.data;
+  currentMode.value = props.initialMode;
+  isLoading.value = true;
+  const [detailRes, memberTypesRes, menusRes] = await Promise.all([
+    getUserGroupDetail(props.id),
+    getMemberTypes(),
+    getAllMenus(),
+  ]);
+  memberTypes.value = memberTypesRes.data;
   menus.value = menusRes.data;
+  userGroupDetail.value = detailRes.data;
+  const permissionsMap: Record<number, any> = {};
+  for (const roleMenu of userGroupDetail.value.roleMenus) {
+    if (roleMenu.permissions.length) {
+      const id = roleMenu.menuId;
+      const perms = roleMenu.permissions;
+      permissionsMap[id as number] = {
+        VIEW: perms.includes("VIEW"),
+        ADD: perms.includes("ADD"),
+        UPDATE: perms.includes("UPDATE"),
+        DELETE: perms.includes("DELETE"),
+        EXPORT: perms.includes("EXPORT"),
+      };
+    }
+  }
+  permMap.value = cloneDeep(permissionsMap);
+  console.log('outside', permMap.value);
+  isLoading.value = false;
 });
 
 const handlePermChange = (event: any) => {
@@ -145,6 +223,10 @@ const handlePermChange = (event: any) => {
 const handleCancelClick = (event: any) => {
   event.preventDefault();
   emit("closeModal");
+};
+
+const handleSwitchMode = (mode: TMode) => {
+  currentMode.value = mode;
 };
 
 const handleSubmit = async () => {
@@ -163,12 +245,10 @@ const handleSubmit = async () => {
       }
     }
 
-    if (perm.length) {
-      roleMenus.push({
-        menuId,
-        permissions: perm,
-      });
-    }
+    roleMenus.push({
+      menuId,
+      permissions: perm,
+    });
   }
 
   // NOTE: Recursively loops into menus, grab any menu that has its descendant in the roleMenus array, put those menu id in a set
@@ -269,7 +349,24 @@ const isFormValid = computed(() => {
 });
 </script>
 <style lang="scss" scoped>
-.create-user-group {
+.edit-user-group {
+  .loading-overlay {
+    position: fixed;
+    z-index: 999;
+    background-color: rgba(black, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+
+    .spinner {
+      display: block;
+      font-size: 32px;
+    }
+  }
   .form-block {
     .line {
       display: flex;
@@ -277,15 +374,19 @@ const isFormValid = computed(() => {
       gap: 8px;
       justify-content: space-between;
     }
+
     .text-input {
       width: 380px;
+
       :deep(.input) {
         padding: 6px 8px;
+
         input {
           font-size: 13px;
         }
       }
     }
+
     .select-input {
       margin: 2px 0px;
       display: flex;
@@ -298,6 +399,7 @@ const isFormValid = computed(() => {
         flex-direction: row;
         gap: 8px;
         align-items: center;
+
         .required {
           font-size: 12px;
           color: $color-danger;
@@ -314,9 +416,17 @@ const isFormValid = computed(() => {
         border: 2px solid rgba($color-primary-800, 0.1);
         color: $text-light;
         width: 380px;
-        &:hover {
+
+        &:disabled {
+          cursor: default !important;
+          border: 2px solid rgba($color-gray-300, 1);
+          opacity: 100%;
+        }
+
+        &:hover:not(:disabled) {
           border: 2px solid rgba($color-primary-400, 1);
         }
+
         &.error {
           border: 2px solid $color-danger;
         }

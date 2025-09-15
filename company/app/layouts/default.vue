@@ -1,8 +1,5 @@
 <template>
   <div class="main-layout">
-    <div v-if="isLoading" class="loading-overlay">
-      <AppSpinnerHalfCircle class="spinner" />
-    </div>
     <AppSidebar />
     <div class="main-content">
       <AppHeader />
@@ -64,22 +61,6 @@ onBeforeMount(async () => {
   min-height: 100vh;
   height: 100vh;
   background-color: $color-gray-100;
-
-  .loading-overlay {
-    position: fixed;
-    z-index: 999;
-    background-color: rgba(black, 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100vw;
-    height: 100vh;
-
-    .spinner {
-      display: block;
-      font-size: 32px;
-    }
-  }
 
   .main-content {
     max-height: 100%;

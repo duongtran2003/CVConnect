@@ -48,8 +48,11 @@ export const useDefaultRole = () => {
         currentRole.value.code,
         requiredRole,
       );
-      await logout();
-      clearToken();
+      const defaultRoute = getDefaultRoute(currentRole.value);
+      router.push({ path: defaultRoute });
+
+      // await logout();
+      // clearToken();
       setLoading(false);
     }
   };

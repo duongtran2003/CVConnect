@@ -4,7 +4,11 @@
       <div class="name">
         <span>{{ label }}</span>
         <UTooltip v-if="tooltip" :text="props.tooltip">
-          <Icon v-if="tooltip" name="mdi:help-circle-outline" class="tooltip"></Icon>
+          <Icon
+            v-if="tooltip"
+            name="mdi:help-circle-outline"
+            class="tooltip"
+          ></Icon>
         </UTooltip>
       </div>
       <div v-if="required" class="required">Bắt buộc</div>
@@ -13,7 +17,7 @@
       {{ desc }}
     </div>
     <div :class="{ error: error }" class="input-wrapper">
-      <div class="input">
+      <div class="input" :class="{ disabled: isDisabled }">
         <input
           :disabled="isDisabled"
           :maxlength="maxLength"
@@ -156,6 +160,10 @@ const isTextHidden = ref(true);
         &::placeholder {
           color: $color-gray-300;
         }
+      }
+
+      &.disabled {
+        border: 2px solid rgba($color-gray-300, 1);
       }
 
       &:hover:not(.disabled),

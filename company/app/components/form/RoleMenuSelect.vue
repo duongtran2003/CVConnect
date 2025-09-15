@@ -1,5 +1,5 @@
 <template>
-  <div class="role-menu-select">
+  <div class="role-menu-select" :class="{ disabled: props.isDisabled }">
     <div class="row header-row">
       <div class="header menu-cell">Chức năng</div>
       <div class="header checkbox-cell">Tất cả</div>
@@ -162,18 +162,23 @@
 <script setup lang="ts">
 type TProps = {
   menus: TSidebarItem[];
+  initialPermMap?: any;
+  isDisabled?: boolean;
 };
 
-const props = defineProps<TProps>();
+const props = withDefaults(defineProps<TProps>(), {
+  initialPermMap: {},
+  isDisabled: false,
+});
 const emit = defineEmits<{
   (e: "permChange", payload: any): void;
 }>();
 
-onBeforeMount(() => {
-  console.log(props);
-});
-
 const permValue = ref<any>({});
+
+onBeforeMount(() => {
+  console.log("perm map", props.initialPermMap);
+});
 
 const getCheckboxValue = computed(() => {
   const resolveValue = (
@@ -224,6 +229,9 @@ const handleCheckbox = (
   perm: TPermission | "ALL",
   value: boolean | string,
 ) => {
+  if (props.isDisabled) {
+    return;
+  }
   if (perm === "ALL") {
     const perms: TPermission[] = ["VIEW", "ADD", "UPDATE", "DELETE", "EXPORT"];
     for (const p of perms) {
@@ -250,7 +258,6 @@ const handleCheckboxChange = (
   value: boolean | string,
 ) => {
   if (!permValue.value[id]) {
-
     permValue.value[id] = {
       VIEW: false,
       ADD: false,
@@ -264,6 +271,19 @@ const handleCheckboxChange = (
   console.log(permValue.value);
   emit("permChange", permValue.value);
 };
+
+watch(
+  () => props.initialPermMap,
+  (newVal) => {
+    if (!newVal) {
+      permValue.value = {};
+    } else {
+      permValue.value = newVal;
+    }
+    console.log("watcher", newVal);
+  },
+  { immediate: true },
+);
 </script>
 <style lang="scss" scoped>
 .role-menu-select {
@@ -328,6 +348,14 @@ const handleCheckboxChange = (
     justify-content: center;
     :deep(button) {
       cursor: pointer;
+    }
+  }
+
+  &.disabled {
+    .checkbox-cell {
+      :deep(button) {
+        cursor: default;
+      }
     }
   }
 

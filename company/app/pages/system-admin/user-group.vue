@@ -1,5 +1,21 @@
 <template>
   <div class="wrapper">
+    <UModal
+      :open="isEditViewOpen"
+      title="Thông tin nhóm người dùng"
+      :ui="{ content: 'w-[840px] max-w-[840px]' }"
+      @update:open="handleEditViewOpenUpdate"
+      @after:leave="clearViewEditId"
+    >
+      <template #body>
+        <FormEditUserGroup
+          :id="editViewId || -1"
+          :initial-mode="editViewInitialMode"
+          :allow-edit="editViewAllowEdit"
+          @close-modal="closeEditViewModal"
+        />
+      </template>
+    </UModal>
     <div class="user-group-content">
       <div class="title">Quản lí nhóm người dùng</div>
       <div class="table-top">
@@ -69,6 +85,7 @@
           @selection-update="handleSelectionsUpdate"
           @delete="handleTableActionClick($event, 'delete')"
           @edit="handleTableActionClick($event, 'edit')"
+          @view="handleTableActionClick($event, 'view')"
           @sort="handleSort"
           @filter="handleFilter"
         />
@@ -117,6 +134,10 @@ const route = useRoute();
 const router = useRouter();
 const isCreateModalOpen = ref<boolean>(false);
 const isDeleteModalOpen = ref<boolean>(false);
+const isEditViewOpen = ref<boolean>(false);
+const editViewId = ref<number | null>(null);
+const editViewInitialMode = ref<any>(null);
+const editViewAllowEdit = ref<boolean>(false);
 const isFetchingData = ref<boolean>(false);
 const fetchRoleController = ref<AbortController | null>();
 const memberTypes = ref<any>([]);
@@ -226,9 +247,21 @@ const clearDeleteList = () => {
   deleteList.value = [];
 };
 
+const clearViewEditId = () => {
+  editViewId.value = null;
+  editViewInitialMode.value = null;
+  editViewAllowEdit.value = false;
+};
+
 const handleDeleteModalOpenUpdate = (event: boolean) => {
   if (!event) {
     isDeleteModalOpen.value = false;
+  }
+};
+
+const handleEditViewOpenUpdate = (event: boolean) => {
+  if (!event) {
+    isEditViewOpen.value = false;
   }
 };
 
@@ -238,10 +271,6 @@ const handleDelete = async () => {
   isDeleting.value = false;
   if (isSuccess) {
     handleDeleteModalOpenUpdate(false);
-    toast.add({
-      title: "Xóa thành công",
-      color: "success",
-    });
     fetchData();
   }
 };
@@ -253,6 +282,10 @@ const handleModalSubmit = () => {
 const closeModal = () => {
   isCreateModalOpen.value = false;
 };
+
+const closeEditViewModal = () => {
+  isEditViewOpen.value = false;
+}
 
 const deleteListNames = computed(() => {
   return tableData.value
@@ -352,6 +385,16 @@ const handlePageIndexChange = (e: any) => {
 const handleTableActionClick = (id: number, action: TTableAction) => {
   if (action === "delete") {
     handleDeleteClick([id]);
+  }
+  if (action === "view") {
+    editViewId.value = id;
+    editViewInitialMode.value = "view";
+    if (allowActions.value.includes("UPDATE")) {
+      editViewAllowEdit.value = true;
+    } else {
+      editViewAllowEdit.value = false;
+    }
+    isEditViewOpen.value = true;
   }
 };
 
