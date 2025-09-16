@@ -365,7 +365,9 @@ const handleActionClick = (row: any, action: TTableAction) => {
   // border: 1px solid $color-gray-300;
   border-radius: 4px;
   position: relative;
-
+  display: flex;
+  flex: 1;
+  max-height: fit-content;
 
   .spinner {
     position: absolute;
@@ -386,8 +388,10 @@ const handleActionClick = (row: any, action: TTableAction) => {
   }
 
   .data-table {
-    max-height: 520px;
+    flex: 1;
     max-width: 100%;
+    min-height: 0;
+    overflow: auto;
     @include custom-scrollbar;
 
     :deep(table) {

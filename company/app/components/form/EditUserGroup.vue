@@ -78,7 +78,6 @@
           />
           <AppButton
             v-if="props.allowEdit"
-            :is-disabled="!isFormValid"
             :text="'Chỉnh sửa'"
             class="submit-button"
             @click="handleSwitchMode('edit')"
@@ -127,6 +126,7 @@ const props = withDefaults(defineProps<TProps>(), {
 });
 
 const currentMode = ref<TMode>("view");
+const didUpdate = ref<boolean>(false);
 
 const formInput = ref<TCreateForm>({
   code: "",
@@ -178,7 +178,8 @@ const userGroupDetail = ref<any>(null);
 const permMap = ref<any>({});
 const isLoading = ref<boolean>(false);
 
-const { getMemberTypes, createUserGroup, getUserGroupDetail } = useRoleApi();
+const { getMemberTypes, createUserGroup, getUserGroupDetail, updateUserGroup } =
+  useRoleApi();
 const { getAllMenus } = useMenuApi();
 
 const emit = defineEmits<{
@@ -186,8 +187,7 @@ const emit = defineEmits<{
   (e: "submit"): void;
 }>();
 
-onBeforeMount(async () => {
-  currentMode.value = props.initialMode;
+const populateData = async () => {
   isLoading.value = true;
   const [detailRes, memberTypesRes, menusRes] = await Promise.all([
     getUserGroupDetail(props.id),
@@ -197,8 +197,31 @@ onBeforeMount(async () => {
   memberTypes.value = memberTypesRes.data;
   menus.value = menusRes.data;
   userGroupDetail.value = detailRes.data;
+  permMap.value = cloneDeep(mapPerm(userGroupDetail.value.roleMenus));
+  isLoading.value = false;
+};
+
+onBeforeMount(async () => {
+  currentMode.value = props.initialMode;
+  await populateData();
+  if (props.initialMode == "edit") {
+    formInput.value = {
+      code: userGroupDetail.value.code,
+      name: userGroupDetail.value.name,
+      memberType: userGroupDetail.value.memberTypeDto.code,
+    };
+    formError.value = {
+      code: "",
+      name: "",
+      memberType: "",
+    };
+    permValue.value = cloneDeep(mapPerm(userGroupDetail.value.roleMenus));
+  }
+});
+
+const mapPerm = (roleMenus: any) => {
   const permissionsMap: Record<number, any> = {};
-  for (const roleMenu of userGroupDetail.value.roleMenus) {
+  for (const roleMenu of roleMenus) {
     if (roleMenu.permissions.length) {
       const id = roleMenu.menuId;
       const perms = roleMenu.permissions;
@@ -211,10 +234,8 @@ onBeforeMount(async () => {
       };
     }
   }
-  permMap.value = cloneDeep(permissionsMap);
-  console.log('outside', permMap.value);
-  isLoading.value = false;
-});
+  return permissionsMap;
+};
 
 const handlePermChange = (event: any) => {
   permValue.value = event;
@@ -227,6 +248,36 @@ const handleCancelClick = (event: any) => {
 
 const handleSwitchMode = (mode: TMode) => {
   currentMode.value = mode;
+  if (mode == "edit") {
+    console.log("switch to edit");
+    formInput.value = {
+      code: userGroupDetail.value.code,
+      name: userGroupDetail.value.name,
+      memberType: userGroupDetail.value.memberTypeDto.code,
+    };
+    formError.value = {
+      code: "",
+      name: "",
+      memberType: "",
+    };
+    permValue.value = cloneDeep(mapPerm(userGroupDetail.value.roleMenus));
+  } else {
+    if (didUpdate.value) {
+      populateData();
+      didUpdate.value = false;
+    }
+    formInput.value = {
+      code: "",
+      name: "",
+      memberType: "",
+    };
+    formError.value = {
+      code: "",
+      name: "",
+      memberType: "",
+    };
+    permMap.value = cloneDeep(mapPerm(userGroupDetail.value.roleMenus));
+  }
 };
 
 const handleSubmit = async () => {
@@ -292,11 +343,17 @@ const handleSubmit = async () => {
   console.log(payload);
 
   isSubmiting.value = true;
-  const res = await createUserGroup(payload);
+  const res = await updateUserGroup(props.id, payload);
   if (res) {
     emit("submit");
   }
   isSubmiting.value = false;
+  didUpdate.value = true;
+  if (props.initialMode == "view") {
+    currentMode.value = "view";
+  } else {
+    emit("closeModal");
+  }
 };
 
 const handleMemberTypeChange = (value: any) => {

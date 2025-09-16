@@ -79,6 +79,26 @@ export const useRoleApi = () => {
     }
   };
 
+  const updateUserGroup = async (id:number, payload: any) => {
+    try {
+      const res = await $axios.put(`/_api/user/role/update/${id}`, payload);
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
   const deleteUserGroup = async (payload: any) => {
     try {
       const res = await $axios.delete(`/_api/user/role/delete`, {
@@ -109,5 +129,6 @@ export const useRoleApi = () => {
     createUserGroup,
     deleteUserGroup,
     getUserGroupDetail,
+    updateUserGroup,
   };
 };

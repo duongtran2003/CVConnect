@@ -2,7 +2,7 @@
   <div class="wrapper">
     <UModal
       :open="isEditViewOpen"
-      title="Thông tin nhóm người dùng"
+      :title="editViewModalTitle"
       :ui="{ content: 'w-[840px] max-w-[840px]' }"
       @update:open="handleEditViewOpenUpdate"
       @after:leave="clearViewEditId"
@@ -13,6 +13,7 @@
           :initial-mode="editViewInitialMode"
           :allow-edit="editViewAllowEdit"
           @close-modal="closeEditViewModal"
+          @submit="handleModalSubmit"
         />
       </template>
     </UModal>
@@ -69,27 +70,25 @@
           </template>
         </UModal>
       </div>
-      <div class="table-section">
-        <AppTableDataTable
-          :table-data="tableData"
-          :columns="tableColumns"
-          :allow-actions="allowActions"
-          :show-checkbox="true"
-          :show-actions="true"
-          :is-loading="isFetchingData"
-          :selection-list="selectedRows"
-          :sort="sort"
-          :select-options="memberTypeSelectOptions"
-          :filter="filter"
-          :is-table-empty="isNoData"
-          @selection-update="handleSelectionsUpdate"
-          @delete="handleTableActionClick($event, 'delete')"
-          @edit="handleTableActionClick($event, 'edit')"
-          @view="handleTableActionClick($event, 'view')"
-          @sort="handleSort"
-          @filter="handleFilter"
-        />
-      </div>
+      <AppTableDataTable
+        :table-data="tableData"
+        :columns="tableColumns"
+        :allow-actions="allowActions"
+        :show-checkbox="true"
+        :show-actions="true"
+        :is-loading="isFetchingData"
+        :selection-list="selectedRows"
+        :sort="sort"
+        :select-options="memberTypeSelectOptions"
+        :filter="filter"
+        :is-table-empty="isNoData"
+        @selection-update="handleSelectionsUpdate"
+        @delete="handleTableActionClick($event, 'delete')"
+        @edit="handleTableActionClick($event, 'edit')"
+        @view="handleTableActionClick($event, 'view')"
+        @sort="handleSort"
+        @filter="handleFilter"
+      />
       <div class="top-section">
         <UPagination
           :show-edges="true"
@@ -151,6 +150,17 @@ const allowActions = computed(() => {
   const menuItem = getMenuItem(url);
   const permissions = Array.from(menuItem?.permissions || []);
   return permissions;
+});
+const editViewModalTitle = computed(() => {
+  if (editViewInitialMode.value == "view") {
+    return "Thông tin nhóm người dùng";
+  }
+
+  if (editViewInitialMode.value == "edit") {
+    return "Chỉnh sửa nhóm người dùng";
+  }
+
+  return "";
 });
 
 const { getMenuItem } = useSidebarStore();
@@ -285,7 +295,7 @@ const closeModal = () => {
 
 const closeEditViewModal = () => {
   isEditViewOpen.value = false;
-}
+};
 
 const deleteListNames = computed(() => {
   return tableData.value
@@ -389,6 +399,16 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
   if (action === "view") {
     editViewId.value = id;
     editViewInitialMode.value = "view";
+    if (allowActions.value.includes("UPDATE")) {
+      editViewAllowEdit.value = true;
+    } else {
+      editViewAllowEdit.value = false;
+    }
+    isEditViewOpen.value = true;
+  }
+  if (action === "edit") {
+    editViewId.value = id;
+    editViewInitialMode.value = "edit";
     if (allowActions.value.includes("UPDATE")) {
       editViewAllowEdit.value = true;
     } else {

@@ -1,8 +1,8 @@
 <template>
+  <div v-if="isLoading" class="loading-overlay">
+    <AppSpinnerHalfCircle class="spinner" />
+  </div>
   <NuxtLayout>
-    <div v-if="isLoading" class="loading-overlay">
-      <AppSpinnerHalfCircle class="spinner" />
-    </div>
     <NuxtLoadingIndicator color="#38b2ac" />
     <UApp :toaster="toasterConfig">
       <NuxtPage />
