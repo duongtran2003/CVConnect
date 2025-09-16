@@ -531,8 +531,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
       // Header border
       thead {
         tr:last-child {
-          background-color: $color-gray-300;
-          height: 1px;
+          height: 0px;
         }
       }
 
@@ -552,11 +551,11 @@ const handleActionClick = (row: any, action: TTableAction) => {
             background-color: $color-gray-50;
           }
         }
-        &.divide-y {
-          tr:not(:last-child) {
-            border-bottom: 1px solid $color-gray-300;
-          }
-        }
+        // &.divide-y {
+        //   tr:not(:last-child) {
+        //     border-bottom: 1px solid $color-gray-300;
+        //   }
+        // }
       }
 
       tr {
@@ -571,7 +570,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
           &::before {
             content: "";
             position: absolute;
-            bottom: -1px;
+            bottom: 0px;
             left: 0px;
             width: 100%;
             height: 1px;

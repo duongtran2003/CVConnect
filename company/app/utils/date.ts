@@ -13,6 +13,9 @@ export function formatDateTime(
   format: string,
   timezone?: string,
 ): string {
+  if (!input) {
+    return "";
+  }
   let m: moment.Moment;
 
   if (typeof input === "number") {
