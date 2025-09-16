@@ -11,9 +11,10 @@
         <FormEditUserGroup
           :id="editViewId || -1"
           :initial-mode="editViewInitialMode"
-          :allow-edit="editViewAllowEdit"
+          :allow-edit="canEdit"
           @close-modal="closeEditViewModal"
           @submit="handleModalSubmit"
+          @mode-switch="handleSwitchEditViewMode"
         />
       </template>
     </UModal>
@@ -136,7 +137,7 @@ const isDeleteModalOpen = ref<boolean>(false);
 const isEditViewOpen = ref<boolean>(false);
 const editViewId = ref<number | null>(null);
 const editViewInitialMode = ref<any>(null);
-const editViewAllowEdit = ref<boolean>(false);
+const editViewMode = ref<any>(null);
 const isFetchingData = ref<boolean>(false);
 const fetchRoleController = ref<AbortController | null>();
 const memberTypes = ref<any>([]);
@@ -151,12 +152,22 @@ const allowActions = computed(() => {
   const permissions = Array.from(menuItem?.permissions || []);
   return permissions;
 });
+
+const canEdit = computed(() => {
+  if (allowActions.value.includes("UPDATE")) {
+    return true
+  } else {
+    return false
+  }
+});
+
 const editViewModalTitle = computed(() => {
-  if (editViewInitialMode.value == "view") {
+  console.log("computed editviewmodal", editViewMode.value);
+  if (editViewMode.value == "view") {
     return "Thông tin nhóm người dùng";
   }
 
-  if (editViewInitialMode.value == "edit") {
+  if (editViewMode.value == "edit") {
     return "Chỉnh sửa nhóm người dùng";
   }
 
@@ -168,13 +179,30 @@ const { getRoles, getMemberTypes, deleteUserGroup } = useRoleApi();
 
 // NOTE: From query string to filter
 const convertQuery = () => {
-  const query = route.query;
+  const _query = route.query;
   let restoredFilter: Record<string, any> = {};
+
+  const { mode, targetId, ...query } = _query;
 
   restoredFilter = {
     ...restoredFilter,
     ...query,
   };
+
+  // NOTE: Reopening modal
+  if (mode && targetId) {
+    restoredFilter = {
+      ...restoredFilter,
+      mode,
+      targetId,
+    };
+    isEditViewOpen.value = true;
+    editViewInitialMode.value = mode;
+    editViewMode.value = mode;
+    editViewId.value = +targetId;
+  }
+
+  console.log("query in conver query", query);
 
   const createdAt: (Date | null)[] = [];
   if (query.createdAtStart) {
@@ -248,6 +276,10 @@ onBeforeMount(async () => {
   }));
 });
 
+const handleSwitchEditViewMode = (mode: any) => {
+  editViewMode.value = mode;
+};
+
 const handleDeleteClick = (items: any[]) => {
   deleteList.value = items;
   isDeleteModalOpen.value = true;
@@ -260,7 +292,7 @@ const clearDeleteList = () => {
 const clearViewEditId = () => {
   editViewId.value = null;
   editViewInitialMode.value = null;
-  editViewAllowEdit.value = false;
+  editViewMode.value = null;
 };
 
 const handleDeleteModalOpenUpdate = (event: boolean) => {
@@ -399,21 +431,13 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
   if (action === "view") {
     editViewId.value = id;
     editViewInitialMode.value = "view";
-    if (allowActions.value.includes("UPDATE")) {
-      editViewAllowEdit.value = true;
-    } else {
-      editViewAllowEdit.value = false;
-    }
+    editViewMode.value = "view";
     isEditViewOpen.value = true;
   }
   if (action === "edit") {
     editViewId.value = id;
     editViewInitialMode.value = "edit";
-    if (allowActions.value.includes("UPDATE")) {
-      editViewAllowEdit.value = true;
-    } else {
-      editViewAllowEdit.value = false;
-    }
+    editViewMode.value = "edit";
     isEditViewOpen.value = true;
   }
 };
@@ -481,8 +505,25 @@ watch(filter, (newVal) => {
   });
   debouncedFetchData();
 });
-</script>
 
+watch([editViewMode, editViewId], ([newMode, newId]) => {
+  const query = { ...route.query };
+
+  if (newMode == null || newMode === "") {
+    delete query.mode;
+  } else {
+    query.mode = String(newMode);
+  }
+
+  if (newId == null || newId === -1) {
+    delete query.targetId;
+  } else {
+    query.targetId = String(newId);
+  }
+
+  router.replace({ query });
+});
+</script>
 <style lang="scss" scoped>
 .wrapper {
   overflow: hidden;

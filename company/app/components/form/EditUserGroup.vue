@@ -185,6 +185,7 @@ const { getAllMenus } = useMenuApi();
 const emit = defineEmits<{
   (e: "closeModal"): void;
   (e: "submit"): void;
+  (e: "modeSwitch", mode: TMode): void;
 }>();
 
 const populateData = async () => {
@@ -248,6 +249,7 @@ const handleCancelClick = (event: any) => {
 
 const handleSwitchMode = (mode: TMode) => {
   currentMode.value = mode;
+  emit('modeSwitch', mode)
   if (mode == "edit") {
     console.log("switch to edit");
     formInput.value = {
