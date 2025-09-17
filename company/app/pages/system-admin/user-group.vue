@@ -531,6 +531,7 @@ watch([editViewMode, editViewId], ([newMode, newId]) => {
   flex: 1;
   border-radius: 8px;
   margin-top: 8px;
+  @include box-shadow;
 }
 .user-group-content {
   background-color: white;
