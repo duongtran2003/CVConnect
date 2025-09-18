@@ -15,6 +15,7 @@ export default defineNuxtPlugin(() => {
   const authStore = useAuthStore();
   const { token } = storeToRefs(authStore);
   const { logout } = useAuth();
+  const route = useRoute();
 
   const refreshAuthLogic = (failedRequest: any) =>
     axios
@@ -32,13 +33,11 @@ export default defineNuxtPlugin(() => {
       .catch((err) => {
         // const urlParts = window.location.href.split("/");
         // if (urlParts[urlParts.length - 1] !== "login") {
-        //   clearToken();
-        //   clearUser();
         // }
+        console.log("logout when refresh fail", route.fullPath);
         clearToken();
         clearUser();
-        console.log("logout when refresh fail");
-        logout();
+        // logout();
       });
 
   createAuthRefreshInterceptor(axiosInstance, refreshAuthLogic, {
