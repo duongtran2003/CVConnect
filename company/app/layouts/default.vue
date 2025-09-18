@@ -25,17 +25,27 @@ const { handleRoleValidation, checkPermission } = useDefaultRole();
 
 watch(token, (newVal) => {
   if (newVal === null) {
-    router.push({ name: "auth-login" });
+    router.push({
+      name: "auth-login",
+      query: {
+        redirect: route.fullPath,
+      },
+    });
   }
 });
 
 watch(currentRole, async (newRole) => {
-    await checkPermission(permittedRole);
+  await checkPermission(permittedRole);
 });
 
 onBeforeMount(async () => {
   if (!token.value) {
-    router.push({ name: "auth-login" });
+    router.push({
+      name: "auth-login",
+      query: {
+        redirect: route.fullPath,
+      },
+    });
     return;
   }
   setLoading(true);

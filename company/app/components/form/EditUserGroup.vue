@@ -62,6 +62,7 @@
         />
       </div>
       <FormRoleMenuSelect
+        v-if="formInput.memberType && menus"
         :menus="menus"
         :is-disabled="currentMode == 'view'"
         :initial-perm-map="permMap"
@@ -190,14 +191,14 @@ const emit = defineEmits<{
 
 const populateData = async () => {
   isLoading.value = true;
-  const [detailRes, memberTypesRes, menusRes] = await Promise.all([
+  const [detailRes, memberTypesRes] = await Promise.all([
     getUserGroupDetail(props.id),
     getMemberTypes(),
-    getAllMenus(),
   ]);
   memberTypes.value = memberTypesRes.data;
-  menus.value = menusRes.data;
   userGroupDetail.value = detailRes.data;
+  const menusRes = await getAllMenus(userGroupDetail.value.memberTypeDto.code);
+  menus.value = menusRes.data;
   permMap.value = cloneDeep(mapPerm(userGroupDetail.value.roleMenus));
   isLoading.value = false;
 };
@@ -249,7 +250,7 @@ const handleCancelClick = (event: any) => {
 
 const handleSwitchMode = (mode: TMode) => {
   currentMode.value = mode;
-  emit('modeSwitch', mode)
+  emit("modeSwitch", mode);
   if (mode == "edit") {
     console.log("switch to edit");
     formInput.value = {
@@ -406,6 +407,18 @@ const isFormValid = computed(() => {
   }
   return true;
 });
+
+watch(
+  () => formInput.value.memberType,
+  async (newVal, oldVal) => {
+    console.log(newVal, oldVal);
+    if (newVal && newVal != oldVal) {
+      const menusRes = await getAllMenus(newVal);
+      menus.value = menusRes.data;
+    }
+  },
+  { deep: true },
+);
 </script>
 <style lang="scss" scoped>
 .edit-user-group {

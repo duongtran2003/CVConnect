@@ -6,7 +6,7 @@
           <div class="logo">
             <img src="/logo-horizontal.svg" />
           </div>
-          <div class="welcome-message">Đăng ký</div>
+          <div class="welcome-message">Đăng ký tài khoản ứng viên</div>
           <div class="welcome-desc">
             Đăng ký ngay để kết nối nhiều cơ hội hơn
           </div>
@@ -478,7 +478,7 @@ watch(formInput.value, (val) => {
 
         .forgot-password {
           color: $text-light;
-          margin-top: 4px;
+          margin-top: 8px;
           font-size: 13px;
         }
       }

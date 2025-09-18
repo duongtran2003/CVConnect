@@ -60,6 +60,10 @@
             Bạn chưa có tài khoản?
             <NuxtLink to="/auth/register" class="link">Đăng ký ngay</NuxtLink>
           </div>
+          <div class="create-account">
+            <NuxtLink to="/auth/org-register" class="link">Đăng ký</NuxtLink>
+            với tư cách nhà tuyển dụng
+          </div>
         </div>
       </div>
       <NuxtLink
@@ -174,7 +178,7 @@ const handleLoginClick = async () => {
     isLoading.value.loginButton = true;
     const isSuccess = await login(loginCredentials);
     if (isSuccess) {
-      handleRoleValidation();
+      handleRoleValidation(route.query.redirect as string ?? "");
     }
     isLoading.value.loginButton = false;
   }

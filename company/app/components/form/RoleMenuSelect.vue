@@ -291,10 +291,12 @@ watch(
   margin-top: 18px;
   max-height: 65%;
   overflow-y: auto;
-  min-height: 256px;
   position: relative;
   border-radius: 6px;
+  max-height: calc(60vh - 188px);
   border: 1px solid $color-gray-300;
+  min-height: 0;
+  flex: 1;
   .body {
     display: flex;
     flex-direction: column;
@@ -318,6 +320,7 @@ watch(
       position: sticky;
       z-index: 2;
       top: 0px;
+      border-bottom: 1px solid $color-gray-300;
     }
 
     .header {

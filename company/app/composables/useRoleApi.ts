@@ -48,9 +48,14 @@ export const useRoleApi = () => {
       const res = await $axios.get(`/_api/user/role/member-type`);
       return res.data;
     } catch (err: any) {
-      if (err.response && err.response.data) {
+      if (err.response && err.response.data.message) {
         toast.add({
           title: err.response.data.message,
+          color: "error",
+        });
+      } else {
+        toast.add({
+          title: "Có lỗi xảy ra",
           color: "error",
         });
       }
@@ -79,7 +84,7 @@ export const useRoleApi = () => {
     }
   };
 
-  const updateUserGroup = async (id:number, payload: any) => {
+  const updateUserGroup = async (id: number, payload: any) => {
     try {
       const res = await $axios.put(`/_api/user/role/update/${id}`, payload);
       toast.add({

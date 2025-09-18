@@ -48,6 +48,8 @@
         />
       </div>
       <FormRoleMenuSelect
+        v-if="formInput.memberType && menus"
+        class="menu-select"
         :menus="menus"
         @perm-change="handlePermChange($event)"
       />
@@ -133,9 +135,7 @@ const emit = defineEmits<{
 
 onBeforeMount(async () => {
   const res = await getMemberTypes();
-  const menusRes = await getAllMenus();
   memberTypes.value = res.data;
-  menus.value = menusRes.data;
 });
 
 const handlePermChange = (event: any) => {
@@ -267,15 +267,31 @@ const isFormValid = computed(() => {
   }
   return true;
 });
+watch(
+  () => formInput.value.memberType,
+  async (newVal, oldVal) => {
+    console.log(newVal, oldVal);
+    if (newVal && newVal != oldVal) {
+      const menusRes = await getAllMenus(newVal);
+      menus.value = menusRes.data;
+    }
+  },
+  { deep: true },
+);
 </script>
 <style lang="scss" scoped>
 .create-user-group {
+  @include custom-scrollbar;
+  max-height: 100%;
   .form-block {
+    display: flex;
+    flex-direction: column;
     .line {
       display: flex;
       flex-direction: row;
       gap: 8px;
       justify-content: space-between;
+      flex: 1;
     }
     .text-input {
       width: 380px;

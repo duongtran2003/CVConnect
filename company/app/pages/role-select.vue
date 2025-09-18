@@ -210,6 +210,7 @@ const handleButtonClick = () => {
       .next-btn {
         background-color: $color-primary-500;
         width: 100%;
+        color: $text-dark;
 
         &.disabled {
           background-color: rgba($color-gray-300, 1);
