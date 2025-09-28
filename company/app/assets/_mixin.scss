@@ -25,10 +25,10 @@ $breakpoint-xxl: 1400px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: $color-gray-300;
+    background: $color-gray-500;
 
     &:hover {
-      background: $color-gray-400;
+      background: $color-gray-600;
     }
   }
 }

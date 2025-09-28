@@ -47,6 +47,7 @@ const handleClick = (event) => {
   justify-content: center;
   align-items: center;
   transition: filter 200ms;
+  outline: none;
 
   .loading-icon {
     display: flex;

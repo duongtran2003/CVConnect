@@ -178,7 +178,8 @@ const handleLoginClick = async () => {
     isLoading.value.loginButton = true;
     const isSuccess = await login(loginCredentials);
     if (isSuccess) {
-      handleRoleValidation(route.query.redirect as string ?? "");
+      // handleRoleValidation(route.query.redirect as string ?? "");
+      handleRoleValidation();
     }
     isLoading.value.loginButton = false;
   }

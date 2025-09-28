@@ -36,7 +36,9 @@
         />
       </div>
     </div>
-    <div class="error-message">{{ props.showError ? error : "" }}</div>
+    <div v-if="!props.slimError" class="error-message">
+      {{ props.showError ? error : "" }}
+    </div>
   </label>
 </template>
 <script setup lang="ts">
@@ -52,6 +54,7 @@ export type TInputTextProps = {
   placeholder?: string;
   showError?: boolean;
   tooltip?: string;
+  slimError?: boolean;
 };
 
 const emit = defineEmits<{
@@ -68,6 +71,7 @@ const props = withDefaults(defineProps<TInputTextProps>(), {
   showError: true,
   tooltip: "",
   placeholder: "",
+  slimError: false,
 });
 
 const { label, desc, required, value, isDisabled, isSecured } = toRefs(props);

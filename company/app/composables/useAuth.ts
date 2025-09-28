@@ -74,6 +74,32 @@ export const useAuth = () => {
     }
   };
 
+  const registerOrgAdmin = async (credentials: FormData) => {
+    try {
+      const res = await $axios.post(
+        "/_api/user/auth/register-org-admin",
+        credentials,
+        {
+          skipAuth: true,
+        },
+      );
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
   const requestResendVerifyEmail = async (identifier: string) => {
     try {
       const res = await $axios.get(
@@ -224,5 +250,6 @@ export const useAuth = () => {
     verifyEmail,
     requestResetPassword,
     resetPassword,
+    registerOrgAdmin,
   };
 };

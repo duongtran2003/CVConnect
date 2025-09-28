@@ -1,8 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 @import "@nuxt/ui";
-@import "tailwindcss";
-@import "@nuxt/ui";
+@plugin "@tailwindcss/typography";
 
 @theme static {
   --color-red-50: #f9e6e8;
