@@ -8,7 +8,7 @@
       @after:leave="clearViewEditId"
     >
       <template #body>
-        <FormEditUserGroup
+        <FormEditLevel
           :id="editViewId || -1"
           :initial-mode="editViewInitialMode"
           :allow-edit="canEdit"
@@ -18,8 +18,8 @@
         />
       </template>
     </UModal>
-    <div class="user-group-content">
-      <div class="title">Quản lí nhóm người dùng</div>
+    <div class="level-content">
+      <div class="title">Danh mục cấp bậc</div>
       <div class="table-top">
         <AppButton
           :text="'Xóa bỏ'"
@@ -34,8 +34,8 @@
 
         <UModal
           :open="isDeleteModalOpen"
-          title="Xóa nhóm người dùng"
-          :ui="{ content: 'w-[840px] max-w-[840px]' }"
+          title="Xóa cấp bậc"
+          :ui="{ content: 'w-[600px] max-w-[600px]' }"
           @update:open="handleDeleteModalOpenUpdate"
           @after:leave="clearDeleteList"
         >
@@ -55,8 +55,8 @@
 
         <UModal
           v-model:open="isCreateModalOpen"
-          title="Thêm mới nhóm người dùng"
-          :ui="{ content: 'w-[840px] max-w-[840px] max-h-[100vh]' }"
+          title="Thêm mới cấp bậc"
+          :ui="{ content: 'w-[840px] max-w-[840px]' }"
         >
           <AppButton :text="'Thêm mới'" class="add-button">
             <template #icon>
@@ -64,7 +64,7 @@
             </template>
           </AppButton>
           <template #body>
-            <FormCreateUserGroup
+            <FormCreateLevel
               @close-modal="closeModal"
               @submit="handleModalSubmit"
             />
@@ -80,7 +80,6 @@
         :is-loading="isFetchingData"
         :selection-list="selectedRows"
         :sort="sort"
-        :select-options="memberTypeSelectOptions"
         :filter="filter"
         :is-table-empty="isNoData"
         @selection-update="handleSelectionsUpdate"
@@ -116,9 +115,9 @@
 <script setup lang="ts">
 import type { TTableAction } from "~/components/app/table/data-table.vue";
 import {
-  userGroupTableHeaders,
+  levelTableHeaders,
   pageSizeOptions,
-} from "~/const/views/system-admin/user-group";
+} from "~/const/views/system-admin/level";
 import type { TSort } from "~/types/common";
 import { cloneDeep, debounce } from "lodash";
 
@@ -126,7 +125,7 @@ definePageMeta({
   layout: "system-admin",
 });
 useHead({
-  title: "Cài đặt nhóm người dùng",
+  title: "Danh mục cấp bậc",
 });
 
 const toast = useToast();
@@ -139,8 +138,7 @@ const editViewId = ref<number | null>(null);
 const editViewInitialMode = ref<any>(null);
 const editViewMode = ref<any>(null);
 const isFetchingData = ref<boolean>(false);
-const fetchRoleController = ref<AbortController | null>();
-const memberTypes = ref<any>([]);
+const fetchLevelController = ref<AbortController | null>();
 const filter = ref<Record<string, any>>({});
 const totalItems = ref<number>(0);
 const isNoData = ref<boolean>(false);
@@ -164,18 +162,19 @@ const canEdit = computed(() => {
 const editViewModalTitle = computed(() => {
   console.log("computed editviewmodal", editViewMode.value);
   if (editViewMode.value == "view") {
-    return "Thông tin nhóm người dùng";
+    return "Thông tin cấp bậc";
   }
 
   if (editViewMode.value == "edit") {
-    return "Chỉnh sửa nhóm người dùng";
+    return "Chỉnh sửa cấp bậc";
   }
 
   return "";
 });
 
 const { getMenuItem } = useSidebarStore();
-const { getRoles, getMemberTypes, deleteUserGroup } = useRoleApi();
+// TODO: REPLACE THIS APIS
+const { getLevels, deleteLevel } = useLevelApi();
 
 // NOTE: From query string to filter
 const convertQuery = () => {
@@ -201,8 +200,6 @@ const convertQuery = () => {
     editViewMode.value = mode;
     editViewId.value = +targetId;
   }
-
-  console.log("query in conver query", query);
 
   const createdAt: (Date | null)[] = [];
   if (query.createdAtStart) {
@@ -246,13 +243,6 @@ const convertQuery = () => {
     restoredFilter.updatedAt = updatedAt;
   }
 
-  if (query.memberType) {
-    const values = (query.memberType as string).split(",");
-    restoredFilter.memberType = values
-      .map((val) => memberTypes.value.find((opt: any) => opt.value === val))
-      .filter(Boolean);
-  }
-
   delete restoredFilter.createdAtStart;
   delete restoredFilter.createdAtEnd;
   delete restoredFilter.updatedAtStart;
@@ -262,18 +252,7 @@ const convertQuery = () => {
 };
 
 onBeforeMount(async () => {
-  const res = await getMemberTypes();
-  memberTypes.value = res.data.map((memberType: any) => ({
-    label: memberType.name,
-    value: memberType.code,
-  }));
-
   filter.value = convertQuery();
-
-  memberTypes.value = res.data.map((memberType: any) => ({
-    label: memberType.name,
-    value: memberType.code,
-  }));
 });
 
 const handleSwitchEditViewMode = (mode: any) => {
@@ -309,7 +288,8 @@ const handleEditViewOpenUpdate = (event: boolean) => {
 
 const handleDelete = async () => {
   isDeleting.value = true;
-  const isSuccess = await deleteUserGroup({ ids: deleteList.value });
+  // TODO: REPLACE THIS API
+  const isSuccess = await deleteLevel({ ids: deleteList.value });
   isDeleting.value = false;
   if (isSuccess) {
     handleDeleteModalOpenUpdate(false);
@@ -346,7 +326,7 @@ const isDeleteAllDisabled = computed(() => {
       rowData.push(row);
     }
   }
-  return rowData.some((row) => !row.canDelete);
+  return rowData.some((row) => !row.isDefault);
 });
 const sort = computed(() => {
   return {
@@ -375,14 +355,14 @@ const handleFilter = (e: any) => {
 };
 
 const fetchData = async () => {
-  if (fetchRoleController.value) {
-    fetchRoleController.value.abort();
+  if (fetchLevelController.value) {
+    fetchLevelController.value.abort();
   }
 
-  fetchRoleController.value = new AbortController();
+  fetchLevelController.value = new AbortController();
   isFetchingData.value = true;
   const query = route.query;
-  const res = await getRoles(query, fetchRoleController.value);
+  const res = await getLevels(query, fetchLevelController.value);
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
@@ -399,7 +379,7 @@ const fetchData = async () => {
     entry.index = index + 1 + (pageIndex.value - 1) * pageSize.value;
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
-    entry.memberType = entry.memberTypeDto.memberType;
+    entry.canDelete = !entry.isDefault;
   }
   tableData.value = data;
 };
@@ -444,15 +424,10 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
 
 const tableData = ref([]);
 const tableColumns = computed(() => {
-  return userGroupTableHeaders;
+  return levelTableHeaders;
 });
 const pageSizeOpts = computed(() => {
   return pageSizeOptions;
-});
-const memberTypeSelectOptions = computed(() => {
-  return {
-    memberType: memberTypes.value,
-  };
 });
 
 // NOTE: From filter to query string
@@ -476,21 +451,10 @@ const normalizeFilter = (filter: any) => {
     if (startDate) normalizedFilter.updatedAtStart = toUtcDate(startDate);
     if (endDate) normalizedFilter.updatedAtEnd = toUtcDate(endDate);
   }
-  if (normalizedFilter.memberType && normalizedFilter.memberType.length) {
-    normalizedFilter.memberType = normalizedFilter.memberType.map(
-      (memberType: any) => memberType.value,
-    );
-  } else {
-    delete normalizedFilter.memberType;
-  }
 
   const queryForUrl: Record<string, any> = {
     ...normalizedFilter,
   };
-
-  if (Array.isArray(queryForUrl.memberType)) {
-    queryForUrl.memberType = queryForUrl.memberType.join(",");
-  }
 
   return queryForUrl;
 };
@@ -533,7 +497,7 @@ watch([editViewMode, editViewId], ([newMode, newId]) => {
   margin-top: 8px;
   @include box-shadow;
 }
-.user-group-content {
+.level-content {
   background-color: white;
   min-height: calc(100% - 48px - 8px);
   @include box-shadow;

@@ -49,9 +49,9 @@
             class="icon"
             title="Xóa"
             name="mdi:delete-outline"
-            :class="{ disabled: !row.original.canDelete }"
+            :class="{ disabled: !row.original[props.deleteConditionKey] }"
             @click="
-              row.original.canDelete
+              row.original[props.deleteConditionKey]
                 ? handleActionClick(row, 'delete')
                 : () => {}
             "
@@ -173,6 +173,7 @@ export type TDataTableProps = {
   filter?: Record<string, any> | null;
   selectOptions?: Record<string, { label: string; value: string }[]> | null;
   isTableEmpty?: boolean;
+  deleteConditionKey?: string;
 };
 
 export type TFilterType = "date" | "text" | "select";
@@ -187,6 +188,7 @@ const props = withDefaults(defineProps<TDataTableProps>(), {
   filter: null,
   selectOptions: null,
   isTableEmpty: false,
+  deleteConditionKey: "canDelete",
 });
 
 const havePermission = (permission: TPermission) => {

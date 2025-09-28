@@ -19,6 +19,7 @@ export const useAuth = () => {
   const authStore = useAuthStore();
   const { token } = storeToRefs(authStore);
   const toast = useToast();
+  const router = useRouter();
 
   const login = async (credentials: TLoginCredentials) => {
     try {
@@ -142,6 +143,7 @@ export const useAuth = () => {
   const logout = async () => {
     try {
       await $axios.post("/_api/user/auth/logout");
+      await router.push({ path: "/auth/login" });
       clearToken();
       clearUser();
     } catch (err) {

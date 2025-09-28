@@ -161,7 +161,7 @@ const hasChildActive = computed(() => hasActiveChild(props.item.children));
     border-radius: 8px;
     display: flex;
     flex-direction: row;
-    gap: 16px;
+    gap: 12px;
     align-items: center;
     justify-content: center;
     text-decoration: none;

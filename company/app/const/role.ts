@@ -19,6 +19,6 @@ export const DEFAULT_ROLE_VIEW: Record<TRole, string> = {
   SYSTEM_ADMIN: "/system-admin/report/candidate",
   CANDIDATE: "/dashboard",
   HR: "",
-  ORG_ADMIN: "",
+  ORG_ADMIN: "/org-admin/org-member",
   INTERVIEWER: "",
 };

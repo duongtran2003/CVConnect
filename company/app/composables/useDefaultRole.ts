@@ -5,9 +5,19 @@ export const useDefaultRole = () => {
   const { setLoading } = useLoadingStore();
   const router = useRouter();
   const { logout } = useAuth();
+  const route = useRoute();
 
   const handleRoleValidation = (redirect?: string) => {
     if (currentRole.value) {
+      if (route.name === "auth-login") {
+        const defaultRoute = getDefaultRoute(currentRole.value);
+
+        if (!redirect) {
+          router.push({ path: defaultRoute });
+        } else if (redirect !== defaultRoute) {
+          router.push(redirect);
+        }
+      }
       return;
     }
     const defaultRole = getDefaultRole();
@@ -34,6 +44,7 @@ export const useDefaultRole = () => {
           query: redirect ? { redirect: redirect } : undefined,
         });
       } else if (roles.value.length == 1) {
+        console.log("set role cho ne");
         setCurrentRole(roles.value[0]!);
       }
     }

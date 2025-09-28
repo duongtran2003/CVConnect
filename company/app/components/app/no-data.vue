@@ -1,6 +1,7 @@
 <template>
   <div class="no-data">
-    <Icon name="material-symbols-light:folder-limited-outline-rounded" class="icon" />
+    <!-- <Icon name="material-symbols-light:folder-limited-outline-rounded" class="icon" /> -->
+    <AppNoDataNew />
     <div class="text">{{ props.text }}</div>
   </div>
 </template>
@@ -28,6 +29,10 @@ const props = withDefaults(defineProps<TNoDataProps>(), {
   }
   .text {
     color: $color-gray-500;
+  }
+
+  :deep(svg) {
+    height: 84px;
   }
 }
 </style>

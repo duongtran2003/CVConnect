@@ -61,6 +61,7 @@
           <strong>${duration} giờ</strong>`
           "
         ></div>
+        <NuxtLink class="link" to="/auth/login">Đưa tôi trở về</NuxtLink>
       </template>
     </div>
     <div class="footer-wrapper">
@@ -100,7 +101,7 @@ const activeTab = ref<number>(0);
 const duration = ref<number>(0);
 
 type TRegisteringMode = "confirming" | "registering";
-const mode = ref<TRegisteringMode>("registering");
+const mode = ref<TRegisteringMode>("confirming");
 
 const formData = ref<Record<string, any>>({
   name: "",
@@ -261,7 +262,6 @@ const handleGoNext = async () => {
 
     isNextButtonLoading.value = true;
     const res = await registerOrgAdmin(formDataReq);
-    console.log(res);
     if (res && res.data.needVerifyEmail) {
       duration.value = res.data.duration / 60 / 60;
       mode.value = "confirming";
@@ -323,6 +323,7 @@ const description = [
       text-align: left;
       color: $color-success;
       background-color: rgba($color-success, 0.1);
+      width: 70%;
     }
 
     .buttons {
@@ -424,6 +425,13 @@ const description = [
           }
         }
       }
+    }
+
+    .link {
+      color: $color-primary-500;
+      text-decoration: underline;
+      font-style: italic;
+      margin-top: 12px;
     }
   }
 }
