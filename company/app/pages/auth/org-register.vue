@@ -101,7 +101,7 @@ const activeTab = ref<number>(0);
 const duration = ref<number>(0);
 
 type TRegisteringMode = "confirming" | "registering";
-const mode = ref<TRegisteringMode>("confirming");
+const mode = ref<TRegisteringMode>("registering");
 
 const formData = ref<Record<string, any>>({
   name: "",

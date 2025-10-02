@@ -1,5 +1,9 @@
-export type TSortType = "ASC" | "DESC" | undefined
+import type { CHIP_TYPE } from "~/const/common";
+
+export type TSortType = "ASC" | "DESC" | undefined;
 export type TSort = {
   key: string;
   type: TSortType;
 };
+
+export type TChipType = (typeof CHIP_TYPE)[keyof typeof CHIP_TYPE];

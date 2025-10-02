@@ -146,7 +146,20 @@
         :key="col.accessorKey"
         #[`${col.accessorKey}-cell`]="{ row }"
       >
-        <span class="" :title="row.original[col.accessorKey]">
+        <span
+          v-if="
+            row.original[col.accessorKey] &&
+            row.original[col.accessorKey].cellType == CELL_TYPE.TAG
+          "
+          class=""
+          :title="row.original[col.accessorKey].text"
+        >
+          <AppChip
+            :text="row.original[col.accessorKey].text"
+            :type="row.original[col.accessorKey].type"
+          />
+        </span>
+        <span v-else class="" :title="row.original[col.accessorKey]">
           {{ row.original[col.accessorKey] }}
         </span>
       </template>
@@ -159,6 +172,7 @@
 </template>
 <script setup lang="ts">
 import { cloneDeep } from "lodash";
+import { CELL_TYPE } from "~/const/common";
 import type { TSort, TSortType } from "~/types/common";
 
 export type TDataTableProps = {
@@ -171,7 +185,7 @@ export type TDataTableProps = {
   allowActions?: TPermission[];
   sort?: TSort | null;
   filter?: Record<string, any> | null;
-  selectOptions?: Record<string, { label: string; value: string }[]> | null;
+  selectOptions?: Record<string, { label: string; value: any }[]> | null;
   isTableEmpty?: boolean;
   deleteConditionKey?: string;
 };
@@ -268,21 +282,17 @@ const nextSortState = computed(() => {
 });
 
 const handleFilterUpdate = (accessorKey: string, value: any) => {
-  console.log(
-    "caught key: ",
-    accessorKey,
-    " with value ",
-    JSON.stringify(value),
-  );
+  const trimValue = typeof value == "string" ? value.trim() : value;
+
   if (props.filter) {
     const newFilter = {
       ...props.filter,
-      [accessorKey]: value,
+      [accessorKey]: trimValue,
     };
     emit("filter", newFilter);
   } else {
     emit("filter", {
-      [accessorKey]: value,
+      [accessorKey]: trimValue,
     });
   }
 };

@@ -1,7 +1,10 @@
 <template>
   <div class="wrapper">
-    <IndustryCreateModal v-model="isCreateModalOpen" @submit="handleCreated" />
-    <IndustryEditViewModal
+    <DepartmentCreateModal
+      v-model="isCreateModalOpen"
+      @submit="handleCreated"
+    />
+    <DepartmentEditViewModal
       v-model="isEditViewOpen"
       :initial-mode="editViewInitialMode"
       :target-id="editViewId || -1"
@@ -9,9 +12,23 @@
       @submit="handleUpdated"
       @mode-change="handleSwitchEditViewMode($event)"
     />
-    <div class="level-content">
-      <div class="title">Danh mục lĩnh vực</div>
+    <div class="department-content">
+      <div class="title">Danh mục phòng ban</div>
       <div class="table-top">
+        <AppButton
+          :text="'Hoạt động'"
+          :is-disabled="selectedRows.length == 0"
+          class="active-btn active"
+          @click="handleActiveToggle(selectedRows, true)"
+        >
+        </AppButton>
+        <AppButton
+          :text="'Ngừng hoạt động'"
+          :is-disabled="selectedRows.length == 0"
+          class="active-btn deactive"
+          @click="handleActiveToggle(selectedRows, false)"
+        >
+        </AppButton>
         <AppButton
           :text="'Xóa bỏ'"
           :is-disabled="isDeleteAllDisabled"
@@ -58,6 +75,7 @@
         :show-actions="true"
         :is-loading="isFetchingData"
         :selection-list="selectedRows"
+        :select-options="filterSelectOption"
         :sort="sort"
         :filter="filter"
         :is-table-empty="isNoData"
@@ -69,6 +87,7 @@
         @filter="handleFilter"
       />
       <div class="top-section">
+        <div class="record-count">{{ `${totalItems} bản ghi` }}</div>
         <UPagination
           :show-edges="true"
           :sibling-count="1"
@@ -90,7 +109,6 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import type { TTableAction } from "~/components/app/table/data-table.vue";
 import type { TSort } from "~/types/common";
@@ -99,12 +117,14 @@ import {
   industryTableHeaders,
   pageSizeOptions,
 } from "~/const/views/system-admin/industry";
+import { departmentTableHeaders } from "~/const/views/org-admin/department";
+import { CELL_TYPE, CHIP_TYPE } from "~/const/common";
 
 definePageMeta({
-  layout: "system-admin",
+  layout: "org-admin",
 });
 useHead({
-  title: "Danh mục lĩnh vực",
+  title: "Danh mục phòng ban",
 });
 
 const route = useRoute();
@@ -116,7 +136,7 @@ const editViewId = ref<number | null>(null);
 const editViewInitialMode = ref<any>(null);
 const editViewMode = ref<any>(null);
 const isFetchingData = ref<boolean>(false);
-const fetchIndustryController = ref<AbortController | null>();
+const fetchDepartmentController = ref<AbortController | null>();
 const filter = ref<Record<string, any>>({});
 const totalItems = ref<number>(0);
 const isNoData = ref<boolean>(false);
@@ -138,8 +158,10 @@ const canEdit = computed(() => {
 });
 
 const { getMenuItem } = useSidebarStore();
+const { setLoading } = useLoadingStore();
 // TODO: REPLACE THIS APIS
-const { getIndustries, deleteIndustry } = useIndustryApi();
+const { getDepartments, deleteDepartment, changeDepartmentStatus } =
+  useDepartmentApi();
 
 // NOTE: From query string to filter
 const convertQuery = () => {
@@ -185,6 +207,18 @@ const convertQuery = () => {
   }
   if (createdAt.length) {
     restoredFilter.createdAt = createdAt;
+  }
+
+  if (query.isActive) {
+    const values = (query.isActive as string).split(",");
+    console.log(values);
+    restoredFilter.isActive = values.map((val) =>
+      filterSelectOption.value.isActive.find((opt: any) => {
+        const booleanValue = val == "true";
+        return opt.value == booleanValue;
+      }),
+    );
+    console.log(restoredFilter.isActive);
   }
 
   const updatedAt: (Date | null)[] = [];
@@ -258,7 +292,10 @@ const handleDeleteModalOpenUpdate = (event: boolean) => {
 const handleDelete = async () => {
   isDeleting.value = true;
   // TODO: REPLACE THIS API
-  const isSuccess = await deleteIndustry({ ids: deleteList.value });
+  const isSuccess = await deleteDepartment({ ids: deleteList.value });
+  selectedRows.value = selectedRows.value.filter(
+    (selected) => !deleteList.value.includes(selected),
+  );
   isDeleting.value = false;
   if (isSuccess) {
     handleDeleteModalOpenUpdate(false);
@@ -287,7 +324,7 @@ const isDeleteAllDisabled = computed(() => {
       rowData.push(row);
     }
   }
-  return rowData.some((row) => !row.isDefault);
+  return rowData.some((row) => !row.canDelete);
 });
 const sort = computed(() => {
   return {
@@ -316,14 +353,14 @@ const handleFilter = (e: any) => {
 };
 
 const fetchData = async () => {
-  if (fetchIndustryController.value) {
-    fetchIndustryController.value.abort();
+  if (fetchDepartmentController.value) {
+    fetchDepartmentController.value.abort();
   }
 
-  fetchIndustryController.value = new AbortController();
+  fetchDepartmentController.value = new AbortController();
   isFetchingData.value = true;
   const query = route.query;
-  const res = await getIndustries(query, fetchIndustryController.value);
+  const res = await getDepartments(query, fetchDepartmentController.value);
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
@@ -340,9 +377,18 @@ const fetchData = async () => {
     entry.index = index + 1 + (pageIndex.value - 1) * pageSize.value;
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
+    entry.isActive = entry.isActive
+      ? {
+          text: "Đang hoạt động",
+          type: CHIP_TYPE.SUCCESS,
+          cellType: CELL_TYPE.TAG,
+        }
+      : {
+          text: "Ngừng hoạt động",
+          type: CHIP_TYPE.ERROR,
+          cellType: CELL_TYPE.TAG,
+        };
     entry.canDelete = true;
-    entry.industrySubName =
-      entry.industrySubs?.map((sub: any) => sub.name)?.join(", ") ?? "";
   }
   tableData.value = data;
 };
@@ -367,6 +413,21 @@ const handlePageIndexChange = (e: any) => {
   };
 };
 
+const handleActiveToggle = async (ids: number[], state: boolean) => {
+  const payload = {
+    ids,
+    active: state,
+  };
+
+  setLoading(true);
+  const res = await changeDepartmentStatus(payload);
+  if (res) {
+    selectedRows.value = [];
+    fetchData();
+  }
+  setLoading(false);
+};
+
 const handleTableActionClick = (id: number, action: TTableAction) => {
   if (action === "delete") {
     handleDeleteClick([id]);
@@ -386,8 +447,23 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
 };
 
 const tableData = ref([]);
+const filterSelectOption = computed(() => {
+  return {
+    isActive: [
+      {
+        label: "Ngừng hoạt động",
+        value: false,
+      },
+      {
+        label: "Đang hoạt động",
+        value: true,
+      },
+    ],
+  };
+});
+
 const tableColumns = computed(() => {
-  return industryTableHeaders;
+  return departmentTableHeaders;
 });
 const pageSizeOpts = computed(() => {
   return pageSizeOptions;
@@ -406,6 +482,17 @@ const normalizeFilter = (filter: any) => {
     if (endDate) {
       normalizedFilter.createdAtEnd = toUtcDate(endDate);
     }
+  }
+  if (
+    normalizedFilter.isActive &&
+    normalizedFilter.isActive.length &&
+    normalizedFilter.isActive.length != 2
+  ) {
+    normalizedFilter.isActive = normalizedFilter.isActive.map(
+      (activity: any) => activity.value,
+    );
+  } else {
+    delete normalizedFilter.isActive;
   }
   if (normalizedFilter.updatedAt) {
     const startDate = normalizedFilter.updatedAt[0];
@@ -466,7 +553,7 @@ watch(isEditViewOpen, (newVal) => {
   margin-top: 8px;
   @include box-shadow;
 }
-.level-content {
+.department-content {
   background-color: white;
   min-height: calc(100% - 48px - 8px);
   @include box-shadow;
@@ -482,6 +569,7 @@ watch(isEditViewOpen, (newVal) => {
   .table-top {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 12px;
     margin-bottom: 20px;
@@ -497,6 +585,27 @@ watch(isEditViewOpen, (newVal) => {
       background-color: $color-primary-400;
       color: $text-dark;
     }
+
+    .active-btn {
+      background-color: white;
+      padding: 4px 14px 4px 14px;
+
+      &.disabled {
+        border: 1px solid $color-gray-400;
+        color: $color-gray-400;
+      }
+    }
+
+    .active {
+      color: $color-success;
+      border: 1px solid $color-success;
+    }
+
+    .deactive {
+      color: $color-primary-400;
+      border: 1px solid $color-primary-400;
+    }
+
     .delete-button {
       background-color: white;
       color: $color-primary-400;
@@ -518,12 +627,19 @@ watch(isEditViewOpen, (newVal) => {
   .top-section {
     margin-top: 18px;
     display: flex;
+    align-items: center;
     flex-direction: row;
     gap: 8px;
     justify-content: flex-end;
 
     :deep(button[type="button"][disabled]) {
       color: $color-gray-400;
+    }
+
+    .record-count {
+      color: $color-gray-500;
+      font-size: 14px;
+      font-style: italic;
     }
   }
   .table-section {
