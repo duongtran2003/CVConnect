@@ -91,6 +91,8 @@
   </div>
 </template>
 <script setup lang="ts">
+import { BREADCRUMB_BASE } from "~/const/views/org-admin/position";
+
 definePageMeta({
   layout: "org-admin",
 });
@@ -104,6 +106,8 @@ const { getDepartments } = useDepartmentApi();
 const { getAll } = useProcessTypeApi();
 const { setLoading } = useLoadingStore();
 const { createPosition } = usePositionApi();
+const breadcrumbStore = useBreadcrumbStore();
+const { overrideItems, clearOverrideItems } = breadcrumbStore;
 
 const departmentList = ref<Record<string, any>[]>([]);
 const processList = ref<Record<string, any>[]>([]);
@@ -163,6 +167,14 @@ onBeforeMount(async () => {
   const res = await getAll();
   processList.value = res.data;
   setLoading(false);
+  overrideItems([
+    ...BREADCRUMB_BASE,
+    {
+      name: "Thêm mới",
+      icon: "",
+      url: "/org-admin/position/create",
+    },
+  ]);
 });
 
 const departmentOption = computed(() => {
@@ -291,6 +303,10 @@ const handleSubmit = async () => {
   }
   setLoading(false);
 };
+
+onBeforeMount(() => {
+  clearOverrideItems();
+})
 </script>
 <style lang="scss" scoped>
 .wrapper {

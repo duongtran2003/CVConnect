@@ -134,6 +134,7 @@
 </template>
 <script setup lang="ts">
 import { cloneDeep, isEqual } from "lodash";
+import { BREADCRUMB_BASE } from "~/const/views/org-admin/position";
 
 definePageMeta({
   layout: "org-admin",
@@ -150,6 +151,8 @@ const { setLoading } = useLoadingStore();
 const { getPositionDetail, changePositionStatus, updatePosition } =
   usePositionApi();
 const route = useRoute();
+const breadcrumbStore = useBreadcrumbStore();
+const { overrideItems, clearOverrideItems } = breadcrumbStore;
 
 const departmentList = ref<Record<string, any>[]>([]);
 const processList = ref<Record<string, any>[]>([]);
@@ -277,7 +280,14 @@ onBeforeMount(async () => {
   const res = await getAll();
   processList.value = res.data;
   await fetchDetail();
-  console.log("set loading false");
+  overrideItems([
+    ...BREADCRUMB_BASE,
+    {
+      name: positionDetail.value?.name,
+      icon: "",
+      url: route.fullPath,
+    },
+  ]);
   setLoading(false);
 });
 
@@ -466,13 +476,25 @@ const handleSubmitUpdate = async () => {
   setLoading(false);
 };
 
-watch(currentMode, (newVal) => {
+watch(currentMode, async (newVal) => {
   if (newVal == "view") {
     const { mode, ...rest } = route.query;
-    router.replace({ query: rest });
+    await router.replace({ query: rest });
   } else {
-    router.replace({ query: { ...route.query, mode: "edit" } });
+    await router.replace({ query: { ...route.query, mode: "edit" } });
   }
+  overrideItems([
+    ...BREADCRUMB_BASE,
+    {
+      name: positionDetail.value?.name,
+      icon: "",
+      url: route.fullPath,
+    },
+  ]);
+});
+
+onBeforeUnmount(() => {
+  clearOverrideItems();
 });
 </script>
 <style lang="scss" scoped>

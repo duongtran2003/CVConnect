@@ -154,3 +154,16 @@ export const pageSizeOptions = [
     value: 50,
   },
 ];
+
+export const BREADCRUMB_BASE: TBreadcumbItem[] = [
+  {
+    name: "Danh mục",
+    icon: "material-symbols:category-outline-rounded",
+    url: "",
+  },
+  {
+    name: "Vị trí tuyển dụng",
+    icon: "",
+    url: "/org-admin/position",
+  },
+];
