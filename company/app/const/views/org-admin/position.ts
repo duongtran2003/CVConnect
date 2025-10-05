@@ -1,4 +1,4 @@
-export const industryTableHeaders = [
+export const positionTableHeaders = [
   {
     accessorKey: "index",
     header: "STT",
@@ -48,11 +48,37 @@ export const industryTableHeaders = [
   //   },
   // },
   {
-    accessorKey: "industrySubName",
-    header: "Phân ngành",
+    accessorKey: "listLevel",
+    header: "Cấp bậc",
     allowFilter: true,
     filterType: "text",
     isSortable: false,
+    meta: {
+      class: {
+        th: "min-w-[200px] pl-[32px] max-w-[440px] truncate",
+        td: "pl-[32px] max-w-[440px] truncate",
+      },
+    },
+  },
+  {
+    accessorKey: "departmentName",
+    header: "Phòng ban",
+    allowFilter: true,
+    filterType: "select",
+    isSortable: true,
+    meta: {
+      class: {
+        th: "min-w-[200px] pl-[32px] max-w-[440px] truncate",
+        td: "pl-[32px] max-w-[440px] truncate",
+      },
+    },
+  },
+  {
+    accessorKey: "isActive",
+    header: "Trạng thái",
+    allowFilter: true,
+    filterType: "select",
+    isSortable: true,
     meta: {
       class: {
         th: "min-w-[200px] pl-[32px] max-w-[440px] truncate",

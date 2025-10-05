@@ -5,7 +5,7 @@
         <div class="flex items-center justify-between w-full">
           <div class="flex items-center gap-2">
             <span class="text-highlighted font-semibold">
-              {{ title }}
+              {{ departmentDetail ? departmentDetail.name : title }}
             </span>
             <AppChip
               v-if="departmentDetail"

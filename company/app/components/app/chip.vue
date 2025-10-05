@@ -18,12 +18,14 @@ const props = defineProps<TProps>();
   padding: 4px 8px;
   border: 1px solid black;
   font-size: 12px;
+  font-weight: 400;
   display: flex;
   justify-content: center;
   align-items: center;
   width: fit-content;
   border-radius: 999px;
   background-color: white;
+  display: inline-block;
 
   &.success {
     color: $color-success;

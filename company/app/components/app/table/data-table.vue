@@ -112,6 +112,7 @@
               variant="none"
               autocomplete="autocomplete"
               placeholder="Chọn giá trị"
+              :title="selectTooltip(col.accessorKey)"
               :search-input="{
                 placeholder: 'Tìm kiếm',
               }"
@@ -211,6 +212,15 @@ const havePermission = (permission: TPermission) => {
 };
 
 const columns = ref<any[]>(cloneDeep(props.columns));
+const selectTooltip = computed(() => {
+  return (accessorKey: string) => {
+    if (!props.filter) {
+      return "";
+    }
+    const tooltipString = props.filter[accessorKey]?.map((filter: any) => filter.label)?.join(', ')
+    return tooltipString;
+  };
+});
 const columnKey = computed(() => {
   return (column: any) => {
     return column.columnDef.accessorKey;

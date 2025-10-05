@@ -1,25 +1,8 @@
-export const useIndustryApi = () => {
+export const usePositionApi = () => {
   const { $axios } = useNuxtApp();
   const toast = useToast();
 
-  const getIndustriesPublic = async (params: any) => {
-    try {
-      const queryString = objectToQuery(params);
-      const res = await $axios.get(`/_api/core/industry/public/filter?${queryString}`);
-      return res.data;
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        toast.add({
-          title: err.response.data.message,
-          color: "error",
-        });
-      }
-      console.error(err);
-      return null;
-    }
-  };
-
-  const getIndustries = async (
+  const getPositions = async (
     params: any,
     abortController?: AbortController,
   ) => {
@@ -28,7 +11,7 @@ export const useIndustryApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/industry/filter?${queryString}`,
+        `/_api/core/position/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -50,9 +33,9 @@ export const useIndustryApi = () => {
     }
   };
 
-  const getIndustryDetail = async (id: number) => {
+  const getPositionDetail = async (id: number) => {
     try {
-      const res = await $axios.get(`/_api/core/industry/detail/${id}`);
+      const res = await $axios.get(`/_api/core/position/detail/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -66,9 +49,9 @@ export const useIndustryApi = () => {
     }
   };
 
-  const createIndustry = async (payload: any) => {
+  const createPosition = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/core/industry/create`, payload);
+      const res = await $axios.post(`/_api/core/position/create`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -86,9 +69,12 @@ export const useIndustryApi = () => {
     }
   };
 
-  const updateIndustry = async (id: number, payload: any) => {
+  const changePositionStatus = async (payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/industry/update/${id}`, payload);
+      const res = await $axios.put(
+        `/_api/core/position/change-status-active`,
+        payload,
+      );
       toast.add({
         title: res.data.message,
         color: "success",
@@ -106,9 +92,29 @@ export const useIndustryApi = () => {
     }
   };
 
-  const deleteIndustry = async (payload: any) => {
+  const updatePosition = async (id: number, payload: any) => {
     try {
-      const res = await $axios.delete(`/_api/core/industry/delete`, {
+      const res = await $axios.put(`/_api/core/position/update/${id}`, payload);
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  const deletePosition = async (payload: any) => {
+    try {
+      const res = await $axios.delete(`/_api/core/position/delete`, {
         data: payload.ids,
       });
       if (res.data.message) {
@@ -131,11 +137,11 @@ export const useIndustryApi = () => {
   };
 
   return {
-    getIndustriesPublic,
-    getIndustries,
-    createIndustry,
-    deleteIndustry,
-    getIndustryDetail,
-    updateIndustry,
+    getPositions,
+    createPosition,
+    deletePosition,
+    getPositionDetail,
+    updatePosition,
+    changePositionStatus,
   };
 };

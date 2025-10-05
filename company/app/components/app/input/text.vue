@@ -1,5 +1,5 @@
 <template>
-  <label class="text-input" :class="{ disabled: isDisabled }">
+  <div class="text-input" :class="{ disabled: isDisabled }">
     <div v-if="props.label" class="label">
       <div class="name">
         <span>{{ label }}</span>
@@ -39,7 +39,7 @@
     <div v-if="!props.slimError" class="error-message">
       {{ props.showError ? error : "" }}
     </div>
-  </label>
+  </div>
 </template>
 <script setup lang="ts">
 export type TInputTextProps = {
@@ -101,6 +101,7 @@ const isTextHidden = ref(true);
     flex-direction: row;
     gap: 8px;
     align-items: center;
+    width: fit-content;
     .name {
       font-size: 14px;
       color: $text-light;
