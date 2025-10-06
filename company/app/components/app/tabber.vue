@@ -4,8 +4,8 @@
       v-for="(tab, index) of props.tabs"
       :key="index"
       class="tab"
-      :class="{ active: currentTabIndex === index }"
-      @click="handleTabSwitch(index)"
+      :class="{ active: currentTabIndex === index + 1 }"
+      @click="handleTabSwitch(index + 1)"
     >
       {{ tab.label }}
     </div>

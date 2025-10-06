@@ -304,9 +304,9 @@ const handleSubmit = async () => {
   setLoading(false);
 };
 
-onBeforeMount(() => {
+onBeforeUnmount(() => {
   clearOverrideItems();
-})
+});
 </script>
 <style lang="scss" scoped>
 .wrapper {

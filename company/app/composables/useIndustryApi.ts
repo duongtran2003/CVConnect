@@ -5,9 +5,42 @@ export const useIndustryApi = () => {
   const getIndustriesPublic = async (params: any) => {
     try {
       const queryString = objectToQuery(params);
-      const res = await $axios.get(`/_api/core/industry/public/filter?${queryString}`);
+      const res = await $axios.get(
+        `/_api/core/industry/public/filter?${queryString}`,
+      );
       return res.data;
     } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getIndustriesSub = async (
+    params: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(params);
+      const res = await $axios.get(
+        `/_api/core/industry-sub/filter?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
       if (err.response && err.response.data) {
         toast.add({
           title: err.response.data.message,
@@ -133,6 +166,7 @@ export const useIndustryApi = () => {
   return {
     getIndustriesPublic,
     getIndustries,
+    getIndustriesSub,
     createIndustry,
     deleteIndustry,
     getIndustryDetail,

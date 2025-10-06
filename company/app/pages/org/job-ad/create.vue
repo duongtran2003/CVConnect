@@ -10,6 +10,9 @@
         :current-tab-index="currentTabIndex"
         @tab-switch="handleTabSwitch($event)"
       />
+      <div class="tab-content">
+        <OrgAdJobCreateGeneralInfo v-show="currentTabIndex == 1" />
+      </div>
     </div>
   </div>
 </template>
@@ -58,12 +61,20 @@ onBeforeUnmount(() => {
   min-height: calc(100% - 48px - 8px);
   @include box-shadow;
   color: $text-light;
-  padding: 20px;
+  padding: 12px;
   display: flex;
+  gap: 12px;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
   @include custom-scrollbar;
   height: 100%;
+
+  .tab-content {
+    @include custom-scrollbar;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
 }
 </style>
