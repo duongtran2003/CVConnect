@@ -1,32 +1,43 @@
 <template>
   <div class="search-select-input">
     <div class="label">
-      <span class="text">Ngành nghề</span>
-      <span class="required">Bắt buộc</span>
+      <span v-if="props.label" class="text">{{ props.label }}</span>
+      <span v-if="props.required" class="required">Bắt buộc</span>
     </div>
-    <USelectMenu
-      :search-term="searchValue"
-      :model-value="props.value"
-      :items="options"
-      class="selector"
-      :class="{ error: error }"
-      :variant="'none'"
-      autocomplete="autocomplete"
-      :placeholder="props.placeholder"
-      :multiple="props.multiple"
-      :filter="!props.remoteFilter"
-      searchable
-      :loading="props.isLoading"
-      :title="props.value?.map((i: any) => i.label).join(', ') ?? ''"
-      :search-input="{ placeholder: 'Tìm kiếm' }"
-      :ui="{
-        trailingIcon:
-          'group-data-[state=open]:rotate-180 transition-transform duration-200',
-      }"
-      @update:model-value="handleInput($event)"
-      @update:search-term="handleSearchInput($value as string)"
-      @update:open="($event) => handleOpenUpdate($event)"
-    />
+    <div class="wrapper">
+      <USelectMenu
+        :search-term="searchValue"
+        :model-value="props.value"
+        :items="options"
+        class="selector"
+        :class="{ error: error, 'is-loading': isLoading }"
+        :variant="'none'"
+        autocomplete="autocomplete"
+        :placeholder="props.placeholder"
+        :multiple="props.multiple"
+        :filter="!props.remoteFilter"
+        :disabled="props.isDisabled"
+        searchable
+        :loading="isLoading"
+        :title="title"
+        :search-input="{ placeholder: 'Tìm kiếm' }"
+        :ui="{
+          trailingIcon:
+            'group-data-[state=open]:rotate-180 transition-transform duration-200',
+        }"
+        @update:model-value="handleInput($event)"
+        @update:search-term="handleSearchInput($event)"
+        @update:open="($event) => handleOpenUpdate($event)"
+      >
+      </USelectMenu>
+      <div
+        v-if="props.allowClear && hasValue"
+        class="clear-button"
+        @click="emits('clear-value')"
+      >
+        <Icon name="mdi:close-circle" />
+      </div>
+    </div>
     <div class="error-message">{{ error }}</div>
   </div>
 </template>
@@ -37,13 +48,16 @@ type TProps = {
   label?: string;
   required?: boolean;
   options?: Record<string, any>[];
-  value: Record<string, any>[] | Record<string, any> | undefined;
+  value: any;
   error?: string;
+  isDisabled?: boolean;
   placeholder?: string;
   remoteFilter?: boolean;
   multiple?: boolean;
-  isLoading?: boolean;
-  fetchFn: (params: any, controller?: AbortController) => Promise<any>;
+  allowClear?: boolean;
+  fetchFn?:
+    | ((params: any, controller?: AbortController) => Promise<any>)
+    | null;
 };
 
 const props = withDefaults(defineProps<TProps>(), {
@@ -54,7 +68,9 @@ const props = withDefaults(defineProps<TProps>(), {
   placeholder: "Mời chọn",
   remoteFilter: false,
   multiple: false,
-  isLoading: false,
+  isDisabled: false,
+  fetchFn: null,
+  allowClear: true,
 });
 const emits = defineEmits<{
   (
@@ -62,7 +78,7 @@ const emits = defineEmits<{
     value: Record<string, any> | Record<string, any>[] | undefined,
   ): void;
   (e: "open-update", value: boolean): void;
-  (e: "search-filter"): void;
+  (e: "search-filter" | "clear-value"): void;
 }>();
 
 const scrollTarget = ref<HTMLElement | null>(null);
@@ -70,7 +86,25 @@ const controller = ref<AbortController | null>(null);
 const currentPage = ref<number>(0);
 const searchValue = ref<string>("");
 const hasReachBottom = ref<boolean>(false);
+const isLoading = ref<boolean>(false);
 let lastScrollTop = 0;
+
+const title = computed(() => {
+  if (props.value?.length) {
+    return props.value?.map((i: any) => i.label).join(", ") ?? "";
+  } else {
+    console.log(props.value);
+    return props.value?.label;
+  }
+});
+
+const hasValue = computed(() => {
+  if (props.value?.length >= 0) {
+    return props.value.length > 0;
+  } else {
+    return !!props.value;
+  }
+});
 
 function handleInput(
   value: Record<string, any> | Record<string, any>[] | undefined,
@@ -78,8 +112,11 @@ function handleInput(
   emits("input", value);
 }
 
-function handleOpenUpdate(isOpen: boolean) {
+async function handleOpenUpdate(isOpen: boolean) {
   if (isOpen) {
+    if (props.options.length == 0) {
+      await resetAndFetch();
+    }
     attachScrollListener();
   } else {
     detachScrollListener();
@@ -89,6 +126,7 @@ function handleOpenUpdate(isOpen: boolean) {
 }
 
 function handleSearchInput(value: string) {
+  console.log(value);
   searchValue.value = value;
 }
 
@@ -119,7 +157,6 @@ function detachScrollListener() {
 function onScroll(e: Event) {
   const el = e.target as HTMLElement;
   const currentTop = el.scrollTop;
-  console.log(currentTop, lastScrollTop);
   if (currentTop <= lastScrollTop) {
     lastScrollTop = currentTop;
     return;
@@ -130,17 +167,19 @@ function onScroll(e: Event) {
 
 const handleScroll = debounce(async (el: HTMLElement) => {
   if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
-    await props.fetchFn(searchValue);
+    await fetchData(searchValue.value);
   }
 }, 250);
 
 async function resetAndFetch(searchTerm = "") {
   //Save scroll before reset (if open)
+  if (!props.fetchFn) {
+    return;
+  }
   const prevScrollTop = scrollTarget.value?.scrollTop ?? 0;
 
   hasReachBottom.value = false;
   currentPage.value = 0;
-  // industryList.value = [];
   emits("search-filter");
 
   if (controller.value) {
@@ -157,6 +196,10 @@ async function resetAndFetch(searchTerm = "") {
 }
 
 async function fetchData(searchTerm = "") {
+  if (!props.fetchFn) {
+    console.log("no fetch?");
+    return;
+  }
   if (hasReachBottom.value) {
     return;
   }
@@ -173,7 +216,10 @@ async function fetchData(searchTerm = "") {
   };
   if (searchTerm) params.name = searchTerm;
 
+  isLoading.value = true;
+  console.log("here!");
   const res = await props.fetchFn(params, controller.value);
+  isLoading.value = false;
   if (!res) {
     return;
   }
@@ -205,6 +251,18 @@ watch(searchValue, (val) => {
   gap: 4px;
   flex: 1;
 
+  .clear-button {
+    position: absolute;
+    color: $color-gray-300;
+    cursor: pointer;
+    transition-duration: 200ms;
+    &:hover {
+      color: $color-primary-500;
+    }
+    top: 10px;
+    right: 34px;
+  }
+
   .label {
     display: flex;
     flex-direction: row;
@@ -232,6 +290,10 @@ watch(searchValue, (val) => {
     line-height: 16px;
   }
 
+  .wrapper {
+    position: relative;
+  }
+
   :deep(button.selector) {
     margin: 2px 0px;
     cursor: pointer;
@@ -249,6 +311,9 @@ watch(searchValue, (val) => {
 
     border-radius: 10px !important;
     padding: 6px 48px 6px 8px !important;
+    &.is-loading {
+      padding: 6px 48px 6px 36px !important;
+    }
     font-weight: 500 !important;
     color: $text-light !important;
     height: 36px;

@@ -11,139 +11,94 @@
         :error="formError.title"
         :placeholder="'Mời nhập tiêu đề'"
         :value="formInput.title"
-        class="text-input"
+        class="title-input"
         @input="handleInput('title', $event)"
         @blur="validateKey('title')"
       />
       <div class="row">
-        <div class="select-input">
-          <div class="label">
-            <span class="text">Phòng ban</span>
-            <span class="required">Bắt buộc</span>
-          </div>
-          <USelectMenu
-            :model-value="formInput.department"
-            :items="departmentList"
-            class="selector"
-            :class="{ error: formError.department }"
-            :variant="'none'"
-            autocomplete="autocomplete"
-            placeholder="Mời chọn phòng ban"
-            multiple
-            :title="
-              formInput.department?.map((dept: any) => dept.label).join(', ') ??
-              ''
-            "
-            :search-input="{
-              placeholder: 'Tìm kiếm',
-            }"
-            :ui="{
-              trailingIcon:
-                'group-data-[state=open]:rotate-180 transition-transform duration-200',
-            }"
-            @update:model-value="handleInput('department', $event)"
-            @update:open="
-              ($event) => (!$event ? validateKey('department') : () => {})
-            "
-          />
-          <div class="error-message">{{ formError.department }}</div>
-        </div>
-        <div class="select-input">
-          <div class="label">
-            <span class="text">Vị trí</span>
-            <span class="required">Bắt buộc</span>
-          </div>
-          <USelectMenu
-            :model-value="formInput.position"
-            :items="positionOptions"
-            class="selector"
-            :class="{ error: formError.position }"
-            :variant="'none'"
-            autocomplete="autocomplete"
-            placeholder="Mời chọn vị trí"
-            :title="formInput.position?.label ?? ''"
-            :disabled="!formInput.department.length"
-            :search-input="{
-              placeholder: 'Tìm kiếm',
-            }"
-            :ui="{
-              trailingIcon:
-                'group-data-[state=open]:rotate-180 transition-transform duration-200',
-            }"
-            @update:model-value="handleInput('position', $event)"
-            @update:open="
-              ($event) => (!$event ? validateKey('position') : () => {})
-            "
-          />
-          <div class="error-message">{{ formError.position }}</div>
-        </div>
-        <div class="select-input">
-          <div class="label">
-            <span class="text">Cấp bậc</span>
-            <span class="required">Bắt buộc</span>
-          </div>
-          <USelectMenu
-            :model-value="formInput.level"
-            :items="levelOptions"
-            class="selector"
-            :class="{ error: formError.level }"
-            :variant="'none'"
-            autocomplete="autocomplete"
-            placeholder="Mời chọn cấp bậc"
-            :title="formInput.level?.label ?? ''"
-            :disabled="!formInput.position"
-            :search-input="{
-              placeholder: 'Tìm kiếm',
-            }"
-            :ui="{
-              trailingIcon:
-                'group-data-[state=open]:rotate-180 transition-transform duration-200',
-            }"
-            @update:model-value="handleInput('level', $event)"
-            @update:open="
-              ($event) => (!$event ? validateKey('level') : () => {})
-            "
-          />
-          <div class="error-message">{{ formError.level }}</div>
-        </div>
-        <div class="select-input">
-          <div class="label">
-            <span class="text">Ngành nghề</span>
-            <span class="required">Bắt buộc</span>
-          </div>
-          <USelectMenu
-            v-model:search-term="industrySearch"
-            :model-value="formInput.industry"
-            :items="industryList"
-            class="selector"
-            :class="{ error: formError.industry }"
-            :variant="'none'"
-            autocomplete="autocomplete"
-            placeholder="Mời chọn ngành nghề"
-            multiple
-            :filter="false"
-            searchable
-            :title="
-              formInput.industry?.map((i: any) => i.label).join(', ') ?? ''
-            "
-            :search-input="{ placeholder: 'Tìm kiếm' }"
-            :ui="{
-              trailingIcon:
-                'group-data-[state=open]:rotate-180 transition-transform duration-200',
-            }"
-            @update:model-value="handleInput('industry', $event)"
-            @update:open="($event) => handleIndustryOpenUpdate($event)"
-          />
-          <div class="error-message">{{ formError.industry }}</div>
-        </div>
+        <AppInputSearchSelect
+          :label="'Phòng ban'"
+          :required="true"
+          :options="departmentList"
+          :value="formInput.department"
+          :error="formError.department"
+          :placeholder="'Mời chọn phòng ban'"
+          :remote-filter="true"
+          :multiple="true"
+          :fetch-fn="fetchDepartments"
+          @open-update="handleDepartmentOpenUpdate"
+          @input="handleInput('department', $event)"
+          @clear-value="handleClearDepartment"
+          @search-filter="
+            () => {
+              departmentList = [];
+            }
+          "
+        />
+        <AppInputSearchSelect
+          :label="'Vị trí'"
+          :required="true"
+          :options="positionOptions"
+          :value="formInput.position"
+          :error="formError.position"
+          :placeholder="'Mời chọn vị trí'"
+          :remote-filter="true"
+          :multiple="false"
+          :is-disabled="formInput.department.length == 0"
+          :fetch-fn="fetchPosition"
+          @open-update="handlePositionOpenUpdate"
+          @input="handleInput('position', $event)"
+          @clear-value="handleClearPosition"
+          @search-filter="
+            () => {
+              positionList = [];
+            }
+          "
+        />
+        <AppInputSearchSelect
+          :label="'Cấp bậc'"
+          :required="true"
+          :options="levelOptions"
+          :value="formInput.level"
+          :error="formError.level"
+          :placeholder="'Mời chọn cấp bậc'"
+          :remote-filter="false"
+          :multiple="false"
+          :is-disabled="!formInput.position"
+          :fetch-fn="null"
+          @open-update="handlePositionOpenUpdate"
+          @input="handleInput('level', $event)"
+          @clear-value="handleInput('level', null)"
+          @search-filter="
+            () => {
+              positionList = [];
+            }
+          "
+        />
+        <AppInputSearchSelect
+          :label="'Ngành nghề'"
+          :required="true"
+          :options="industryList"
+          :value="formInput.industry"
+          :error="formError.industry"
+          :placeholder="'Mời chọn ngành nghề'"
+          :remote-filter="true"
+          :multiple="true"
+          :fetch-fn="fetchIndustriesSub"
+          @open-update="handleIndustryOpenUpdate"
+          @input="handleInput('industry', $event)"
+          @clear-value="handleInput('industry', [])"
+          @search-filter="
+            () => {
+              industryList = [];
+            }
+          "
+        />
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { debounce } from "lodash";
-import { useDebounceFn } from "@vueuse/core";
-
 const { getDepartments } = useDepartmentApi();
 const { getPositions } = usePositionApi();
 const { getIndustriesSub } = useIndustryApi();
@@ -152,14 +107,6 @@ const isLoading = ref<boolean>(false);
 const departmentList = ref<Record<string, any>[]>([]);
 const positionList = ref<Record<string, any>[]>([]);
 const industryList = ref<Record<string, any>[]>([]);
-const currentIndustryPage = ref<number>(0);
-const hasReachBottom = ref<boolean>(false);
-const scrollTarget = ref<HTMLElement | null>(null);
-let lastScrollTop = 0;
-
-// 🔹 For remote search
-const industrySearch = ref("");
-let industryAbortController: AbortController | null = null;
 
 const formInput = ref<Record<string, any>>({
   title: "",
@@ -210,147 +157,68 @@ const formRule: Record<string, any> = {
   ],
 };
 
-onBeforeMount(async () => {
-  isLoading.value = true;
+function handleClearDepartment() {
+  handleInput("department", []);
+  handleInput("position", null);
+  handleInput("level", null);
+}
 
-  let departmentRes = await getDepartments({ pageIndex: 0, pageSize: 1 });
-  departmentRes = await getDepartments({
-    pageIndex: 0,
-    pageSize: departmentRes.data.pageInfo.totalElements,
-  });
-  departmentList.value = departmentRes.data.data
+function handleClearPosition() {
+  handleInput("position", null);
+  handleInput("level", null);
+}
+
+function handleDepartmentOpenUpdate(value: boolean) {
+  if (!value) {
+    validateKey("department");
+  }
+}
+
+function handlePositionOpenUpdate(value: boolean) {
+  if (!value) {
+    validateKey("position");
+  }
+}
+
+function handleIndustryOpenUpdate(value: boolean) {
+  if (!value) {
+    validateKey("industry");
+  }
+}
+
+async function fetchPosition(params: any, controller?: AbortController) {
+  const ids = formInput.value.department.map((val: any) => val.value);
+  const newParams = {
+    ...params,
+    departmentIds: ids,
+  };
+  const res = await getPositions(newParams, controller);
+  const nextPage = res.data.data.filter((pos: any) => pos.isActive);
+  positionList.value = [...positionList.value, ...nextPage];
+  return res;
+}
+
+async function fetchDepartments(params: any, controller?: AbortController) {
+  const res = await getDepartments(params, controller);
+  const nextPage = res.data.data
     .filter((dept: any) => dept.isActive)
     .map((dept: any) => ({
       label: dept.name,
       value: dept.id,
     }));
+  departmentList.value = [...departmentList.value, ...nextPage];
+  return res;
+}
 
-  await resetAndFetchIndustry();
-
-  isLoading.value = false;
-});
-
-async function fetchIndustry(searchTerm = "") {
-  if (hasReachBottom.value) return;
-
-  // Cancel previous pending request if exists
-  if (industryAbortController) {
-    industryAbortController.abort();
-  }
-  industryAbortController = new AbortController();
-
-  //Save current scroll position before fetch
-  const prevScrollTop = scrollTarget.value?.scrollTop ?? 0;
-
-  const params: any = {
-    pageIndex: currentIndustryPage.value,
-    pageSize: 10,
-  };
-  if (searchTerm) params.name = searchTerm;
-
-  const res = await getIndustriesSub(params, industryAbortController);
-
-  if (!res) return;
-
-  const newData = res.data.data.map((data: any) => ({
-    label: data.name,
-    value: data.id,
+async function fetchIndustriesSub(params: any, controller?: AbortController) {
+  const res = await getIndustriesSub(params, controller);
+  const nextPage = res.data.data.map((industry: any) => ({
+    label: industry.name,
+    value: industry.id,
   }));
-
-  if (newData.length === 0) {
-    hasReachBottom.value = true;
-  }
-
-  industryList.value = [...industryList.value, ...newData];
-  currentIndustryPage.value += 1;
-
-  //Restore previous scroll position
-  await nextTick();
-  if (scrollTarget.value) {
-    scrollTarget.value.scrollTop = prevScrollTop;
-  }
+  industryList.value = [...industryList.value, ...nextPage];
+  return res;
 }
-
-async function resetAndFetchIndustry(searchTerm = "") {
-  //Save scroll before reset (if open)
-  const prevScrollTop = scrollTarget.value?.scrollTop ?? 0;
-
-  hasReachBottom.value = false;
-  currentIndustryPage.value = 0;
-  industryList.value = [];
-
-  if (industryAbortController) {
-    industryAbortController.abort();
-  }
-
-  await fetchIndustry(searchTerm);
-
-  //Restore scroll after reset
-  await nextTick();
-  if (scrollTarget.value) {
-    scrollTarget.value.scrollTop = prevScrollTop;
-  }
-}
-
-function handleIndustryOpenUpdate(value: boolean) {
-  if (value) {
-    attachScrollListener();
-  } else {
-    validateKey("industry");
-    detachScrollListener();
-  }
-}
-
-const handleScroll = debounce(async (el: HTMLElement) => {
-  if (el.scrollTop + el.clientHeight >= el.scrollHeight - 20) {
-    await fetchIndustry(industrySearch.value);
-  }
-}, 250);
-
-function onScroll(e: Event) {
-  const el = e.target as HTMLElement;
-  const currentTop = el.scrollTop;
-  console.log(currentTop, lastScrollTop);
-  if (currentTop <= lastScrollTop) {
-    lastScrollTop = currentTop;
-    return;
-  }
-  lastScrollTop = currentTop;
-  handleScroll(el);
-}
-
-function attachScrollListener() {
-  nextTick(() => {
-    scrollTarget.value = document.querySelector(
-      '[role="presentation"]',
-    ) as HTMLElement;
-
-    if (scrollTarget.value) {
-      scrollTarget.value.addEventListener("scroll", onScroll, {
-        passive: true,
-      });
-    }
-  });
-}
-
-function detachScrollListener() {
-  nextTick(() => {
-    if (scrollTarget.value) {
-      scrollTarget.value.removeEventListener("scroll", onScroll);
-      scrollTarget.value = null;
-    }
-    lastScrollTop = 0;
-  });
-}
-
-const debouncedSearch = useDebounceFn(async (query: string) => {
-  await resetAndFetchIndustry(query);
-}, 400);
-
-watch(industrySearch, (val) => {
-  console.log("ha!");
-  debouncedSearch(val);
-});
 
 const positionOptions = computed(() => {
   return positionList.value.map((position) => ({
@@ -372,27 +240,8 @@ const levelOptions = computed(() => {
   }));
 });
 
-watch(
-  () => formInput.value.department,
-  async (newVal) => {
-    const ids = newVal.map((val: any) => val.value);
-    let positionRes = await getPositions({
-      pageIndex: 0,
-      pageSize: 1,
-      departmentIds: ids,
-    });
-    positionRes = await getPositions({
-      pageIndex: 0,
-      pageSize: positionRes.data.pageInfo.totalElements,
-      departmentIds: ids,
-    });
-    positionList.value = positionRes.data.data.filter(
-      (pos: any) => pos.isActive,
-    );
-  },
-);
-
 function handleInput(key: string, value: any) {
+  console.log(key, value);
   formError.value[key] = "";
   formInput.value[key] = value;
 }
@@ -418,7 +267,14 @@ function validateKey(key: string) {
     display: flex;
     flex-direction: row;
     gap: 8px;
-    flex-wrap: wrap;
+    @include respond-max($breakpoint-lg) {
+      flex-wrap: wrap;
+
+      :deep(.search-select-input) {
+        max-width: calc((100% - 8px) * 0.5);
+        min-width: calc((100% - 8px) * 0.5);
+      }
+    }
   }
 
   .title {
@@ -439,13 +295,22 @@ function validateKey(key: string) {
     }
   }
 
-  :deep(.text-input) {
+  :deep(.text-input.title-input) {
+    max-width: calc(50% - 4px);
     .input {
       padding: 6px 8px;
       input {
         font-size: 14px;
       }
     }
+
+    @include respond-max($breakpoint-lg) {
+      max-width: 100%;
+    }
+  }
+
+  :deep(.search-select-input) {
+    max-width: calc((100% - 24px) * 0.25);
   }
 
   .select-input {
