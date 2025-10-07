@@ -95,6 +95,65 @@
           "
         />
       </div>
+      <div class="row">
+        <AppInputSearchSelect
+          :label="'Địa điểm làm việc'"
+          :required="true"
+          :options="locationOptions"
+          :value="formInput.location"
+          :error="formError.location"
+          :placeholder="'Mời chọn địa điểm làm việc'"
+          :remote-filter="false"
+          :multiple="true"
+          :fetch-fn="fetchLocation"
+          @open-update="handleLocationOpenUpdate"
+          @input="handleInput('location', $event)"
+          @clear-value="handleInput('location', [])"
+          @search-filter="
+            () => {
+              locationList = [];
+            }
+          "
+        />
+        <AppInputSearchSelect
+          :label="'Loại hình công việc'"
+          :required="true"
+          :options="jobTypeList"
+          :value="formInput.jobType"
+          :error="formError.jobType"
+          :placeholder="'Mời chọn loại hình công việc'"
+          :remote-filter="false"
+          :multiple="false"
+          :fetch-fn="fetchJobType"
+          @open-update="handleJobTypeOpenUpdate"
+          @input="handleInput('jobType', $event)"
+          @clear-value="handleInput('jobType', null)"
+          @search-filter="
+            () => {
+              locationList = [];
+            }
+          "
+        />
+        <AppInputDatepicker
+          :label="'Hạn nộp hồ sơ'"
+          :required="true"
+          :value="formInput.dueDate"
+          :error="formError.dueDate"
+          :placeholder="'Mời chọn ngày nộp hồ sơ'"
+          @input="handleInput('dueDate', $event)"
+          @clear="validateKey('dueDate')"
+          @close="validateKey('dueDate')"
+        />
+        <AppInputNumber
+          :label="'Số lượng'"
+          :required="true"
+          :error="formError.quant"
+          :placeholder="'Mời nhập số lượng'"
+          :value="formInput.quant"
+          @input="handleInput('quant', $event)"
+          @blur="validateKey('quant')"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -102,11 +161,15 @@
 const { getDepartments } = useDepartmentApi();
 const { getPositions } = usePositionApi();
 const { getIndustriesSub } = useIndustryApi();
+const { getAllLocations } = useLocationApi();
+const { getJobTypes } = useEnumApi();
 
 const isLoading = ref<boolean>(false);
 const departmentList = ref<Record<string, any>[]>([]);
 const positionList = ref<Record<string, any>[]>([]);
 const industryList = ref<Record<string, any>[]>([]);
+const locationList = ref<Record<string, any>[]>([]);
+const jobTypeList = ref<Record<string, any>[]>([]);
 
 const formInput = ref<Record<string, any>>({
   title: "",
@@ -114,6 +177,10 @@ const formInput = ref<Record<string, any>>({
   position: null,
   level: null,
   industry: [],
+  location: [],
+  jobType: null,
+  dueDate: null,
+  quant: null,
 });
 
 const formError = ref<Record<string, any>>({
@@ -122,6 +189,10 @@ const formError = ref<Record<string, any>>({
   position: "",
   level: "",
   industry: "",
+  location: "",
+  jobType: "",
+  dueDate: "",
+  quant: "",
 });
 
 const formRule: Record<string, any> = {
@@ -155,6 +226,34 @@ const formRule: Record<string, any> = {
       validator: (input: any[]) => !!input.length,
     },
   ],
+  location: [
+    {
+      error: "Mời chọn địa điểm làm việc",
+      validator: (input: any[]) => !!input.length,
+    },
+  ],
+  jobType: [
+    {
+      error: "Mời chọn loại hình công việc",
+      validator: (input: any) => !!input,
+    },
+  ],
+  dueDate: [
+    {
+      error: "Mời chọn hạn nộp hồ sơ",
+      validator: (input: any) => {
+        return !!input;
+      },
+    },
+  ],
+  quant: [
+    {
+      error: "Mời chọn số lượng",
+      validator: (input: any) => {
+        return input != null && input != undefined;
+      },
+    },
+  ],
 };
 
 function handleClearDepartment() {
@@ -186,6 +285,18 @@ function handleIndustryOpenUpdate(value: boolean) {
   }
 }
 
+function handleLocationOpenUpdate(value: boolean) {
+  if (!value) {
+    validateKey("location");
+  }
+}
+
+function handleJobTypeOpenUpdate(value: boolean) {
+  if (!value) {
+    validateKey("jobType");
+  }
+}
+
 async function fetchPosition(params: any, controller?: AbortController) {
   const ids = formInput.value.department.map((val: any) => val.value);
   const newParams = {
@@ -193,13 +304,19 @@ async function fetchPosition(params: any, controller?: AbortController) {
     departmentIds: ids,
   };
   const res = await getPositions(newParams, controller);
+  if (!res) {
+    return null;
+  }
   const nextPage = res.data.data.filter((pos: any) => pos.isActive);
   positionList.value = [...positionList.value, ...nextPage];
-  return res;
+  return res.data.data;
 }
 
 async function fetchDepartments(params: any, controller?: AbortController) {
   const res = await getDepartments(params, controller);
+  if (!res) {
+    return null;
+  }
   const nextPage = res.data.data
     .filter((dept: any) => dept.isActive)
     .map((dept: any) => ({
@@ -207,18 +324,49 @@ async function fetchDepartments(params: any, controller?: AbortController) {
       value: dept.id,
     }));
   departmentList.value = [...departmentList.value, ...nextPage];
-  return res;
+  return res.data.data;
 }
 
 async function fetchIndustriesSub(params: any, controller?: AbortController) {
   const res = await getIndustriesSub(params, controller);
+  if (!res) {
+    return null;
+  }
   const nextPage = res.data.data.map((industry: any) => ({
     label: industry.name,
     value: industry.id,
   }));
   industryList.value = [...industryList.value, ...nextPage];
-  return res;
+  return res.data.data;
 }
+
+async function fetchLocation(params: any, controller?: AbortController) {
+  const res = await getAllLocations();
+  if (!res) {
+    return null;
+  }
+  locationList.value = res.data;
+  return res.data;
+}
+
+async function fetchJobType(params: any, controller?: AbortController) {
+  const res = await getJobTypes();
+  if (!res) {
+    return null;
+  }
+  jobTypeList.value = res.data.map((jobType: any) => ({
+    label: jobType.description,
+    value: jobType.name,
+  }));
+  return res.data;
+}
+
+const locationOptions = computed(() => {
+  return locationList.value.map((location) => ({
+    label: location.displayAddress,
+    value: location.id,
+  }));
+});
 
 const positionOptions = computed(() => {
   return positionList.value.map((position) => ({
@@ -267,10 +415,12 @@ function validateKey(key: string) {
     display: flex;
     flex-direction: row;
     gap: 8px;
-    @include respond-max($breakpoint-lg) {
+    @include respond-max(1064px) {
       flex-wrap: wrap;
 
-      :deep(.search-select-input) {
+      :deep(.search-select-input),
+      :deep(.number-input),
+      :deep(.datepicker-input) {
         max-width: calc((100% - 8px) * 0.5);
         min-width: calc((100% - 8px) * 0.5);
       }
@@ -295,6 +445,17 @@ function validateKey(key: string) {
     }
   }
 
+  :deep(.number-input) {
+    .input-wrapper {
+      .input {
+        padding: 6px 8px;
+        input {
+          font-size: 14px;
+        }
+      }
+    }
+  }
+
   :deep(.text-input.title-input) {
     max-width: calc(50% - 4px);
     .input {
@@ -304,13 +465,16 @@ function validateKey(key: string) {
       }
     }
 
-    @include respond-max($breakpoint-lg) {
+    @include respond-max(1064px) {
       max-width: 100%;
     }
   }
 
-  :deep(.search-select-input) {
+  :deep(.search-select-input),
+  :deep(.number-input),
+  :deep(.datepicker-input) {
     max-width: calc((100% - 24px) * 0.25);
+    min-width: calc((100% - 24px) * 0.25);
   }
 
   .select-input {

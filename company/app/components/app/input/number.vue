@@ -1,5 +1,5 @@
 <template>
-  <div class="text-input" :class="{ disabled: isDisabled }">
+  <div class="number-input" :class="{ disabled: isDisabled }">
     <div v-if="props.label" class="label">
       <div class="name">
         <span>{{ label }}</span>
@@ -20,19 +20,14 @@
       <div class="input" :class="{ disabled: isDisabled }">
         <input
           :disabled="isDisabled"
-          :maxlength="maxLength"
+          :max="props.maxValue"
+          :min="props.minValue"
           :value="value"
-          :type="isSecured && isTextHidden ? 'password' : 'text'"
+          type="number"
           :placeholder="placeholder"
           :class="{ disabled: isDisabled }"
           @input="updateValue"
           @blur="emit('blur')"
-        />
-        <Icon
-          v-if="isSecured"
-          class="secure-toggle"
-          :name="isTextHidden ? 'mdi:eye-off-outline' : 'mdi:eye-outline'"
-          @click="() => (isTextHidden = !isTextHidden)"
         />
       </div>
     </div>
@@ -43,14 +38,14 @@
 </template>
 <script setup lang="ts">
 export type TInputTextProps = {
-  label: string;
+  label?: string;
   desc?: string;
   required?: boolean;
-  value: string;
-  error: string;
-  isSecured?: boolean;
+  value: string | null;
+  error?: string;
   isDisabled?: boolean;
-  maxLength?: number;
+  maxValue?: number;
+  minValue?: number;
   placeholder?: string;
   showError?: boolean;
   tooltip?: string;
@@ -58,36 +53,38 @@ export type TInputTextProps = {
 };
 
 const emit = defineEmits<{
-  (e: "input", value: string): void;
+  (e: "input", value: any): void;
   (e: "blur"): void;
 }>();
 
 const props = withDefaults(defineProps<TInputTextProps>(), {
   desc: "",
+  label: "",
   required: false,
   isSecured: false,
   isDisabled: false,
-  maxLength: 80,
+  error: "",
+  maxValue: undefined,
+  minValue: undefined,
   showError: true,
   tooltip: "",
   placeholder: "",
   slimError: false,
 });
 
-const { label, desc, required, value, isDisabled, isSecured } = toRefs(props);
+const { label, desc, required, value, isDisabled } = toRefs(props);
 const updateValue = (event: Event) => {
   if (isDisabled.value) {
     return;
   }
 
-  const value = (event.target as HTMLInputElement)?.value || "";
+  const value = (event.target as HTMLInputElement)?.value || 0;
 
-  emit("input", isSecured.value ? value : value.trimStart());
+  emit("input", value);
 };
-const isTextHidden = ref(true);
 </script>
 <style lang="scss" scoped>
-.text-input {
+.number-input {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -123,9 +120,9 @@ const isTextHidden = ref(true);
   .input-wrapper {
     border-radius: 12px;
     display: flex;
+    transition-duration: 200ms;
     margin-top: 1px;
     margin-bottom: 1px;
-    transition-duration: 200ms;
 
     &.error {
       // border: 3px solid rgba($color-danger, 0.3);

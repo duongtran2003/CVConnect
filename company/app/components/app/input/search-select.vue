@@ -29,6 +29,11 @@
         @update:search-term="handleSearchInput($event)"
         @update:open="($event) => handleOpenUpdate($event)"
       >
+        <template #item-label="{ item }">
+          <div :title="item.label" class="truncate cursor-pointer">
+            {{ item.label }}
+          </div>
+        </template>
       </USelectMenu>
       <div
         v-if="props.allowClear && hasValue"
@@ -224,7 +229,7 @@ async function fetchData(searchTerm = "") {
     return;
   }
 
-  if (res.data.data.length == 0) {
+  if (res.length == 0) {
     hasReachBottom.value = true;
   }
 
@@ -241,6 +246,9 @@ const debouncedSearch = useDebounceFn(async (query: string) => {
 }, 400);
 
 watch(searchValue, (val) => {
+  if (!props.remoteFilter) {
+    return;
+  }
   debouncedSearch(val);
 });
 </script>
