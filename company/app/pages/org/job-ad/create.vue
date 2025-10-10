@@ -59,10 +59,11 @@
           :items="actions"
           :ui="{
             item: 'cursor-pointer hover:bg-gray-100',
+            content: 'w-[130px]',
           }"
         >
           <AppButton
-            :text="'Đăng tuyển'"
+            :text="'Lưu và đăng tin'"
             class="submit-button"
             :is-disabled="!isFormValid"
           />
