@@ -2,18 +2,61 @@ export const useEnumApi = () => {
   const { $axios } = useNuxtApp();
   const toast = useToast();
 
-  const getJobTypes = async (
-    abortController?: AbortController,
-  ) => {
+  const getJobTypes = async (abortController?: AbortController) => {
     const _abortController = abortController;
 
     try {
-      const res = await $axios.get(
-        `/_api/core/type/Job`,
-        {
-          signal: _abortController ? _abortController.signal : undefined,
-        },
-      );
+      const res = await $axios.get(`/_api/core/type/Job`, {
+        signal: _abortController ? _abortController.signal : undefined,
+      });
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getSalaryType = async (abortController?: AbortController) => {
+    const _abortController = abortController;
+
+    try {
+      const res = await $axios.get(`/_api/core/type/salary`, {
+        signal: _abortController ? _abortController.signal : undefined,
+      });
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getCurrency = async (abortController?: AbortController) => {
+    const _abortController = abortController;
+
+    try {
+      const res = await $axios.get(`/_api/core/type/currency`, {
+        signal: _abortController ? _abortController.signal : undefined,
+      });
       return res.data;
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -33,5 +76,7 @@ export const useEnumApi = () => {
 
   return {
     getJobTypes,
+    getCurrency,
+    getSalaryType,
   };
 };

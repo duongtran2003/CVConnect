@@ -77,7 +77,7 @@
         />
         <AppInputSearchSelect
           :label="'Ngành nghề'"
-          :required="true"
+          :required="false"
           :options="industryList"
           :value="formInput.industry"
           :error="formError.industry"
@@ -105,6 +105,7 @@
           :placeholder="'Mời chọn địa điểm làm việc'"
           :remote-filter="false"
           :multiple="true"
+          :is-paginated="false"
           :fetch-fn="fetchLocation"
           @open-update="handleLocationOpenUpdate"
           @input="handleInput('location', $event)"
@@ -124,6 +125,7 @@
           :placeholder="'Mời chọn loại hình công việc'"
           :remote-filter="false"
           :multiple="false"
+          :is-paginated="false"
           :fetch-fn="fetchJobType"
           @open-update="handleJobTypeOpenUpdate"
           @input="handleInput('jobType', $event)"
@@ -164,6 +166,39 @@ const { getIndustriesSub } = useIndustryApi();
 const { getAllLocations } = useLocationApi();
 const { getJobTypes } = useEnumApi();
 
+export type TGeneralInfoForm = {
+  title: string;
+  department: Record<string, any>[];
+  position: Record<string, any> | null;
+  level: Record<string, any> | null;
+  industry: Record<string, any>[];
+  location: Record<string, any>[];
+  jobType: Record<string, any> | null;
+  dueDate: string | null;
+  quant: Record<string, any> | null;
+};
+
+type TProps = {
+  data?: TGeneralInfoForm;
+};
+
+const props = withDefaults(defineProps<TProps>(), {
+  data: () => ({
+    title: "",
+    department: [],
+    position: null,
+    level: null,
+    industry: [],
+    location: [],
+    jobType: null,
+    dueDate: null,
+    quant: null,
+  }),
+});
+const emits = defineEmits<{
+  (e: "dataChange", payload: TGeneralInfoForm): void;
+}>();
+
 const isLoading = ref<boolean>(false);
 const departmentList = ref<Record<string, any>[]>([]);
 const positionList = ref<Record<string, any>[]>([]);
@@ -171,17 +206,7 @@ const industryList = ref<Record<string, any>[]>([]);
 const locationList = ref<Record<string, any>[]>([]);
 const jobTypeList = ref<Record<string, any>[]>([]);
 
-const formInput = ref<Record<string, any>>({
-  title: "",
-  department: [],
-  position: null,
-  level: null,
-  industry: [],
-  location: [],
-  jobType: null,
-  dueDate: null,
-  quant: null,
-});
+const formInput = ref<Record<string, any>>({});
 
 const formError = ref<Record<string, any>>({
   title: "",
@@ -193,6 +218,10 @@ const formError = ref<Record<string, any>>({
   jobType: "",
   dueDate: "",
   quant: "",
+});
+
+onBeforeMount(() => {
+  formInput.value = props.data;
 });
 
 const formRule: Record<string, any> = {
@@ -218,12 +247,6 @@ const formRule: Record<string, any> = {
     {
       error: "Mời chọn cấp bậc",
       validator: (input: any | null) => !!input,
-    },
-  ],
-  industry: [
-    {
-      error: "Mời chọn ngành nghề",
-      validator: (input: any[]) => !!input.length,
     },
   ],
   location: [
@@ -389,13 +412,15 @@ const levelOptions = computed(() => {
 });
 
 function handleInput(key: string, value: any) {
-  console.log(key, value);
   formError.value[key] = "";
   formInput.value[key] = value;
 }
 
 function validateKey(key: string) {
   const rules = formRule[key];
+  if (!rules) {
+    return;
+  }
   for (const rule of rules) {
     const isValid = rule.validator(formInput.value[key]);
     if (!isValid) {
@@ -404,6 +429,14 @@ function validateKey(key: string) {
     }
   }
 }
+
+watch(
+  formInput,
+  (newVal) => {
+    emits("dataChange", newVal as TGeneralInfoForm);
+  },
+  { deep: true },
+);
 </script>
 <style lang="scss" scoped>
 .general-info {

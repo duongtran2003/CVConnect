@@ -1,5 +1,5 @@
 <template>
-  <label class="textarea-input" :class="{ disabled: isDisabled }">
+  <div class="textarea-input" :class="{ disabled: isDisabled }">
     <!-- Label -->
     <div class="label">
       <div class="name">
@@ -37,7 +37,7 @@
     <div v-if="!props.slimError" class="error-message">
       {{ props.showError ? error : "" }}
     </div>
-  </label>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -125,11 +125,11 @@ const isTextHidden = ref(true);
 
   .input-wrapper {
     border-radius: 12px;
-    border: 3px solid transparent;
+    // border: 3px solid transparent;
     transition-duration: 200ms;
 
     &.error {
-      border: 3px solid rgba($color-danger, 0.3);
+      // border: 3px solid rgba($color-danger, 0.3);
 
       .input {
         border: 2px solid rgba($color-danger, 1);
@@ -170,10 +170,10 @@ const isTextHidden = ref(true);
         border: 2px solid $color-gray-300;
       }
     }
-
-    &:focus-within {
-      border: 3px solid rgba($color-primary-400, 0.4);
-    }
+    //
+    // &:focus-within {
+    //   border: 3px solid rgba($color-primary-400, 0.4);
+    // }
   }
 
   .error-message {

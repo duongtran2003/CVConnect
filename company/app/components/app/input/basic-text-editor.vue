@@ -87,7 +87,7 @@ const editor = useEditor({
     ListItem,
   ],
   onUpdate: ({ editor }) => {
-    emits("input", editor.getHTML());
+    emits("input", editor.isEmpty ? "" : editor.getHTML());
   },
 });
 </script>

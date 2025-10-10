@@ -1,6 +1,6 @@
 <template>
   <div class="search-select-input">
-    <div class="label">
+    <div v-if="props.label" class="label">
       <span v-if="props.label" class="text">{{ props.label }}</span>
       <span v-if="props.required" class="required">Bắt buộc</span>
     </div>
@@ -43,7 +43,7 @@
         <Icon name="mdi:close-circle" />
       </div>
     </div>
-    <div class="error-message">{{ error }}</div>
+    <div v-if="!props.slimError" class="error-message">{{ error }}</div>
   </div>
 </template>
 <script setup lang="ts">
@@ -60,6 +60,8 @@ type TProps = {
   remoteFilter?: boolean;
   multiple?: boolean;
   allowClear?: boolean;
+  isPaginated?: boolean;
+  slimError?: boolean;
   fetchFn?:
     | ((params: any, controller?: AbortController) => Promise<any>)
     | null;
@@ -75,7 +77,9 @@ const props = withDefaults(defineProps<TProps>(), {
   multiple: false,
   isDisabled: false,
   fetchFn: null,
+  slimError: false,
   allowClear: true,
+  isPaginated: true,
 });
 const emits = defineEmits<{
   (
@@ -122,9 +126,13 @@ async function handleOpenUpdate(isOpen: boolean) {
     if (props.options.length == 0) {
       await resetAndFetch();
     }
-    attachScrollListener();
+    if (props.isPaginated) {
+      attachScrollListener();
+    }
   } else {
-    detachScrollListener();
+    if (props.isPaginated) {
+      detachScrollListener();
+    }
   }
 
   emits("open-update", isOpen);

@@ -22,12 +22,12 @@
           :disabled="isDisabled"
           :max="props.maxValue"
           :min="props.minValue"
-          :value="value"
-          type="number"
+          type="text"
+          :value="displayValue"
           :placeholder="placeholder"
           :class="{ disabled: isDisabled }"
-          @input="updateValue"
-          @blur="emit('blur')"
+          @input="onInput"
+          @blur="onBlur"
         />
       </div>
     </div>
@@ -41,7 +41,7 @@ export type TInputTextProps = {
   label?: string;
   desc?: string;
   required?: boolean;
-  value: string | null;
+  value: number | string | null;
   error?: string;
   isDisabled?: boolean;
   maxValue?: number;
@@ -73,15 +73,22 @@ const props = withDefaults(defineProps<TInputTextProps>(), {
 });
 
 const { label, desc, required, value, isDisabled } = toRefs(props);
-const updateValue = (event: Event) => {
-  if (isDisabled.value) {
-    return;
-  }
 
-  const value = (event.target as HTMLInputElement)?.value || 0;
+const displayValue = computed(() => {
+  if (value.value === null || value.value === "" || isNaN(Number(value.value)))
+    return "";
+  return new Intl.NumberFormat("en-US").format(Number(value.value));
+});
 
-  emit("input", value);
-};
+function onInput(event: Event) {
+  if (isDisabled.value) return;
+
+  const raw = (event.target as HTMLInputElement).value;
+  const numericString = raw.replace(/[^\d.-]/g, "");
+  const numericValue = numericString ? Number(numericString) : null;
+
+  emit("input", numericValue);
+}
 </script>
 <style lang="scss" scoped>
 .number-input {
@@ -149,6 +156,7 @@ const updateValue = (event: Event) => {
       align-items: center;
       flex-direction: row;
       color: $text-light;
+      min-width: 0;
 
       .secure-toggle {
         cursor: pointer;
@@ -159,6 +167,7 @@ const updateValue = (event: Event) => {
         font-size: 16px;
         outline: none;
         border: none;
+        min-width: 0;
 
         &::placeholder {
           color: $color-gray-300;

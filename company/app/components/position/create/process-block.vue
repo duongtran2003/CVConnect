@@ -59,6 +59,7 @@
                 :value="element.name"
                 :slim-error="true"
                 :is-disabled="props.disabled"
+                :title="element.name"
                 class="text-input"
                 @input="handleInput(index, $event)"
               />
