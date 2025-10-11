@@ -23,13 +23,6 @@
       </div>
       <div class="address-wrapper">
         <div class="label">Địa chỉ doanh nghiệp</div>
-        <div class="remote-toggler">
-          <UCheckbox
-            :model-value="props.data.hasRemote"
-            @update:model-value="handleRemoteInput"
-          />
-          <div @click="handleRemoteInput">Thêm địa chỉ làm việc từ xa</div>
-        </div>
         <!-- <div class="description">Hãy nhập đầy đủ thành phố/tỉnh thành và địa chỉ chi tiết</div> -->
         <div class="address-picker-list">
           <OrgRegisterAddressPicker
@@ -108,12 +101,6 @@ const handlePhotoInput = (key: string, value: unknown) => {
   emits("input", {
     key,
     value: value ?? null,
-  });
-};
-const handleRemoteInput = () => {
-  emits("input", {
-    key: "hasRemote",
-    value: !props.data.hasRemote,
   });
 };
 const handleAddressRemove = (index: number) => {

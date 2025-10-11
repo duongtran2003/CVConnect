@@ -14,8 +14,8 @@ export default defineNuxtPlugin(() => {
   const { clearUser } = useUserStore();
   const authStore = useAuthStore();
   const { token } = storeToRefs(authStore);
-  const { logout } = useAuth();
   const route = useRoute();
+  const router = useRouter();
 
   const refreshAuthLogic = (failedRequest: any) =>
     axios
@@ -31,17 +31,13 @@ export default defineNuxtPlugin(() => {
         return Promise.resolve();
       })
       .catch((err) => {
-        // const urlParts = window.location.href.split("/");
-        // if (urlParts[urlParts.length - 1] !== "login") {
-        // }
         console.log("logout when refresh fail", route.fullPath);
         clearToken();
         clearUser();
-        // logout();
       });
 
   createAuthRefreshInterceptor(axiosInstance, refreshAuthLogic, {
-    statusCodes: [401, 403],
+    statusCodes: [401],
   });
 
   axiosInstance.interceptors.request.use(
@@ -52,6 +48,9 @@ export default defineNuxtPlugin(() => {
       return config;
     },
     (error) => {
+      if (error.response && error.response.status === 403) {
+        router.push({ path: "/403" });
+      }
       return Promise.reject(error);
     },
   );

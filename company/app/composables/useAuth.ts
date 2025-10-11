@@ -35,6 +35,10 @@ export const useAuth = () => {
       setRoles(res.data.data.roles);
       if (res.data.data.roles.length == 1) {
         setCurrentRole(res.data.data.roles[0]);
+      } else {
+        if (res.data.data.roles.length == 0) {
+          router.push({ path: "/403" });
+        }
       }
       return true;
     } catch (err: any) {

@@ -106,7 +106,6 @@ const mode = ref<TRegisteringMode>("registering");
 const formData = ref<Record<string, any>>({
   name: "",
   website: "",
-  hasRemote: false,
   companySize: "",
   companyType: [],
   description: "",
@@ -202,7 +201,6 @@ const handleGoNext = async () => {
         website: formData.value.website.trim()
           ? formData.value.website.trim()
           : undefined,
-        hasRemote: formData.value.hasRemote ? formData.value.hasRemote : false,
       },
     };
 

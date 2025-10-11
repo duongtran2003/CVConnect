@@ -94,6 +94,7 @@ const route = useRoute();
 
 onBeforeMount(async () => {
   const res = await verifyToken();
+  console.log('login', res)
   if (res.data.isValid) {
     handleRoleValidation();
   }
