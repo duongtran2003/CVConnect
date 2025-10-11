@@ -74,7 +74,7 @@ onBeforeMount(async () => {
 
   .main-content {
     max-height: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
     padding: 12px 12px;
     flex: 1;

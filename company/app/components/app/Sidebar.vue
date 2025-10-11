@@ -98,7 +98,7 @@ const sidebarStore = useSidebarStore();
 const { setMenus } = sidebarStore;
 const { sidebarData } = storeToRefs(sidebarStore);
 const authStore = useAuthStore();
-const { setCurrentRole } = authStore;
+const { setCurrentRole, setRoles } = authStore;
 const { currentRole, roles } = storeToRefs(authStore);
 const { setLoading } = useLoadingStore();
 const { getMenus, setDefaultRole } = useAuth();
@@ -153,8 +153,13 @@ const isCurrentRole = computed(() => {
 
 const isSetDefault = computed(() => {
   return (role: TAccountRole) => {
-    const _role = getDefaultRole();
-    if (_role && _role.id == role.id) {
+    const currentDefaultRole = roles.value.filter((role) => role.isDefault);
+    console.log(currentDefaultRole, roles.value);
+    if (
+      currentDefaultRole.length &&
+      currentDefaultRole[0] &&
+      currentDefaultRole[0].id == role.id
+    ) {
       return true;
     }
     return false;
@@ -191,6 +196,17 @@ const handleSetRoleDefault = async (role: TAccountRole) => {
       color: "success",
     });
     if (currentRole.value && currentRole.value.id !== role.id) {
+      const roleList = roles.value.map((_role) => {
+        if (_role.id !== role.id) {
+          return _role;
+        }
+
+        return {
+          ..._role,
+          isDefault: true,
+        };
+      });
+      setRoles(roleList);
       setCurrentRole(role);
     }
   }

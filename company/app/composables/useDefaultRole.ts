@@ -4,6 +4,7 @@ export const useDefaultRole = () => {
   const { setCurrentRole } = authStore;
   const { setLoading } = useLoadingStore();
   const router = useRouter();
+  const route = useRoute();
 
   const handleRoleValidation = (redirect?: string) => {
     // if (currentRole.value) {
@@ -48,7 +49,8 @@ export const useDefaultRole = () => {
           });
         } else if (roles.value.length == 1 && roles.value[0]) {
           setCurrentRole(roles.value[0]);
-        } else if (roles.value.length == 0) {
+        } else if (roles.value.length == 0 && route.path !== "/auth/login") {
+          console.log("use default role 403");
           router.push({ path: "/403" });
         }
       }

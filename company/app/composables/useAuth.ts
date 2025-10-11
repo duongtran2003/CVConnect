@@ -37,6 +37,7 @@ export const useAuth = () => {
         setCurrentRole(res.data.data.roles[0]);
       } else {
         if (res.data.data.roles.length == 0) {
+          console.log('push to 403 do roles length = 0')
           router.push({ path: "/403" });
         }
       }
@@ -221,6 +222,12 @@ export const useAuth = () => {
   const getMe = async (role: TAccountRole, option?: TApiOption) => {
     try {
       const res = await $axios.get(`/_api/user/user/my-info/${role.id}`);
+      if (!res.data.data.roles || !res.data.data.roles.length) {
+        console.log('push to forbidden', res.data)
+        router.push({ path: "/403" });
+      } else {
+        setRoles(res.data.data.roles);
+      }
       return res;
     } catch (err: any) {
       if (!option?.isSilent && err.response && err.response.data) {

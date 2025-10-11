@@ -22,3 +22,7 @@ export const DEFAULT_ROLE_VIEW: Record<TRole, string> = {
   ORG_ADMIN: "/org-admin/org-member",
   INTERVIEWER: "",
 };
+
+export const DEFAULT_MEMBER_TYPE_VIEW: Record<string, string> = {
+  ORG: '/org-info'
+};
