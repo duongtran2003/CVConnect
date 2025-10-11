@@ -150,8 +150,12 @@ export const useAuth = () => {
       await router.push({ path: "/auth/login" });
       clearToken();
       clearUser();
+      clearLocalCurrentRole();
     } catch (err) {
       console.error(err);
+      clearLocalCurrentRole();
+      clearToken();
+      clearUser();
     }
   };
 
@@ -229,6 +233,21 @@ export const useAuth = () => {
     }
   };
 
+  const setDefaultRole = async (role: TAccountRole) => {
+    try {
+      const res = await $axios.put(`/_api/user/user/role-default/${role.id}`);
+      return res;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      return null;
+    }
+  };
+
   const getMenus = async (role: TAccountRole) => {
     try {
       const res = await $axios.get(`/_api/user/menu/menu-by-role/${role.id}`);
@@ -257,5 +276,6 @@ export const useAuth = () => {
     requestResetPassword,
     resetPassword,
     registerOrgAdmin,
+    setDefaultRole,
   };
 };

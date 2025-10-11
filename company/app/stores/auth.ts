@@ -12,6 +12,7 @@ export type TAccountRole = {
   code: TRole;
   name: string;
   memberType?: TRole;
+  isDefault?: boolean;
 };
 
 export const useAuthStore = defineStore(
@@ -31,6 +32,11 @@ export const useAuthStore = defineStore(
 
     const setCurrentRole = (_role: TAccountRole | null) => {
       currentRole.value = _role;
+      if (_role) {
+        setLocalCurrentRole(_role);
+      } else {
+        clearLocalCurrentRole();
+      }
     };
 
     const clearToken = () => {

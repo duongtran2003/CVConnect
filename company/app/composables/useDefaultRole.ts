@@ -1,31 +1,39 @@
 export const useDefaultRole = () => {
   const authStore = useAuthStore();
   const { currentRole, roles } = storeToRefs(authStore);
-  const { setCurrentRole, clearToken } = authStore;
+  const { setCurrentRole } = authStore;
   const { setLoading } = useLoadingStore();
   const router = useRouter();
-  const { logout } = useAuth();
-  const route = useRoute();
 
   const handleRoleValidation = (redirect?: string) => {
-    if (currentRole.value) {
-      if (route.name === "auth-login") {
-        const defaultRoute = getDefaultRoute(currentRole.value);
+    // if (currentRole.value) {
+    //   if (route.name === "auth-login") {
+    //     const defaultRoute = getDefaultRoute(currentRole.value);
+    //
+    //     if (!redirect) {
+    //       router.push({ path: defaultRoute });
+    //     } else if (redirect !== defaultRoute) {
+    //       router.push(redirect);
+    //     }
+    //   }
+    //   return;
+    // }
 
-        if (!redirect) {
-          router.push({ path: defaultRoute });
-        } else if (redirect !== defaultRoute) {
-          router.push(redirect);
-        }
+    const localRole = getLocalCurrentRole();
+    if (localRole) {
+      const defaultRoute = getDefaultRoute(localRole);
+      setCurrentRole(localRole);
+
+      if (!redirect) {
+        router.push({ path: defaultRoute });
+      } else if (redirect !== defaultRoute) {
+        router.push(redirect);
       }
-      return;
-    }
-    const defaultRole = getDefaultRole();
-    if (defaultRole) {
-      const role = roles.value.find((role) => role.id == defaultRole.id);
-      if (role) {
-        const defaultRoute = getDefaultRoute(role);
-        setCurrentRole(defaultRole);
+    } else {
+      const defaultRole = roles.value.filter((role) => role.isDefault);
+      if (defaultRole.length && defaultRole[0]) {
+        const defaultRoute = getDefaultRoute(defaultRole[0]);
+        setCurrentRole(defaultRole[0]);
 
         if (!redirect) {
           router.push({ path: defaultRoute });
@@ -33,19 +41,16 @@ export const useDefaultRole = () => {
           router.push(redirect);
         }
       } else {
-        clearDefaultRole();
-      }
-    }
-
-    if (!currentRole.value) {
-      if (roles.value.length > 1) {
-        router.push({
-          name: "role-select",
-          query: redirect ? { redirect: redirect } : undefined,
-        });
-      } else if (roles.value.length == 1) {
-        console.log("set role cho ne");
-        setCurrentRole(roles.value[0]!);
+        if (roles.value.length > 1) {
+          router.push({
+            name: "role-select",
+            query: redirect ? { redirect: redirect } : undefined,
+          });
+        } else if (roles.value.length == 1 && roles.value[0]) {
+          setCurrentRole(roles.value[0]);
+        } else if (roles.value.length == 0) {
+          router.push({ path: "/403" });
+        }
       }
     }
   };
@@ -61,9 +66,6 @@ export const useDefaultRole = () => {
       );
       const defaultRoute = getDefaultRoute(currentRole.value);
       router.push({ path: defaultRoute });
-
-      // await logout();
-      // clearToken();
       setLoading(false);
     }
   };

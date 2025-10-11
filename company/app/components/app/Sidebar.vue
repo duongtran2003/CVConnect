@@ -10,7 +10,10 @@
       <div
         ref="mainSection"
         class="main-section"
-        :class="{ expanded: isExpanded, 'has-scrollbar': hasMainSidebarScrollbar }"
+        :class="{
+          expanded: isExpanded,
+          'has-scrollbar': hasMainSidebarScrollbar,
+        }"
       >
         <AppSidebarItem
           v-for="menu in sidebarData"
@@ -98,7 +101,7 @@ const authStore = useAuthStore();
 const { setCurrentRole } = authStore;
 const { currentRole, roles } = storeToRefs(authStore);
 const { setLoading } = useLoadingStore();
-const { getMenus } = useAuth();
+const { getMenus, setDefaultRole } = useAuth();
 const toast = useToast();
 
 const isAllRolesShow = ref(false);
@@ -179,16 +182,18 @@ const handleSetRole = (role: TAccountRole) => {
   });
 };
 
-const handleSetRoleDefault = (role: TAccountRole) => {
+const handleSetRoleDefault = async (role: TAccountRole) => {
   isAllRolesShow.value = false;
-  toast.add({
-    title: "Đặt vai trò làm mặc định thành công",
-    color: "success",
-  });
-  if (currentRole.value && currentRole.value.id !== role.id) {
-    setCurrentRole(role);
+  const res = await setDefaultRole(role);
+  if (res) {
+    toast.add({
+      title: "Đặt vai trò làm mặc định thành công",
+      color: "success",
+    });
+    if (currentRole.value && currentRole.value.id !== role.id) {
+      setCurrentRole(role);
+    }
   }
-  setDefaultRole(role);
 };
 
 const handleItemExpand = ({ id, state }: TSidebarItemExpandPayload) => {

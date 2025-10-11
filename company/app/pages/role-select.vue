@@ -46,6 +46,8 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const { setCurrentRole } = authStore;
+const { setDefaultRole } = useAuth();
+const { setLoading } = useLoadingStore();
 const { roles } = storeToRefs(authStore);
 const setDefault = ref(false);
 const selectedRole = ref<TAccountRole | null>(null);
@@ -81,14 +83,16 @@ const handleClickRole = (role: TAccountRole) => {
   selectedRole.value = role;
 };
 
-const handleButtonClick = () => {
+const handleButtonClick = async () => {
   if (!selectedRole.value) {
     return;
   }
 
   setCurrentRole(selectedRole.value);
   if (setDefault.value) {
-    setDefaultRole(selectedRole.value);
+    setLoading(true);
+    await setDefaultRole(selectedRole.value);
+    setLoading(false);
   }
 
   const redirectTo = route.query.redirect as string;
