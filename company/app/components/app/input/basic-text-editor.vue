@@ -1,6 +1,7 @@
 <template>
   <div class="basic-text-editor">
     <div v-if="editor" class="editor-toolbar">
+      <!-- Basic formatting -->
       <button
         :class="{ active: editor.isActive('bold') }"
         @click="editor.chain().focus().toggleBold().run()"
@@ -32,6 +33,7 @@
       >
         <Icon name="material-symbols:format-list-bulleted-rounded" />
       </button>
+
       <button
         :class="{ active: editor.isActive('orderedList') }"
         @click="editor.chain().focus().toggleOrderedList().run()"
@@ -40,28 +42,28 @@
       </button>
       <button
         :class="{ active: editor.isActive({ textAlign: 'left' }) }"
-        @click="editor.chain().focus().setTextAlign('left').run()"
+        @click="editor.chain().focus().toggleTextAlign('left').run()"
       >
         <Icon name="material-symbols:format-align-left-rounded" />
       </button>
 
       <button
         :class="{ active: editor.isActive({ textAlign: 'center' }) }"
-        @click="editor.chain().focus().setTextAlign('center').run()"
+        @click="editor.chain().focus().toggleTextAlign('center').run()"
       >
         <Icon name="material-symbols:format-align-center-rounded" />
       </button>
 
       <button
         :class="{ active: editor.isActive({ textAlign: 'right' }) }"
-        @click="editor.chain().focus().setTextAlign('right').run()"
+        @click="editor.chain().focus().toggleTextAlign('right').run()"
       >
         <Icon name="material-symbols:format-align-right-rounded" />
       </button>
 
       <button
         :class="{ active: editor.isActive({ textAlign: 'justify' }) }"
-        @click="editor.chain().focus().setTextAlign('justify').run()"
+        @click="editor.chain().focus().toggleTextAlign('justify').run()"
       >
         <Icon name="material-symbols:format-align-justify-rounded" />
       </button>
@@ -78,7 +80,13 @@
       </button>
     </div>
 
-    <div class="editor-wrapper" @click="editor?.chain().focus().run()">
+    <!-- The editor area -->
+    <div
+      class="editor-wrapper"
+      @click="editor?.chain().focus().run()"
+      @dragover.prevent
+      @drop="onDrop"
+    >
       <EditorContent :editor="editor" />
     </div>
   </div>
@@ -87,11 +95,12 @@
 <script setup lang="ts">
 import { useEditor, EditorContent } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
 import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
-import Underline from "@tiptap/extension-underline";
-import TextAlign from "@tiptap/extension-text-align";
+import { MergeTag } from "~/extensions/tiptap/MergeTag";
 
 const props = defineProps<{
   value: string;
@@ -116,11 +125,103 @@ const editor = useEditor({
     TextAlign.configure({
       types: ["heading", "paragraph"],
     }),
+    MergeTag,
   ],
   onUpdate: ({ editor }) => {
-    emits("input", editor.isEmpty ? "" : editor.getHTML());
+    const html = editor.isEmpty ? "" : editor.getHTML();
+    emits("input", html);
   },
 });
+
+let draggedTagData: any = null;
+
+onMounted(() => {
+  try {
+    const dom = editor.value?.view.dom;
+    if (!dom) return;
+
+    // when user starts dragging a merge tag inside the editor
+    dom.addEventListener("dragstart", (e: DragEvent) => {
+      const target = e.target as HTMLElement;
+      const tag = target?.closest("[data-merge-tag]");
+      if (tag) {
+        const attrs = {
+          id: tag.getAttribute("data-id"),
+          code: tag.getAttribute("data-merge-tag"),
+          label: tag.textContent,
+          description: tag.getAttribute("data-description"),
+        };
+        draggedTagData = attrs;
+        e.dataTransfer?.setData("application/json", JSON.stringify(attrs));
+        // small delay to refocus
+        requestAnimationFrame(() => editor.value?.commands.focus());
+      }
+    });
+
+    dom.addEventListener("dragend", () => {
+      draggedTagData = null;
+    });
+  } catch (err) {
+    console.log("loi nay", err);
+  }
+});
+
+function onDrop(e: DragEvent) {
+  e.preventDefault();
+  if (!editor.value?.view) return;
+
+  const data = e.dataTransfer?.getData("application/json");
+  if (!data) return;
+
+  const placeholder = JSON.parse(data);
+  const coords = { left: e.clientX, top: e.clientY };
+  const pos = editor.value.view.posAtCoords(coords)?.pos;
+  if (pos == null) return;
+
+  // remove original tag if this was an internal drag
+  if (draggedTagData) {
+    const { state, dispatch } = editor.value.view;
+    const tr = state.tr;
+    state.doc.descendants((node, offset) => {
+      if (
+        node.type.name === "mergeTag" &&
+        node.attrs.code === draggedTagData.code
+      ) {
+        tr.delete(offset, offset + node.nodeSize);
+      }
+    });
+    dispatch(tr);
+  }
+
+  // insert tag at drop position
+  editor.value
+    ?.chain()
+    .focus()
+    .insertContentAt(pos, { type: "mergeTag", attrs: placeholder })
+    .run();
+
+  draggedTagData = null;
+}
+
+function getUsedPlaceholders() {
+  const json = editor.value?.getJSON();
+  if (!json) return [];
+
+  const tags: any[] = [];
+
+  function walk(node: any) {
+    if (!node) return;
+    if (node.type === "mergeTag") {
+      tags.push(node.attrs);
+    }
+    if (node.content) node.content.forEach(walk);
+  }
+
+  walk(json);
+  return tags;
+}
+
+defineExpose({ getUsedPlaceholders });
 </script>
 
 <style scoped lang="scss">
@@ -143,7 +244,6 @@ const editor = useEditor({
     padding: 8px;
     border-bottom: 1px solid rgba($color-primary-800, 0.1);
     background-color: $color-gray-50;
-    // background-color: white;
 
     button {
       height: 28px;
@@ -179,6 +279,29 @@ const editor = useEditor({
     :deep(.ProseMirror) {
       outline: none;
     }
+  }
+
+  :deep(.chip) {
+    border: 1px solid $color-gray-300;
+    background-color: #ffffff;
+    padding: 1px 3px;
+    border-radius: 4px;
+    font-size: 13px;
+
+    // display: inline-flex;
+    // align-items: center;
+    // gap: 4px;
+    // background-color: #ffffff;
+    // border: 1px solid $color-gray-300;
+    // border-radius: 9999px;
+    // padding: 2px 6px;
+    font-weight: 600;
+    cursor: grab;
+    user-select: none;
+  }
+
+  :deep(.chip:active) {
+    cursor: grabbing;
   }
 }
 </style>
