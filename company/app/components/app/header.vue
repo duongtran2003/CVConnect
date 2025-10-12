@@ -1,14 +1,12 @@
 <template>
   <div class="header">
-    <AppBreadcrumb />
+    <AppBreadcrumb class="breadcrumb" />
     <AppHeaderSearch />
     <AppHeaderNotificationBell />
     <AppHeaderAvatar />
   </div>
 </template>
-<script setup lang="ts">
-  
-</script>
+<script setup lang="ts"></script>
 <style lang="scss" scoped>
 .header {
   width: 100%;
@@ -21,5 +19,11 @@
   top: 0px;
   padding-right: 20px;
   padding-left: 20px;
-} 
+
+  .breadcrumb {
+    @media (max-width: $breakpoint-lg) {
+      display: none;
+    }
+  }
+}
 </style>

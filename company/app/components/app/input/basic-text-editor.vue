@@ -38,6 +38,33 @@
       >
         <Icon name="material-symbols:format-list-numbered-rounded" />
       </button>
+      <button
+        :class="{ active: editor.isActive({ textAlign: 'left' }) }"
+        @click="editor.chain().focus().setTextAlign('left').run()"
+      >
+        <Icon name="material-symbols:format-align-left-rounded" />
+      </button>
+
+      <button
+        :class="{ active: editor.isActive({ textAlign: 'center' }) }"
+        @click="editor.chain().focus().setTextAlign('center').run()"
+      >
+        <Icon name="material-symbols:format-align-center-rounded" />
+      </button>
+
+      <button
+        :class="{ active: editor.isActive({ textAlign: 'right' }) }"
+        @click="editor.chain().focus().setTextAlign('right').run()"
+      >
+        <Icon name="material-symbols:format-align-right-rounded" />
+      </button>
+
+      <button
+        :class="{ active: editor.isActive({ textAlign: 'justify' }) }"
+        @click="editor.chain().focus().setTextAlign('justify').run()"
+      >
+        <Icon name="material-symbols:format-align-justify-rounded" />
+      </button>
 
       <button @click="editor.chain().focus().setHorizontalRule().run()">
         <Icon name="material-symbols:horizontal-rule-rounded" />
@@ -64,6 +91,7 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
 import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
 
 const props = defineProps<{
   value: string;
@@ -85,6 +113,9 @@ const editor = useEditor({
     }),
     Underline,
     ListItem,
+    TextAlign.configure({
+      types: ["heading", "paragraph"],
+    }),
   ],
   onUpdate: ({ editor }) => {
     emits("input", editor.isEmpty ? "" : editor.getHTML());

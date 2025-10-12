@@ -48,7 +48,7 @@ function handleGoBack() {
     font-weight: 400;
   }
 
-  .back-to-login {
+  .back-to-last {
     padding: 8px 12px;
     background-color: $color-primary-500;
     color: $text-dark;

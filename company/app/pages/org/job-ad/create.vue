@@ -62,10 +62,17 @@
             content: 'w-[130px]',
           }"
         >
+          <template #item-trailing="{ item }">
+            <Icon v-if="item.label == 'Công khai'" name="ic:round-public" class="text-[16px] mr-[2px]"/>
+            <Icon
+              v-if="item.label == 'Nội bộ'"
+              name="ic:outline-private-connectivity"
+              class="text-[20px]"
+            />
+          </template>
           <AppButton
             :text="'Lưu và đăng tin'"
             class="submit-button"
-            :is-disabled="!isFormValid"
           />
         </UDropdownMenu>
       </div>
@@ -121,7 +128,7 @@ const formData = ref<TFormData>({
 onBeforeMount(async () => {
   overrideItems(CREATE_BREADCRUMBS);
   const res = await getMailTemplateConfig();
-  if (res.data) {
+  if (res && res.data) {
     mailConfig.value = res.data;
   }
 });
@@ -182,6 +189,7 @@ const transformedForm = computed(() => {
       ? toUtcDate(data.generalInfo.dueDate)
       : "",
     quantity: data.generalInfo?.quant,
+    hasRemote: data.generalInfo?.hasRemote,
     salaryType: data.salaryInfo?.salaryType?.value,
     salaryFrom: data.salaryInfo?.salaryFrom,
     salaryTo: data.salaryInfo?.salaryTo,

@@ -300,7 +300,6 @@ const isExpanded = ref(true);
     display: flex;
     flex-direction: column;
     gap: 8px;
-    flex: 1;
 
     .role-list {
       display: flex;

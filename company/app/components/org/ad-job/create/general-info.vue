@@ -156,6 +156,13 @@
           @blur="validateKey('quant')"
         />
       </div>
+      <div class="row">
+        <UCheckbox
+          class="checkbox"
+          :model-value="formInput.hasRemote"
+          :label="'Cho phép làm từ xa'"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -176,6 +183,7 @@ export type TGeneralInfoForm = {
   jobType: Record<string, any> | null;
   dueDate: string | null;
   quant: Record<string, any> | null;
+  hasRemote: boolean;
 };
 
 type TProps = {
@@ -193,6 +201,7 @@ const props = withDefaults(defineProps<TProps>(), {
     jobType: null,
     dueDate: null,
     quant: null,
+    hasRemote: false,
   }),
 });
 const emits = defineEmits<{
@@ -457,6 +466,17 @@ watch(
         max-width: calc((100% - 8px) * 0.5);
         min-width: calc((100% - 8px) * 0.5);
       }
+    }
+  }
+
+  .checkbox {
+    :deep(label) {
+      color: $text-light;
+      font-weight: 400;
+      cursor: pointer !important;
+    }
+    :deep(button) {
+      cursor: pointer !important;
     }
   }
 
