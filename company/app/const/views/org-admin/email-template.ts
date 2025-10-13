@@ -128,3 +128,29 @@ export const pageSizeOptions = [
     value: 50,
   },
 ];
+
+export const TEMPLATE_TABS = [
+  {
+    label: "Thiết lập mẫu email",
+    index: 1,
+  },
+  {
+    label: "Cấu hình mail service",
+    index: 2,
+  },
+];
+
+export const MAIL_PROTOCOLS = [
+  {
+    label: "SMTP",
+    value: "smtp",
+  },
+  {
+    label: "POP3",
+    value: "pop3",
+  },
+  {
+    label: "IMAP",
+    value: "imap",
+  },
+];

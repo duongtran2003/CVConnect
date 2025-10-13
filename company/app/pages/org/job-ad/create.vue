@@ -73,6 +73,7 @@
           <AppButton
             :text="'Lưu và đăng tin'"
             class="submit-button"
+            :is-disabled="!isFormValid"
           />
         </UDropdownMenu>
       </div>

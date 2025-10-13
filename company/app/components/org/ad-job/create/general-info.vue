@@ -24,7 +24,7 @@
           :error="formError.department"
           :placeholder="'Mời chọn phòng ban'"
           :remote-filter="true"
-          :multiple="true"
+          :multiple="false"
           :fetch-fn="fetchDepartments"
           @open-update="handleDepartmentOpenUpdate"
           @input="handleInput('department', $event)"
@@ -161,6 +161,7 @@
           class="checkbox"
           :model-value="formInput.hasRemote"
           :label="'Cho phép làm từ xa'"
+          @update:model-value="handleInput('hasRemote', $event)"
         />
       </div>
     </div>
@@ -330,7 +331,7 @@ function handleJobTypeOpenUpdate(value: boolean) {
 }
 
 async function fetchPosition(params: any, controller?: AbortController) {
-  const ids = formInput.value.department.map((val: any) => val.value);
+  const ids = formInput.value.department.value;
   const newParams = {
     ...params,
     departmentIds: ids,

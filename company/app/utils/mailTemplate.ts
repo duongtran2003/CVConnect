@@ -48,6 +48,7 @@ export function parseMergeTagsToHtml(
       `data-merge-tag="${p.code}"`,
       `code="${p.code}"`,
       `data-id="${p.id}"`,
+      `label="${p.label}"`,
       `id="${p.id}"`,
       `draggable="true"`,
       `class="chip"`,

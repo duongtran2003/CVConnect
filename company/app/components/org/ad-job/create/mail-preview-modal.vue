@@ -254,6 +254,7 @@ watch(
     flex-direction: column;
     margin: auto;
     max-height: 100%;
+    width: 100%;
     overflow: auto;
 
     &.is-mobile {

@@ -559,7 +559,6 @@ watch(isOpen, async (val) => {
           // border: 1px solid $color-gray-300;
           // border-radius: 9999px;
           // padding: 2px 6px;
-          font-weight: 600;
         }
       }
     }

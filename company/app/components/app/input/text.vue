@@ -147,6 +147,7 @@ const isTextHidden = ref(true);
       padding: 8px 10px;
       border: 2px solid rgba($color-primary-800, 0.1);
       flex: 1;
+      gap: 8px;
       transition-duration: 200ms;
       display: flex;
       align-items: center;
