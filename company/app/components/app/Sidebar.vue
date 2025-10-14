@@ -320,7 +320,7 @@ const isExpanded = ref(true);
       color: $text-light;
       display: flex;
       flex-direction: row;
-      gap: 16px;
+      gap: 8px;
       align-items: center;
       padding: 8px;
       cursor: pointer;
@@ -336,7 +336,8 @@ const isExpanded = ref(true);
       .star-icon {
         display: flex;
         color: $color-goldenrod;
-        font-size: 24px;
+        font-size: 20px;
+        margin-left: -8px;
 
         &.small {
           position: absolute;

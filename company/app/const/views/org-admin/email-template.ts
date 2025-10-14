@@ -154,3 +154,10 @@ export const MAIL_PROTOCOLS = [
     value: "imap",
   },
 ];
+
+export const BROADCAST_MESSAGE_TYPE = {
+  MAIL_CONFIG_UPDATE: "MAIL_CONFIG_UPDATED",
+};
+export const BROADCAST_CHANNEL = {
+  MAIL_CONFIG: "MAIL_CONFIG_CHANNEL",
+};

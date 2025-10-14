@@ -44,7 +44,12 @@
           />
           <div v-if="mailConfig == null" class="mail-service-notice">
             Doanh nghiệp của bạn chưa thiết lập cấu hình email.
-            <span class="link">Thiết lập ngay</span>
+            <NuxtLink
+              :to="'/org-admin/email-template?isConfig=1'"
+              target="_blank"
+              class="link"
+              >Thiết lập ngay</NuxtLink
+            >
           </div>
         </div>
         <OrgAdJobCreateMailInfo
@@ -63,7 +68,11 @@
           }"
         >
           <template #item-trailing="{ item }">
-            <Icon v-if="item.label == 'Công khai'" name="ic:round-public" class="text-[16px] mr-[2px]"/>
+            <Icon
+              v-if="item.label == 'Công khai'"
+              name="ic:round-public"
+              class="text-[16px] mr-[2px]"
+            />
             <Icon
               v-if="item.label == 'Nội bộ'"
               name="ic:outline-private-connectivity"
@@ -88,6 +97,10 @@ import type { TMailInfoForm } from "~/components/org/ad-job/create/mail-info.vue
 import type { TProcessConfigForm } from "~/components/org/ad-job/create/process-config.vue";
 import type { TSalaryInfoForm } from "~/components/org/ad-job/create/salary-info.vue";
 import { SALARY_TYPE } from "~/const/common";
+import {
+  BROADCAST_CHANNEL,
+  BROADCAST_MESSAGE_TYPE,
+} from "~/const/views/org-admin/email-template";
 import { CREATE_BREADCRUMBS, CREATE_TABS } from "~/const/views/org/job-ad";
 
 definePageMeta({
@@ -103,6 +116,7 @@ const { getMailTemplateConfig } = useMailTemplateApi();
 const { setLoading } = useLoadingStore();
 const { createJobAd } = useJobAdApi();
 
+const broadcastChannel = ref<BroadcastChannel | null>(null);
 const mailConfig = ref<Record<string, any> | null>(null);
 const paddedProcesses = ref<any[]>([]);
 const currentTabIndex = ref<number>(1);
@@ -128,6 +142,18 @@ const formData = ref<TFormData>({
 
 onBeforeMount(async () => {
   overrideItems(CREATE_BREADCRUMBS);
+  broadcastChannel.value = new BroadcastChannel(BROADCAST_CHANNEL.MAIL_CONFIG);
+  broadcastChannel.value.onmessage = async (event) => {
+    if (event.data?.type === BROADCAST_MESSAGE_TYPE.MAIL_CONFIG_UPDATE) {
+      mailConfig.value = null;
+      const res = await getMailTemplateConfig();
+      if (res && res.data) {
+        mailConfig.value = res.data;
+      } else {
+        formData.value.sendMail = false;
+      }
+    }
+  };
   const res = await getMailTemplateConfig();
   if (res && res.data) {
     mailConfig.value = res.data;

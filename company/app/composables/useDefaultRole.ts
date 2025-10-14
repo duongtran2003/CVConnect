@@ -1,8 +1,12 @@
 export const useDefaultRole = () => {
   const authStore = useAuthStore();
+  const userStore = useUserStore();
+  const { userInfo } = storeToRefs(userStore);
   const { currentRole, roles } = storeToRefs(authStore);
   const { setCurrentRole } = authStore;
   const { setLoading } = useLoadingStore();
+  const sidebarStore = useSidebarStore();
+  const { sidebarData } = storeToRefs(sidebarStore);
   const router = useRouter();
   const route = useRoute();
 
@@ -60,17 +64,19 @@ export const useDefaultRole = () => {
   const checkPermission = async (requiredRole: TRole) => {
     if (currentRole.value && currentRole.value.code !== requiredRole) {
       setLoading(true);
-      console.log(
-        "logout when check permission failed",
-        currentRole.value,
-        currentRole.value.code,
-        requiredRole,
-      );
-      const defaultRoute = getDefaultRoute(currentRole.value);
-      router.push({ path: defaultRoute });
+      // console.log(
+      //   "logout when check permission failed",
+      //   currentRole.value,
+      //   currentRole.value.code,
+      //   requiredRole,
+      // );
+      // const defaultRoute = getDefaultRoute(currentRole.value);
+      router.push({ path: "/403" });
       setLoading(false);
     }
   };
+
+  const checkMemberType = async (requiredMemberType: string) => {};
 
   return { handleRoleValidation, checkPermission };
 };

@@ -56,8 +56,6 @@
         @open-update="handleProtocolOpenUpdate"
         @input="handleInput('protocol', $event)"
       />
-    </div>
-    <div class="row">
       <UCheckbox
         class="checkbox"
         :model-value="formInput.isSsl"
@@ -66,7 +64,12 @@
       />
     </div>
     <div class="footer">
-      <AppButton v-if="configDetail" :text="'Xóa'" class="button delete" @click="isDeleteModalOpen = true" />
+      <AppButton
+        v-if="configDetail"
+        :text="'Xóa'"
+        class="button delete"
+        @click="isDeleteModalOpen = true"
+      />
       <AppButton
         :text="'Lưu'"
         :is-disabled="!isFormValid"
@@ -98,7 +101,11 @@
 <script setup lang="ts">
 import { cloneDeep, isEqual } from "lodash";
 import { EMAIL_REGEX } from "~/const/auth";
-import { MAIL_PROTOCOLS } from "~/const/views/org-admin/email-template";
+import { BROADCAST_CHANNEL, BROADCAST_MESSAGE_TYPE, MAIL_PROTOCOLS } from "~/const/views/org-admin/email-template";
+
+useHead({
+  title: "Cấu hình mail service",
+});
 
 const {
   getMailTemplateConfig,
@@ -108,6 +115,11 @@ const {
 } = useMailTemplateApi();
 const { setLoading } = useLoadingStore();
 
+const emits = defineEmits<{
+  (e: "onUpdate"): void;
+}>();
+
+const broadcastChannel = ref<BroadcastChannel | null>(null);
 const isDeleteModalOpen = ref<boolean>(false);
 const isDeleting = ref<boolean>(false);
 const formInput = ref<Record<string, any>>({});
@@ -124,6 +136,7 @@ const configDetail = ref<Record<string, any> | null>(null);
 const formSnapshot = ref<Record<string, any> | null>(null);
 
 onBeforeMount(async () => {
+  broadcastChannel.value = new BroadcastChannel(BROADCAST_CHANNEL.MAIL_CONFIG);
   await fetchData();
 });
 
@@ -236,6 +249,9 @@ async function handleSubmit() {
   }
   setLoading(false);
   await fetchData();
+  broadcastChannel.value?.postMessage({
+    type: BROADCAST_MESSAGE_TYPE.MAIL_CONFIG_UPDATE,
+  });
 }
 
 async function handleDelete() {
@@ -244,6 +260,9 @@ async function handleDelete() {
   isDeleting.value = false;
   isDeleteModalOpen.value = false;
   fetchData();
+  broadcastChannel.value?.postMessage({
+    type: BROADCAST_MESSAGE_TYPE.MAIL_CONFIG_UPDATE,
+  });
 }
 
 function handleInput(key: string, value: any) {
@@ -286,6 +305,10 @@ const isFormValid = computed(() => {
   }
   return true;
 });
+
+onBeforeUnmount(() => {
+  broadcastChannel.value?.close();
+});
 </script>
 <style lang="scss" scoped>
 .mail-config {
@@ -297,26 +320,34 @@ const isFormValid = computed(() => {
     display: flex;
     flex-direction: row;
     gap: 8px;
-    @include respond-max(1064px) {
+    @include respond-max($breakpoint-lg) {
       flex-wrap: wrap;
+
+      .checkbox {
+        margin-left: 0px;
+      }
 
       :deep(.search-select-input),
       :deep(.text-input),
       :deep(.number-input),
       :deep(.datepicker-input) {
-        max-width: calc((100% - 8px) * 0.5);
-        min-width: calc((100% - 8px) * 0.5);
+        max-width: calc((100% - 8px) * 1);
+        min-width: calc((100% - 8px) * 1);
       }
     }
   }
 
   .checkbox {
+    align-items: center;
+    margin-left: 24px;
     :deep(label) {
+      margin-top: 4px;
       color: $text-light;
       font-weight: 400;
       cursor: pointer !important;
     }
     :deep(button) {
+      margin-top: 4px;
       cursor: pointer !important;
     }
   }
@@ -355,14 +386,14 @@ const isFormValid = computed(() => {
   :deep(.text-input),
   :deep(.number-input),
   :deep(.datepicker-input) {
-    max-width: calc((100% - 24px) * 0.25);
-    min-width: calc((100% - 24px) * 0.25);
+    max-width: calc((100% - 24px) * 0.5);
+    min-width: calc((100% - 24px) * 0.5);
   }
 
   .footer {
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 8px;
     margin-top: 12px;
 
