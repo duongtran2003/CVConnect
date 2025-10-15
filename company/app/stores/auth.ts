@@ -18,7 +18,7 @@ export type TAccountRole = {
 export const useAuthStore = defineStore(
   "auth",
   () => {
-    const token = ref<string | null>("not_set");
+    const token = ref<string | null>(null);
     const roles = ref<TAccountRole[]>([]);
     const currentRole = ref<TAccountRole | null | undefined>(undefined);
 
@@ -39,6 +39,12 @@ export const useAuthStore = defineStore(
       }
     };
 
+    const clearStore = () => {
+      token.value = null;
+      roles.value = [];
+      currentRole.value = undefined;
+    };
+
     const clearToken = () => {
       token.value = null;
       currentRole.value = null;
@@ -53,12 +59,13 @@ export const useAuthStore = defineStore(
       clearToken,
       setRoles,
       setCurrentRole,
+      clearStore,
     };
   },
   {
     persist: {
       storage: localStorage,
-      omit: ["currentRole"],
+      omit: ["currentRole", "roles"],
     },
   },
 );

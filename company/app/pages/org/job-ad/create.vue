@@ -104,7 +104,7 @@ import {
 import { CREATE_BREADCRUMBS, CREATE_TABS } from "~/const/views/org/job-ad";
 
 definePageMeta({
-  layout: "org-admin",
+  layout: "org",
 });
 useHead({
   title: "Tạo mới tin tuyển dụng",

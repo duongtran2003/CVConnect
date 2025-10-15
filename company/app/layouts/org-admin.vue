@@ -8,61 +8,13 @@
   </div>
 </template>
 <script setup lang="ts">
-import { isEmpty } from "lodash";
+import { PERMISSION_CHECK_TYPE } from "~/const/permission";
+import type { TPermissionCheckType } from "~/types/permision";
 
 const permittedRole: TRole = "ORG_ADMIN";
+const permissionType: TPermissionCheckType = PERMISSION_CHECK_TYPE.ROLE;
 
-const authStore = useAuthStore();
-const { token, currentRole } = storeToRefs(authStore);
-const { setUser } = useUserStore();
-const { getMe, verifyToken } = useAuth();
-const loadingStore = useLoadingStore();
-const { setLoading } = loadingStore;
-const router = useRouter();
-const route = useRoute();
-const { handleRoleValidation, checkPermission } = useDefaultRole();
-
-watch(token, (newVal) => {
-  if (newVal === null) {
-    router.push({
-      name: "auth-login",
-      query: {
-        redirect: route.fullPath,
-      },
-    });
-  }
-});
-
-watch(currentRole, async (newRole) => {
-  await checkPermission(permittedRole);
-});
-
-onBeforeMount(async () => {
-  if (!token.value) {
-    router.push({
-      name: "auth-login",
-      query: {
-        redirect: route.fullPath,
-      },
-    });
-    return;
-  }
-  setLoading(true);
-  await verifyToken();
-  setLoading(false);
-
-  handleRoleValidation(route.fullPath);
-
-  if (currentRole.value) {
-    await checkPermission(permittedRole);
-    setLoading(true);
-    const res = await getMe(currentRole.value, { isSilent: true });
-    setLoading(false);
-    if (res) {
-      setUser(res.data.data);
-    }
-  }
-});
+useLayoutPermission(permissionType, permittedRole);
 </script>
 <style lang="scss" scoped>
 .org-admin-layout {

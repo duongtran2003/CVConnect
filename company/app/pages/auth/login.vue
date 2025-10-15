@@ -86,18 +86,30 @@ useHead({
   title: "Đăng nhập",
 });
 
-const { handleRoleValidation } = useDefaultRole();
+const { handleSetRole, getInitialRoute } = usePermission();
 
-const { login, verifyToken } = useAuth();
+const { login, verifyToken, getMenus } = useAuth();
+const authStore = useAuthStore();
+const { setRoles } = authStore;
+const { currentRole } = storeToRefs(authStore);
+const { getMyRoles } = useRoleApi();
 const router = useRouter();
 const route = useRoute();
+const { setLoading } = useLoadingStore();
+const { setMenus } = useSidebarStore();
 
 onBeforeMount(async () => {
+  setLoading(true);
   const res = await verifyToken();
-  console.log('login', res)
   if (res.data.isValid) {
-    handleRoleValidation();
+    const rolesRes = await getMyRoles();
+    setLoading(false);
+    if (rolesRes) {
+      setRoles(rolesRes.data);
+      await handleRouting();
+    }
   }
+  setLoading(false);
   const username = route.query.username as string;
   if (username) {
     formInput.value.username = username;
@@ -178,11 +190,10 @@ const handleLoginClick = async () => {
     };
     isLoading.value.loginButton = true;
     const isSuccess = await login(loginCredentials);
-    if (isSuccess) {
-      // handleRoleValidation(route.query.redirect as string ?? "");
-      handleRoleValidation();
-    }
     isLoading.value.loginButton = false;
+    if (isSuccess) {
+      handleRouting();
+    }
   }
 };
 
@@ -190,6 +201,19 @@ const handleInput = (key: string, value: string) => {
   formInput.value[key as keyof typeof formInput.value] = value;
   formError.value[key as keyof typeof formError.value] = "";
 };
+
+async function handleRouting() {
+  handleSetRole();
+  setLoading(true);
+  const menusRes = await getMenus(currentRole.value!);
+  setLoading(false);
+  if (menusRes) {
+    setMenus(menusRes);
+    const route = await getInitialRoute();
+    router.push({ path: route });
+    return;
+  }
+}
 
 const isLoading = ref({
   loginButton: false,

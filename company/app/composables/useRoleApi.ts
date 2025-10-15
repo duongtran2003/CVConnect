@@ -2,6 +2,26 @@ export const useRoleApi = () => {
   const { $axios } = useNuxtApp();
   const toast = useToast();
 
+  const getMyRoles = async () => {
+    try {
+      const res = await $axios.get(`/_api/user/user/my-roles`);
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   const getRoles = async (params: any, abortController?: AbortController) => {
     const _abortController = abortController;
 
@@ -135,5 +155,6 @@ export const useRoleApi = () => {
     deleteUserGroup,
     getUserGroupDetail,
     updateUserGroup,
+    getMyRoles,
   };
 };

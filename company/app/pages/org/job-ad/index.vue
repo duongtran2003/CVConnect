@@ -8,7 +8,7 @@
 </template>
 <script setup lang="ts">
 definePageMeta({
-  layout: "org-admin",
+  layout: "org",
 });
 useHead({
   title: "Tin tuyển dụng",

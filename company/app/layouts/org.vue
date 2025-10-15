@@ -1,5 +1,5 @@
 <template>
-  <div class="system-admin-layout">
+  <div class="org-layout">
     <AppSidebar />
     <div class="main-content">
       <AppHeader />
@@ -8,16 +8,16 @@
   </div>
 </template>
 <script setup lang="ts">
-import { PERMISSION_CHECK_TYPE } from '~/const/permission';
-import type { TPermissionCheckType } from '~/types/permision';
+import { PERMISSION_CHECK_TYPE } from "~/const/permission";
+import type { TPermissionCheckType } from "~/types/permision";
 
-const permittedRole: TRole = "SYSTEM_ADMIN";
-const permissionType: TPermissionCheckType = PERMISSION_CHECK_TYPE.ROLE;
+const permittedRole: string = "ORGANIZATION";
+const permissionType: TPermissionCheckType = PERMISSION_CHECK_TYPE.MEMBER_TYPE;
 
 useLayoutPermission(permissionType, permittedRole);
 </script>
 <style lang="scss" scoped>
-.system-admin-layout {
+.org-layout {
   display: flex;
   min-height: 100vh;
   height: 100vh;

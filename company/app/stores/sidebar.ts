@@ -16,6 +16,10 @@ export type TSidebarItem = {
 export const useSidebarStore = defineStore("sidebar", () => {
   const sidebarData = ref<TSidebarItem[]>([]);
 
+  const clearStore = () => {
+    sidebarData.value = [];
+  }
+
   const expandItem = (
     id: number,
     state: boolean,
@@ -70,5 +74,6 @@ export const useSidebarStore = defineStore("sidebar", () => {
     expandItem,
     setMenus,
     getMenuItem,
+    clearStore,
   };
 });
