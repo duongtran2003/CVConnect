@@ -91,10 +91,10 @@ export const useOrgMemberApi = () => {
     }
   };
 
-  const changeDepartmentStatus = async (payload: any) => {
+  const changeOrgMemberStatus = async (payload: any) => {
     try {
       const res = await $axios.put(
-        `/_api/core/department/change-status-active`,
+        `/_api/user/org-member/change-status-active`,
         payload,
       );
       toast.add({
@@ -167,7 +167,7 @@ export const useOrgMemberApi = () => {
     deleteDepartment,
     getDepartmentDetail,
     updateDepartment,
-    changeDepartmentStatus,
+    changeOrgMemberStatus,
     getRoleFilterOption,
   };
 };

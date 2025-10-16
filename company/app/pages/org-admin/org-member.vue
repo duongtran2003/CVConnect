@@ -126,12 +126,17 @@ const canEdit = computed(() => {
   }
 });
 
+const userStore = useUserStore();
+const { userInfo } = storeToRefs(userStore);
+const { logout } = useAuth();
+
 const { getMenuItem } = useSidebarStore();
 const { setLoading } = useLoadingStore();
 // TODO: REPLACE THIS APIS
 const { getDepartments, deleteDepartment, changeDepartmentStatus } =
   useDepartmentApi();
-const { getOrgMembers, getRoleFilterOption } = useOrgMemberApi();
+const { getOrgMembers, getRoleFilterOption, changeOrgMemberStatus } =
+  useOrgMemberApi();
 
 // NOTE: From query string to filter
 const convertQuery = () => {
@@ -400,7 +405,7 @@ const fetchData = async () => {
 const debouncedFetchData = debounce(fetchData, 500);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
-  console.log(selectionList)
+  console.log(selectionList);
   selectedRows.value = selectionList;
 };
 
@@ -426,9 +431,12 @@ const handleActiveToggle = async (ids: number[], state: boolean) => {
   };
 
   setLoading(true);
-  const res = await changeDepartmentStatus(payload);
+  const res = await changeOrgMemberStatus(payload);
   if (res) {
     selectedRows.value = [];
+    if (ids.includes(userInfo.value?.id)) {
+      await logout();
+    }
     fetchData();
   }
   setLoading(false);
