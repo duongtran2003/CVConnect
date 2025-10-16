@@ -1,6 +1,6 @@
 <template>
   <div class="wrapper">
-    <DepartmentCreateModal
+    <OrgAdminInviteMemberModal
       v-model="isCreateModalOpen"
       @submit="handleCreated"
     />
@@ -30,7 +30,7 @@
         >
         </AppButton>
 
-        <AppButton :text="'Thêm mới'" class="add-button" @click="handleAddNew">
+        <AppButton :text="'Mời'" class="add-button" @click="handleAddNew">
           <template #icon>
             <Icon name="material-symbols:add-2-rounded" />
           </template>

@@ -71,9 +71,9 @@ export const useOrgMemberApi = () => {
     }
   };
 
-  const createDepartment = async (payload: any) => {
+  const inviteToOrg = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/core/department/create`, payload);
+      const res = await $axios.post(`/_api/user/org-member/invite-join-org`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -161,13 +161,45 @@ export const useOrgMemberApi = () => {
     }
   };
 
+  const findNotOrgMembers = async (
+    params: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(params);
+      const res = await $axios.get(
+        `/_api/user/user/find-not-org-member?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   return {
     getOrgMembers,
-    createDepartment,
+    inviteToOrg,
     deleteDepartment,
     getDepartmentDetail,
     updateDepartment,
     changeOrgMemberStatus,
     getRoleFilterOption,
+    findNotOrgMembers,
   };
 };

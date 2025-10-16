@@ -41,7 +41,7 @@
             v-if="havePermission('UPDATE')"
             class="icon"
             title="Cấp quyền"
-            name="mdi:pencil-outline"
+            name="ph:tree-structure"
             @click="handleActionClick(row, 'edit')"
           />
         </div>

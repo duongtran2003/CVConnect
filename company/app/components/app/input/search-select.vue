@@ -20,7 +20,7 @@
         searchable
         :loading="isLoading"
         :title="title"
-        :search-input="{ placeholder: 'Tìm kiếm' }"
+        :search-input="{ placeholder: props.searchPlaceholder }"
         :ui="{
           trailingIcon:
             'group-data-[state=open]:rotate-180 transition-transform duration-200',
@@ -62,6 +62,7 @@ type TProps = {
   allowClear?: boolean;
   isPaginated?: boolean;
   slimError?: boolean;
+  searchPlaceholder?: string;
   fetchFn?:
     | ((params: any, controller?: AbortController) => Promise<any>)
     | null;
@@ -80,6 +81,7 @@ const props = withDefaults(defineProps<TProps>(), {
   slimError: false,
   allowClear: true,
   isPaginated: true,
+  searchPlaceholder: "Tìm kiếm"
 });
 const emits = defineEmits<{
   (
