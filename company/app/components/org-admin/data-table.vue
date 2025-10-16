@@ -140,7 +140,6 @@
             row.original[col.accessorKey] &&
             row.original[col.accessorKey].cellType == CELL_TYPE.TAG
           "
-          class=""
           :title="row.original[col.accessorKey].text"
         >
           <AppChip
@@ -148,8 +147,22 @@
             :type="row.original[col.accessorKey].type"
           />
         </span>
-        <span v-else class="" :title="row.original[col.accessorKey]">
+
+        <span
+          v-else
+          class="username-cell"
+          :title="row.original[col.accessorKey]"
+        >
           {{ row.original[col.accessorKey] }}
+          <span
+            v-if="
+              col.accessorKey === 'username' &&
+              row.original.userId === userInfo?.id
+            "
+            class="asterisk"
+          >
+            *
+          </span>
         </span>
       </template>
       <template #empty>
@@ -194,6 +207,9 @@ const props = withDefaults(defineProps<TDataTableProps>(), {
   deleteConditionKey: "canDelete",
 });
 
+const userStore = useUserStore();
+const { userInfo } = storeToRefs(userStore);
+
 const havePermission = (permission: TPermission) => {
   const perm = props.allowActions.find((action) => action === permission);
   return perm;
@@ -205,7 +221,9 @@ const selectTooltip = computed(() => {
     if (!props.filter) {
       return "";
     }
-    const tooltipString = props.filter[accessorKey]?.map((filter: any) => filter.label)?.join(', ')
+    const tooltipString = props.filter[accessorKey]
+      ?.map((filter: any) => filter.label)
+      ?.join(", ");
     return tooltipString;
   };
 });
@@ -369,6 +387,11 @@ const handleActionClick = (row: any, action: TTableAction) => {
 };
 </script>
 <style lang="scss" scoped>
+:deep(.username-cell .asterisk) {
+  color: $color-danger;
+  font-weight: bold;
+  margin-left: 4px;
+}
 .data-table-wrapper {
   overflow-x: auto;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;

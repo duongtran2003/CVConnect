@@ -13,7 +13,7 @@
       @mode-change="handleSwitchEditViewMode($event)"
     />
     <div class="org-member-content">
-      <div class="title">Danh mục thành viên tổ chức</div>
+      <div class="title">Danh sách thành viên</div>
       <div class="table-top">
         <AppButton
           :text="'Hoạt động'"
