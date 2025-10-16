@@ -244,7 +244,10 @@ const formRule: Record<string, any> = {
   department: [
     {
       error: "Mời chọn phòng ban",
-      validator: (input: any[]) => !!input.length,
+      validator: (input: any[]) => {
+        console.log(input);
+        return !!input
+      },
     },
   ],
   position: [

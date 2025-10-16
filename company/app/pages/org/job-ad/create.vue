@@ -245,7 +245,7 @@ const transformedForm = computed(() => {
           return mapped;
         })
       : [],
-    autoSendMail: data.sendMail,
+    autoSendEmail: data.sendMail,
   };
 
   return transformed;
@@ -253,8 +253,8 @@ const transformedForm = computed(() => {
 
 const actions = computed(() => {
   return [
-    { label: "Nội bộ", onSelect: () => handleSubmit("public") },
-    { label: "Công khai", onSelect: () => handleSubmit() },
+    { label: "Nội bộ", onSelect: () => handleSubmit("private") },
+    { label: "Công khai", onSelect: () => handleSubmit("public") },
   ];
 });
 
@@ -283,6 +283,9 @@ const handleFormDataChange = <K extends keyof TFormData>(
   key: K,
   payload: TFormData[K],
 ) => {
+  if (key == "descriptionInfo") {
+    console.log(formData.value[key]);
+  }
   formData.value[key] = payload;
 };
 

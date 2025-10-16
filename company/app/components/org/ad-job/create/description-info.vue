@@ -18,7 +18,7 @@
         </div>
         <AppInputBasicTextEditor
           :value="formInput.benefit"
-          @input="handleInput('description', $event)"
+          @input="handleInput('benefit', $event)"
         />
       </div>
       <div class="textarea-block">
