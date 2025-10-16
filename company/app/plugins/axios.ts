@@ -48,6 +48,7 @@ export default defineNuxtPlugin(() => {
       return config;
     },
     (error) => {
+      console.log('catch in axios plugin with error', error)
       if (error.response && error.response.status === 403) {
         router.push({ path: "/403" });
       }

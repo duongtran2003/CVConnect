@@ -42,7 +42,7 @@
 
         <UModal
           :open="isDeleteModalOpen"
-          title="Xóa lĩnh vực"
+          title="Xóa phòng ban"
           :ui="{ content: 'w-[600px] max-w-[600px]' }"
           @update:open="handleDeleteModalOpenUpdate"
           @after:leave="clearDeleteList"
