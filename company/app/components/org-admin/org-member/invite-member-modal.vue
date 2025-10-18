@@ -16,6 +16,7 @@
                 :value="formInput.member"
                 :error="formError.member"
                 :placeholder="'Mời chọn người dùng'"
+                :search-placeholder="'Tìm kiếm email'"
                 :remote-filter="true"
                 :multiple="false"
                 :fetch-fn="fetchNotOrgMembers"
@@ -38,7 +39,6 @@
                 :error="formError.role"
                 :placeholder="'Mời chọn vai trò'"
                 :remote-filter="false"
-                :search-placeholder="'Tìm kiếm email'"
                 :multiple="false"
                 :fetch-fn="fetchRoles"
                 @open-update="handleRoleOpenUpdate"
@@ -126,7 +126,8 @@ const formRules = {
   ],
 };
 
-const { findNotOrgMembers, getRoleFilterOption, inviteToOrg } = useOrgMemberApi();
+const { findNotOrgMembers, getRoleFilterOption, inviteToOrg } =
+  useOrgMemberApi();
 
 const isSubmiting = ref<boolean>(false);
 
@@ -137,7 +138,7 @@ const isOpen = computed({
 });
 
 const isFormValid = computed(() => {
-  console.log(formInput.value)
+  console.log(formInput.value);
   if (!formInput.value.member || !formInput.value.role) {
     return false;
   }
@@ -169,12 +170,11 @@ async function fetchRoles(params: any, controller?: AbortController) {
   if (!res) {
     return null;
   }
-  console.log(res.data)
-  const nextPage = res.data
-    .map((role: any) => ({
-      label: role.name,
-      value: role.id,
-    }));
+  console.log(res.data);
+  const nextPage = res.data.map((role: any) => ({
+    label: role.name,
+    value: role.id,
+  }));
   roleList.value = [...roleList.value, ...nextPage];
   return res.data;
 }

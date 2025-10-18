@@ -206,6 +206,7 @@ async function handleRouting() {
   handleSetRole();
   setLoading(true);
   const menusRes = await getMenus(currentRole.value!);
+  console.log(menusRes);
   setLoading(false);
   if (menusRes) {
     setMenus(menusRes);

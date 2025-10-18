@@ -1,10 +1,10 @@
 <template>
   <div class="wrapper">
-    <OrgAdminInviteMemberModal
+    <OrgAdminOrgMemberInviteMemberModal
       v-model="isCreateModalOpen"
       @submit="handleCreated"
     />
-    <DepartmentEditViewModal
+    <OrgAdminOrgMemberEditViewModal
       v-model="isEditViewOpen"
       :initial-mode="editViewInitialMode"
       :target-id="editViewId || -1"

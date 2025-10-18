@@ -55,9 +55,11 @@ export const useOrgMemberApi = () => {
     }
   };
 
-  const getDepartmentDetail = async (id: number) => {
+  const getOrgMemberDetail = async (id: number) => {
     try {
-      const res = await $axios.get(`/_api/core/department/detail/${id}`);
+      const res = await $axios.get(
+        `/_api/user/org-member/org-member-info/${id}`,
+      );
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -73,7 +75,10 @@ export const useOrgMemberApi = () => {
 
   const inviteToOrg = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/user/org-member/invite-join-org`, payload);
+      const res = await $axios.post(
+        `/_api/user/org-member/invite-join-org`,
+        payload,
+      );
       toast.add({
         title: res.data.message,
         color: "success",
@@ -114,10 +119,10 @@ export const useOrgMemberApi = () => {
     }
   };
 
-  const updateDepartment = async (id: number, payload: any) => {
+  const assignRole = async (payload: any) => {
     try {
       const res = await $axios.put(
-        `/_api/core/department/update/${id}`,
+        `/_api/user/org-member/assign-role`,
         payload,
       );
       toast.add({
@@ -196,8 +201,8 @@ export const useOrgMemberApi = () => {
     getOrgMembers,
     inviteToOrg,
     deleteDepartment,
-    getDepartmentDetail,
-    updateDepartment,
+    getOrgMemberDetail,
+    assignRole,
     changeOrgMemberStatus,
     getRoleFilterOption,
     findNotOrgMembers,

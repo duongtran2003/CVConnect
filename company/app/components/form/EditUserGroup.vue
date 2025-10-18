@@ -179,13 +179,12 @@ const userGroupDetail = ref<any>(null);
 const permMap = ref<any>({});
 const isLoading = ref<boolean>(false);
 
-const { getMemberTypes, createUserGroup, getUserGroupDetail, updateUserGroup } =
+const { getMemberTypes, getUserGroupDetail, updateUserGroup } =
   useRoleApi();
 const { getAllMenus } = useMenuApi();
 
 const emit = defineEmits<{
-  (e: "closeModal"): void;
-  (e: "submit"): void;
+  (e: "submit" | "closeModal"): void;
   (e: "modeSwitch", mode: TMode): void;
 }>();
 
@@ -206,19 +205,17 @@ const populateData = async () => {
 onBeforeMount(async () => {
   currentMode.value = props.initialMode;
   await populateData();
-  if (props.initialMode == "edit") {
-    formInput.value = {
-      code: userGroupDetail.value.code,
-      name: userGroupDetail.value.name,
-      memberType: userGroupDetail.value.memberTypeDto.code,
-    };
-    formError.value = {
-      code: "",
-      name: "",
-      memberType: "",
-    };
-    permValue.value = cloneDeep(mapPerm(userGroupDetail.value.roleMenus));
-  }
+  formInput.value = {
+    code: userGroupDetail.value.code,
+    name: userGroupDetail.value.name,
+    memberType: userGroupDetail.value.memberTypeDto.code,
+  };
+  formError.value = {
+    code: "",
+    name: "",
+    memberType: "",
+  };
+  permValue.value = cloneDeep(mapPerm(userGroupDetail.value.roleMenus));
 });
 
 const mapPerm = (roleMenus: any) => {
@@ -252,7 +249,6 @@ const handleSwitchMode = (mode: TMode) => {
   currentMode.value = mode;
   emit("modeSwitch", mode);
   if (mode == "edit") {
-    console.log("switch to edit");
     formInput.value = {
       code: userGroupDetail.value.code,
       name: userGroupDetail.value.name,
@@ -270,9 +266,9 @@ const handleSwitchMode = (mode: TMode) => {
       didUpdate.value = false;
     }
     formInput.value = {
-      code: "",
-      name: "",
-      memberType: "",
+      code: userGroupDetail.value.code,
+      name: userGroupDetail.value.name,
+      memberType: userGroupDetail.value.memberTypeDto.code,
     };
     formError.value = {
       code: "",
