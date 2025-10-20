@@ -2,6 +2,22 @@ export const useOrgMemberApi = () => {
   const { $axios } = useNuxtApp();
   const toast = useToast();
 
+  const replyInvitation = async (token: string, action: string) => {
+    try {
+      const res = await $axios.post(
+        "_api/user/org-member/reply-invite-join-org",
+        {
+          token,
+          status: action == "a" ? "ACCEPTED" : "REJECTED",
+        },
+      );
+      return res;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  };
+
   const getOrgMembers = async (
     params: any,
     abortController?: AbortController,
@@ -206,5 +222,6 @@ export const useOrgMemberApi = () => {
     changeOrgMemberStatus,
     getRoleFilterOption,
     findNotOrgMembers,
+    replyInvitation,
   };
 };

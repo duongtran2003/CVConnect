@@ -6,6 +6,7 @@
         <div class="toggler-wrapper">
           <UCheckbox
             :model-value="props.value.headquarter"
+            :disabled="props.isViewOnly"
             @update:model-value="handleInput('headquarter', $event)"
           />
           <span @click="handleLabelClick">Trụ sở chính</span>
@@ -21,6 +22,7 @@
               :model-value="props.value.province"
               :items="provinces"
               class="selector"
+              :disabled="props.isViewOnly"
               :variant="'none'"
               autocomplete="autocomplete"
               placeholder="Chọn giá trị"
@@ -43,6 +45,7 @@
               :items="wards"
               class="selector"
               :variant="'none'"
+              :disabled="props.isViewOnly"
               autocomplete="autocomplete"
               placeholder="Chọn giá trị"
               :search-input="{
@@ -61,11 +64,12 @@
         :label="'Địa chỉ chi tiết'"
         :required="true"
         :value="props.value.detailAddress as string"
+        :is-disabled="props.isViewOnly"
         :error="''"
         :slim-error="true"
         @input="handleInput('detailAddress', $event)"
       />
-      <div class="remove-button" @click="handleRemove">
+      <div v-if="!props.isViewOnly" class="remove-button" @click="handleRemove">
         <Icon name="material-symbols:close-rounded" />
       </div>
     </div>
@@ -82,6 +86,7 @@ type TProps = {
   cityInfo: Record<string, any>[];
   value: TAddressValue;
   addressIndex: number;
+  isViewOnly: boolean;
 };
 const props = defineProps<TProps>();
 
@@ -131,6 +136,9 @@ const handleRemove = () => {
   emits("remove");
 };
 const handleLabelClick = () => {
+  if (props.isViewOnly){
+    return;
+  }
   emits("input", {
     ...props.value,
     headquarter: !props.value.headquarter,
@@ -226,7 +234,7 @@ const handleLabelClick = () => {
           min-width: 100%;
           max-width: 100%;
 
-          &:hover {
+          &:hover:not(:disabled) {
             border: 2px solid rgba($color-primary-400, 1);
           }
 

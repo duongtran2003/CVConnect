@@ -9,14 +9,15 @@
         :city-info="cityInfo ?? []"
         :value="address"
         :address-index="index + 1"
+        :is-view-only="!canEdit"
         @input="handleAddressInput(index, $event)"
         @remove="handleAddressRemove(index)"
       />
-      <div class="add-address-button" @click="handleAddNewAddress">
+      <div v-if="canEdit" class="add-address-button" @click="handleAddNewAddress">
         <span class="text"> Thêm mới địa chỉ </span>
       </div>
     </div>
-    <div v-if="!isNoData" class="buttons">
+    <div v-if="!isNoData && canEdit" class="buttons">
       <AppButton
         class="reset-button"
         :text="'Hủy bỏ'"
@@ -37,7 +38,7 @@ import axios from "axios";
 import { cloneDeep, isEqual } from "lodash";
 
 definePageMeta({
-  layout: "org-admin",
+  layout: "org",
 });
 
 const cityInfo = ref<Record<string, any>[] | null>(null);
@@ -46,13 +47,26 @@ const snapshot = ref<any[]>([]);
 const isNoData = ref<boolean>(false);
 
 const { getOrgAddresses, updateOrgAddresses } = useOrgAddressApi();
+const { getMenuItem } = useSidebarStore();
 const { setLoading } = useLoadingStore();
+const route = useRoute();
 
 onBeforeMount(async () => {
   await initList();
   const res = await axios.get(`https://provinces.open-api.vn/api/v2/?depth=2`);
   cityInfo.value = res.data;
 });
+
+const allowActions = computed(() => {
+  const url = route.path;
+  const menuItem = getMenuItem(url);
+  const permissions = Array.from(menuItem?.permissions || []);
+  return permissions;
+});
+
+const canEdit = computed(() => {
+  return allowActions.value.includes('UPDATE');
+})
 
 const isResetDisabled = computed(() => {
   return isEqual(addressList.value, snapshot.value);

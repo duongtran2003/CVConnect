@@ -48,10 +48,27 @@ export default defineNuxtPlugin(() => {
       return config;
     },
     (error) => {
-      console.log('catch in axios plugin with error', error)
+      console.log("catch in axios plugin with error", error);
       if (error.response && error.response.status === 403) {
         router.push({ path: "/403" });
       }
+      return Promise.reject(error);
+    },
+  );
+  axiosInstance.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      const status = error.response?.status;
+
+      if (status === 403) {
+        if (router.currentRoute.value.path !== "/403") {
+          router.push({ path: "/403" });
+        }
+      }
+      console.error("axios response error", status, error.message);
+
       return Promise.reject(error);
     },
   );

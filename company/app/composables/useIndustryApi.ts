@@ -2,11 +2,18 @@ export const useIndustryApi = () => {
   const { $axios } = useNuxtApp();
   const toast = useToast();
 
-  const getIndustriesPublic = async (params: any) => {
+  const getIndustriesPublic = async (
+    params: any,
+    abortController?: AbortController,
+  ) => {
     try {
+      const _abortController = abortController;
       const queryString = objectToQuery(params);
       const res = await $axios.get(
         `/_api/core/industry/public/filter?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
       );
       return res.data;
     } catch (err: any) {

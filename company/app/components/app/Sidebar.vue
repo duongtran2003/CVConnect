@@ -154,7 +154,6 @@ const isCurrentRole = computed(() => {
 const isSetDefault = computed(() => {
   return (role: TAccountRole) => {
     const currentDefaultRole = roles.value.filter((role) => role.isDefault);
-    console.log(currentDefaultRole, roles.value);
     if (
       currentDefaultRole.length &&
       currentDefaultRole[0] &&
