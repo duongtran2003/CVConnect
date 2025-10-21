@@ -32,7 +32,7 @@
           Đã đọc
         </div>
       </div>
-      <div class="mark-all-as-read" @click="handleMarkAllRead">
+      <div v-if="isMarkAllShow" class="mark-all-as-read" @click="handleMarkAllRead">
         Đánh dấu đã đọc tất cả
       </div>
       <div class="content">
@@ -56,7 +56,7 @@
       <div class="footer">
         <div class="view-all">Xem tất cả</div>
         <div
-          v-if="!isFetching && notifications.length"
+          v-if="!isFetching && notifications.length && isShowMoreShow"
           class="fetch-more"
           @click="fetchNotifications"
         >
@@ -90,6 +90,7 @@ const params = ref<Record<string, any>>({
   pageSize: 20,
 });
 const notifications = ref<TNotification[]>([]);
+const totalNotifications = ref<number>(0);
 const unread = ref<number>(0);
 const isDropdownShow = ref<boolean>(false);
 
@@ -103,6 +104,14 @@ onBeforeMount(async () => {
 onMounted(() => {
   connect();
 });
+
+const isMarkAllShow = computed(() => {
+  return unread.value > 0;
+})
+
+const isShowMoreShow = computed(() => {
+  return totalNotifications.value == notifications.value.length;
+})
 
 const parsedQuantity = computed(() => {
   return unread.value > 99 ? "99+" : unread.value;
@@ -148,6 +157,7 @@ function connect() {
     console.log("on notify", data);
     notifications.value = [data, ...notifications.value];
     unread.value += 1;
+    totalNotifications.value += 1;
     notifyUser();
   });
   connection.value.on(SOCKET_EVENT.UNREAD_NOTIFY, (data: any) => {
@@ -189,6 +199,7 @@ async function fetchNotifications() {
   if (res) {
     notifications.value = [...notifications.value, ...res.data.data];
     params.value.pageIndex += 1;
+    totalNotifications.value = res.data.pageInfo.totalElements;
   }
   console.log(res);
   isFetching.value = false;
