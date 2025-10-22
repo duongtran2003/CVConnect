@@ -103,6 +103,8 @@ const { currentRole, roles } = storeToRefs(authStore);
 const { setLoading } = useLoadingStore();
 const { getMenus, setDefaultRole } = useAuth();
 const toast = useToast();
+const route = useRoute();
+const router = useRouter();
 
 const isAllRolesShow = ref(false);
 const mainSection = useTemplateRef("mainSection");
@@ -174,7 +176,7 @@ const roleIcon = computed(() => {
   };
 });
 
-const handleSetRole = (role: TAccountRole) => {
+const handleSetRole = async  (role: TAccountRole) => {
   if (currentRole.value && currentRole.value.id == role.id) {
     return;
   }
@@ -184,6 +186,7 @@ const handleSetRole = (role: TAccountRole) => {
     title: "Chuyển đổi vai trò thành công",
     color: "success",
   });
+  location.reload();
 };
 
 const handleSetRoleDefault = async (role: TAccountRole) => {
@@ -208,6 +211,7 @@ const handleSetRoleDefault = async (role: TAccountRole) => {
       setRoles(roleList);
       setCurrentRole(role);
     }
+    location.reload();
   }
 };
 

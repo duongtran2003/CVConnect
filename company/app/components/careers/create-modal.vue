@@ -1,16 +1,13 @@
 <template>
-  <div class="edit-view-modal">
+  <div class="create-modal">
     <UModal
       v-model:open="isOpen"
-      :title="title"
+      title="Thêm mới ngành nghề"
       :ui="{ content: 'w-[840px] max-w-[840px]' }"
     >
       <template #body>
-        <div class="edit-view-industry">
-          <div v-if="isLoading" class="loading-overlay">
-            <AppSpinnerHalfCircle class="spinner" />
-          </div>
-          <form v-if="industryDetail" class="form-block">
+        <div class="create-industry">
+          <form class="form-block">
             <div class="line">
               <AppInputText
                 :label="'Tên'"
@@ -18,7 +15,6 @@
                 :error="formError.name"
                 :placeholder="'Mời nhập tên'"
                 :value="formInput.name"
-                :is-disabled="currentMode == 'view'"
                 class="text-input"
                 @input="handleInput('name', $event)"
                 @blur="validateKey('name')"
@@ -29,46 +25,34 @@
                 :error="formError.code"
                 :placeholder="'Mời nhập mã'"
                 :value="formInput.code"
-                :is-disabled="currentMode == 'view'"
                 class="text-input"
                 @input="handleInput('code', $event)"
                 @blur="validateKey('code')"
               />
             </div>
-            <div class="line">
-              <div class="text-area">
-                <AppInputTextarea
-                  v-model="formInput.description"
-                  :label="'Mô tả'"
-                  :required="false"
-                  :placeholder="'Mời nhập mô tả'"
-                  :is-disabled="currentMode == 'view'"
-                  :error="''"
-                  :show-error="false"
-                />
-              </div>
-            </div>
+            <!-- <div class="line"> -->
+            <!--   <div class="text-area"> -->
+            <!--     <AppInputTextarea -->
+            <!--       v-model="formInput.description" -->
+            <!--       :label="'Mô tả'" -->
+            <!--       :required="false" -->
+            <!--       :placeholder="'Mời nhập mô tả'" -->
+            <!--       :error="''" -->
+            <!--       :show-error="false" -->
+            <!--     /> -->
+            <!--   </div> -->
+            <!-- </div> -->
             <!-- <div class="line"> -->
             <!--   <div class="sub-list"> -->
             <!--     <div class="label">Phân ngành</div> -->
-            <!--     <AppNoData -->
-            <!--       v-if="currentMode == 'view' && !formInput.sub?.length" -->
-            <!--     ></AppNoData> -->
             <!--     <IndustrySubIndustry -->
             <!--       v-for="(item, index) of formInput.sub" -->
             <!--       :key="index" -->
             <!--       :data="item" -->
-            <!--       :is-disabled="currentMode == 'view'" -->
             <!--       @input="handleSubInput(index, $event)" -->
             <!--       @delete="handleSubDelete(index)" -->
             <!--     /> -->
-            <!--     <div -->
-            <!--       v-if="currentMode == 'edit'" -->
-            <!--       class="add-button" -->
-            <!--       @click="handleAddSub" -->
-            <!--     > -->
-            <!--       Thêm mới -->
-            <!--     </div> -->
+            <!--     <div class="add-button" @click="handleAddSub">Thêm mới</div> -->
             <!--   </div> -->
             <!-- </div> -->
           </form>
@@ -77,37 +61,18 @@
       <template #footer>
         <div class="footer">
           <div class="buttons">
-            <template v-if="currentMode == 'view'">
-              <AppButton
-                :text="'Đóng'"
-                class="cancel-button"
-                @click.prevent="handleCancelClick($event)"
-              />
-              <AppButton
-                v-if="props.allowEdit"
-                :text="'Chỉnh sửa'"
-                class="submit-button"
-                @click="handleSwitchMode('edit')"
-              />
-            </template>
-            <template v-else>
-              <AppButton
-                :text="'Hủy bỏ'"
-                class="cancel-button"
-                @click.prevent="
-                  props.initialMode == 'view'
-                    ? handleSwitchMode('view')
-                    : handleCancelClick($event)
-                "
-              />
-              <AppButton
-                :is-disabled="!isFormValid"
-                :text="'Lưu'"
-                :is-loading="isSubmiting"
-                class="submit-button"
-                @click="handleSubmit"
-              />
-            </template>
+            <AppButton
+              :text="'Hủy bỏ'"
+              class="cancel-button"
+              @click.prevent="handleCancelClick($event)"
+            />
+            <AppButton
+              :is-disabled="!isFormValid"
+              :text="'Tạo mới'"
+              :is-loading="isSubmiting"
+              class="submit-button"
+              @click="handleSubmit"
+            />
           </div>
         </div>
       </template>
@@ -117,40 +82,29 @@
 
 <script setup lang="ts">
 import type { TSubIndustry } from "~/types/subIndustry";
-import { cloneDeep } from "lodash";
+// import SubIndustry from "./sub-industry.vue";
 
 type TProps = {
   modelValue: boolean;
-  initialMode?: string;
-  allowEdit?: boolean;
-  targetId: number;
 };
 
-const props = withDefaults(defineProps<TProps>(), {
-  initialMode: "view",
-  allowEdit: false,
-});
+const props = defineProps<TProps>();
 const emits = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
-  (e: "modeChange", value: string): void;
   (e: "submit"): void;
 }>();
 
 type TCreateForm = {
   code: string;
   name: string;
-  description?: string;
+  // description?: string;
   // sub?: TSubIndustry[];
 };
 
-const currentMode = ref<string>("view");
-const industryDetail = ref<any>(null);
-const industryDetailSnapshot = ref<any>(null);
-const isLoading = ref<boolean>(false);
 const formInput = ref<TCreateForm>({
   code: "",
   name: "",
-  description: "",
+  // description: "",
   // sub: [],
 });
 const formError = ref<TCreateForm>({
@@ -179,7 +133,8 @@ const formRules = {
   ],
 };
 
-const { updateIndustry, getIndustryDetail } = useIndustryApi();
+const { createIndustry } = useIndustryApi();
+const {createCareer} = useCareerApi();
 
 const isSubmiting = ref<boolean>(false);
 
@@ -187,12 +142,6 @@ const isSubmiting = ref<boolean>(false);
 const isOpen = computed({
   get: () => props.modelValue,
   set: (value: boolean) => emits("update:modelValue", value),
-});
-
-const title = computed(() => {
-  return currentMode.value == "view"
-    ? "Thông tin lĩnh vực"
-    : "Cập nhật thông tin lĩnh vực";
 });
 
 const isFormValid = computed(() => {
@@ -214,33 +163,6 @@ const isFormValid = computed(() => {
 
   return true;
 });
-
-const fetchDetail = async (id: number) => {
-  isLoading.value = true;
-  const res = await getIndustryDetail(id);
-  industryDetail.value = res.data;
-  formInput.value = {
-    name: res.data.name,
-    code: res.data.code,
-    description: res.data.description ?? "",
-    // sub: res.data.industrySubs?.map((sub: any) => {
-    //   const mapped = {
-    //     id: sub.id,
-    //     name: sub.name,
-    //     code: sub.code,
-    //     isEdit: false,
-    //   };
-    //
-    //   return mapped;
-    // }),
-  };
-  industryDetailSnapshot.value = cloneDeep(formInput.value);
-  isLoading.value = false;
-};
-
-const handleSwitchMode = (mode: string) => {
-  currentMode.value = mode;
-};
 
 // const handleAddSub = () => {
 //   formInput.value.sub!.push({
@@ -283,7 +205,7 @@ const handleSubmit = async () => {
   const payload = {
     code: formInput.value.code,
     name: formInput.value.name,
-    description: formInput.value.description,
+    // description: formInput.value.description,
     // industrySubs: formInput.value.sub?.map((subIndustry: TSubIndustry) => {
     //   const { isEdit, ...rest } = subIndustry;
     //   return rest;
@@ -291,14 +213,19 @@ const handleSubmit = async () => {
   };
 
   isSubmiting.value = true;
-  const res = await updateIndustry(industryDetail.value.id, payload);
+  const res = await createCareer(payload);
   if (res) {
-    if (props.initialMode == "edit") {
-      emits("submit");
-    } else {
-      currentMode.value = "view";
-      await fetchDetail(industryDetail.value.id);
-    }
+    formInput.value = {
+      code: "",
+      name: "",
+      // description: "",
+      // sub: [],
+    };
+    formError.value = {
+      code: "",
+      name: "",
+    };
+    emits("submit");
   }
   isSubmiting.value = false;
 };
@@ -323,73 +250,9 @@ const validateKey = (key: keyof typeof formInput.value) => {
     }
   }
 };
-
-watch(
-  () => props.initialMode,
-  (newVal) => {
-    currentMode.value = newVal;
-  },
-  {
-    immediate: true,
-  },
-);
-
-watch(currentMode, (newVal) => {
-  emits("modeChange", newVal);
-  if (newVal == "view") {
-    if (industryDetailSnapshot.value) {
-      formInput.value = industryDetailSnapshot.value;
-      formError.value = {
-        code: "",
-        name: "",
-      };
-    }
-  }
-});
-
-watch(
-  () => props.targetId,
-  async (newVal) => {
-    if (newVal == -1) {
-      industryDetailSnapshot.value = null;
-      industryDetail.value = null;
-      formInput.value = {
-        code: "",
-        name: "",
-        description: "",
-        // sub: [],
-      };
-      formError.value = {
-        code: "",
-        name: "",
-      };
-      return;
-    }
-    await fetchDetail(newVal);
-  },
-  {
-    immediate: true,
-  },
-);
 </script>
 <style lang="scss" scoped>
-.edit-view-industry {
-  position: relative;
-
-  .loading-overlay {
-    position: absolute;
-    color: $color-primary-400;
-    font-size: 20px;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1;
-  }
-
+.create-industry {
   @include custom-scrollbar;
   max-height: 100%;
   .form-block {

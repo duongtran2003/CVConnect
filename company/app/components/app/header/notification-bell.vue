@@ -32,7 +32,11 @@
           Đã đọc
         </div>
       </div>
-      <div v-if="isMarkAllShow" class="mark-all-as-read" @click="handleMarkAllRead">
+      <div
+        v-if="isMarkAllShow"
+        class="mark-all-as-read"
+        @click="handleMarkAllRead"
+      >
         Đánh dấu đã đọc tất cả
       </div>
       <div class="content">
@@ -54,7 +58,7 @@
       </div>
 
       <div class="footer">
-        <div class="view-all">Xem tất cả</div>
+        <div class="view-all" @click="handleViewAll">Xem tất cả</div>
         <div
           v-if="!isFetching && notifications.length && isShowMoreShow"
           class="fetch-more"
@@ -107,11 +111,11 @@ onMounted(() => {
 
 const isMarkAllShow = computed(() => {
   return unread.value > 0;
-})
+});
 
 const isShowMoreShow = computed(() => {
-  return totalNotifications.value == notifications.value.length;
-})
+  return totalNotifications.value != notifications.value.length;
+});
 
 const parsedQuantity = computed(() => {
   return unread.value > 99 ? "99+" : unread.value;
@@ -237,6 +241,10 @@ async function handleMarkAllRead() {
 
 function handleClickBell() {
   isDropdownShow.value = !isDropdownShow.value;
+}
+
+function handleViewAll() {
+  router.push({ path: "/org-info" });
 }
 
 onBeforeUnmount(() => {

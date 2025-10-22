@@ -36,4 +36,19 @@ export function toUtcDate(dateString: string): string {
     .utc() // convert to UTC
     .startOf("day") // set time to 00:00:00
     .format("YYYY-MM-DDTHH:mm:ss[Z]");
+
+}
+
+export function toUtcDateStart(dateString: string): string {
+  return moment(dateString)
+    .startOf("day") // set time to 00:00:00 in local time FIRST
+    .utc() // THEN convert to UTC
+    .format("YYYY-MM-DDTHH:mm:ss[Z]");
+}
+
+export function toUtcDateEnd(dateString: string): string {
+  return moment(dateString)
+    .endOf("day") // set time to 23:59:59.999 in local time FIRST
+    .utc() // THEN convert to UTC
+    .format("YYYY-MM-DDTHH:mm:ss[Z]");
 }

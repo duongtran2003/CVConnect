@@ -170,7 +170,7 @@ const isFormValid = computed(() => {
   if (
     !form.title ||
     form.positionId == null ||
-    form.positionLevelId == null ||
+    !form.levelIds.length ||
     !form.workLocationIds.length ||
     !form.jobType ||
     !form.dueDate ||
@@ -204,9 +204,11 @@ const transformedForm = computed(() => {
   const transformed: Record<string, any> = {
     title: data.generalInfo?.title.trim(),
     positionId: data.generalInfo?.position?.value,
-    positionLevelId: data.generalInfo?.level?.value,
-    industrySubIds: data.generalInfo?.industry
-      ? data.generalInfo.industry.map((indus) => indus.value)
+    levelIds: data.generalInfo?.level
+      ? data.generalInfo?.level.map((level) => level.value)
+      : [],
+    careerIds: data.generalInfo?.career
+      ? data.generalInfo?.career.map((career) => career.value)
       : [],
     workLocationIds: data.generalInfo?.location
       ? data.generalInfo.location.map((loc) => loc.value)
@@ -260,6 +262,17 @@ const actions = computed(() => {
 
 const handleSubmit = async (type: string = "") => {
   const payload = transformedForm.value;
+  const levels = payload.levelIds;
+  if (levels) {
+    const isAll = levels.find((levelId: any) => levelId == 0);
+    console.log(levels)
+    if (isAll != undefined) {
+      console.log('has is all')
+      delete payload.levelIds;
+      console.log('after delete', payload)
+      payload.isAllLevel = true;
+    }
+  }
   if (type === "public") {
     payload.isPublic = true;
   } else {

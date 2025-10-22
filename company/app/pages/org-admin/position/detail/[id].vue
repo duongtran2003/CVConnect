@@ -30,66 +30,69 @@
           <div class="columns">
             <div class="col">
               <div class="title">Thông tin chung</div>
-              <AppInputText
-                :label="'Mã'"
-                :required="true"
-                :error="formError.code"
-                :placeholder="'Mời nhập mã'"
-                :value="formInput.code"
-                :is-disabled="currentMode == 'view'"
-                class="text-input"
-                @input="handleInput('code', $event)"
-                @blur="validateKey('code')"
-              />
-              <AppInputText
-                :label="'Tên'"
-                :required="true"
-                :error="formError.name"
-                :placeholder="'Mời nhập tên'"
-                :is-disabled="currentMode == 'view'"
-                :value="formInput.name"
-                class="text-input"
-                @input="handleInput('name', $event)"
-                @blur="validateKey('name')"
-              />
-              <div class="select-input">
-                <div class="label">
-                  <span class="text">Phòng ban</span>
-                  <span class="required">Bắt buộc</span>
-                </div>
-                <USelectMenu
-                  :model-value="formInput.department"
-                  :items="departmentOption"
-                  class="selector"
-                  :class="{ error: formError.department }"
-                  :variant="'none'"
-                  :disabled="currentMode == 'view'"
-                  autocomplete="autocomplete"
-                  placeholder="Mời chọn phòng ban"
-                  :title="formInput.department?.label ?? ''"
-                  :search-input="{
-                    placeholder: 'Tìm kiếm',
-                  }"
-                  :ui="{
-                    trailingIcon:
-                      'group-data-[state=open]:rotate-180 transition-transform duration-200',
-                  }"
-                  @update:model-value="handleInput('department', $event)"
-                  @update:open="
-                    ($event) => (!$event ? validateKey('department') : () => {})
-                  "
+              <div class="row">
+                <AppInputText
+                  :label="'Mã'"
+                  :required="true"
+                  :error="formError.code"
+                  :placeholder="'Mời nhập mã'"
+                  :value="formInput.code"
+                  :is-disabled="currentMode == 'view'"
+                  class="text-input"
+                  @input="handleInput('code', $event)"
+                  @blur="validateKey('code')"
                 />
-                <div class="error-message">{{ formError.department }}</div>
+                <AppInputText
+                  :label="'Tên'"
+                  :required="true"
+                  :error="formError.name"
+                  :placeholder="'Mời nhập tên'"
+                  :is-disabled="currentMode == 'view'"
+                  :value="formInput.name"
+                  class="text-input"
+                  @input="handleInput('name', $event)"
+                  @blur="validateKey('name')"
+                />
+                <div class="select-input">
+                  <div class="label">
+                    <span class="text">Phòng ban</span>
+                    <span class="required">Bắt buộc</span>
+                  </div>
+                  <USelectMenu
+                    :model-value="formInput.department"
+                    :items="departmentOption"
+                    class="selector"
+                    :class="{ error: formError.department }"
+                    :variant="'none'"
+                    :disabled="currentMode == 'view'"
+                    autocomplete="autocomplete"
+                    placeholder="Mời chọn phòng ban"
+                    :title="formInput.department?.label ?? ''"
+                    :search-input="{
+                      placeholder: 'Tìm kiếm',
+                    }"
+                    :ui="{
+                      trailingIcon:
+                        'group-data-[state=open]:rotate-180 transition-transform duration-200',
+                    }"
+                    @update:model-value="handleInput('department', $event)"
+                    @update:open="
+                      ($event) =>
+                        !$event ? validateKey('department') : () => {}
+                    "
+                  />
+                  <div class="error-message">{{ formError.department }}</div>
+                </div>
               </div>
             </div>
-            <div class="col">
-              <div class="title">Thiết lập cấp bậc</div>
-              <PositionCreateLevelBlock
-                :list="formInput.level"
-                :disabled="currentMode == 'view'"
-                @input="handleInput('level', $event)"
-              />
-            </div>
+            <!-- <div class="col"> -->
+            <!--   <div class="title">Thiết lập cấp bậc</div> -->
+            <!--   <PositionCreateLevelBlock -->
+            <!--     :list="formInput.level" -->
+            <!--     :disabled="currentMode == 'view'" -->
+            <!--     @input="handleInput('level', $event)" -->
+            <!--   /> -->
+            <!-- </div> -->
           </div>
         </div>
         <div class="block">
@@ -164,7 +167,7 @@ const formInput = ref<Record<string, any>>({
   name: "",
   code: "",
   department: null,
-  level: [],
+  // level: [],
   process: [],
 });
 
@@ -228,35 +231,35 @@ const fetchDetail = async () => {
         return res;
       });
 
-    const levels: any[] = [];
-    for (const level of positionDetail.value?.listLevel ?? []) {
-      const index = levels.findIndex(
-        (lvl) => lvl.levelName == level.level.name,
-      );
-      if (index != -1) {
-        levels[index].sub.push({
-          name: level.name,
-          id: level.id,
-        });
-      } else {
-        levels.push({
-          levelName: level.level.name,
-          levelId: level.levelId,
-          sub: [
-            {
-              id: level.id,
-              name: level.name,
-            },
-          ],
-        });
-      }
-    }
+    // const levels: any[] = [];
+    // for (const level of positionDetail.value?.listLevel ?? []) {
+    //   const index = levels.findIndex(
+    //     (lvl) => lvl.levelName == level.level.name,
+    //   );
+    //   if (index != -1) {
+    //     levels[index].sub.push({
+    //       name: level.name,
+    //       id: level.id,
+    //     });
+    //   } else {
+    //     levels.push({
+    //       levelName: level.level.name,
+    //       levelId: level.levelId,
+    //       sub: [
+    //         {
+    //           id: level.id,
+    //           name: level.name,
+    //         },
+    //       ],
+    //     });
+    //   }
+    // }
 
     formInput.value = {
       name: positionDetail.value?.name,
       code: positionDetail.value?.code,
       department: department,
-      level: levels,
+      // level: levels,
       process: processes,
     };
     snapshotForm.value = cloneDeep(formInput.value);
@@ -321,16 +324,16 @@ const isFormValid = computed(() => {
   if (!input.name.trim() || !input.code.trim() || !input.department) {
     return false;
   }
-  console.log(input.level);
-  for (const level of input.level) {
-    console.log(level);
-    for (const sub of level.sub) {
-      console.log(sub);
-      if (!sub.name.trim()) {
-        return false;
-      }
-    }
-  }
+  // console.log(input.level);
+  // for (const level of input.level) {
+  //   console.log(level);
+  //   for (const sub of level.sub) {
+  //     console.log(sub);
+  //     if (!sub.name.trim()) {
+  //       return false;
+  //     }
+  //   }
+  // }
   for (const process of input.process) {
     if (!process.name.trim()) {
       return false;
@@ -411,19 +414,19 @@ const handleSubmitUpdate = async () => {
   }
   const input = formInput.value;
 
-  const levels = [];
-  for (const level of input.level) {
-    for (const sub of level.sub) {
-      const mappedLevel: Record<string, any> = {
-        levelId: level.levelId,
-        name: sub.name,
-      };
-      if (sub.id) {
-        mappedLevel.id = sub.id;
-      }
-      levels.push(mappedLevel);
-    }
-  }
+  // const levels = [];
+  // for (const level of input.level) {
+  //   for (const sub of level.sub) {
+  //     const mappedLevel: Record<string, any> = {
+  //       levelId: level.levelId,
+  //       name: sub.name,
+  //     };
+  //     if (sub.id) {
+  //       mappedLevel.id = sub.id;
+  //     }
+  //     levels.push(mappedLevel);
+  //   }
+  // }
 
   const processes = [];
   let i = 1;
@@ -463,7 +466,7 @@ const handleSubmitUpdate = async () => {
     code: input.code,
     name: input.name,
     departmentId: input.department.value,
-    positionLevel: levels,
+    // positionLevel: levels,
     positionProcess: processes,
   };
 
@@ -585,12 +588,22 @@ onBeforeUnmount(() => {
           font-weight: 600;
         }
 
+        .row {
+          display: flex;
+          flex-direction: row;
+          gap: 12px;
+          width: 100%;
+          flex-wrap: wrap;
+        }
+
         .columns {
           display: flex;
           flex-direction: row;
           gap: 16px;
           row-gap: 4px;
           flex-wrap: wrap;
+
+
           .col {
             display: flex;
             flex-direction: column;
@@ -600,6 +613,7 @@ onBeforeUnmount(() => {
         }
 
         :deep(.text-input) {
+          flex: 1;
           .input {
             padding: 6px 8px;
             input {
@@ -612,6 +626,7 @@ onBeforeUnmount(() => {
           display: flex;
           flex-direction: column;
           gap: 4px;
+          flex: 1;
 
           .label {
             display: flex;
@@ -641,7 +656,6 @@ onBeforeUnmount(() => {
           }
 
           :deep(button.selector) {
-            margin: 2px 0px;
             cursor: pointer;
             border: 2px solid rgba($color-primary-800, 0.1);
 
@@ -659,7 +673,7 @@ onBeforeUnmount(() => {
             padding: 6px 48px 6px 8px !important;
             font-weight: 500 !important;
             color: $text-light !important;
-            height: 36px;
+            height: 38px;
             background-color: white !important;
             width: 100%;
             max-width: 100%;

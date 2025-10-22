@@ -10,7 +10,7 @@
           <div v-if="isLoading" class="loading-overlay">
             <AppSpinnerHalfCircle class="spinner" />
           </div>
-          <form v-if="industryDetail" class="form-block">
+          <form v-if="careerDetail" class="form-block">
             <div class="line">
               <AppInputText
                 :label="'Tên'"
@@ -35,19 +35,19 @@
                 @blur="validateKey('code')"
               />
             </div>
-            <div class="line">
-              <div class="text-area">
-                <AppInputTextarea
-                  v-model="formInput.description"
-                  :label="'Mô tả'"
-                  :required="false"
-                  :placeholder="'Mời nhập mô tả'"
-                  :is-disabled="currentMode == 'view'"
-                  :error="''"
-                  :show-error="false"
-                />
-              </div>
-            </div>
+            <!-- <div class="line"> -->
+            <!--   <div class="text-area"> -->
+            <!--     <AppInputTextarea -->
+            <!--       v-model="formInput.description" -->
+            <!--       :label="'Mô tả'" -->
+            <!--       :required="false" -->
+            <!--       :placeholder="'Mời nhập mô tả'" -->
+            <!--       :is-disabled="currentMode == 'view'" -->
+            <!--       :error="''" -->
+            <!--       :show-error="false" -->
+            <!--     /> -->
+            <!--   </div> -->
+            <!-- </div> -->
             <!-- <div class="line"> -->
             <!--   <div class="sub-list"> -->
             <!--     <div class="label">Phân ngành</div> -->
@@ -139,18 +139,18 @@ const emits = defineEmits<{
 type TCreateForm = {
   code: string;
   name: string;
-  description?: string;
+  // description?: string;
   // sub?: TSubIndustry[];
 };
 
 const currentMode = ref<string>("view");
-const industryDetail = ref<any>(null);
-const industryDetailSnapshot = ref<any>(null);
+const careerDetail = ref<any>(null);
+const careerDetailSnapshot = ref<any>(null);
 const isLoading = ref<boolean>(false);
 const formInput = ref<TCreateForm>({
   code: "",
   name: "",
-  description: "",
+  // description: "",
   // sub: [],
 });
 const formError = ref<TCreateForm>({
@@ -180,6 +180,7 @@ const formRules = {
 };
 
 const { updateIndustry, getIndustryDetail } = useIndustryApi();
+const { updateCareer, getCareerDetail } = useCareerApi();
 
 const isSubmiting = ref<boolean>(false);
 
@@ -191,8 +192,8 @@ const isOpen = computed({
 
 const title = computed(() => {
   return currentMode.value == "view"
-    ? "Thông tin lĩnh vực"
-    : "Cập nhật thông tin lĩnh vực";
+    ? "Thông tin ngành nghề"
+    : "Cập nhật thông tin ngành nghề";
 });
 
 const isFormValid = computed(() => {
@@ -217,12 +218,11 @@ const isFormValid = computed(() => {
 
 const fetchDetail = async (id: number) => {
   isLoading.value = true;
-  const res = await getIndustryDetail(id);
-  industryDetail.value = res.data;
+  const res = await getCareerDetail(id);
+  careerDetail.value = res.data;
   formInput.value = {
     name: res.data.name,
     code: res.data.code,
-    description: res.data.description ?? "",
     // sub: res.data.industrySubs?.map((sub: any) => {
     //   const mapped = {
     //     id: sub.id,
@@ -234,7 +234,7 @@ const fetchDetail = async (id: number) => {
     //   return mapped;
     // }),
   };
-  industryDetailSnapshot.value = cloneDeep(formInput.value);
+  careerDetailSnapshot.value = cloneDeep(formInput.value);
   isLoading.value = false;
 };
 
@@ -283,7 +283,7 @@ const handleSubmit = async () => {
   const payload = {
     code: formInput.value.code,
     name: formInput.value.name,
-    description: formInput.value.description,
+    // description: formInput.value.description,
     // industrySubs: formInput.value.sub?.map((subIndustry: TSubIndustry) => {
     //   const { isEdit, ...rest } = subIndustry;
     //   return rest;
@@ -291,13 +291,13 @@ const handleSubmit = async () => {
   };
 
   isSubmiting.value = true;
-  const res = await updateIndustry(industryDetail.value.id, payload);
+  const res = await updateCareer(careerDetail.value.id, payload);
   if (res) {
     if (props.initialMode == "edit") {
       emits("submit");
     } else {
       currentMode.value = "view";
-      await fetchDetail(industryDetail.value.id);
+      await fetchDetail(careerDetail.value.id);
     }
   }
   isSubmiting.value = false;
@@ -337,8 +337,8 @@ watch(
 watch(currentMode, (newVal) => {
   emits("modeChange", newVal);
   if (newVal == "view") {
-    if (industryDetailSnapshot.value) {
-      formInput.value = industryDetailSnapshot.value;
+    if (careerDetailSnapshot.value) {
+      formInput.value = careerDetailSnapshot.value;
       formError.value = {
         code: "",
         name: "",
@@ -351,12 +351,12 @@ watch(
   () => props.targetId,
   async (newVal) => {
     if (newVal == -1) {
-      industryDetailSnapshot.value = null;
-      industryDetail.value = null;
+      careerDetailSnapshot.value = null;
+      careerDetail.value = null;
       formInput.value = {
         code: "",
         name: "",
-        description: "",
+        // description: "",
         // sub: [],
       };
       formError.value = {

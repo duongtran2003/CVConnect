@@ -23,10 +23,9 @@ export function useMomentRelativeTime(
 
     const localizedTime = timezone ? time.tz(timezone) : time;
 
-    console.log(moment.locale());
     moment.updateLocale("vi", {
       relativeTime: {
-        future: "in %s",
+        future: "Trong %s",
         past: "%s trước",
         s: "vài giây",
         ss: "%d giây",
@@ -44,7 +43,6 @@ export function useMomentRelativeTime(
         yy: "%d years",
       },
     });
-    console.log(moment.locale());
 
     const diffDays = moment().diff(localizedTime, "days");
 

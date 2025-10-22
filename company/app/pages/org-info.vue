@@ -1,148 +1,156 @@
 <template>
-  <div class="wrapper">
-    <div class="org-info">
-      <OrgOrgInfoChangeLogoModal
-        v-model="isChangeLogoModalOpen"
-        @submit="handleUpdateLogo"
-      />
-      <OrgOrgInfoChangeCoverModal
-        v-model="isChangeCoverModalOpen"
-        @submit="handleUpdateCover"
-      />
-      <OrgOrgInfoUpdateInfoModal
-        v-model="isChangeInfoModalOpen"
-        :company-info="orgInfo"
-        @submit="handleUpdateInfo"
-      />
-      <div class="org-image-wrapper">
-        <div class="org-cover">
-          <img :src="orgInfo?.coverPhotoUrl ?? '/orgcover.jpg'" alt="" />
-          <div
-            v-if="allowActions.includes('UPDATE')"
-            class="edit-cover-button"
-            @click="isChangeCoverModalOpen = true"
-          >
-            <Icon name="material-symbols:edit-rounded" />
-          </div>
-        </div>
-        <div class="org-logo">
-          <div class="logo-wrapper">
-            <img :src="orgInfo?.logoUrl ?? '/blankuser.jpg'" alt="" />
+  <div class="org-info-wrapper">
+    <div class="wrapper">
+      <div class="org-info">
+        <OrgOrgInfoChangeLogoModal
+          v-model="isChangeLogoModalOpen"
+          @submit="handleUpdateLogo"
+        />
+        <OrgOrgInfoChangeCoverModal
+          v-model="isChangeCoverModalOpen"
+          @submit="handleUpdateCover"
+        />
+        <OrgOrgInfoUpdateInfoModal
+          v-model="isChangeInfoModalOpen"
+          :company-info="orgInfo"
+          @submit="handleUpdateInfo"
+        />
+        <div class="org-image-wrapper">
+          <div class="org-cover">
+            <img :src="orgInfo?.coverPhotoUrl ?? '/orgcover.jpg'" alt="" />
             <div
               v-if="allowActions.includes('UPDATE')"
-              class="change-image"
-              @click="isChangeLogoModalOpen = true"
+              class="edit-cover-button"
+              @click="isChangeCoverModalOpen = true"
             >
-              <Icon name="material-symbols:android-camera" />
+              <Icon name="material-symbols:edit-rounded" />
             </div>
           </div>
-          <div class="company-info-misc">
-            <div class="name">
-              {{ orgInfo?.name }}
+          <div class="org-logo">
+            <div class="logo-wrapper">
+              <img :src="orgInfo?.logoUrl ?? '/blankuser.jpg'" alt="" />
+              <div
+                v-if="allowActions.includes('UPDATE')"
+                class="change-image"
+                @click="isChangeLogoModalOpen = true"
+              >
+                <Icon name="material-symbols:android-camera" />
+              </div>
             </div>
-            <div v-if="displayingAddresses" class="address truncate">
-              <Icon
-                name="streamline:travel-map-location-pin-navigation-map-maps-pin-gps-location"
-              />
-              <span>
-                {{ displayingAddresses.mainAddress }}
-                <span
-                  v-if="displayingAddresses.others"
-                  class="link"
-                  @click="routeToAddresses"
-                  >{{ `và ${displayingAddresses.others} địa chỉ khác` }}</span
-                >
-              </span>
+            <div class="company-info-misc">
+              <div class="name">
+                {{ orgInfo?.name }}
+              </div>
+              <div v-if="displayingAddresses" class="address truncate">
+                <Icon
+                  name="streamline:travel-map-location-pin-navigation-map-maps-pin-gps-location"
+                />
+                <span>
+                  {{ displayingAddresses.mainAddress }}
+                  <span
+                    v-if="displayingAddresses.others"
+                    class="link"
+                    @click="routeToAddresses"
+                    >{{ `và ${displayingAddresses.others} địa chỉ khác` }}</span
+                  >
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="info-block">
-        <div class="line">
-          <div class="col">
-            <div class="row">
-              <div class="label">
-                <Icon name="mdi:web" />
-                Website
+        <div class="info-block">
+          <div class="line">
+            <div class="col">
+              <div class="row">
+                <div class="label">
+                  <Icon name="mdi:web" />
+                  Website
+                </div>
+                <a
+                  :href="orgInfo?.website"
+                  target="_blank"
+                  class="value link"
+                  >{{ orgInfo?.website }}</a
+                >
               </div>
-              <a :href="orgInfo?.website" target="_blank" class="value link">{{
-                orgInfo?.website
-              }}</a>
-            </div>
-            <div class="row">
-              <div class="label">
-                <Icon name="streamline-plump:office-worker-remix" />
-                Số lượng nhân viên
+              <div class="row">
+                <div class="label">
+                  <Icon name="streamline-plump:office-worker-remix" />
+                  Số lượng nhân viên
+                </div>
+                <div class="value">{{ employeeCount }}</div>
               </div>
-              <div class="value">{{ employeeCount }}</div>
-            </div>
-            <div class="row">
-              <div class="label">
-                <Icon name="iconoir:suitcase" />
-                Lĩnh vực
-              </div>
-              <div class="value">
-                <div class="industry-list">
-                  <div
-                    v-for="indus of orgInfo?.industryList ?? []"
-                    :key="indus.id"
-                    class="industry-item"
-                  >
-                    {{ indus.name }}
+              <div class="row">
+                <div class="label">
+                  <Icon name="iconoir:suitcase" />
+                  Lĩnh vực
+                </div>
+                <div class="value">
+                  <div class="industry-list">
+                    <div
+                      v-for="indus of orgInfo?.industryList ?? []"
+                      :key="indus.id"
+                      class="industry-item"
+                    >
+                      {{ indus.name }}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+            <div class="col">
+              <div class="row">
+                <div class="label">
+                  <Icon name="material-symbols:add-home-rounded" />
+                  Ngày tạo
+                </div>
+                <div class="value">
+                  {{ formatDateTime(orgInfo?.createdAt, "DD/MM/YYYY") }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="label">
+                  <Icon name="material-symbols:person-add-rounded" />
+                  Người tạo
+                </div>
+                <div class="value">{{ orgInfo?.createdBy }}</div>
+              </div>
+              <div v-if="orgInfo?.updatedAt" class="row">
+                <div class="label">
+                  <Icon name="material-symbols:add-home-rounded" />
+                  Ngày cập nhật
+                </div>
+                <div class="value">
+                  {{ formatDateTime(orgInfo?.updatedAt, "DD/MM/YYYY") }}
+                </div>
+              </div>
+              <div v-if="orgInfo?.updatedBy" class="row">
+                <div class="label">
+                  <Icon name="material-symbols:person-edit-rounded" />
+                  Người cập nhật
+                </div>
+                <div class="value">{{ orgInfo?.updatedBy }}</div>
+              </div>
+            </div>
           </div>
-          <div class="col">
-            <div class="row">
-              <div class="label">
-                <Icon name="material-symbols:add-home-rounded" />
-                Ngày tạo
-              </div>
-              <div class="value">
-                {{ formatDateTime(orgInfo?.createdAt, "DD/MM/YYYY") }}
-              </div>
+          <div class="description-block">
+            <div class="label">
+              <Icon name="fluent:text-description-ltr-24-filled" />
+              Mô tả chung
             </div>
-            <div class="row">
-              <div class="label">
-                <Icon name="material-symbols:person-add-rounded" />
-                Người tạo
-              </div>
-              <div class="value">{{ orgInfo?.createdBy }}</div>
-            </div>
-            <div v-if="orgInfo?.updatedAt" class="row">
-              <div class="label">
-                <Icon name="material-symbols:add-home-rounded" />
-                Ngày cập nhật
-              </div>
-              <div class="value">
-                {{ formatDateTime(orgInfo?.updatedAt, "DD/MM/YYYY") }}
-              </div>
-            </div>
-            <div v-if="orgInfo?.updatedBy" class="row">
-              <div class="label">
-                <Icon name="material-symbols:person-edit-rounded" />
-                Người cập nhật
-              </div>
-              <div class="value">{{ orgInfo?.updatedBy }}</div>
-            </div>
+            <div class="content" v-html="orgInfo?.description"></div>
           </div>
         </div>
-        <div class="description-block">
-          <div class="label">
-            <Icon name="fluent:text-description-ltr-24-filled" />
-            Mô tả chung
-          </div>
-          <div class="content" v-html="orgInfo?.description"></div>
-        </div>
+        <AppButton
+          v-if="allowActions.includes('UPDATE')"
+          class="edit-button"
+          :text="'Chỉnh sửa'"
+          @click="isChangeInfoModalOpen = true"
+        />
       </div>
-      <AppButton
-        v-if="allowActions.includes('UPDATE')"
-        class="edit-button"
-        :text="'Chỉnh sửa'"
-        @click="isChangeInfoModalOpen = true"
-      />
+    </div>
+    <div class="notification-block-wrapper">
+      <OrgOrgInfoNotificationsList />
     </div>
   </div>
 </template>
@@ -252,6 +260,13 @@ function handleUpdateInfo() {
 }
 </script>
 <style lang="scss" scoped>
+.org-info-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
 .wrapper {
   min-height: 0;
   flex: 1;
@@ -265,6 +280,19 @@ function handleUpdateInfo() {
   max-width: 60%;
   @include custom-scrollbar;
 }
+
+.notification-block-wrapper {
+  min-height: 0;
+  flex: 1;
+  min-height: 0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  margin-top: 8px;
+  @include box-shadow;
+  max-width: 40%;
+  max-height: 100%;
+}
+
 .org-info {
   display: flex;
   flex-direction: column;
@@ -436,9 +464,9 @@ function handleUpdateInfo() {
     display: flex;
     flex-direction: column;
 
-      @media (max-width: 1330px) {
+    @media (max-width: 1330px) {
       margin-top: 156px;
-      }
+    }
 
     .industry-list {
       display: flex;

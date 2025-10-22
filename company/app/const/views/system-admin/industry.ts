@@ -47,19 +47,19 @@ export const industryTableHeaders = [
   //     },
   //   },
   // },
-  {
-    accessorKey: "industrySubName",
-    header: "Phân ngành",
-    allowFilter: true,
-    filterType: "text",
-    isSortable: false,
-    meta: {
-      class: {
-        th: "min-w-[200px] pl-[32px] max-w-[440px] truncate",
-        td: "pl-[32px] max-w-[440px] truncate",
-      },
-    },
-  },
+  // {
+  //   accessorKey: "industrySubName",
+  //   header: "Phân ngành",
+  //   allowFilter: true,
+  //   filterType: "text",
+  //   isSortable: false,
+  //   meta: {
+  //     class: {
+  //       th: "min-w-[200px] pl-[32px] max-w-[440px] truncate",
+  //       td: "pl-[32px] max-w-[440px] truncate",
+  //     },
+  //   },
+  // },
   {
     accessorKey: "createdAt",
     header: "Ngày tạo",

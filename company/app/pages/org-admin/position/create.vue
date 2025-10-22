@@ -12,62 +12,65 @@
           <div class="columns">
             <div class="col">
               <div class="title">Thông tin chung</div>
-              <AppInputText
-                :label="'Mã'"
-                :required="true"
-                :error="formError.code"
-                :placeholder="'Mời nhập mã'"
-                :value="formInput.code"
-                class="text-input"
-                @input="handleInput('code', $event)"
-                @blur="validateKey('code')"
-              />
-              <AppInputText
-                :label="'Tên'"
-                :required="true"
-                :error="formError.name"
-                :placeholder="'Mời nhập tên'"
-                :value="formInput.name"
-                class="text-input"
-                @input="handleInput('name', $event)"
-                @blur="validateKey('name')"
-              />
-              <div class="select-input">
-                <div class="label">
-                  <span class="text">Phòng ban</span>
-                  <span class="required">Bắt buộc</span>
-                </div>
-                <USelectMenu
-                  :model-value="formInput.department"
-                  :items="departmentOption"
-                  class="selector"
-                  :class="{ error: formError.department }"
-                  :variant="'none'"
-                  autocomplete="autocomplete"
-                  placeholder="Mời chọn phòng ban"
-                  :title="formInput.department?.label ?? ''"
-                  :search-input="{
-                    placeholder: 'Tìm kiếm',
-                  }"
-                  :ui="{
-                    trailingIcon:
-                      'group-data-[state=open]:rotate-180 transition-transform duration-200',
-                  }"
-                  @update:model-value="handleInput('department', $event)"
-                  @update:open="
-                    ($event) => (!$event ? validateKey('department') : () => {})
-                  "
+              <div class="row">
+                <AppInputText
+                  :label="'Mã'"
+                  :required="true"
+                  :error="formError.code"
+                  :placeholder="'Mời nhập mã'"
+                  :value="formInput.code"
+                  class="text-input"
+                  @input="handleInput('code', $event)"
+                  @blur="validateKey('code')"
                 />
-                <div class="error-message">{{ formError.department }}</div>
+                <AppInputText
+                  :label="'Tên'"
+                  :required="true"
+                  :error="formError.name"
+                  :placeholder="'Mời nhập tên'"
+                  :value="formInput.name"
+                  class="text-input"
+                  @input="handleInput('name', $event)"
+                  @blur="validateKey('name')"
+                />
+                <div class="select-input">
+                  <div class="label">
+                    <span class="text">Phòng ban</span>
+                    <span class="required">Bắt buộc</span>
+                  </div>
+                  <USelectMenu
+                    :model-value="formInput.department"
+                    :items="departmentOption"
+                    class="selector"
+                    :class="{ error: formError.department }"
+                    :variant="'none'"
+                    autocomplete="autocomplete"
+                    placeholder="Mời chọn phòng ban"
+                    :title="formInput.department?.label ?? ''"
+                    :search-input="{
+                      placeholder: 'Tìm kiếm',
+                    }"
+                    :ui="{
+                      trailingIcon:
+                        'group-data-[state=open]:rotate-180 transition-transform duration-200',
+                    }"
+                    @update:model-value="handleInput('department', $event)"
+                    @update:open="
+                      ($event) =>
+                        !$event ? validateKey('department') : () => {}
+                    "
+                  />
+                  <div class="error-message">{{ formError.department }}</div>
+                </div>
               </div>
             </div>
-            <div class="col">
-              <div class="title">Thiết lập cấp bậc</div>
-              <PositionCreateLevelBlock
-                :list="formInput.level"
-                @input="handleInput('level', $event)"
-              />
-            </div>
+            <!-- <div class="col"> -->
+            <!--   <div class="title">Thiết lập cấp bậc</div> -->
+            <!--   <PositionCreateLevelBlock -->
+            <!--     :list="formInput.level" -->
+            <!--     @input="handleInput('level', $event)" -->
+            <!--   /> -->
+            <!-- </div> -->
           </div>
         </div>
         <div class="block">
@@ -116,7 +119,7 @@ const formInput = ref<Record<string, any>>({
   name: "",
   code: "",
   department: null,
-  level: [],
+  // level: [],
   process: [],
 });
 
@@ -190,16 +193,16 @@ const isFormValid = computed(() => {
   if (!input.name.trim() || !input.code.trim() || !input.department) {
     return false;
   }
-  console.log(input.level);
-  for (const level of input.level) {
-    console.log(level);
-    for (const sub of level.sub) {
-      console.log(sub);
-      if (!sub.name.trim()) {
-        return false;
-      }
-    }
-  }
+  // console.log(input.level);
+  // for (const level of input.level) {
+  //   console.log(level);
+  //   for (const sub of level.sub) {
+  //     console.log(sub);
+  //     if (!sub.name.trim()) {
+  //       return false;
+  //     }
+  //   }
+  // }
   for (const process of input.process) {
     if (!process.name.trim()) {
       return false;
@@ -251,15 +254,15 @@ const handleSubmit = async () => {
   }
   const input = formInput.value;
 
-  const levels = [];
-  for (const level of input.level) {
-    for (const sub of level.sub) {
-      levels.push({
-        levelId: level.levelId,
-        name: sub.name,
-      });
-    }
-  }
+  // const levels = [];
+  // for (const level of input.level) {
+  //   for (const sub of level.sub) {
+  //     levels.push({
+  //       levelId: level.levelId,
+  //       name: sub.name,
+  //     });
+  //   }
+  // }
 
   const processes = [];
   let i = 1;
@@ -291,7 +294,7 @@ const handleSubmit = async () => {
     code: input.code,
     name: input.name,
     departmentId: input.department.value,
-    positionLevel: levels,
+    // positionLevel: levels,
     positionProcess: processes,
   };
 
@@ -380,6 +383,14 @@ onBeforeUnmount(() => {
           font-weight: 600;
         }
 
+        .row {
+          display: flex;
+          flex-direction: row;
+          gap: 12px;
+          width: 100%;
+          flex-wrap: wrap;
+        }
+
         .columns {
           display: flex;
           flex-direction: row;
@@ -395,6 +406,7 @@ onBeforeUnmount(() => {
         }
 
         :deep(.text-input) {
+          flex: 1;
           .input {
             padding: 6px 8px;
             input {
@@ -407,6 +419,7 @@ onBeforeUnmount(() => {
           display: flex;
           flex-direction: column;
           gap: 4px;
+          flex: 1;
 
           .label {
             display: flex;

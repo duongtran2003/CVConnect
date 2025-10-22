@@ -287,7 +287,7 @@ const isDeleteAllDisabled = computed(() => {
       rowData.push(row);
     }
   }
-  return rowData.some((row) => !row.isDefault);
+  return rowData.some((row) => !row.canDelete);
 });
 const sort = computed(() => {
   return {
@@ -341,8 +341,8 @@ const fetchData = async () => {
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
     entry.canDelete = true;
-    entry.industrySubName =
-      entry.industrySubs?.map((sub: any) => sub.name)?.join(", ") ?? "";
+    // entry.industrySubName =
+    //   entry.industrySubs?.map((sub: any) => sub.name)?.join(", ") ?? "";
   }
   tableData.value = data;
 };

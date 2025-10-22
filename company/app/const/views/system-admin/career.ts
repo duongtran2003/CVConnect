@@ -1,4 +1,4 @@
-export const positionTableHeaders = [
+export const careerTableHeaders = [
   {
     accessorKey: "index",
     header: "STT",
@@ -48,8 +48,8 @@ export const positionTableHeaders = [
   //   },
   // },
   // {
-  //   accessorKey: "listLevel",
-  //   header: "Cấp bậc",
+  //   accessorKey: "industrySubName",
+  //   header: "Phân ngành",
   //   allowFilter: true,
   //   filterType: "text",
   //   isSortable: false,
@@ -60,32 +60,6 @@ export const positionTableHeaders = [
   //     },
   //   },
   // },
-  {
-    accessorKey: "departmentName",
-    header: "Phòng ban",
-    allowFilter: true,
-    filterType: "select",
-    isSortable: true,
-    meta: {
-      class: {
-        th: "min-w-[200px] pl-[32px] max-w-[440px] truncate",
-        td: "pl-[32px] max-w-[440px] truncate",
-      },
-    },
-  },
-  {
-    accessorKey: "isActive",
-    header: "Trạng thái",
-    allowFilter: true,
-    filterType: "select",
-    isSortable: true,
-    meta: {
-      class: {
-        th: "min-w-[200px] pl-[32px] max-w-[440px] truncate",
-        td: "pl-[32px] max-w-[440px] truncate",
-      },
-    },
-  },
   {
     accessorKey: "createdAt",
     header: "Ngày tạo",
@@ -152,18 +126,5 @@ export const pageSizeOptions = [
   {
     label: "50",
     value: 50,
-  },
-];
-
-export const BREADCRUMB_BASE: TBreadcumbItem[] = [
-  {
-    name: "Danh mục",
-    icon: "material-symbols:category-outline-rounded",
-    url: "",
-  },
-  {
-    name: "Vị trí tuyển dụng",
-    icon: "",
-    url: "/org-admin/position",
   },
 ];

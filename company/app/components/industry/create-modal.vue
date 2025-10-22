@@ -42,19 +42,19 @@
                 />
               </div>
             </div>
-            <div class="line">
-              <div class="sub-list">
-                <div class="label">Phân ngành</div>
-                <IndustrySubIndustry
-                  v-for="(item, index) of formInput.sub"
-                  :key="index"
-                  :data="item"
-                  @input="handleSubInput(index, $event)"
-                  @delete="handleSubDelete(index)"
-                />
-                <div class="add-button" @click="handleAddSub">Thêm mới</div>
-              </div>
-            </div>
+            <!-- <div class="line"> -->
+            <!--   <div class="sub-list"> -->
+            <!--     <div class="label">Phân ngành</div> -->
+            <!--     <IndustrySubIndustry -->
+            <!--       v-for="(item, index) of formInput.sub" -->
+            <!--       :key="index" -->
+            <!--       :data="item" -->
+            <!--       @input="handleSubInput(index, $event)" -->
+            <!--       @delete="handleSubDelete(index)" -->
+            <!--     /> -->
+            <!--     <div class="add-button" @click="handleAddSub">Thêm mới</div> -->
+            <!--   </div> -->
+            <!-- </div> -->
           </form>
         </div>
       </template>
@@ -98,14 +98,14 @@ type TCreateForm = {
   code: string;
   name: string;
   description?: string;
-  sub?: TSubIndustry[];
+  // sub?: TSubIndustry[];
 };
 
 const formInput = ref<TCreateForm>({
   code: "",
   name: "",
   description: "",
-  sub: [],
+  // sub: [],
 });
 const formError = ref<TCreateForm>({
   code: "",
@@ -152,24 +152,24 @@ const isFormValid = computed(() => {
     }
   }
 
-  if (formInput.value.sub) {
-    for (const sub of formInput.value.sub) {
-      if (!sub.code || !sub.name) {
-        return false;
-      }
-    }
-  }
+  // if (formInput.value.sub) {
+  //   for (const sub of formInput.value.sub) {
+  //     if (!sub.code || !sub.name) {
+  //       return false;
+  //     }
+  //   }
+  // }
 
   return true;
 });
 
-const handleAddSub = () => {
-  formInput.value.sub!.push({
-    name: "",
-    code: "",
-    isEdit: true,
-  });
-};
+// const handleAddSub = () => {
+//   formInput.value.sub!.push({
+//     name: "",
+//     code: "",
+//     isEdit: true,
+//   });
+// };
 
 const handleInput = <K extends keyof TCreateForm>(
   key: K,
@@ -179,16 +179,16 @@ const handleInput = <K extends keyof TCreateForm>(
   formError.value[key] = "" as TCreateForm[K];
 };
 
-const handleSubInput = (index: number, value: TSubIndustry) => {
-  if (!formInput.value.sub) {
-    return;
-  }
-  formInput.value.sub[index] = value;
-};
-
-const handleSubDelete = (index: number) => {
-  formInput.value.sub?.splice(index, 1);
-};
+// const handleSubInput = (index: number, value: TSubIndustry) => {
+//   if (!formInput.value.sub) {
+//     return;
+//   }
+//   formInput.value.sub[index] = value;
+// };
+//
+// const handleSubDelete = (index: number) => {
+//   formInput.value.sub?.splice(index, 1);
+// };
 
 const handleCancelClick = (event: any) => {
   event.preventDefault();
@@ -205,10 +205,10 @@ const handleSubmit = async () => {
     code: formInput.value.code,
     name: formInput.value.name,
     description: formInput.value.description,
-    industrySubs: formInput.value.sub?.map((subIndustry: TSubIndustry) => {
-      const { isEdit, ...rest } = subIndustry;
-      return rest;
-    }),
+    // industrySubs: formInput.value.sub?.map((subIndustry: TSubIndustry) => {
+    //   const { isEdit, ...rest } = subIndustry;
+    //   return rest;
+    // }),
   };
 
   isSubmiting.value = true;
@@ -218,7 +218,7 @@ const handleSubmit = async () => {
       code: "",
       name: "",
       description: "",
-      sub: [],
+      // sub: [],
     };
     formError.value = {
       code: "",

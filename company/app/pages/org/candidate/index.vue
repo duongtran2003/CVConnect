@@ -1,5 +1,9 @@
 <template>
   <div class="wrapper">
+    <DepartmentCreateModal
+      v-model="isCreateModalOpen"
+      @submit="handleCreated"
+    />
     <DepartmentEditViewModal
       v-model="isEditViewOpen"
       :initial-mode="editViewInitialMode"
@@ -8,8 +12,8 @@
       @submit="handleUpdated"
       @mode-change="handleSwitchEditViewMode($event)"
     />
-    <div class="position-content">
-      <div class="title">Danh mục vị trí tuyển dụng</div>
+    <div class="candidate-content">
+      <div class="title">Ứng viên</div>
       <div class="table-top">
         <AppButton
           :text="'Hoạt động'"
@@ -38,7 +42,7 @@
 
         <UModal
           :open="isDeleteModalOpen"
-          title="Xóa lĩnh vực"
+          title="Xóa phòng ban"
           :ui="{ content: 'w-[600px] max-w-[600px]' }"
           @update:open="handleDeleteModalOpenUpdate"
           @after:leave="clearDeleteList"
@@ -109,29 +113,30 @@
 import type { TTableAction } from "~/components/app/table/data-table.vue";
 import type { TSort } from "~/types/common";
 import { cloneDeep, debounce } from "lodash";
-import { CELL_TYPE, CHIP_TYPE } from "~/const/common";
 import {
+  industryTableHeaders,
   pageSizeOptions,
-  positionTableHeaders,
-} from "~/const/views/org-admin/position";
+} from "~/const/views/system-admin/industry";
+import { departmentTableHeaders } from "~/const/views/org-admin/department";
+import { CELL_TYPE, CHIP_TYPE } from "~/const/common";
 
 definePageMeta({
-  layout: "org-admin",
+  layout: "org",
 });
 useHead({
-  title: "Danh mục vị trí tuyển dụng",
+  title: "Ứng viên",
 });
 
 const route = useRoute();
 const router = useRouter();
-const departmentList = ref<any[]>([]);
+const isCreateModalOpen = ref<boolean>(false);
 const isDeleteModalOpen = ref<boolean>(false);
 const isEditViewOpen = ref<boolean>(false);
 const editViewId = ref<number | null>(null);
 const editViewInitialMode = ref<any>(null);
 const editViewMode = ref<any>(null);
 const isFetchingData = ref<boolean>(false);
-const fetchPositionController = ref<AbortController | null>();
+const fetchCandidateController = ref<AbortController | null>();
 const filter = ref<Record<string, any>>({});
 const totalItems = ref<number>(0);
 const isNoData = ref<boolean>(false);
@@ -155,8 +160,9 @@ const canEdit = computed(() => {
 const { getMenuItem } = useSidebarStore();
 const { setLoading } = useLoadingStore();
 // TODO: REPLACE THIS APIS
-const { getDepartments } = useDepartmentApi();
-const { getPositions, deletePosition, changePositionStatus } = usePositionApi();
+const { getDepartments, deleteDepartment, changeDepartmentStatus } =
+  useDepartmentApi();
+const { getJobAdCandidates } = useCandidateApi();
 
 // NOTE: From query string to filter
 const convertQuery = () => {
@@ -206,19 +212,14 @@ const convertQuery = () => {
 
   if (query.isActive) {
     const values = (query.isActive as string).split(",");
+    console.log(values);
     restoredFilter.isActive = values.map((val) =>
       filterSelectOption.value.isActive.find((opt: any) => {
         const booleanValue = val == "true";
         return opt.value == booleanValue;
       }),
     );
-  }
-
-  if (query.departmentName) {
-    const values = (query.departmentName as string).split(",");
-    restoredFilter.departmentName = values
-      .map((val) => departmentList.value.find((opt: any) => opt.id === val))
-      .filter(Boolean);
+    console.log(restoredFilter.isActive);
   }
 
   const updatedAt: (Date | null)[] = [];
@@ -251,17 +252,13 @@ const convertQuery = () => {
 };
 
 onBeforeMount(async () => {
-  let res = await getDepartments({ pageIndex: 0, pageSize: 1 });
-  const totalElement = res.data.pageInfo.totalElements;
-  res = await getDepartments({
-    pageIndex: 0,
-    pageSize: totalElement,
-  });
-  console.log(res);
-  departmentList.value = res.data.data;
-
   filter.value = convertQuery();
 });
+
+const handleCreated = () => {
+  isCreateModalOpen.value = false;
+  fetchData();
+};
 
 const handleUpdated = () => {
   isEditViewOpen.value = false;
@@ -293,14 +290,10 @@ const handleDeleteModalOpenUpdate = (event: boolean) => {
   }
 };
 
-const handleAddNew = () => {
-  router.push({ path: "/org-admin/position/create" });
-};
-
 const handleDelete = async () => {
   isDeleting.value = true;
   // TODO: REPLACE THIS API
-  const isSuccess = await deletePosition({ ids: deleteList.value });
+  const isSuccess = await deleteDepartment({ ids: deleteList.value });
   selectedRows.value = selectedRows.value.filter(
     (selected) => !deleteList.value.includes(selected),
   );
@@ -310,6 +303,10 @@ const handleDelete = async () => {
     handleDeleteModalOpenUpdate(false);
     fetchData();
   }
+};
+
+const handleAddNew = () => {
+  isCreateModalOpen.value = true;
 };
 
 const deleteListNames = computed(() => {
@@ -358,14 +355,14 @@ const handleFilter = (e: any) => {
 };
 
 const fetchData = async () => {
-  if (fetchPositionController.value) {
-    fetchPositionController.value.abort();
+  if (fetchCandidateController.value) {
+    fetchCandidateController.value.abort();
   }
 
-  fetchPositionController.value = new AbortController();
+  fetchCandidateController.value = new AbortController();
   isFetchingData.value = true;
   const query = route.query;
-  const res = await getPositions(query, fetchPositionController.value);
+  const res = await getJobAdCandidates(query, fetchCandidateController.value);
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
@@ -382,9 +379,6 @@ const fetchData = async () => {
     entry.index = index + 1 + (pageIndex.value - 1) * pageSize.value;
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
-    // entry.listLevel = entry.listLevel
-    //   .map((level: any) => level.name)
-    //   ?.join(", ");
     entry.isActive = entry.isActive
       ? {
           text: "Đang hoạt động",
@@ -402,7 +396,6 @@ const fetchData = async () => {
 };
 const debouncedFetchData = debounce(fetchData, 500);
 const selectedRows = ref<number[]>([]);
-
 const handleSelectionsUpdate = (selectionList: number[]) => {
   selectedRows.value = selectionList;
 };
@@ -429,7 +422,7 @@ const handleActiveToggle = async (ids: number[], state: boolean) => {
   };
 
   setLoading(true);
-  const res = await changePositionStatus(payload);
+  const res = await changeDepartmentStatus(payload);
   if (res) {
     selectedRows.value = [];
     fetchData();
@@ -442,13 +435,16 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
     handleDeleteClick([id]);
   }
   if (action === "view") {
-    router.push({ path: `/org-admin/position/detail/${id}` });
+    editViewId.value = id;
+    editViewInitialMode.value = "view";
+    editViewMode.value = "view";
+    isEditViewOpen.value = true;
   }
   if (action === "edit") {
-    router.push({
-      path: `/org-admin/position/detail/${id}`,
-      query: { mode: "edit" },
-    });
+    editViewId.value = id;
+    editViewInitialMode.value = "edit";
+    editViewMode.value = "edit";
+    isEditViewOpen.value = true;
   }
 };
 
@@ -465,15 +461,11 @@ const filterSelectOption = computed(() => {
         value: true,
       },
     ],
-    departmentName: departmentList.value.map((dept) => ({
-      label: dept.name,
-      value: dept.id,
-    })),
   };
 });
 
 const tableColumns = computed(() => {
-  return positionTableHeaders;
+  return departmentTableHeaders;
 });
 const pageSizeOpts = computed(() => {
   return pageSizeOptions;
@@ -510,17 +502,6 @@ const normalizeFilter = (filter: any) => {
     delete normalizedFilter.updatedAt;
     if (startDate) normalizedFilter.updatedAtStart = toUtcDate(startDate);
     if (endDate) normalizedFilter.updatedAtEnd = toUtcDate(endDate);
-  }
-
-  if (
-    normalizedFilter.departmentName &&
-    normalizedFilter.departmentName.length
-  ) {
-    normalizedFilter.departmentName = normalizedFilter.departmentName.map(
-      (memberType: any) => memberType.value,
-    );
-  } else {
-    delete normalizedFilter.departmentName;
   }
 
   const queryForUrl: Record<string, any> = {
@@ -574,7 +555,7 @@ watch(isEditViewOpen, (newVal) => {
   margin-top: 8px;
   @include box-shadow;
 }
-.position-content {
+.candidate-content {
   background-color: white;
   min-height: calc(100% - 48px - 8px);
   @include box-shadow;

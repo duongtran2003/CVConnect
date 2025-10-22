@@ -62,35 +62,35 @@
           :value="formInput.level"
           :error="formError.level"
           :placeholder="'Mời chọn cấp bậc'"
-          :remote-filter="false"
-          :multiple="false"
-          :is-disabled="!formInput.position"
-          :fetch-fn="null"
+          :remote-filter="true"
+          :multiple="true"
+          :is-disabled="false"
+          :fetch-fn="fetchLevel"
           @open-update="handlePositionOpenUpdate"
           @input="handleInput('level', $event)"
           @clear-value="handleInput('level', null)"
           @search-filter="
             () => {
-              positionList = [];
+              levelList = [];
             }
           "
         />
         <AppInputSearchSelect
           :label="'Ngành nghề'"
           :required="false"
-          :options="industryList"
-          :value="formInput.industry"
-          :error="formError.industry"
+          :options="career"
+          :value="formInput.career"
+          :error="formError.career"
           :placeholder="'Mời chọn ngành nghề'"
           :remote-filter="true"
           :multiple="true"
-          :fetch-fn="fetchIndustriesSub"
-          @open-update="handleIndustryOpenUpdate"
-          @input="handleInput('industry', $event)"
-          @clear-value="handleInput('industry', [])"
+          :fetch-fn="fetchCareer"
+          @open-update="handleCareerOpenUpdate"
+          @input="handleInput('career', $event)"
+          @clear-value="handleInput('career', [])"
           @search-filter="
             () => {
-              industryList = [];
+              career = [];
             }
           "
         />
@@ -171,15 +171,17 @@
 const { getDepartments } = useDepartmentApi();
 const { getPositions } = usePositionApi();
 const { getIndustriesSub } = useIndustryApi();
+const { getCareers } = useCareerApi();
 const { getAllLocations } = useLocationApi();
 const { getJobTypes } = useEnumApi();
+const { getLevels } = useLevelApi();
 
 export type TGeneralInfoForm = {
   title: string;
   department: Record<string, any>[];
   position: Record<string, any> | null;
-  level: Record<string, any> | null;
-  industry: Record<string, any>[];
+  level: Record<string, any>[] | null;
+  career: Record<string, any>[];
   location: Record<string, any>[];
   jobType: Record<string, any> | null;
   dueDate: string | null;
@@ -197,7 +199,7 @@ const props = withDefaults(defineProps<TProps>(), {
     department: [],
     position: null,
     level: null,
-    industry: [],
+    career: [],
     location: [],
     jobType: null,
     dueDate: null,
@@ -212,7 +214,8 @@ const emits = defineEmits<{
 const isLoading = ref<boolean>(false);
 const departmentList = ref<Record<string, any>[]>([]);
 const positionList = ref<Record<string, any>[]>([]);
-const industryList = ref<Record<string, any>[]>([]);
+const levelList = ref<Record<string, any>[]>([]);
+const career = ref<Record<string, any>[]>([]);
 const locationList = ref<Record<string, any>[]>([]);
 const jobTypeList = ref<Record<string, any>[]>([]);
 
@@ -223,7 +226,7 @@ const formError = ref<Record<string, any>>({
   department: "",
   position: "",
   level: "",
-  industry: "",
+  career: "",
   location: "",
   jobType: "",
   dueDate: "",
@@ -246,7 +249,7 @@ const formRule: Record<string, any> = {
       error: "Mời chọn phòng ban",
       validator: (input: any[]) => {
         console.log(input);
-        return !!input
+        return !!input;
       },
     },
   ],
@@ -259,7 +262,7 @@ const formRule: Record<string, any> = {
   level: [
     {
       error: "Mời chọn cấp bậc",
-      validator: (input: any | null) => !!input,
+      validator: (input: any[]) => !!input.length,
     },
   ],
   location: [
@@ -315,9 +318,9 @@ function handlePositionOpenUpdate(value: boolean) {
   }
 }
 
-function handleIndustryOpenUpdate(value: boolean) {
+function handleCareerOpenUpdate(value: boolean) {
   if (!value) {
-    validateKey("industry");
+    validateKey("career");
   }
 }
 
@@ -348,6 +351,27 @@ async function fetchPosition(params: any, controller?: AbortController) {
   return res.data.data;
 }
 
+async function fetchLevel(params: any, controller?: AbortController) {
+  // const ids = formInput.value.department.value;
+  const newParams = {
+    ...params,
+    // departmentIds: ids,
+  };
+  const res = await getLevels(newParams, controller);
+  if (!res) {
+    return null;
+  }
+  const nextPage = res.data.data;
+  levelList.value = [...levelList.value, ...nextPage];
+  if (levelList.value[0]?.id != 0) {
+    levelList.value.unshift({
+      name: "Tất cả",
+      id: 0,
+    });
+  }
+  return res.data.data;
+}
+
 async function fetchDepartments(params: any, controller?: AbortController) {
   const res = await getDepartments(params, controller);
   if (!res) {
@@ -363,16 +387,16 @@ async function fetchDepartments(params: any, controller?: AbortController) {
   return res.data.data;
 }
 
-async function fetchIndustriesSub(params: any, controller?: AbortController) {
-  const res = await getIndustriesSub(params, controller);
+async function fetchCareer(params: any, controller?: AbortController) {
+  const res = await getCareers(params, controller);
   if (!res) {
     return null;
   }
-  const nextPage = res.data.data.map((industry: any) => ({
-    label: industry.name,
-    value: industry.id,
+  const nextPage = res.data.data.map((career: any) => ({
+    label: career.name,
+    value: career.id,
   }));
-  industryList.value = [...industryList.value, ...nextPage];
+  career.value = [...career.value, ...nextPage];
   return res.data.data;
 }
 
@@ -412,21 +436,33 @@ const positionOptions = computed(() => {
 });
 
 const levelOptions = computed(() => {
-  const selectedPositionId = formInput.value.position?.value;
-  if (!selectedPositionId) return [];
-  const position = positionList.value.find(
-    (pos) => pos.id === selectedPositionId,
-  );
-  if (!position) return [];
-  return position.listLevel.map((lvl: any) => ({
-    label: lvl.name,
-    value: lvl.id,
+  return levelList.value.map((level) => ({
+    label: level.name,
+    value: level.id,
   }));
 });
 
 function handleInput(key: string, value: any) {
-  formError.value[key] = "";
-  formInput.value[key] = value;
+  if (key == "level") {
+    console.log("input level ne", value);
+    if (value.length && value[value.length - 1].value == 0) {
+      formError.value[key] = "";
+      formInput.value[key] = [value[value.length - 1]];
+    } 
+    else if (value.length && value[value.length - 1].value != 0 && value.find((val: any) => val.value == 0) != undefined) {
+      const index = value.findIndex((val: any) => val.value == 0);
+      const newValue = value;
+      newValue.splice(index, 1);
+      formError.value[key] = "";
+      formInput.value[key] = newValue;
+    } else {
+      formError.value[key] = "";
+      formInput.value[key] = value;
+    }
+  } else {
+    formError.value[key] = "";
+    formInput.value[key] = value;
+  }
 }
 
 function validateKey(key: string) {
