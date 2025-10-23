@@ -1,10 +1,10 @@
 <template>
   <div class="wrapper">
-    <DepartmentCreateModal
+    <OrgAdminOrgMemberInviteMemberModal
       v-model="isCreateModalOpen"
       @submit="handleCreated"
     />
-    <DepartmentEditViewModal
+    <OrgAdminOrgMemberEditViewModal
       v-model="isEditViewOpen"
       :initial-mode="editViewInitialMode"
       :target-id="editViewId || -1"
@@ -12,8 +12,8 @@
       @submit="handleUpdated"
       @mode-change="handleSwitchEditViewMode($event)"
     />
-    <div class="candidate-content">
-      <div class="title">Ứng viên</div>
+    <div class="org-member-content">
+      <div class="title">Danh sách thành viên</div>
       <div class="table-top">
         <AppButton
           :text="'Hoạt động'"
@@ -29,45 +29,14 @@
           @click="handleActiveToggle(selectedRows, false)"
         >
         </AppButton>
-        <AppButton
-          :text="'Xóa bỏ'"
-          :is-disabled="isDeleteAllDisabled"
-          class="delete-button"
-          @click="handleDeleteClick(selectedRows)"
-        >
-          <template #icon>
-            <Icon name="material-symbols:delete-outline-rounded" />
-          </template>
-        </AppButton>
 
-        <UModal
-          :open="isDeleteModalOpen"
-          title="Xóa phòng ban"
-          :ui="{ content: 'w-[600px] max-w-[600px]' }"
-          @update:open="handleDeleteModalOpenUpdate"
-          @after:leave="clearDeleteList"
-        >
-          <template #body>
-            <ModalsDeleteConfirm :delete-list="deleteListNames">
-              <template #footer>
-                <AppButton
-                  :text="'Đồng ý'"
-                  class="modal-delete-submit"
-                  :is-loading="isDeleting"
-                  @click="handleDelete"
-                />
-              </template>
-            </ModalsDeleteConfirm>
-          </template>
-        </UModal>
-
-        <AppButton :text="'Thêm mới'" class="add-button" @click="handleAddNew">
+        <AppButton :text="'Mời'" class="add-button" @click="handleAddNew">
           <template #icon>
             <Icon name="material-symbols:add-2-rounded" />
           </template>
         </AppButton>
       </div>
-      <AppTableDataTable
+      <OrgCandidateDataTable
         :table-data="tableData"
         :columns="tableColumns"
         :allow-actions="allowActions"
@@ -113,18 +82,18 @@
 import type { TTableAction } from "~/components/app/table/data-table.vue";
 import type { TSort } from "~/types/common";
 import { cloneDeep, debounce } from "lodash";
-import {
-  industryTableHeaders,
-  pageSizeOptions,
-} from "~/const/views/system-admin/industry";
-import { departmentTableHeaders } from "~/const/views/org-admin/department";
 import { CELL_TYPE, CHIP_TYPE } from "~/const/common";
+import {
+  orgMemberTableHeaders,
+  pageSizeOptions,
+} from "~/const/views/org-admin/org-member";
+import { candidateTableHeaders } from "~/const/views/org/candidates";
 
 definePageMeta({
-  layout: "org",
+  layout: "org-admin",
 });
 useHead({
-  title: "Ứng viên",
+  title: "Thành viên tổ chức",
 });
 
 const route = useRoute();
@@ -136,12 +105,13 @@ const editViewId = ref<number | null>(null);
 const editViewInitialMode = ref<any>(null);
 const editViewMode = ref<any>(null);
 const isFetchingData = ref<boolean>(false);
-const fetchCandidateController = ref<AbortController | null>();
+const fetchJobAdCandidateController = ref<AbortController | null>();
 const filter = ref<Record<string, any>>({});
 const totalItems = ref<number>(0);
 const isNoData = ref<boolean>(false);
 const isDeleting = ref<boolean>(false);
 const deleteList = ref<any[]>([]);
+const rolesFilterOptions = ref<any[]>([]);
 const allowActions = computed(() => {
   const url = route.path;
   const menuItem = getMenuItem(url);
@@ -157,11 +127,17 @@ const canEdit = computed(() => {
   }
 });
 
+const userStore = useUserStore();
+const { userInfo } = storeToRefs(userStore);
+const { logout } = useAuth();
+
 const { getMenuItem } = useSidebarStore();
 const { setLoading } = useLoadingStore();
 // TODO: REPLACE THIS APIS
 const { getDepartments, deleteDepartment, changeDepartmentStatus } =
   useDepartmentApi();
+const { getOrgMembers, getRoleFilterOption, changeOrgMemberStatus } =
+  useOrgMemberApi();
 const { getJobAdCandidates } = useCandidateApi();
 
 // NOTE: From query string to filter
@@ -219,7 +195,24 @@ const convertQuery = () => {
         return opt.value == booleanValue;
       }),
     );
-    console.log(restoredFilter.isActive);
+  }
+
+  if (query.isEmailVerified) {
+    const values = (query.isEmailVerified as string).split(",");
+    console.log(values);
+    restoredFilter.isEmailVerified = values.map((val) =>
+      filterSelectOption.value.isEmailVerified.find((opt: any) => {
+        const booleanValue = val == "true";
+        return opt.value == booleanValue;
+      }),
+    );
+  }
+
+  if (query.roleIds) {
+    const ids = (query.roleIds as string).split(",");
+    restoredFilter.roleIds = ids.map((val) =>
+      filterSelectOption.value.roleIds.find((opt: any) => opt.value == +val),
+    );
   }
 
   const updatedAt: (Date | null)[] = [];
@@ -252,7 +245,12 @@ const convertQuery = () => {
 };
 
 onBeforeMount(async () => {
+  const rolesRes = await getRoleFilterOption();
+  rolesFilterOptions.value = rolesRes.data;
+
   filter.value = convertQuery();
+
+  console.log(rolesRes.data);
 });
 
 const handleCreated = () => {
@@ -355,14 +353,17 @@ const handleFilter = (e: any) => {
 };
 
 const fetchData = async () => {
-  if (fetchCandidateController.value) {
-    fetchCandidateController.value.abort();
+  if (fetchJobAdCandidateController.value) {
+    fetchJobAdCandidateController.value.abort();
   }
 
-  fetchCandidateController.value = new AbortController();
+  fetchJobAdCandidateController.value = new AbortController();
   isFetchingData.value = true;
   const query = route.query;
-  const res = await getJobAdCandidates(query, fetchCandidateController.value);
+  const res = await getJobAdCandidates(
+    query,
+    fetchJobAdCandidateController.value,
+  );
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
@@ -375,28 +376,33 @@ const fetchData = async () => {
   const data = res.data.data;
   totalItems.value = res.data.pageInfo.totalElements;
 
+  const flatten: Record<string, any>[] = [];
+
   for (const [index, entry] of data.entries()) {
-    entry.index = index + 1 + (pageIndex.value - 1) * pageSize.value;
-    entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
-    entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
-    entry.isActive = entry.isActive
-      ? {
-          text: "Đang hoạt động",
-          type: CHIP_TYPE.SUCCESS,
-          cellType: CELL_TYPE.TAG,
-        }
-      : {
-          text: "Ngừng hoạt động",
-          type: CHIP_TYPE.ERROR,
-          cellType: CELL_TYPE.TAG,
-        };
-    entry.canDelete = true;
+    for (const sub of entry.jobAdCandidates) {
+      const newEntry = {
+        index: index + 1 + (pageIndex.value - 1) * pageSize.value,
+        id: entry.candidateInfo.id,
+        fullName: entry.candidateInfo.fullName,
+        email: entry.candidateInfo.email,
+        phone: entry.candidateInfo.phone,
+        numOfApply: entry.numOfApply,
+        applyDate: formatDateTime(sub.applyDate, "DD/MM/YYYY - HH:mm"),
+        candidateStatus: sub.candidateStatus,
+        jobAdTitle: sub.jobAd.title,
+        jobAdContact: sub.jobAd.hrContactName,
+        currentRound: sub.currentRound.name,
+        canDelete: false,
+      };
+      flatten.push(newEntry);
+    }
   }
-  tableData.value = data;
+  tableData.value = flatten;
 };
 const debouncedFetchData = debounce(fetchData, 500);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
+  console.log(selectionList);
   selectedRows.value = selectionList;
 };
 
@@ -422,9 +428,12 @@ const handleActiveToggle = async (ids: number[], state: boolean) => {
   };
 
   setLoading(true);
-  const res = await changeDepartmentStatus(payload);
+  const res = await changeOrgMemberStatus(payload);
   if (res) {
     selectedRows.value = [];
+    if (ids.includes(userInfo.value?.id)) {
+      await logout();
+    }
     fetchData();
   }
   setLoading(false);
@@ -448,7 +457,7 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
   }
 };
 
-const tableData = ref([]);
+const tableData = ref<Record<any, string>[]>([]);
 const filterSelectOption = computed(() => {
   return {
     isActive: [
@@ -461,11 +470,25 @@ const filterSelectOption = computed(() => {
         value: true,
       },
     ],
+    isEmailVerified: [
+      {
+        label: "Đã xác thực",
+        value: false,
+      },
+      {
+        label: "Chưa xác thực",
+        value: true,
+      },
+    ],
+    roleIds: rolesFilterOptions.value.map((role) => ({
+      label: role.name,
+      value: role.id,
+    })),
   };
 });
 
 const tableColumns = computed(() => {
-  return departmentTableHeaders;
+  return candidateTableHeaders;
 });
 const pageSizeOpts = computed(() => {
   return pageSizeOptions;
@@ -495,6 +518,24 @@ const normalizeFilter = (filter: any) => {
     );
   } else {
     delete normalizedFilter.isActive;
+  }
+  if (
+    normalizedFilter.isEmailVerified &&
+    normalizedFilter.isEmailVerified.length &&
+    normalizedFilter.isEmailVerified.length != 2
+  ) {
+    normalizedFilter.isEmailVerified = normalizedFilter.isEmailVerified.map(
+      (activity: any) => activity.value,
+    );
+  } else {
+    delete normalizedFilter.isEmailVerified;
+  }
+  if (normalizedFilter.roleIds && normalizedFilter.roleIds.length) {
+    normalizedFilter.roleIds = normalizedFilter.roleIds.map(
+      (activity: any) => activity.value,
+    );
+  } else {
+    delete normalizedFilter.roleIds;
   }
   if (normalizedFilter.updatedAt) {
     const startDate = normalizedFilter.updatedAt[0];
@@ -555,7 +596,7 @@ watch(isEditViewOpen, (newVal) => {
   margin-top: 8px;
   @include box-shadow;
 }
-.candidate-content {
+.org-member-content {
   background-color: white;
   min-height: calc(100% - 48px - 8px);
   @include box-shadow;
