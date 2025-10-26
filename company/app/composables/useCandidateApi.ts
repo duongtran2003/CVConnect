@@ -33,9 +33,9 @@ export const useCandidateApi = () => {
     }
   };
 
-  const getDepartmentDetail = async (id: number) => {
+  const getJobAdCandidateDetail = async (id: number) => {
     try {
-      const res = await $axios.get(`/_api/core/department/detail/${id}`);
+      const res = await $axios.get(`/_api/core/job-ad-candidate/candidate-detail/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -140,7 +140,7 @@ export const useCandidateApi = () => {
     getJobAdCandidates,
     createDepartment,
     deleteDepartment,
-    getDepartmentDetail,
+    getJobAdCandidateDetail,
     updateDepartment,
     changeDepartmentStatus,
   };

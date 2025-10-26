@@ -2,7 +2,11 @@
   <div class="candidate-card">
     <div class="fullName row">
       <span class="text">{{ props.candidateData.candidateInfo.fullName }}</span>
-      <AppButton class="view-detail-btn" text="Xem chi tiết" />
+      <AppButton
+        class="view-detail-btn"
+        text="Xem chi tiết"
+        @click="handleViewDetail"
+      />
     </div>
 
     <div class="info-row contact-info">
@@ -113,12 +117,20 @@ type TProps = {
 
 const props = defineProps<TProps>();
 const isExpanded = ref(false);
+const router = useRouter();
 
 function expand() {
   isExpanded.value = true;
 }
 function close() {
   isExpanded.value = false;
+}
+
+function handleViewDetail() {
+  const resolved = router.resolve({
+    path: `/org/candidate/detail/${props.candidateData.candidateInfo.id}`,
+  });
+  window.open(resolved.href, "_blank");
 }
 
 defineExpose({
