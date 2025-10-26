@@ -11,6 +11,7 @@
           ></Icon>
         </UTooltip>
       </div>
+      <slot name="icon"></slot>
       <div v-if="required" class="required">Bắt buộc</div>
     </div>
     <div v-if="desc" class="desc">

@@ -3,6 +3,7 @@
     <div v-if="props.label" class="label">
       <span v-if="props.label" class="text">{{ props.label }}</span>
       <span v-if="props.required" class="required">Bắt buộc</span>
+      <slot name="icon"></slot>
     </div>
     <div class="wrapper">
       <USelectMenu
@@ -81,7 +82,7 @@ const props = withDefaults(defineProps<TProps>(), {
   slimError: false,
   allowClear: true,
   isPaginated: true,
-  searchPlaceholder: "Tìm kiếm"
+  searchPlaceholder: "Tìm kiếm",
 });
 const emits = defineEmits<{
   (
@@ -227,7 +228,7 @@ async function fetchData(searchTerm = "") {
 
   const params: any = {
     pageIndex: currentPage.value,
-    pageSize: 10,
+    pageSize: 30,
   };
   if (searchTerm) params.name = searchTerm;
 

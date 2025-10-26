@@ -1,4 +1,4 @@
-export const PROCESS_COLOR_CODE = {
+export const PROCESS_COLOR_CODE: Record<string, any> = {
   APPLY: "#64B5F6",     // medium blue
   SCAN_CV: "#FFB74D",   // warm orange
   CONTEST: "#BA68C8",   // softer purple

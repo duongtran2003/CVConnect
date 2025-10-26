@@ -10,7 +10,7 @@
       :columns="columns"
       :data="props.tableData"
       :loading="props.isLoading"
-      :grouping="['id']"
+      :grouping="['groupId']"
       :grouping-options="groupingOptions"
     >
       <template v-if="props.showCheckbox" #checkbox-header="{ table }">
@@ -32,7 +32,9 @@
       </template>
       <template v-if="props.allowActions" #action-cell="{ row }">
         <div class="action-wrapper">
-          <div @click="row.toggleExpanded()">expand</div>
+          <div v-if="row.getIsGrouped()" @click="row.toggleExpanded()">
+            expand
+          </div>
           <Icon
             v-if="havePermission('VIEW')"
             title="Xem"
@@ -133,6 +135,7 @@
           </div>
         </div>
       </template>
+
       <template
         v-for="col in excludedColumns"
         :key="col.accessorKey"
@@ -157,16 +160,12 @@
           :title="row.original[col.accessorKey]"
         >
           {{ row.original[col.accessorKey] }}
-          <span
-            v-if="
-              col.accessorKey === 'username' &&
-              row.original.userId === userInfo?.id
-            "
-            class="asterisk"
-          >
-            *
-          </span>
         </span>
+      </template>
+      <template #expanded-row="{ row }">
+        <div class="p-4 bg-gray-50 rounded">
+          Chi tiết của {{ row.original.fullName }}
+        </div>
       </template>
       <template #empty>
         <!-- <AppNoData v-if="props.isTableEmpty" /> -->
@@ -212,18 +211,29 @@ const props = withDefaults(defineProps<TDataTableProps>(), {
   deleteConditionKey: "canDelete",
 });
 
+onBeforeMount(() => {
+  console.log(props.tableData);
+});
+
 const userStore = useUserStore();
-const { userInfo } = storeToRefs(userStore);
 
 const havePermission = (permission: TPermission) => {
   const perm = props.allowActions.find((action) => action === permission);
   return perm;
 };
 
+const expanded = ref<Record<string, boolean>>({});
+
 const groupingOptions = ref<GroupingOptions>({
-  groupedColumnMode: undefined,
+  groupedColumnMode: "remove",
   getGroupedRowModel: getGroupedRowModel(),
 });
+
+const onExpandedChange = (updater: any) => {
+  expanded.value =
+    typeof updater === "function" ? updater(expanded.value) : updater;
+};
+
 const columns = ref<any[]>(cloneDeep(props.columns));
 const selectTooltip = computed(() => {
   return (accessorKey: string) => {
@@ -396,10 +406,8 @@ const handleActionClick = (row: any, action: TTableAction) => {
 };
 </script>
 <style lang="scss" scoped>
-:deep(.username-cell .asterisk) {
-  color: $color-danger;
-  font-weight: bold;
-  margin-left: 4px;
+:deep(tr.data-\[selected\=true\]\:bg-elevated\/50:has(td[colspan="12"])) {
+  display: none !important;
 }
 .data-table-wrapper {
   overflow-x: auto;

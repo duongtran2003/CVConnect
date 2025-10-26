@@ -2,7 +2,7 @@ import type { CHIP_TYPE } from "~/const/common";
 
 export type TSortType = "ASC" | "DESC" | undefined;
 export type TSort = {
-  key: string;
+  key: string | undefined;
   type: TSortType;
 };
 

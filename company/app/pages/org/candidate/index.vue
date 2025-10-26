@@ -12,49 +12,50 @@
       @submit="handleUpdated"
       @mode-change="handleSwitchEditViewMode($event)"
     />
-    <div class="org-member-content">
-      <div class="title">Danh sách thành viên</div>
+    <div class="job-ad-candidate-content">
+      <div class="title">Danh sách ứng viên</div>
       <div class="table-top">
-        <AppButton
-          :text="'Hoạt động'"
-          :is-disabled="selectedRows.length == 0"
-          class="active-btn active"
-          @click="handleActiveToggle(selectedRows, true)"
+        <div :title="'Mở rộng'" class="expand-btn" @click="expandAll">
+          <Icon name="material-symbols:expand-all" />
+        </div>
+        <div :title="'Thu gọn'" class="collapse-btn" @click="collapseAll">
+          <Icon name="material-symbols:collapse-all" />
+        </div>
+        <div :title="'Trò chuyện'" class="collapse-btn" @click="collapseAll">
+          <Icon name="material-symbols-light:chat-rounded" />
+        </div>
+        <div
+          :title="'Lọc ứng viên'"
+          class="filter-btn"
+          @click="isFilterShow = !isFilterShow"
         >
-        </AppButton>
-        <AppButton
-          :text="'Ngừng hoạt động'"
-          :is-disabled="selectedRows.length == 0"
-          class="active-btn deactive"
-          @click="handleActiveToggle(selectedRows, false)"
-        >
-        </AppButton>
-
-        <AppButton :text="'Mời'" class="add-button" @click="handleAddNew">
-          <template #icon>
-            <Icon name="material-symbols:add-2-rounded" />
-          </template>
-        </AppButton>
+          <Icon
+            :name="
+              isFilterShow
+                ? 'material-symbols:filter-alt'
+                : 'material-symbols:filter-alt-outline'
+            "
+          />
+        </div>
       </div>
-      <OrgCandidateDataTable
-        :table-data="tableData"
-        :columns="tableColumns"
-        :allow-actions="allowActions"
-        :show-checkbox="true"
-        :show-actions="true"
-        :is-loading="isFetchingData"
-        :selection-list="selectedRows"
-        :select-options="filterSelectOption"
-        :sort="sort"
-        :filter="filter"
-        :is-table-empty="isNoData"
-        @selection-update="handleSelectionsUpdate"
-        @delete="handleTableActionClick($event, 'delete')"
-        @edit="handleTableActionClick($event, 'edit')"
-        @view="handleTableActionClick($event, 'view')"
-        @sort="handleSort"
-        @filter="handleFilter"
-      />
+      <div class="content-wrapper">
+        <div class="card-list">
+          <OrgCandidateCard
+            v-for="data of tableData"
+            :key="data.candidateInfo.id"
+            :ref="setChildRef"
+            :candidate-data="data as TJobAdCandidate"
+          />
+          <AppNoData v-if="isNoData" />
+        </div>
+        <div v-show="isFilterShow" class="filter-col">
+          <OrgCandidateFilter
+            :filter-data="filter"
+            @filter-change="handleFilter"
+            @sort-change="handleSort"
+          />
+        </div>
+      </div>
       <div class="top-section">
         <div class="record-count">{{ `${totalItems} bản ghi` }}</div>
         <UPagination
@@ -88,16 +89,19 @@ import {
   pageSizeOptions,
 } from "~/const/views/org-admin/org-member";
 import { candidateTableHeaders } from "~/const/views/org/candidates";
+import type { TCandidateFilter, TJobAdCandidate } from "~/types/candidate";
+import { POSITIVE_INT_REGEX } from "~/const/validation";
 
 definePageMeta({
   layout: "org-admin",
 });
 useHead({
-  title: "Thành viên tổ chức",
+  title: "Danh sách ứng viên",
 });
 
 const route = useRoute();
 const router = useRouter();
+const isFilterShow = ref<boolean>(true);
 const isCreateModalOpen = ref<boolean>(false);
 const isDeleteModalOpen = ref<boolean>(false);
 const isEditViewOpen = ref<boolean>(false);
@@ -106,7 +110,7 @@ const editViewInitialMode = ref<any>(null);
 const editViewMode = ref<any>(null);
 const isFetchingData = ref<boolean>(false);
 const fetchJobAdCandidateController = ref<AbortController | null>();
-const filter = ref<Record<string, any>>({});
+const filter = ref<TCandidateFilter>({});
 const totalItems = ref<number>(0);
 const isNoData = ref<boolean>(false);
 const isDeleting = ref<boolean>(false);
@@ -140,6 +144,25 @@ const { getOrgMembers, getRoleFilterOption, changeOrgMemberStatus } =
   useOrgMemberApi();
 const { getJobAdCandidates } = useCandidateApi();
 
+const childRefs = ref<any[]>([]);
+
+function setChildRef(el: any) {
+  if (el) childRefs.value.push(el);
+  else childRefs.value = [];
+}
+
+function expandAll() {
+  childRefs.value.forEach((child) => {
+    child.expand();
+  });
+}
+
+function collapseAll() {
+  childRefs.value.forEach((child) => {
+    child.close();
+  });
+}
+
 // NOTE: From query string to filter
 const convertQuery = () => {
   const _query = route.query;
@@ -152,94 +175,56 @@ const convertQuery = () => {
     ...query,
   };
 
-  // NOTE: Reopening modal
-  if (mode && targetId) {
-    restoredFilter = {
-      ...restoredFilter,
-      mode,
-      targetId,
+  const levelIds = (query.levelIds as string)?.split(",") || [];
+  if (levelIds && levelIds.length) {
+    restoredFilter.levels = levelIds.map((id) => ({
+      value: +id,
+    }));
+  }
+
+  const candidateStatuses =
+    (query.candidateStatuses as string)?.split(",") || [];
+  if (candidateStatuses && candidateStatuses.length) {
+    restoredFilter.candidateStatusesOpt = candidateStatuses.map((status) => ({
+      value: status,
+    }));
+  }
+
+  const processTypes = (query.processTypes as string)?.split(",") || [];
+  if (processTypes && processTypes.length) {
+    restoredFilter.processTypesOpt = processTypes.map((process) => ({
+      value: +process,
+    }));
+  }
+
+  const hrContactId = query.hrContactId as string;
+  if (hrContactId) {
+    restoredFilter.hrContact = {
+      value: hrContactId,
     };
-    isEditViewOpen.value = true;
-    editViewInitialMode.value = mode;
-    editViewMode.value = mode;
-    editViewId.value = +targetId;
   }
 
-  const createdAt: (Date | null)[] = [];
-  if (query.createdAtStart) {
-    const start = new Date(query.createdAtStart as string);
+  const applyDates: (Date | null)[] = [];
+  if (query.applyDateStart) {
+    const start = new Date(query.applyDateStart as string);
     if (!isNaN(start.getTime())) {
-      createdAt.push(start);
+      applyDates.push(start);
     } else {
-      createdAt.push(null);
+      applyDates.push(null);
     }
   }
-  if (query.createdAtEnd) {
-    const end = new Date(query.createdAtEnd as string);
+  if (query.applyDateEnd) {
+    const end = new Date(query.applyDateEnd as string);
     if (!isNaN(end.getTime())) {
-      createdAt.push(end);
+      applyDates.push(end);
     } else {
-      createdAt.push(null);
+      applyDates.push(null);
     }
   }
-  if (createdAt.length) {
-    restoredFilter.createdAt = createdAt;
+  if (applyDates.length) {
+    restoredFilter.applyDateStart = applyDates[0];
+    restoredFilter.applyDateEnd = applyDates[1];
   }
-
-  if (query.isActive) {
-    const values = (query.isActive as string).split(",");
-    console.log(values);
-    restoredFilter.isActive = values.map((val) =>
-      filterSelectOption.value.isActive.find((opt: any) => {
-        const booleanValue = val == "true";
-        return opt.value == booleanValue;
-      }),
-    );
-  }
-
-  if (query.isEmailVerified) {
-    const values = (query.isEmailVerified as string).split(",");
-    console.log(values);
-    restoredFilter.isEmailVerified = values.map((val) =>
-      filterSelectOption.value.isEmailVerified.find((opt: any) => {
-        const booleanValue = val == "true";
-        return opt.value == booleanValue;
-      }),
-    );
-  }
-
-  if (query.roleIds) {
-    const ids = (query.roleIds as string).split(",");
-    restoredFilter.roleIds = ids.map((val) =>
-      filterSelectOption.value.roleIds.find((opt: any) => opt.value == +val),
-    );
-  }
-
-  const updatedAt: (Date | null)[] = [];
-  if (query.updatedAtStart) {
-    const start = new Date(query.updatedAtStart as string);
-    if (!isNaN(start.getTime())) {
-      updatedAt.push(start);
-    } else {
-      updatedAt.push(null);
-    }
-  }
-  if (query.updatedAtEnd) {
-    const end = new Date(query.updatedAtEnd as string);
-    if (!isNaN(end.getTime())) {
-      updatedAt.push(end);
-    } else {
-      updatedAt.push(null);
-    }
-  }
-  if (updatedAt.length) {
-    restoredFilter.updatedAt = updatedAt;
-  }
-
-  delete restoredFilter.createdAtStart;
-  delete restoredFilter.createdAtEnd;
-  delete restoredFilter.updatedAtStart;
-  delete restoredFilter.updatedAtEnd;
 
   return restoredFilter;
 };
@@ -326,14 +311,17 @@ const isDeleteAllDisabled = computed(() => {
   }
   return rowData.some((row) => !row.canDelete);
 });
-const sort = computed(() => {
-  return {
-    key: filter.value.sortBy,
-    type: filter.value.sortDirection ? filter.value.sortDirection : undefined,
-  };
-});
+// const sort = computed(() => {
+//   return {
+//     key: filter.value.sortBy,
+//     type: filter.value.sortDirection ? filter.value.sortDirection : undefined,
+//   };
+// });
 
 const pageIndex = computed(() => {
+  if (!filter.value.pageIndex) {
+    return 1;
+  }
   return !isNaN(filter.value.pageIndex) ? +filter.value.pageIndex + 1 : 1;
 });
 
@@ -347,12 +335,15 @@ const handleSort = (e: TSort) => {
     sortBy: e.type ? e.key : undefined,
     sortDirection: e.type ? e.type : undefined,
   };
+  console.log("changed sort", filter.value);
 };
 const handleFilter = (e: any) => {
+  console.log("filter change emited");
   filter.value = e;
 };
 
 const fetchData = async () => {
+  console.log("wtf why does it fetch");
   if (fetchJobAdCandidateController.value) {
     fetchJobAdCandidateController.value.abort();
   }
@@ -360,10 +351,12 @@ const fetchData = async () => {
   fetchJobAdCandidateController.value = new AbortController();
   isFetchingData.value = true;
   const query = route.query;
+  setLoading(true);
   const res = await getJobAdCandidates(
     query,
     fetchJobAdCandidateController.value,
   );
+  setLoading(false);
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
@@ -376,30 +369,9 @@ const fetchData = async () => {
   const data = res.data.data;
   totalItems.value = res.data.pageInfo.totalElements;
 
-  const flatten: Record<string, any>[] = [];
-
-  for (const [index, entry] of data.entries()) {
-    for (const sub of entry.jobAdCandidates) {
-      const newEntry = {
-        index: index + 1 + (pageIndex.value - 1) * pageSize.value,
-        id: entry.candidateInfo.id,
-        fullName: entry.candidateInfo.fullName,
-        email: entry.candidateInfo.email,
-        phone: entry.candidateInfo.phone,
-        numOfApply: entry.numOfApply,
-        applyDate: formatDateTime(sub.applyDate, "DD/MM/YYYY - HH:mm"),
-        candidateStatus: sub.candidateStatus,
-        jobAdTitle: sub.jobAd.title,
-        jobAdContact: sub.jobAd.hrContactName,
-        currentRound: sub.currentRound.name,
-        canDelete: false,
-      };
-      flatten.push(newEntry);
-    }
-  }
-  tableData.value = flatten;
+  tableData.value = data;
 };
-const debouncedFetchData = debounce(fetchData, 500);
+const debouncedFetchData = debounce(fetchData, 0);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
   console.log(selectionList);
@@ -457,7 +429,7 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
   }
 };
 
-const tableData = ref<Record<any, string>[]>([]);
+const tableData = ref<Record<string, any>[]>([]);
 const filterSelectOption = computed(() => {
   return {
     isActive: [
@@ -495,54 +467,51 @@ const pageSizeOpts = computed(() => {
 });
 
 // NOTE: From filter to query string
-const normalizeFilter = (filter: any) => {
+const normalizeFilter = (filter: TCandidateFilter) => {
   const normalizedFilter = cloneDeep(filter);
-  if (normalizedFilter.createdAt) {
-    const startDate = normalizedFilter.createdAt[0];
-    const endDate = normalizedFilter.createdAt[1];
-    delete normalizedFilter.createdAt;
-    if (startDate) {
-      normalizedFilter.createdAtStart = toUtcDate(startDate);
-    }
-    if (endDate) {
-      normalizedFilter.createdAtEnd = toUtcDate(endDate);
-    }
+
+  if (filter.levels?.length) {
+    console.log(filter.levels);
+    normalizedFilter.levelIds = filter.levels
+      .map((id) => id.value as number)
+      .join(",");
+    console.log(normalizedFilter.levelIds);
+    delete normalizedFilter.levels;
   }
-  if (
-    normalizedFilter.isActive &&
-    normalizedFilter.isActive.length &&
-    normalizedFilter.isActive.length != 2
-  ) {
-    normalizedFilter.isActive = normalizedFilter.isActive.map(
-      (activity: any) => activity.value,
-    );
-  } else {
-    delete normalizedFilter.isActive;
+
+  if (filter.candidateStatusesOpt?.length) {
+    normalizedFilter.candidateStatuses = filter.candidateStatusesOpt
+      .map((id) => id.value as string)
+      .join(",");
+    delete normalizedFilter.candidateStatusesOpt;
   }
-  if (
-    normalizedFilter.isEmailVerified &&
-    normalizedFilter.isEmailVerified.length &&
-    normalizedFilter.isEmailVerified.length != 2
-  ) {
-    normalizedFilter.isEmailVerified = normalizedFilter.isEmailVerified.map(
-      (activity: any) => activity.value,
-    );
-  } else {
-    delete normalizedFilter.isEmailVerified;
+
+  if (filter.processTypesOpt?.length) {
+    normalizedFilter.processTypes = filter.processTypesOpt
+      .map((id) => id.value as number)
+      .join(",");
+    delete normalizedFilter.processTypesOpt;
   }
-  if (normalizedFilter.roleIds && normalizedFilter.roleIds.length) {
-    normalizedFilter.roleIds = normalizedFilter.roleIds.map(
-      (activity: any) => activity.value,
-    );
-  } else {
-    delete normalizedFilter.roleIds;
+
+  if (filter.hrContact) {
+    normalizedFilter.hrContactId = filter.hrContact.value;
+    delete normalizedFilter.hrContact;
   }
-  if (normalizedFilter.updatedAt) {
-    const startDate = normalizedFilter.updatedAt[0];
-    const endDate = normalizedFilter.updatedAt[1];
-    delete normalizedFilter.updatedAt;
-    if (startDate) normalizedFilter.updatedAtStart = toUtcDate(startDate);
-    if (endDate) normalizedFilter.updatedAtEnd = toUtcDate(endDate);
+
+  if (!POSITIVE_INT_REGEX.test(String(filter.numOfApplyStart))) {
+    delete normalizedFilter.numOfApplyStart;
+  }
+
+  if (!POSITIVE_INT_REGEX.test(String(filter.numOfApplyEnd))) {
+    delete normalizedFilter.numOfApplyEnd;
+  }
+
+  if (filter.applyDateStart) {
+    normalizedFilter.applyDateStart = toUtcDate(filter.applyDateStart);
+  }
+
+  if (filter.applyDateEnd) {
+    normalizedFilter.applyDateEnd = toUtcDate(filter.applyDateEnd);
   }
 
   const queryForUrl: Record<string, any> = {
@@ -552,16 +521,23 @@ const normalizeFilter = (filter: any) => {
   return queryForUrl;
 };
 
-watch(filter, (newVal) => {
-  const queryForUrl = normalizeFilter(newVal);
+watch(
+  filter,
+  async (newVal) => {
+    console.log("new filter", newVal);
 
-  router.replace({
-    query: {
-      ...truncateQueryObject(queryForUrl),
-    },
-  });
-  debouncedFetchData();
-});
+    const queryForUrl = normalizeFilter(newVal);
+
+    await router.replace({
+      query: {
+        ...truncateQueryObject(queryForUrl),
+      },
+    });
+    console.log("about to fetch with ", queryForUrl);
+    debouncedFetchData();
+  },
+  { deep: true },
+);
 
 watch([editViewMode, editViewId], ([newMode, newId]) => {
   const query = { ...route.query };
@@ -596,7 +572,7 @@ watch(isEditViewOpen, (newVal) => {
   margin-top: 8px;
   @include box-shadow;
 }
-.org-member-content {
+.job-ad-candidate-content {
   background-color: white;
   min-height: calc(100% - 48px - 8px);
   @include box-shadow;
@@ -604,10 +580,31 @@ watch(isEditViewOpen, (newVal) => {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
-  @include custom-scrollbar;
   height: 100%;
+
+  .content-wrapper {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+
+    .filter-col {
+      min-width: 280px;
+      max-width: 280px;
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: 100%;
+      @include custom-scrollbar;
+    }
+  }
 
   .table-top {
     display: flex;
@@ -616,14 +613,41 @@ watch(isEditViewOpen, (newVal) => {
     justify-content: flex-end;
     gap: 12px;
     margin-bottom: 20px;
+    align-items: center;
+
+    .filter-btn,
+    .expand-btn,
+    .collapse-btn {
+      background-color: $color-gray-100;
+      border-radius: 999px;
+      cursor: pointer;
+      height: 36px;
+      width: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $color-primary-500;
+      .iconify {
+        display: block;
+        font-size: 20px;
+      }
+    }
 
     .button {
-      padding: 4px 14px 4px 10px;
+      padding: 4px 12px 4px 12px;
 
       :deep(.button-text) {
         font-size: 14px;
       }
     }
+
+    .toggle-job-ads {
+      background-color: $color-primary-500;
+      color: $text-dark;
+      border-radius: 6px;
+      max-height: fit-content;
+    }
+
     .add-button {
       background-color: $color-primary-400;
       color: $text-dark;

@@ -41,7 +41,7 @@ export type TInputTextProps = {
   label?: string;
   desc?: string;
   required?: boolean;
-  value: number | string | null;
+  value: number | string | null | undefined;
   error?: string;
   isDisabled?: boolean;
   maxValue?: number;

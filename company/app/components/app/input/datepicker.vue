@@ -18,7 +18,7 @@
       @cleared="emits('clear')"
       @closed="emits('close')"
     />
-    <div class="error-message">{{ error }}</div>
+    <div v-if="!props.slimError" class="error-message">{{ error }}</div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -30,6 +30,7 @@ type TProps = {
   isDisabled?: boolean;
   placeholder?: string;
   isRange?: boolean;
+  slimError?: boolean;
 };
 
 const props = withDefaults(defineProps<TProps>(), {
@@ -39,6 +40,7 @@ const props = withDefaults(defineProps<TProps>(), {
   placeholder: "Mời chọn ngày",
   isDisabled: false,
   isRange: false,
+  slimError: false,
 });
 
 const emits = defineEmits<{

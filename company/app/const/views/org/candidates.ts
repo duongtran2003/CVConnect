@@ -13,6 +13,10 @@ export const candidateTableHeaders = [
     accessorKey: "id",
   },
   {
+    id: "groupId",
+    accessorKey: "groupId",
+  },
+  {
     accessorKey: "fullName",
     header: "Tên",
     allowFilter: true,
@@ -145,3 +149,46 @@ export const pageSizeOptions = [
     value: 50,
   },
 ];
+
+export const CANDIDATE_STATUS: Record<string, any> = {
+  APPLIED: {
+    label: "Đã ứng tuyển",
+    color: "#5C9DED",
+    background: "rgba(92,157,237,0.08)",
+  },
+  VIEWED_CV: {
+    label: "Đã xem hồ sơ",
+    color: "#A58FEA",
+    background: "rgba(165,143,234,0.08)",
+  },
+  IN_PROGRESS: {
+    label: "Đang xử lí",
+    color: "#F2B179",
+    background: "rgba(242,177,121,0.08)",
+  },
+  WAITING_ONBOARDING: {
+    label: "Chờ onboard",
+    color: "#6CD2D2",
+    background: "rgba(108,210,210,0.08)",
+  },
+  ONBOARDED: {
+    label: "Đã onboard",
+    color: "#78D6A3",
+    background: "rgba(120,214,163,0.08)",
+  },
+  NOT_ONBOARDED: {
+    label: "Không onboard",
+    color: "#F2E28C",
+    background: "rgba(242,226,140,0.08)",
+  },
+  REJECTED: {
+    label: "Từ chối",
+    color: "#F28B82",
+    background: "rgba(242,139,130,0.08)",
+  },
+};
+
+export const CANDIDATE_STATUS_OPTIONS = Object.keys(CANDIDATE_STATUS).map((key) => ({
+  label: CANDIDATE_STATUS[key].label,
+  value: key,
+}));

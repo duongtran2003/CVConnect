@@ -46,7 +46,6 @@ export const useBreadcrumbStore = defineStore("breadcrumb", () => {
           target.menuIcon === "mdi:circle-medium" ? undefined : target.menuIcon,
         url: target.menuUrl,
       };
-      console.log("traverse", breadcrumbs);
       breadcrumbs.unshift(newItem);
       if (target.parentId) {
         traverse(target.parentId, breadcrumbs);
@@ -60,7 +59,6 @@ export const useBreadcrumbStore = defineStore("breadcrumb", () => {
       traverse(currentItem.id, breadcrumbItems);
     }
 
-    console.log("computed", breadcrumbItems);
     breadcrumbItems.unshift({
       name: "",
       icon: "mdi:home",
