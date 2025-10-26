@@ -1,70 +1,111 @@
 <template>
-  <div class="job-ad">
-    <div class="label">Tin ứng tuyển</div>
+  <div class="job-ad-wrapper">
+    <div class="label">
+      {{ `Tin ứng tuyển (${props.jobAdInfos.length || 0})` }}
+    </div>
+
+    <UModal
+      :open="isRejectModalOpen"
+      title="Loại ứng viên khỏi tin tuyển dụng"
+      :ui="{ content: 'w-[600px] max-w-[600px]' }"
+      @update:open="handleRejectModalOpenUpdate"
+      @after:leave="clearRejectTarget"
+    >
+      <template #body>
+        <div
+          class="reject-body"
+          v-html="
+            `Bạn có chắc muốn loại ứng viên khỏi tin tuyển dụng <strong>${rejectingTarget.jobAd.title}</strong> không?`
+          "
+        ></div>
+      </template>
+      <template #footer>
+        <div class="modal-footer">
+          <AppButton class="submit-btn btn" :text="'Xác nhận'" />
+        </div>
+      </template>
+    </UModal>
+
     <div class="info">
-      <AppNoData v-if="!displayJobAd" />
+      <AppNoData v-if="!props.jobAdInfos.length" />
       <template v-else>
-        <div class="info-top">
-          <span class="title">{{ displayJobAd.jobAd.title }}</span>
-          <span
-            class="value chip"
-            :style="{
-              borderColor: CANDIDATE_STATUS[displayJobAd.candidateStatus].color,
-              color: CANDIDATE_STATUS[displayJobAd.candidateStatus].color,
-              backgroundColor:
-                CANDIDATE_STATUS[displayJobAd.candidateStatus].background,
-            }"
-            >{{ CANDIDATE_STATUS[displayJobAd.candidateStatus].label }}</span
-          >
-        </div>
-        <div class="info-dept-pos">
-          <span>{{ displayJobAd.jobAd.departmentName }}</span>
-          <span>•</span>
-          <span>{{ displayJobAd.jobAd.positionName }}</span>
-        </div>
-        <div class="hr-info">
-          <span class="hr-info-label">
-            <Icon name="material-symbols:article-person-rounded" />
-            <span>{{ displayJobAd.jobAd.hrContactName }}</span>
-          </span>
-        </div>
-        <div class="processes">
-          <div class="list">
-            <div
-              v-for="(process, index) of displayJobAd.jobAdProcessCandidates"
-              :key="process.id"
-              class="process"
+        <div
+          v-for="(displayJobAd, index) of props.jobAdInfos"
+          :key="index"
+          class="job-ad"
+        >
+          <div class="info-top">
+            <span class="title">{{ displayJobAd.jobAd.title }}</span>
+            <span
+              class="value chip"
+              :style="{
+                borderColor:
+                  CANDIDATE_STATUS[displayJobAd.candidateStatus].color,
+                color: CANDIDATE_STATUS[displayJobAd.candidateStatus].color,
+                backgroundColor:
+                  CANDIDATE_STATUS[displayJobAd.candidateStatus].background,
+              }"
+              >{{ CANDIDATE_STATUS[displayJobAd.candidateStatus].label }}</span
             >
+          </div>
+          <div class="info-dept-pos">
+            <span>{{ displayJobAd.jobAd.departmentName }}</span>
+            <span>•</span>
+            <span>{{ displayJobAd.jobAd.positionName }}</span>
+          </div>
+          <div class="hr-info">
+            <span class="hr-info-label">
+              <Icon name="material-symbols:article-person-rounded" />
+              <span>{{ displayJobAd.jobAd.hrContactName }}</span>
+            </span>
+          </div>
+          <div class="processes">
+            <div class="list">
               <div
-                v-if="index !== 0"
-                class="line"
-                :class="{
-                  highlighted: index <= displayJobAdCurrentProcessIndex,
-                }"
+                v-for="(process, index) of displayJobAd.jobAdProcessCandidates"
+                :key="process.id"
+                class="process"
               >
-                <span></span>
-              </div>
-              <div
-                class="dot"
-                :class="{
-                  highlighted: index <= displayJobAdCurrentProcessIndex,
-                }"
-              >
-                <Icon name="stash:circle-dot" />
-                <span>{{ process.processName }}</span>
+                <div
+                  v-if="index !== 0"
+                  class="line"
+                  :class="{
+                    highlighted:
+                      index <= displayJobAdCurrentProcessIndex(displayJobAd),
+                  }"
+                >
+                  <span></span>
+                </div>
+                <div
+                  class="dot"
+                  :class="{
+                    highlighted:
+                      index <= displayJobAdCurrentProcessIndex(displayJobAd),
+                  }"
+                >
+                  <Icon name="stash:circle-dot" />
+                  <span>{{ process.processName }}</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="actions">
-            <AppButton class="action-btn" :text="'Thao tác'" />
+            <div class="actions">
+              <template v-if="!isOnboardStep(displayJobAd)">
+                <div title="Chuyển vòng" class="action-btn next-step-btn">
+                  <Icon name="material-symbols:arrow-right-alt-rounded" />
+                </div>
+                <div
+                  title="Loại ứng viên"
+                  class="action-btn reject-btn"
+                  @click="handleRejectClick(displayJobAd)"
+                >
+                  <Icon name="material-symbols:close-rounded" />
+                </div>
+              </template>
+            </div>
           </div>
         </div>
       </template>
     </div>
-    <template v-if="props.jobAdInfos?.length > 1">
-      <div class="label">Các tin khác</div>
-      <div class="info"></div>
-    </template>
   </div>
 </template>
 <script setup lang="ts">
@@ -76,21 +117,65 @@ type TProps = {
 
 const props = defineProps<TProps>();
 
-const displayJobAd = computed(() => {
-  const firstJobAd = props.jobAdInfos[0];
-  return firstJobAd;
-});
+const isRejectModalOpen = ref<boolean>(false);
+const rejectingTarget = ref<any>(null);
 
 const displayJobAdCurrentProcessIndex = computed(() => {
-  return (
-    displayJobAd.value?.jobAdProcessCandidates.findIndex(
-      (process: any) => process.isCurrentProcess,
-    ) || 0
-  );
+  return (displayJobAd: any) => {
+    return (
+      displayJobAd.value?.jobAdProcessCandidates.findIndex(
+        (process: any) => process.isCurrentProcess,
+      ) || 0
+    );
+  };
 });
+
+const isOnboardStep = computed(() => {
+  return (displayJobAd: any) => {
+    const index =
+      displayJobAd.jobAdProcessCandidates.findIndex(
+        (process: any) => process.isCurrentProcess,
+      ) || 0;
+
+    return index === displayJobAd.jobAdProcessCandidates.length - 1;
+  };
+});
+
+function handleRejectModalOpenUpdate(state: boolean) {
+  isRejectModalOpen.value = state;
+}
+
+function clearRejectTarget() {
+  rejectingTarget.value = null;
+}
+
+function handleRejectClick(jobAd: any) {
+  console.log("rejected click", jobAd);
+  isRejectModalOpen.value = true;
+  rejectingTarget.value = jobAd;
+}
 </script>
 <style lang="scss" scoped>
-.job-ad {
+.modal-footer {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btn {
+  font-size: 14px;
+  padding: 6px 12px;
+
+  &.submit-btn {
+    background-color: $color-primary-500;
+    border-color: 1px solid $color-primary-500;
+    color: $text-dark;
+  }
+}
+
+.job-ad-wrapper {
   font-size: 14px;
   display: flex;
   flex-direction: column;
@@ -99,17 +184,25 @@ const displayJobAdCurrentProcessIndex = computed(() => {
   .label {
     font-weight: 500;
     font-size: 16px;
+    margin-top: 12px;
     color: $text-light;
   }
 
   .info {
-    border: 1px solid $color-gray-300;
-    padding: 6px;
-    border-radius: 6px;
-
+    padding-right: 4px;
     display: flex;
     flex-direction: column;
     gap: 16px;
+
+    .job-ad {
+      border: 1px solid $color-gray-300;
+      border-radius: 6px;
+      padding: 6px;
+
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
   }
 
   .title {
@@ -184,12 +277,36 @@ const displayJobAdCurrentProcessIndex = computed(() => {
         }
       }
     }
+
     .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
       .action-btn {
-        padding: 6px 12px;
-        font-size: 14px;
-        color: $text-dark;
-        background-color: $color-primary-500;
+        height: 32px;
+        width: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid $color-primary-500;
+        cursor: pointer;
+        border-radius: 4px;
+
+        .iconify {
+          font-size: 18px;
+        }
+
+        &.next-step-btn {
+          border-color: $color-success;
+          color: $text-dark;
+          background-color: $color-success;
+        }
+
+        &.reject-btn {
+          border-color: $color-danger;
+          color: $color-danger;
+        }
       }
     }
   }
@@ -215,6 +332,33 @@ const displayJobAdCurrentProcessIndex = computed(() => {
       font-size: 12px;
       font-weight: 500;
     }
+  }
+
+  .other-ad {
+    border: 1px solid $color-gray-300;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+
+    .chip {
+      border-radius: 4px;
+      padding: 4px;
+      border: 1px solid $color-gray-300;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
+
+  .other-ad-list {
+    border: 1px solid $color-gray-300;
+    border-radius: 6px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 }
 </style>

@@ -1,6 +1,9 @@
 <template>
   <div class="wrapper">
     <div class="top">
+      <div class="back-btn" @click="router.push({ path: '/org/candidate' })">
+        <Icon name="material-symbols:chevron-left-rounded" />
+      </div>
       <div class="personal-information">
         <AppAvatar v-if="userInfo" :user-info="userInfo" />
         <span class="name">{{ userInfo?.fullName }}</span>
@@ -9,7 +12,7 @@
     <div v-if="detail" class="content">
       <OrgCandidateInfoLeft :detail="detail" />
       <div class="vert-divider"></div>
-      <div class="right">b</div>
+      <OrgCandidateInfoRight :detail="detail" />
     </div>
   </div>
 </template>
@@ -74,9 +77,30 @@ const userInfo = computed(() => {
   }
 
   .top {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    align-items: center;
     :deep(.avatar) {
       width: 40px;
       height: 40px;
+    }
+
+    .back-btn {
+      background-color: $color-gray-100;
+      height: 32px;
+      width: 32px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+
+      .iconify {
+        font-size: 20px;
+        display: block;
+        width: 20px;
+      }
     }
 
     .personal-information {
@@ -96,9 +120,15 @@ const userInfo = computed(() => {
     display: flex;
     flex-direction: row;
     gap: 12px;
+    min-height: 0;
+    flex: 1;
+    border-top: 1px solid $color-gray-200;
+    border-bottom: 1px solid $color-gray-200;
+    max-height: 100%;
 
     .left {
       width: 30%;
+      max-height: 100%;
     }
 
     .right {

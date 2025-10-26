@@ -188,7 +188,36 @@ export const CANDIDATE_STATUS: Record<string, any> = {
   },
 };
 
-export const CANDIDATE_STATUS_OPTIONS = Object.keys(CANDIDATE_STATUS).map((key) => ({
-  label: CANDIDATE_STATUS[key].label,
-  value: key,
-}));
+export const CANDIDATE_STATUS_OPTIONS = Object.keys(CANDIDATE_STATUS).map(
+  (key) => ({
+    label: CANDIDATE_STATUS[key].label,
+    value: key,
+  }),
+);
+
+export const CANDIDATE_DETAIL_RIGHT_TABS = [
+  {
+    label: "Hồ sơ",
+    index: 1,
+  },
+  {
+    label: "Đánh giá",
+    index: 2,
+  },
+  {
+    label: "Trò chuyện",
+    index: 3,
+  },
+  {
+    label: "Email đã gửi",
+    index: 4,
+  },
+  {
+    label: "Lịch",
+    index: 5,
+  },
+  {
+    label: "Lịch sử",
+    index: 6,
+  },
+];

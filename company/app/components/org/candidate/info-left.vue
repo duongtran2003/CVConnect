@@ -1,6 +1,7 @@
 <template>
   <div class="left">
     <OrgCandidateInfoLeftJobAd :job-ad-infos="props.detail.jobAdCandidates" />
+    <OrgCandidateInfoLeftPersonalInfo :info="props.detail.candidateInfo" />
   </div>
 </template>
 <script setup lang="ts">
@@ -15,5 +16,7 @@ const props = defineProps<TProps>();
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: 100%;
+  overflow-y: auto;
 }
 </style>

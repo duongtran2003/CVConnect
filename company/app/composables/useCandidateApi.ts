@@ -35,7 +35,9 @@ export const useCandidateApi = () => {
 
   const getJobAdCandidateDetail = async (id: number) => {
     try {
-      const res = await $axios.get(`/_api/core/job-ad-candidate/candidate-detail/${id}`);
+      const res = await $axios.get(
+        `/_api/core/job-ad-candidate/candidate-detail/${id}`,
+      );
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -46,6 +48,29 @@ export const useCandidateApi = () => {
       }
       console.error(err);
       return null;
+    }
+  };
+
+  const saveSummary = async (payload: any) => {
+    try {
+      const res = await $axios.post(
+        `/_api/core/candidate-summary-org/save-summary`,
+        payload,
+      );
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
     }
   };
 
@@ -94,7 +119,10 @@ export const useCandidateApi = () => {
 
   const updateDepartment = async (id: number, payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/department/update/${id}`, payload);
+      const res = await $axios.put(
+        `/_api/core/department/update/${id}`,
+        payload,
+      );
       toast.add({
         title: res.data.message,
         color: "success",
@@ -143,5 +171,6 @@ export const useCandidateApi = () => {
     getJobAdCandidateDetail,
     updateDepartment,
     changeDepartmentStatus,
+    saveSummary,
   };
 };
