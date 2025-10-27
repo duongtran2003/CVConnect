@@ -9,6 +9,11 @@
       :rejecting-target="rejectingTarget"
       @rejected="handleCandidateEliminated"
     />
+    <OrgCandidateChangeProcessModal
+      v-model="isChangeProcessModalOpen"
+      :change-process-target="changeProcessTarget"
+      @submit="handleChangeProcess"
+    />
 
     <div class="info">
       <AppNoData v-if="!props.jobAdInfos.length" />
@@ -79,7 +84,11 @@
                   displayJobAd.candidateStatus != 'REJECTED'
                 "
               >
-                <div title="Chuyển vòng" class="action-btn next-step-btn">
+                <div
+                  title="Chuyển vòng"
+                  class="action-btn next-step-btn"
+                  @click="handleChangeProcessClick(displayJobAd)"
+                >
                   <Icon name="material-symbols:arrow-right-alt-rounded" />
                 </div>
                 <div
@@ -110,7 +119,9 @@ const emits = defineEmits<{
 }>();
 
 const isRejectModalOpen = ref<boolean>(false);
+const isChangeProcessModalOpen = ref<boolean>(false);
 const rejectingTarget = ref<any>(null);
+const changeProcessTarget = ref<any>(null);
 
 const displayJobAdCurrentProcessIndex = computed(() => {
   return (displayJobAd: any) => {
@@ -137,9 +148,19 @@ function clearRejectTarget() {
   rejectingTarget.value = null;
 }
 
+function clearChangeProcessTarget() {
+  changeProcessTarget.value = null;
+}
+
 function handleRejectClick(jobAd: any) {
   isRejectModalOpen.value = true;
   rejectingTarget.value = jobAd;
+}
+
+function handleChangeProcessClick(jobAd: any) {
+  console.log("change process of ", jobAd);
+  isChangeProcessModalOpen.value = true;
+  changeProcessTarget.value = jobAd;
 }
 
 function handleCandidateEliminated() {
@@ -147,9 +168,20 @@ function handleCandidateEliminated() {
   emits("refetch");
 }
 
+function handleChangeProcess() {
+  isChangeProcessModalOpen.value = false;
+  emits("refetch");
+}
+
 watch(isRejectModalOpen, (newVal) => {
   if (!newVal) {
     clearRejectTarget();
+  }
+});
+
+watch(isChangeProcessModalOpen, (newVal) => {
+  if (!newVal) {
+    clearChangeProcessTarget();
   }
 });
 </script>

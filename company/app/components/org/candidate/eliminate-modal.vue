@@ -96,7 +96,7 @@
             <div class="line">
               <AppInputText
                 :label="'Tên mẫu'"
-                :required="true"
+                :required="false"
                 :error="''"
                 :slim-error="true"
                 :placeholder="'Mời nhập tên'"
@@ -106,7 +106,7 @@
               />
               <AppInputText
                 :label="'Mã mẫu'"
-                :required="true"
+                :required="false"
                 :error="''"
                 :slim-error="true"
                 :placeholder="'Mời nhập mã'"

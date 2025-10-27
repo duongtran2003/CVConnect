@@ -10,7 +10,7 @@
       :range="props.isRange"
       class="date-input"
       :class="{ disabled: props.isDisabled, error: props.error }"
-      :teleport="true"
+      :teleport="props.isTeleport"
       :model-value="props.value"
       :placeholder="props.placeholder"
       :disabled="props.isDisabled"
@@ -31,6 +31,7 @@ type TProps = {
   placeholder?: string;
   isRange?: boolean;
   slimError?: boolean;
+  isTeleport?: boolean;
 };
 
 const props = withDefaults(defineProps<TProps>(), {
@@ -41,6 +42,7 @@ const props = withDefaults(defineProps<TProps>(), {
   isDisabled: false,
   isRange: false,
   slimError: false,
+  isTeleport: true,
 });
 
 const emits = defineEmits<{
