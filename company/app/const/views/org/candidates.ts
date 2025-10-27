@@ -216,8 +216,4 @@ export const CANDIDATE_DETAIL_RIGHT_TABS = [
     label: "Lịch",
     index: 5,
   },
-  {
-    label: "Lịch sử",
-    index: 6,
-  },
 ];

@@ -10,7 +10,7 @@
       </div>
     </div>
     <div v-if="detail" class="content">
-      <OrgCandidateInfoLeft :detail="detail" />
+      <OrgCandidateInfoLeft :detail="detail" @refetch="fetchData" />
       <div class="vert-divider"></div>
       <OrgCandidateInfoRight :detail="detail" />
     </div>
@@ -30,6 +30,10 @@ const { setLoading } = useLoadingStore();
 const detail = ref<Record<string, any> | null>(null);
 
 onBeforeMount(async () => {
+  await fetchData();
+});
+
+async function fetchData() {
   setLoading(true);
   const candidateId = route.params.id;
   if (!candidateId || candidateId == undefined) {
@@ -41,7 +45,7 @@ onBeforeMount(async () => {
   detail.value = res.data;
   console.log(res);
   setLoading(false);
-});
+}
 
 const userInfo = computed(() => {
   if (!detail.value) {

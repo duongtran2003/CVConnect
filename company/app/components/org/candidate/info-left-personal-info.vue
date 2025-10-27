@@ -16,7 +16,7 @@
     </div>
     <div class="row">
       <AppInputSearchSelect
-        :label="'Cấp bậc'"
+        :label="'Đánh giá cấp bậc'"
         :required="false"
         :options="levelOptions"
         :value="formInput.level"
@@ -44,6 +44,7 @@
         :is-disabled="false"
         :placeholder="'Mời nhập kỹ năng'"
         :error="''"
+        :row="6"
         :slim-error="true"
         :show-error="false"
         @update:model-value="handleInput('skill', $event)"
@@ -221,6 +222,18 @@ watch(
     .cancel-btn {
       color: $color-primary-500;
       border: 1px solid $color-primary-500;
+    }
+  }
+
+  :deep(.search-select-input) {
+    .label {
+      font-weight: 500;
+    }
+  }
+
+  :deep(.textarea-input) {
+    .label {
+      font-weight: 500;
     }
   }
 }

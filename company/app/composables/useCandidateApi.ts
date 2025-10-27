@@ -74,6 +74,29 @@ export const useCandidateApi = () => {
     }
   };
 
+  const eliminateCandidate = async (payload: any) => {
+    try {
+      const res = await $axios.put(
+        `/_api/core/job-ad-candidate/eliminate-candidate`,
+        payload,
+      );
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  }
+
   const createDepartment = async (payload: any) => {
     try {
       const res = await $axios.post(`/_api/core/department/create`, payload);
@@ -172,5 +195,6 @@ export const useCandidateApi = () => {
     updateDepartment,
     changeDepartmentStatus,
     saveSummary,
+    eliminateCandidate,
   };
 };

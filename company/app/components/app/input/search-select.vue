@@ -292,6 +292,7 @@ watch(searchValue, (val) => {
     .text {
       font-size: 14px;
       line-height: 21px;
+      color: $text-light;
     }
 
     .required {

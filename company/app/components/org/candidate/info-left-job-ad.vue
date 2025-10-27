@@ -4,27 +4,11 @@
       {{ `Tin ứng tuyển (${props.jobAdInfos.length || 0})` }}
     </div>
 
-    <UModal
-      :open="isRejectModalOpen"
-      title="Loại ứng viên khỏi tin tuyển dụng"
-      :ui="{ content: 'w-[600px] max-w-[600px]' }"
-      @update:open="handleRejectModalOpenUpdate"
-      @after:leave="clearRejectTarget"
-    >
-      <template #body>
-        <div
-          class="reject-body"
-          v-html="
-            `Bạn có chắc muốn loại ứng viên khỏi tin tuyển dụng <strong>${rejectingTarget.jobAd.title}</strong> không?`
-          "
-        ></div>
-      </template>
-      <template #footer>
-        <div class="modal-footer">
-          <AppButton class="submit-btn btn" :text="'Xác nhận'" />
-        </div>
-      </template>
-    </UModal>
+    <OrgCandidateEliminateModal
+      v-model="isRejectModalOpen"
+      :rejecting-target="rejectingTarget"
+      @rejected="handleCandidateEliminated"
+    />
 
     <div class="info">
       <AppNoData v-if="!props.jobAdInfos.length" />
@@ -89,7 +73,12 @@
               </div>
             </div>
             <div class="actions">
-              <template v-if="!isOnboardStep(displayJobAd)">
+              <template
+                v-if="
+                  !isOnboardStep(displayJobAd) &&
+                  displayJobAd.candidateStatus != 'REJECTED'
+                "
+              >
                 <div title="Chuyển vòng" class="action-btn next-step-btn">
                   <Icon name="material-symbols:arrow-right-alt-rounded" />
                 </div>
@@ -116,6 +105,9 @@ type TProps = {
 };
 
 const props = defineProps<TProps>();
+const emits = defineEmits<{
+  (e: "refetch"): void;
+}>();
 
 const isRejectModalOpen = ref<boolean>(false);
 const rejectingTarget = ref<any>(null);
@@ -141,19 +133,25 @@ const isOnboardStep = computed(() => {
   };
 });
 
-function handleRejectModalOpenUpdate(state: boolean) {
-  isRejectModalOpen.value = state;
-}
-
 function clearRejectTarget() {
   rejectingTarget.value = null;
 }
 
 function handleRejectClick(jobAd: any) {
-  console.log("rejected click", jobAd);
   isRejectModalOpen.value = true;
   rejectingTarget.value = jobAd;
 }
+
+function handleCandidateEliminated() {
+  isRejectModalOpen.value = false;
+  emits("refetch");
+}
+
+watch(isRejectModalOpen, (newVal) => {
+  if (!newVal) {
+    clearRejectTarget();
+  }
+});
 </script>
 <style lang="scss" scoped>
 .modal-footer {

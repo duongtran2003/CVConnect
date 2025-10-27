@@ -1,6 +1,9 @@
 <template>
   <div class="left">
-    <OrgCandidateInfoLeftJobAd :job-ad-infos="props.detail.jobAdCandidates" />
+    <OrgCandidateInfoLeftJobAd
+      :job-ad-infos="props.detail.jobAdCandidates"
+      @refetch="emits('refetch')"
+    />
     <OrgCandidateInfoLeftPersonalInfo :info="props.detail.candidateInfo" />
   </div>
 </template>
@@ -10,6 +13,9 @@ type TProps = {
 };
 
 const props = defineProps<TProps>();
+const emits = defineEmits<{
+  (e: "refetch"): void;
+}>();
 </script>
 <style lang="scss" scoped>
 .left {

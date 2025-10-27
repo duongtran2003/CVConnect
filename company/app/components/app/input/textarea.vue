@@ -23,6 +23,7 @@
           class="w-full"
           :disabled="props.isDisabled"
           :placeholder="props.placeholder"
+          autoresize
         />
         <Icon
           v-if="props.isSecured"
@@ -47,6 +48,7 @@ export type TInputTextProps = {
   desc?: string;
   tooltip?: string;
   placeholder?: string;
+  row?: number;
   error?: string;
   showError?: boolean;
   slimError?: boolean;
@@ -63,6 +65,7 @@ const props = withDefaults(defineProps<TInputTextProps>(), {
   placeholder: "",
   error: "",
   showError: true,
+  row: 4,
   slimError: false,
   required: false,
   isDisabled: false,
