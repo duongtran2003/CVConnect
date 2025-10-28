@@ -1,59 +1,78 @@
 <template>
+  <div id="teleport-target"></div>
   <UModal
     v-model:open="isOpen"
     title="Chuyển đổi vòng tuyển dụng"
-    :ui="{ content: 'max-w-[840px] min-h-[680px]' }"
+    :ui="{ content: 'max-w-[840px]' }"
   >
     <template #body>
       <OrgCandidatePreviewEmailModal
         v-model="isPreviewModalOpen"
         :data="previewData"
       />
-      <div class="body">
-        <div class="process-list">
+      <div class="body" id="modal-body">
+        <div class="process-section">
+          <label class="label"
+            >Vòng tuyển dụng<span class="required">Bắt buộc</span></label
+          >
 
+          <div class="process-list">
+            <label
+              v-for="(process, index) in processList"
+              :key="process.value"
+              class="process-item"
+              :class="{ disabled: index <= currentProcessIndex }"
+            >
+              <div class="left">
+                <input
+                  type="radio"
+                  name="process"
+                  class="radio"
+                  :value="process.value"
+                  :checked="formInput.process?.value === process.value"
+                  :disabled="index <= currentProcessIndex"
+                  @change="handleInput('process', process)"
+                />
+                <span>{{ process.label }}</span>
+              </div>
+
+              <div class="right">
+                <div class="date-time">
+                  {{ processDateTime(process) }}
+                </div>
+                <AppInputDatepicker
+                  v-if="
+                    process.label === 'Onboard' &&
+                    formInput.process?.label === 'Onboard'
+                  "
+                  :label="''"
+                  :required="false"
+                  :value="formInput.onboardDate"
+                  :hide-navigations="['seconds']"
+                  :enable-time-picker="true"
+                  :error="''"
+                  :slim-error="true"
+                  :is-teleport="'html'"
+                  :placeholder="'Chọn ngày'"
+                  :is-range="false"
+                  class="onboard-datepicker"
+                  @input="handleInput('onboardDate', $event)"
+                />
+              </div>
+            </label>
+          </div>
         </div>
-
-
-        <AppInputSearchSelect
-          :label="'Vòng tuyển dụng'"
-          :required="true"
-          :options="processList"
-          :value="formInput.process"
-          :error="''"
-          :placeholder="'Mời chọn'"
-          :remote-filter="false"
-          :multiple="false"
-          :is-disabled="false"
-          :slim-error="true"
-          :fetch-fn="null"
-          @input="handleInput('process', $event)"
-          @clear-value="handleInput('process', null)"
-        />
-        <AppInputDatepicker
-          v-if="formInput.process?.label === 'Onboard'"
-          :label="'Ngày onboard'"
-          :required="false"
-          :value="formInput.onboardDate"
-          :hide-navigations="['seconds']"
-          :enable-time-picker="true"
-          :error="''"
-          :slim-error="true"
-          :is-teleport="false"
-          :placeholder="''"
-          :is-range="false"
-          @input="handleInput('onboardDate', $event)"
-        />
-        <AppInputTextarea
-          v-model="formInput.note"
-          :label="'Ghi chú'"
-          :required="false"
-          :placeholder="'Mời nhập ghi chú'"
-          :is-disabled="false"
-          :error="''"
-          :slim-error="true"
-          :show-error="false"
-        />
+        <div class="divider"></div>
+        <!-- <AppInputTextarea -->
+        <!--   v-model="formInput.note" -->
+        <!--   :label="'Ghi chú'" -->
+        <!--   :required="false" -->
+        <!--   :placeholder="'Mời nhập ghi chú'" -->
+        <!--   :is-disabled="false" -->
+        <!--   :error="''" -->
+        <!--   :slim-error="true" -->
+        <!--   :show-error="false" -->
+        <!-- /> -->
         <UCheckbox
           class="checkbox"
           :model-value="formInput.sendMail"
@@ -277,7 +296,7 @@ const templateListOpts = computed(() => {
 
 const formInput = ref<Record<string, any>>({
   process: undefined,
-  note: "",
+  // note: "",
   onboardDate: undefined,
   sendMail: false,
   emailTemplate: undefined,
@@ -285,6 +304,25 @@ const formInput = ref<Record<string, any>>({
   template: "",
   templateName: "",
   templateCode: "",
+});
+
+const processDateTime = computed(() => {
+  return (process: any) => {
+    let tooltip = "";
+    const _process = props.changeProcessTarget?.jobAdProcessCandidates.find(
+      (p: any) => p.id === process.value,
+    );
+    if (_process.actionDate) {
+      const dateTime = formatDateTime(_process.actionDate, "DD/MM/YYYY HH:mm");
+      if (_process.processName == "Ứng tuyển") {
+        tooltip += `Ngày ứng tuyển: ${dateTime}`;
+      } else {
+        tooltip += `Ngày chuyển vòng: ${dateTime}`;
+      }
+    }
+
+    return tooltip;
+  };
 });
 
 const previewData = computed(() => {
@@ -334,6 +372,15 @@ const isPreviewable = computed(() => {
     (isUseBlankTemplate.value &&
       formInput.value.subject.trim() &&
       formInput.value.template.trim())
+  );
+});
+
+const currentProcessIndex = computed(() => {
+  if (!props.changeProcessTarget) {
+    return -1;
+  }
+  return props.changeProcessTarget?.jobAdProcessCandidates.findIndex(
+    (process: any) => process.isCurrentProcess,
   );
 });
 
@@ -418,12 +465,13 @@ const isSubmitDisabled = computed(() => {
 async function handleSubmit() {
   const payload: Record<string, any> = {
     toJobAdProcessCandidateId: formInput.value.process.value,
-    note: formInput.value.note.value,
+    // note: formInput.value.note.value,
     sendMail: formInput.value.sendMail,
   };
 
   if (formInput.value.process.label === "Onboard") {
-    payload.onboardDate = toUtcDate(formInput.value.onboardDate);
+    console.log(formInput.value.onboardDate)
+    payload.onboardDate = toUtcDateWithTime(formInput.value.onboardDate);
   }
 
   if (formInput.value.sendMail && !isUseBlankTemplate.value) {
@@ -510,13 +558,13 @@ async function handleSubmitAndCreate() {
 
   const payload: Record<string, any> = {
     toJobAdProcessCandidateId: formInput.value.process.value,
-    note: formInput.value.note.value,
+    // note: formInput.value.note.value,
     sendMail: formInput.value.sendMail,
     emailTemplateId: createRes.data.id,
   };
 
   if (formInput.value.process.label === "Onboard") {
-    payload.onboardDate = toUtcDate(formInput.value.onboardDate);
+    payload.onboardDate = toUtcDateWithTime(formInput.value.onboardDate);
   }
 
   const success = await changeProcessCandidate(payload);
@@ -564,8 +612,103 @@ watch(
   flex-direction: column;
   gap: 8px;
 
+  .divider {
+    width: 100%;
+    display: block;
+    height: 1px;
+    background-color: $color-gray-200;
+  }
+
   :deep(textarea) {
     max-height: 90px;
+  }
+
+  .process-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .label {
+      font-size: 14px;
+      color: $text-light;
+      font-weight: 500;
+    }
+
+    .required {
+      color: $color-danger;
+      margin-left: 4px;
+    }
+
+    .process-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .process-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      height: 39px;
+      cursor: pointer;
+
+      &.disabled {
+        cursor: default;
+        span {
+          color: $color-gray-400;
+        }
+
+        input[type="radio"] {
+          cursor: default;
+          &:hover {
+            border-color: $color-gray-400;
+          }
+        }
+      }
+
+      .left {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .right {
+        .date-time {
+          font-size: 14px;
+          color: $text-light;
+        }
+      }
+
+      input[type="radio"] {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 1px solid $color-gray-400;
+        background-color: #fff;
+        cursor: pointer;
+
+        &:checked {
+          appearance: auto;
+          accent-color: $color-primary-500;
+        }
+
+        &:hover {
+          border-color: $color-primary-500;
+        }
+
+        &:focus {
+          outline: none;
+        }
+      }
+
+      span {
+        font-size: 14px;
+        color: $text-light;
+      }
+    }
   }
 
   .required {
@@ -719,4 +862,14 @@ watch(
     }
   }
 }
+
+// #teleport-target {
+//   position: fixed;
+//   height: 100vh;
+//   width: 100vw;
+//   background-color: blue;
+//   top: 0px;
+//   left: 0px;
+//   z-index: 999999999;
+// }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="datepicker-input">
-    <div class="label">
+    <div v-if="props.label" class="label">
       <span v-if="props.label" class="text">{{ props.label }}</span>
       <span v-if="props.required" class="required">Bắt buộc</span>
     </div>
@@ -31,7 +31,7 @@ type TProps = {
   placeholder?: string;
   isRange?: boolean;
   slimError?: boolean;
-  isTeleport?: boolean;
+  isTeleport?: boolean | string;
   hideNavigations?: string[];
   enableTimePicker?: boolean;
 };
