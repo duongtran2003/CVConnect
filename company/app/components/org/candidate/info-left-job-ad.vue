@@ -55,6 +55,7 @@
               <div
                 v-for="(process, index) of displayJobAd.jobAdProcessCandidates"
                 :key="process.id"
+                :title="processTooltip(process)"
                 class="process"
               >
                 <div
@@ -125,6 +126,18 @@ const isRejectModalOpen = ref<boolean>(false);
 const isChangeProcessModalOpen = ref<boolean>(false);
 const rejectingTarget = ref<any>(null);
 const changeProcessTarget = ref<any>(null);
+
+const processTooltip = computed(() => {
+  return (process: any) => {
+    let tooltip = process.processName;
+    if (process.actionDate) {
+      const dateTime = formatDateTime(process.actionDate, "DD/MM/YYYY HH:mm");
+      tooltip += ` - ${dateTime}`;
+    }
+
+    return tooltip;
+  };
+});
 
 const displayJobAdCurrentProcessIndex = computed(() => {
   return (displayJobAd: any) => {
