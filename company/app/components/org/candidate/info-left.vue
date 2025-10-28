@@ -2,6 +2,7 @@
   <div class="left">
     <OrgCandidateInfoLeftJobAd
       :job-ad-infos="props.detail.jobAdCandidates"
+      :candidate-info="props.detail.candidateInfo"
       @refetch="emits('refetch')"
     />
     <OrgCandidateInfoLeftPersonalInfo :info="props.detail.candidateInfo" />

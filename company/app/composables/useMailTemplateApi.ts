@@ -67,6 +67,45 @@ export const useMailTemplateApi = () => {
     }
   };
 
+  const getMailTemplatePreviewNoTemplate = async (
+    subject: string,
+    body: string,
+    placeholderCodes: string[],
+    dataReplacePlaceholder: Record<string, any>,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const res = await $axios.post(
+        `/_api/notify/email-template/preview-email-without-template`,
+        {
+          subject,
+          body,
+          placeholderCodes,
+          dataReplacePlaceholder,
+        },
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   const getMailTemplateDetail = async (
     id: number,
     abortController?: AbortController,
@@ -251,7 +290,7 @@ export const useMailTemplateApi = () => {
       console.error(err);
       return false;
     }
-  }
+  };
 
   const createMailTemplateConfig = async (payload: any) => {
     try {
@@ -301,10 +340,7 @@ export const useMailTemplateApi = () => {
 
   const updateMailTemplateConfig = async (payload: any) => {
     try {
-      const res = await $axios.put(
-        `/_api/notify/email-config/update`,
-        payload,
-      );
+      const res = await $axios.put(`/_api/notify/email-config/update`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -336,5 +372,6 @@ export const useMailTemplateApi = () => {
     updateMailTemplateConfig,
     deleteMailTemplateConfig,
     createMailTemplateWithId,
+    getMailTemplatePreviewNoTemplate,
   };
 };

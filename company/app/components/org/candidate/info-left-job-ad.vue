@@ -7,11 +7,13 @@
     <OrgCandidateEliminateModal
       v-model="isRejectModalOpen"
       :rejecting-target="rejectingTarget"
+      :candidate-info="props.candidateInfo"
       @rejected="handleCandidateEliminated"
     />
     <OrgCandidateChangeProcessModal
       v-model="isChangeProcessModalOpen"
       :change-process-target="changeProcessTarget"
+      :candidate-info="props.candidateInfo"
       @submit="handleChangeProcess"
     />
 
@@ -111,6 +113,7 @@ import { CANDIDATE_STATUS } from "~/const/views/org/candidates";
 
 type TProps = {
   jobAdInfos: Record<string, any>[];
+  candidateInfo: Record<string, any>;
 };
 
 const props = defineProps<TProps>();

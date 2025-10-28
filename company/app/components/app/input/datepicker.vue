@@ -5,8 +5,8 @@
       <span v-if="props.required" class="required">Bắt buộc</span>
     </div>
     <VueDatePicker
-      :hide-navigation="['time', 'minutes', 'hours', 'seconds']"
-      :enable-time-picker="false"
+      :hide-navigation="props.hideNavigations"
+      :enable-time-picker="props.enableTimePicker"
       :range="props.isRange"
       class="date-input"
       :class="{ disabled: props.isDisabled, error: props.error }"
@@ -32,6 +32,8 @@ type TProps = {
   isRange?: boolean;
   slimError?: boolean;
   isTeleport?: boolean;
+  hideNavigations?: string[];
+  enableTimePicker?: boolean;
 };
 
 const props = withDefaults(defineProps<TProps>(), {
@@ -43,6 +45,8 @@ const props = withDefaults(defineProps<TProps>(), {
   isRange: false,
   slimError: false,
   isTeleport: true,
+  hideNavigations: () => ["time", "minutes", "hours", "seconds"],
+  enableTimePicker: false,
 });
 
 const emits = defineEmits<{

@@ -1,14 +1,14 @@
 <template>
-  <!-- <OrgAdJobCreateMailPreviewModal -->
-  <!--   v-model="isPreviewModalOpen" -->
-  <!--   :form-data="props.formData" -->
-  <!-- /> -->
   <UModal
     v-model:open="isOpen"
     title="Loại ứng viên khỏi tin tuyển dụng"
     :ui="{ content: 'max-w-[840px]' }"
   >
     <template #body>
+      <OrgCandidatePreviewEmailModal
+        v-model="isPreviewModalOpen"
+        :data="previewData"
+      />
       <div class="body">
         <AppInputSearchSelect
           :label="'Lí do loại ứng viên'"
@@ -55,6 +55,21 @@
               ($event) => (isUseBlankTemplate = $event as boolean)
             "
           />
+          <div
+            class="preview-button"
+            :title="
+              !isPreviewable
+                ? 'Vui lòng chọn mẫu hoặc nhập đầy đủ tiêu đề và nội dung cho email'
+                : ''
+            "
+            :class="{ 'no-preview': !isPreviewable }"
+            @click="
+              isPreviewable ? () => (isPreviewModalOpen = true) : () => {}
+            "
+          >
+            <Icon name="icon-park-outline:preview-open" />
+            <span>Xem trước</span>
+          </div>
           <template v-if="!isUseBlankTemplate">
             <AppInputSearchSelect
               :label="'Mẫu email'"
@@ -129,7 +144,10 @@
             </div>
             <div class="line">
               <div class="editor">
-                <div class="label">Nội dung email</div>
+                <div class="label">
+                  <span> Nội dung email </span
+                  ><span class="required">Bắt buộc</span>
+                </div>
                 <AppInputBasicTextEditor
                   ref="editorRef"
                   :value="formInput.template"
@@ -187,6 +205,7 @@
 type TProps = {
   modelValue: boolean;
   rejectingTarget: Record<string, any> | null;
+  candidateInfo: Record<string, any> | null;
 };
 
 const { getEliminateReason } = useEnumApi();
@@ -197,6 +216,8 @@ const {
   createMailTemplateWithId,
 } = useMailTemplateApi();
 const { eliminateCandidate } = useCandidateApi();
+const userStore = useUserStore();
+const { userInfo } = storeToRefs(userStore);
 
 const props = defineProps<TProps>();
 
@@ -250,6 +271,56 @@ const formInput = ref<Record<string, any>>({
   template: "",
   templateName: "",
   templateCode: "",
+});
+
+const previewData = computed(() => {
+  const data: Record<string, any> = {};
+
+  data.positionName = props.rejectingTarget?.positionName;
+  data.jobAdName = props.rejectingTarget?.jobAd.title;
+  data.jobAdProcessId = formInput.value.process?.value;
+  data.orgName = userInfo.value?.userDetails?.[0]?.detailInfo?.org?.name;
+  data.candidateName = props.candidateInfo?.fullName;
+  data.candidateInfoApplyId = props.candidateInfo?.id;
+  data.hrContactId = props.rejectingTarget?.hrContactId;
+
+  let placeholderCodes: string[] = [];
+  if (isUseBlankTemplate.value) {
+    const usedPlaceholders = (editorRef.value?.getUsedPlaceholders?.() ||
+      []) as any[];
+    const placeholderSet: Set<string> = new Set();
+    for (const placeholder of usedPlaceholders) {
+      placeholderSet.add(`\${${placeholder.code}}`);
+    }
+    placeholderCodes = [...placeholderSet];
+
+    return {
+      subject: formInput.value.subject,
+      body: parseHtmlToMergeTags(formInput.value.template),
+      dataReplacePlaceholder: data,
+      placeholderCodes,
+    };
+  } else {
+    placeholderCodes = templateDetail.value?.map(
+      (placeholder: any) => placeholder.code,
+    );
+
+    return {
+      subject: templateDetail.value?.subject,
+      body: templateDetail.value?.template,
+      dataReplacePlaceholder: data,
+      placeholderCodes,
+    };
+  }
+});
+
+const isPreviewable = computed(() => {
+  return (
+    (formInput.value.sendMail && formInput.value.emailTemplate) ||
+    (isUseBlankTemplate.value &&
+      formInput.value.subject.trim() &&
+      formInput.value.template.trim())
+  );
 });
 
 const mappedBody = computed(() => {
@@ -316,7 +387,7 @@ const isSubmitDisabled = computed(() => {
   if (
     formInput.value.sendMail &&
     isUseBlankTemplate.value &&
-    !formInput.value.subject.trim()
+    (!formInput.value.subject.trim() || !formInput.value.template.trim())
   ) {
     return true;
   }
@@ -374,6 +445,7 @@ const isSubmitAndCreateDisabled = computed(() => {
     formInput.value.sendMail &&
     isUseBlankTemplate.value &&
     (!formInput.value.subject.trim() ||
+      !formInput.value.template.trim() ||
       !formInput.value.templateName.trim() ||
       !formInput.value.templateCode.trim())
   ) {
@@ -470,6 +542,33 @@ watch(
     max-height: 90px;
   }
 
+  .required {
+    font-size: 12px;
+    font-style: italic;
+    color: $color-danger;
+    margin-left: 8px;
+  }
+
+  .preview-button {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    cursor: pointer;
+    color: $text-light;
+    font-size: 14px;
+
+    &.no-preview {
+      color: $color-gray-400;
+      cursor: default;
+    }
+
+    .iconify {
+      display: block;
+      font-size: 20px;
+      width: 20px;
+    }
+  }
+
   .checkbox {
     max-width: fit-content;
     :deep(label) {
@@ -516,6 +615,11 @@ watch(
     }
   }
 
+  .ProseMirror {
+    max-height: 35vh;
+    overflow: auto;
+  }
+
   .placeholders {
     flex: 1;
     max-width: fit-content;
@@ -524,7 +628,7 @@ watch(
       flex-direction: column;
       gap: 4px;
       overflow-y: auto;
-      max-height: 40vh;
+      max-height: 35vh;
 
       .placeholder {
         padding: 4px 6px;
