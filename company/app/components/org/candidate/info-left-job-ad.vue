@@ -129,10 +129,14 @@ const changeProcessTarget = ref<any>(null);
 
 const processTooltip = computed(() => {
   return (process: any) => {
-    let tooltip = process.processName;
+    let tooltip = "";
     if (process.actionDate) {
       const dateTime = formatDateTime(process.actionDate, "DD/MM/YYYY HH:mm");
-      tooltip += ` - ${dateTime}`;
+      if (process.processName == "Ứng tuyển") {
+        tooltip += `Ngày ứng tuyển: ${dateTime}`;
+      } else {
+        tooltip += `Ngày chuyển vòng: ${dateTime}`;
+      }
     }
 
     return tooltip;

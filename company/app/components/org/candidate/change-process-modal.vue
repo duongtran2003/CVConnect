@@ -10,6 +10,11 @@
         :data="previewData"
       />
       <div class="body">
+        <div class="process-list">
+
+        </div>
+
+
         <AppInputSearchSelect
           :label="'Vòng tuyển dụng'"
           :required="true"
