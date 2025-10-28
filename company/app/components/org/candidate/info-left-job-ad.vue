@@ -29,6 +29,7 @@
             <span class="title">{{ displayJobAd.jobAd.title }}</span>
             <span
               class="value chip"
+              :title="statusTooltip(displayJobAd)"
               :style="{
                 borderColor:
                   CANDIDATE_STATUS[displayJobAd.candidateStatus].color,
@@ -104,6 +105,17 @@
               </template>
             </div>
           </div>
+          <template v-if="displayJobAd.candidateStatus === 'REJECTED'">
+            <div class="eliminate-reason">
+              {{ `Lý do loại: ${displayJobAd.eliminateReason.description}` }}
+            </div>
+            <div
+              class="eliminate-reason"
+              v-if="displayJobAd.eliminateReasonDetail"
+            >
+              {{ `${displayJobAd.eliminateReasonDetail}` }}
+            </div>
+          </template>
         </div>
       </template>
     </div>
@@ -143,13 +155,25 @@ const processTooltip = computed(() => {
   };
 });
 
+const statusTooltip = computed(() => {
+  return (displayJobAd: any) => {
+    if (displayJobAd.candidateStatus === "REJECTED") {
+      return formatDateTime(displayJobAd.eliminateDate, "DD/MM/YYYY - HH:mm");
+    }
+    return "";
+  };
+});
+
 const displayJobAdCurrentProcessIndex = computed(() => {
   return (displayJobAd: any) => {
-    return (
-      displayJobAd.value?.jobAdProcessCandidates.findIndex(
-        (process: any) => process.isCurrentProcess,
-      ) || 0
+    let index = displayJobAd.jobAdProcessCandidates.findIndex(
+      (process: any) => process.isCurrentProcess,
     );
+    if (index == -1) {
+      index = 0;
+    }
+
+    return index;
   };
 });
 
@@ -252,6 +276,10 @@ watch(isChangeProcessModalOpen, (newVal) => {
       display: flex;
       flex-direction: column;
       gap: 8px;
+
+      .eliminate-reason {
+        font-style: italic;
+      }
     }
   }
 

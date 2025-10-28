@@ -162,7 +162,7 @@ export const CANDIDATE_STATUS: Record<string, any> = {
     background: "rgba(165,143,234,0.08)",
   },
   IN_PROGRESS: {
-    label: "Đang xử lí",
+    label: "Đang xử lý",
     color: "#F2B179",
     background: "rgba(242,177,121,0.08)",
   },
