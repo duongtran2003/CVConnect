@@ -56,28 +56,30 @@
           @update:model-value="handleInput('sendMail', $event)"
         />
         <template v-if="formInput.sendMail">
-          <UCheckbox
-            class="checkbox"
-            :model-value="isUseBlankTemplate"
-            :label="'Sử dụng mẫu email trống'"
-            @update:model-value="
-              ($event) => (isUseBlankTemplate = $event as boolean)
-            "
-          />
-          <div
-            class="preview-button"
-            :title="
-              !isPreviewable
-                ? 'Vui lòng chọn mẫu hoặc nhập đầy đủ tiêu đề và nội dung cho email'
-                : ''
-            "
-            :class="{ 'no-preview': !isPreviewable }"
-            @click="
-              isPreviewable ? () => (isPreviewModalOpen = true) : () => {}
-            "
-          >
-            <Icon name="icon-park-outline:preview-open" />
-            <span>Xem trước</span>
+          <div class="line">
+            <UCheckbox
+              class="checkbox"
+              :model-value="isUseBlankTemplate"
+              :label="'Sử dụng mẫu email trống'"
+              @update:model-value="
+                ($event) => (isUseBlankTemplate = $event as boolean)
+              "
+            />
+            <div
+              class="preview-button"
+              :title="
+                !isPreviewable
+                  ? 'Vui lòng chọn mẫu hoặc nhập đầy đủ tiêu đề và nội dung cho email'
+                  : ''
+              "
+              :class="{ 'no-preview': !isPreviewable }"
+              @click="
+                isPreviewable ? () => (isPreviewModalOpen = true) : () => {}
+              "
+            >
+              <Icon name="icon-park-outline:preview-open" />
+              <span>Xem trước</span>
+            </div>
           </div>
           <template v-if="!isUseBlankTemplate">
             <AppInputSearchSelect
