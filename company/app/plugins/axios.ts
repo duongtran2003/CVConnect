@@ -23,16 +23,17 @@ export default defineNuxtPlugin(() => {
       .post(`/_api/user/auth/refresh`, {}, { withCredentials: true })
       .then((tokenRefreshResponse) => {
         setToken(tokenRefreshResponse.data.data.token);
-        setRoles(tokenRefreshResponse.data.data.roles);
-        if (tokenRefreshResponse.data.data.roles.length == 1) {
-          setCurrentRole(tokenRefreshResponse.data.data.roles[0]);
-        }
+        // setRoles(tokenRefreshResponse.data.data.roles);
+        // if (tokenRefreshResponse.data.data.roles.length == 1) {
+        //   setCurrentRole(tokenRefreshResponse.data.data.roles[0]);
+        // }
         failedRequest.response.config.headers["Authorization"] =
           "Bearer " + token;
         return Promise.resolve();
       })
       .catch((err) => {
-        console.log("logout when refresh fail", route.fullPath);
+        console.error(err);
+        console.log("refresh fail, logout!");
         logout();
       });
 

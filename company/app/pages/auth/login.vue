@@ -101,7 +101,7 @@ const { setMenus } = useSidebarStore();
 onBeforeMount(async () => {
   setLoading(true);
   const res = await verifyToken();
-  if (res.data.isValid) {
+  if (res?.data?.isValid) {
     const rolesRes = await getMyRoles();
     setLoading(false);
     if (rolesRes) {

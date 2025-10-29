@@ -82,11 +82,13 @@
 type TProps = {
   modelValue: boolean;
   data: Record<string, any>;
+  templateId: number | null | undefined;
 };
 
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
-const { getMailTemplatePreviewNoTemplate } = useMailTemplateApi();
+const { getMailTemplatePreviewNoTemplate, getMailTemplatePreviewDefault } =
+  useMailTemplateApi();
 
 const props = defineProps<TProps>();
 const emits = defineEmits<{
@@ -115,14 +117,31 @@ function handleClose() {
   emits("update:modelValue", false);
 }
 
-watch(() => props.modelValue, async (newVal) => {
-  if (newVal) {
-    isLoading.value = true;
-    const res = await getMailTemplatePreviewNoTemplate(props.data.subject, props.data.body, props.data.placeholderCodes, props.data.dataReplacePlaceholder);
-    mailDetail.value = res.data;
-    isLoading.value = false;
-  }
-})
+watch(
+  () => props.modelValue,
+  async (newVal) => {
+    if (newVal) {
+      isLoading.value = true;
+      if (props.templateId != null && props.templateId != undefined) {
+        const res = await getMailTemplatePreviewDefault(
+          props.templateId,
+          props.data.dataReplacePlaceholder,
+        );
+        mailDetail.value = res.data;
+        isLoading.value = false;
+        return;
+      }
+      const res = await getMailTemplatePreviewNoTemplate(
+        props.data.subject,
+        props.data.body,
+        props.data.placeholderCodes,
+        props.data.dataReplacePlaceholder,
+      );
+      mailDetail.value = res.data;
+      isLoading.value = false;
+    }
+  },
+);
 </script>
 <style lang="scss" scoped>
 .create-department {

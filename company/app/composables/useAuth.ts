@@ -1,3 +1,4 @@
+import { STATUS_CODE } from "~/const/api";
 import type { TApiOption } from "~/plugins/axios";
 
 export type TLoginCredentials = {
@@ -204,9 +205,10 @@ export const useAuth = () => {
 
   const verifyToken = async () => {
     try {
-      const res = await $axios.post(`/_api/user/auth/verify`, {
-        token: token.value,
-      });
+      // const res = await $axios.post(`/_api/user/auth/verify-token`, {
+      //   token: token.value,
+      // });
+      const res = await $axios.post(`/_api/user/auth/verify-token`);
       return res.data;
     } catch (err: any) {
       return null;

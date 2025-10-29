@@ -9,6 +9,7 @@
       <OrgCandidatePreviewEmailModal
         v-model="isPreviewModalOpen"
         :data="previewData"
+        :template-id="isUseBlankTemplate ? null : formInput.emailTemplate?.value"
       />
       <div class="body" id="modal-body">
         <div class="process-section">
@@ -75,11 +76,11 @@
         <!-- /> -->
         <UCheckbox
           class="checkbox"
-          :model-value="formInput.sendMail"
+          :model-value="formInput.sendEmail"
           :label="'Gửi email'"
-          @update:model-value="handleInput('sendMail', $event)"
+          @update:model-value="handleInput('sendEmail', $event)"
         />
-        <template v-if="formInput.sendMail">
+        <template v-if="formInput.sendEmail">
           <div class="line">
             <UCheckbox
               class="checkbox"
@@ -296,7 +297,7 @@ const formInput = ref<Record<string, any>>({
   process: undefined,
   // note: "",
   onboardDate: undefined,
-  sendMail: false,
+  sendEmail: false,
   emailTemplate: undefined,
   subject: "",
   template: "",
@@ -326,13 +327,20 @@ const processDateTime = computed(() => {
 const previewData = computed(() => {
   const data: Record<string, any> = {};
 
-  data.positionName = props.changeProcessTarget?.positionName;
+  data.positionName = props.changeProcessTarget?.jobAd?.positionName;
+  data.hrContactId = props.changeProcessTarget?.jobAd?.hrContactId;
+
   data.jobAdName = props.changeProcessTarget?.jobAd.title;
-  data.jobAdProcessId = formInput.value.process?.value;
   data.orgName = userInfo.value?.userDetails?.[0]?.detailInfo?.org?.name;
   data.candidateName = props.candidateInfo?.fullName;
   data.candidateInfoApplyId = props.candidateInfo?.id;
-  data.hrContactId = props.changeProcessTarget?.jobAd?.hrContactId;
+
+  const jobProcess = props.changeProcessTarget?.jobAdProcessCandidates.find(
+    (process: any) => process.id == formInput.value.process?.value,
+  );
+  if (jobProcess) {
+    data.jobAdProcessId = jobProcess.jobAdProcessId;
+  }
 
   let placeholderCodes: string[] = [];
   if (isUseBlankTemplate.value) {
@@ -366,7 +374,7 @@ const previewData = computed(() => {
 
 const isPreviewable = computed(() => {
   return (
-    (formInput.value.sendMail && formInput.value.emailTemplate) ||
+    (formInput.value.sendEmail && formInput.value.emailTemplate) ||
     (isUseBlankTemplate.value &&
       formInput.value.subject.trim() &&
       formInput.value.template.trim())
@@ -442,7 +450,7 @@ const isSubmitDisabled = computed(() => {
   }
 
   if (
-    formInput.value.sendMail &&
+    formInput.value.sendEmail &&
     !isUseBlankTemplate.value &&
     !formInput.value.emailTemplate
   ) {
@@ -450,7 +458,7 @@ const isSubmitDisabled = computed(() => {
   }
 
   if (
-    formInput.value.sendMail &&
+    formInput.value.sendEmail &&
     isUseBlankTemplate.value &&
     (!formInput.value.subject.trim() || !formInput.value.template.trim())
   ) {
@@ -472,14 +480,14 @@ async function handleSubmit() {
   const payload: Record<string, any> = {
     toJobAdProcessCandidateId: formInput.value.process.value,
     // note: formInput.value.note.value,
-    sendMail: formInput.value.sendMail,
+    sendEmail: formInput.value.sendEmail,
   };
 
   if (formInput.value.process.label === "Onboard") {
     payload.onboardDate = toUtcDateWithTime(formInput.value.onboardDate);
   }
 
-  if (formInput.value.sendMail && !isUseBlankTemplate.value) {
+  if (formInput.value.sendEmail && !isUseBlankTemplate.value) {
     payload.emailTemplateId = formInput.value.emailTemplate.value;
   }
 
@@ -517,7 +525,7 @@ const isSubmitAndCreateDisabled = computed(() => {
   }
 
   if (
-    formInput.value.sendMail &&
+    formInput.value.sendEmail &&
     !isUseBlankTemplate.value &&
     !formInput.value.emailTemplate
   ) {
@@ -525,7 +533,7 @@ const isSubmitAndCreateDisabled = computed(() => {
   }
 
   if (
-    formInput.value.sendMail &&
+    formInput.value.sendEmail &&
     isUseBlankTemplate.value &&
     (!formInput.value.subject.trim() ||
       !formInput.value.template.trim() ||
@@ -543,7 +551,7 @@ async function handleSubmitAndCreate() {
     code: formInput.value.templateCode,
     name: formInput.value.templateName,
     subject: formInput.value.subject,
-    body: formInput.value.template,
+    body: parseHtmlToMergeTags(formInput.value.template),
   };
 
   const usedPlaceholders = (editorRef.value?.getUsedPlaceholders?.() ||
@@ -564,7 +572,7 @@ async function handleSubmitAndCreate() {
   const payload: Record<string, any> = {
     toJobAdProcessCandidateId: formInput.value.process.value,
     // note: formInput.value.note.value,
-    sendMail: formInput.value.sendMail,
+    sendEmail: formInput.value.sendEmail,
     emailTemplateId: createRes.data.id,
   };
 
@@ -587,7 +595,7 @@ watch(
       formInput.value = {
         reason: undefined,
         reasonDetail: "",
-        sendMail: false,
+        sendEmail: false,
         emailTemplate: undefined,
         subject: "",
         template: "",

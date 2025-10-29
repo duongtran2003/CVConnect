@@ -1,6 +1,7 @@
 import { onBeforeMount } from "vue";
 import { storeToRefs } from "pinia";
 import type { TPermissionCheckType } from "~/types/permision";
+import { STATUS_CODE } from "~/const/api";
 
 export function useLayoutPermission(
   permissionType: TPermissionCheckType,
@@ -24,7 +25,10 @@ export function useLayoutPermission(
     setLoading(true);
 
     const verifyTokenRes = await verifyToken();
-    if (!verifyTokenRes.data.isValid) {
+    if (
+      !verifyTokenRes.data.isValid &&
+      verifyTokenRes.data.code != STATUS_CODE.TOKEN_EXPIRED
+    ) {
       await logout();
       setLoading(false);
       return;

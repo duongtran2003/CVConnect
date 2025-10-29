@@ -178,13 +178,41 @@ export const CANDIDATE_STATUS: Record<string, any> = {
   },
   NOT_ONBOARDED: {
     label: "Không onboard",
-    color: "#F2E28C",
-    background: "rgba(242,226,140,0.08)",
+    color: "#E8B26E",
+    background: "rgba(232,178,110,0.12)",
   },
   REJECTED: {
     label: "Từ chối",
     color: "#F28B82",
     background: "rgba(242,139,130,0.08)",
+  },
+};
+
+export const EMAIL_LOG_STATUS: Record<string, any> = {
+  SENDING: {
+    label: "Đang gửi",
+    color: "#A58FEA",
+    background: "rgba(165,143,234,0.08)", // soft lavender
+  },
+  SUCCESS: {
+    label: "Thành công",
+    color: "#78D6A3",
+    background: "rgba(120,214,163,0.08)", // mint green
+  },
+  TEMPORARY_FAILURE: {
+    label: "Thất bại tạm thời",
+    color: "#F2B179",
+    background: "rgba(242,177,121,0.08)", // warm peach
+  },
+  FAILURE_WAIT_RESEND: {
+    label: "Thất bại, chờ gửi lại",
+    color: "#E8B26E",
+    background: "rgba(232,178,110,0.12)", // amber pastel
+  },
+  FAILURE: {
+    label: "Thất bại",
+    color: "#F28B82",
+    background: "rgba(242,139,130,0.08)", // coral red
   },
 };
 
@@ -199,21 +227,26 @@ export const CANDIDATE_DETAIL_RIGHT_TABS = [
   {
     label: "Hồ sơ",
     index: 1,
+    paramKey: "profile",
   },
   {
     label: "Đánh giá",
     index: 2,
-  },
-  {
-    label: "Trò chuyện",
-    index: 3,
-  },
-  {
-    label: "Email đã gửi",
-    index: 4,
+    paramKey: "grade",
   },
   {
     label: "Lịch",
+    index: 3,
+    paramKey: "schedule",
+  },
+  {
+    label: "Trò chuyện",
+    index: 4,
+    paramKey: "discussion",
+  },
+  {
+    label: "Email đã gửi",
     index: 5,
+    paramKey: "emails",
   },
 ];

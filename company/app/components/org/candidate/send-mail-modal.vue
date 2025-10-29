@@ -1,178 +1,172 @@
 <template>
   <UModal
     v-model:open="isOpen"
-    title="Loại ứng viên khỏi tin tuyển dụng"
+    title="Gửi email cho ứng viên"
     :ui="{ content: 'max-w-[840px]' }"
   >
     <template #body>
       <OrgCandidatePreviewEmailModal
         v-model="isPreviewModalOpen"
         :data="previewData"
-        :template-id="isUseBlankTemplate ? null : formInput.emailTemplate?.value"
+        :template-id="
+          isUseBlankTemplate ? null : formInput.emailTemplate?.value
+        "
       />
       <div class="body">
-        <AppInputSearchSelect
-          :label="'Lí do loại ứng viên'"
-          :required="true"
-          :options="reasons"
-          :value="formInput.reason"
-          :error="''"
-          :placeholder="'Mời chọn lí do'"
-          :remote-filter="false"
-          :multiple="false"
-          :is-disabled="false"
-          :slim-error="true"
-          :fetch-fn="fetchReason"
-          @input="handleInput('reason', $event)"
-          @clear-value="handleInput('reason', null)"
-          @search-filter="
-            () => {
-              reasons = [];
-            }
-          "
-        />
-        <AppInputTextarea
-          v-model="formInput.reasonDetail"
-          :label="'Lí do chi tiết'"
-          :required="false"
-          :placeholder="'Mời nhập lí do chi tiết'"
-          :is-disabled="false"
-          :error="''"
-          :slim-error="true"
-          :show-error="false"
-        />
-        <UCheckbox
-          class="checkbox"
-          :model-value="formInput.sendEmail"
-          :label="'Gửi email'"
-          @update:model-value="handleInput('sendEmail', $event)"
-        />
-        <template v-if="formInput.sendEmail">
-          <div class="line">
-            <UCheckbox
-              class="checkbox"
-              :model-value="isUseBlankTemplate"
-              :label="'Sử dụng mẫu email trống'"
-              @update:model-value="
-                ($event) => (isUseBlankTemplate = $event as boolean)
-              "
-            />
-            <div
-              class="preview-button"
-              :title="
-                !isPreviewable
-                  ? 'Vui lòng chọn mẫu hoặc nhập đầy đủ tiêu đề và nội dung cho email'
-                  : ''
-              "
-              :class="{ 'no-preview': !isPreviewable }"
-              @click="handlePreviewClick"
+        <div class="job-ad-info">
+          <div class="info-top">
+            <span class="title">{{ props.jobAdInfo.jobAd.title }}</span>
+            <span
+              class="value chip"
+              :title="statusTooltip(props.jobAdInfo)"
+              :style="{
+                borderColor:
+                  CANDIDATE_STATUS[props.jobAdInfo.candidateStatus].color,
+                color: CANDIDATE_STATUS[props.jobAdInfo.candidateStatus].color,
+                backgroundColor:
+                  CANDIDATE_STATUS[props.jobAdInfo.candidateStatus].background,
+              }"
+              >{{
+                CANDIDATE_STATUS[props.jobAdInfo.candidateStatus].label
+              }}</span
             >
-              <Icon name="icon-park-outline:preview-open" />
-              <span>Xem trước</span>
+          </div>
+          <div class="info-dept-pos">
+            <span>{{ props.jobAdInfo.jobAd.departmentName }}</span>
+            <span>•</span>
+            <span>{{ props.jobAdInfo.jobAd.positionName }}</span>
+          </div>
+          <div class="hr-info">
+            <span class="hr-info-label">
+              <Icon name="material-symbols:article-person-rounded" />
+              <span>{{ props.jobAdInfo.jobAd.hrContactName }}</span>
+            </span>
+          </div>
+        </div>
+        <div class="line">
+          <UCheckbox
+            class="checkbox"
+            :model-value="isUseBlankTemplate"
+            :label="'Sử dụng mẫu email trống'"
+            @update:model-value="
+              ($event) => (isUseBlankTemplate = $event as boolean)
+            "
+          />
+          <div
+            class="preview-button"
+            :title="
+              !isPreviewable
+                ? 'Vui lòng chọn mẫu hoặc nhập đầy đủ tiêu đề và nội dung cho email'
+                : ''
+            "
+            :class="{ 'no-preview': !isPreviewable }"
+            @click="handlePreviewClick"
+          >
+            <Icon name="icon-park-outline:preview-open" />
+            <span>Xem trước</span>
+          </div>
+        </div>
+        <template v-if="!isUseBlankTemplate">
+          <AppInputSearchSelect
+            :label="'Mẫu email'"
+            :required="true"
+            :options="templateListOpts"
+            :value="formInput.emailTemplate"
+            :error="''"
+            :placeholder="'Mời chọn mẫu'"
+            :remote-filter="true"
+            :multiple="false"
+            :is-disabled="false"
+            :slim-error="true"
+            :fetch-fn="fetchTemplate"
+            @input="handleInput('emailTemplate', $event)"
+            @clear-value="handleInput('emailTemplate', null)"
+            @search-filter="
+              () => {
+                templateList = [];
+              }
+            "
+          />
+          <template v-if="formInput.emailTemplate">
+            <AppInputText
+              :label="'Tiêu đề'"
+              :required="false"
+              :error="''"
+              :placeholder="'Mời nhập tiêu đề'"
+              :is-disabled="true"
+              :slim-error="true"
+              :value="templateDetail?.subject || 'Tiêu đề'"
+            />
+            <div class="editor">
+              <div class="label">Nội dung email</div>
+              <div class="template-body" v-html="mappedBody"></div>
+            </div>
+          </template>
+        </template>
+        <template v-else>
+          <div class="line">
+            <AppInputText
+              :label="'Tên mẫu'"
+              :required="false"
+              :error="''"
+              :slim-error="true"
+              :placeholder="'Mời nhập tên'"
+              :value="formInput.templateName"
+              class="text-input"
+              @input="handleInput('templateName', $event)"
+            />
+            <AppInputText
+              :label="'Mã mẫu'"
+              :required="false"
+              :error="''"
+              :slim-error="true"
+              :placeholder="'Mời nhập mã'"
+              :value="formInput.templateCode"
+              class="text-input"
+              @input="handleInput('templateCode', $event)"
+            />
+          </div>
+          <div class="line">
+            <AppInputText
+              :label="'Tiêu đề'"
+              :required="true"
+              :error="''"
+              :slim-error="true"
+              :placeholder="'Mời nhập tiêu đề'"
+              :value="formInput.subject"
+              class="text-input"
+              @input="handleInput('subject', $event)"
+            />
+          </div>
+          <div class="line">
+            <div class="editor">
+              <div class="label">
+                <span> Nội dung email </span
+                ><span class="required">Bắt buộc</span>
+              </div>
+              <AppInputBasicTextEditor
+                ref="editorRef"
+                :value="formInput.template"
+                @input="handleInput('template', $event)"
+              />
+            </div>
+            <div class="placeholders">
+              <div class="label">Placeholders</div>
+              <AppSpinnerHalfCircle v-if="isFetchingPlaceholder" />
+              <div class="placeholder-list">
+                <div
+                  v-for="placeholder in placeholderList"
+                  :key="placeholder.id"
+                  draggable="true"
+                  class="placeholder"
+                  :title="placeholder.label"
+                  @dragstart="onDragStart($event, placeholder)"
+                >
+                  {{ placeholder.label }}
+                </div>
+              </div>
             </div>
           </div>
-          <template v-if="!isUseBlankTemplate">
-            <AppInputSearchSelect
-              :label="'Mẫu email'"
-              :required="true"
-              :options="templateListOpts"
-              :value="formInput.emailTemplate"
-              :error="''"
-              :placeholder="'Mời chọn mẫu'"
-              :remote-filter="true"
-              :multiple="false"
-              :is-disabled="false"
-              :slim-error="true"
-              :fetch-fn="fetchTemplate"
-              @input="handleInput('emailTemplate', $event)"
-              @clear-value="handleInput('emailTemplate', null)"
-              @search-filter="
-                () => {
-                  templateList = [];
-                }
-              "
-            />
-            <template v-if="formInput.emailTemplate">
-              <AppInputText
-                :label="'Tiêu đề'"
-                :required="false"
-                :error="''"
-                :placeholder="'Mời nhập tiêu đề'"
-                :is-disabled="true"
-                :slim-error="true"
-                :value="templateDetail?.subject || 'Tiêu đề'"
-              />
-              <div class="editor">
-                <div class="label">Nội dung email</div>
-                <div class="template-body" v-html="mappedBody"></div>
-              </div>
-            </template>
-          </template>
-          <template v-else>
-            <div class="line">
-              <AppInputText
-                :label="'Tên mẫu'"
-                :required="false"
-                :error="''"
-                :slim-error="true"
-                :placeholder="'Mời nhập tên'"
-                :value="formInput.templateName"
-                class="text-input"
-                @input="handleInput('templateName', $event)"
-              />
-              <AppInputText
-                :label="'Mã mẫu'"
-                :required="false"
-                :error="''"
-                :slim-error="true"
-                :placeholder="'Mời nhập mã'"
-                :value="formInput.templateCode"
-                class="text-input"
-                @input="handleInput('templateCode', $event)"
-              />
-            </div>
-            <div class="line">
-              <AppInputText
-                :label="'Tiêu đề'"
-                :required="true"
-                :error="''"
-                :slim-error="true"
-                :placeholder="'Mời nhập tiêu đề'"
-                :value="formInput.subject"
-                class="text-input"
-                @input="handleInput('subject', $event)"
-              />
-            </div>
-            <div class="line">
-              <div class="editor">
-                <div class="label">
-                  <span> Nội dung email </span
-                  ><span class="required">Bắt buộc</span>
-                </div>
-                <AppInputBasicTextEditor
-                  ref="editorRef"
-                  :value="formInput.template"
-                  @input="handleInput('template', $event)"
-                />
-              </div>
-              <div class="placeholders">
-                <div class="label">Placeholders</div>
-                <AppSpinnerHalfCircle v-if="isFetchingPlaceholder" />
-                <div class="placeholder-list">
-                  <div
-                    v-for="placeholder in placeholderList"
-                    :key="placeholder.id"
-                    draggable="true"
-                    class="placeholder"
-                    :title="placeholder.label"
-                    @dragstart="onDragStart($event, placeholder)"
-                  >
-                    {{ placeholder.label }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
         </template>
       </div>
     </template>
@@ -203,20 +197,21 @@
   </UModal>
 </template>
 <script setup lang="ts">
+import { CANDIDATE_STATUS } from "~/const/views/org/candidates";
+
 type TProps = {
   modelValue: boolean;
-  rejectingTarget: Record<string, any> | null;
   candidateInfo: Record<string, any> | null;
+  jobAdInfo: any;
 };
 
-const { getEliminateReason } = useEnumApi();
 const {
   getMailTemplates,
   getMailTemplateDetail,
   getPlaceholders,
   createMailTemplateWithId,
 } = useMailTemplateApi();
-const { eliminateCandidate } = useCandidateApi();
+const { sendEmail } = useCandidateApi();
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
 
@@ -224,7 +219,7 @@ const props = defineProps<TProps>();
 
 const emits = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
-  (e: "rejected"): void;
+  (e: "sent"): void;
 }>();
 
 onBeforeMount(async () => {
@@ -246,8 +241,6 @@ const isOpen = computed({
   set: (value: boolean) => emits("update:modelValue", value),
 });
 
-const reasons = ref<Record<string, any>[]>([]);
-
 const isPreviewModalOpen = ref<boolean>(false);
 const editorRef = ref<any>(null);
 const isLoading = ref<boolean>(false);
@@ -264,9 +257,6 @@ const templateListOpts = computed(() => {
 });
 
 const formInput = ref<Record<string, any>>({
-  reason: undefined,
-  reasonDetail: "",
-  sendEmail: false,
   emailTemplate: undefined,
   subject: "",
   template: "",
@@ -274,12 +264,22 @@ const formInput = ref<Record<string, any>>({
   templateCode: "",
 });
 
+const statusTooltip = computed(() => {
+  return (displayJobAd: any) => {
+    if (displayJobAd.candidateStatus === "REJECTED") {
+      return formatDateTime(displayJobAd.eliminateDate, "DD/MM/YYYY - HH:mm");
+    }
+    return "";
+  };
+});
+
 const previewData = computed(() => {
   const data: Record<string, any> = {};
 
-  data.positionName = props.rejectingTarget?.jobAd?.positionName;
-  data.jobAdName = props.rejectingTarget?.jobAd.title;
-  data.hrContactId = props.rejectingTarget?.jobAd?.hrContactId;
+  data.positionName = props.jobAdInfo?.jobAd?.positionName;
+  data.hrContactId = props.jobAdInfo?.jobAd?.hrContactId;
+
+  data.jobAdName = props.jobAdInfo?.jobAd.title;
   data.orgName = userInfo.value?.userDetails?.[0]?.detailInfo?.org?.name;
   data.candidateName = props.candidateInfo?.fullName;
   data.candidateInfoApplyId = props.candidateInfo?.id;
@@ -316,7 +316,7 @@ const previewData = computed(() => {
 
 const isPreviewable = computed(() => {
   return (
-    (formInput.value.sendEmail && formInput.value.emailTemplate) ||
+    formInput.value.emailTemplate ||
     (isUseBlankTemplate.value &&
       formInput.value.subject.trim() &&
       formInput.value.template.trim())
@@ -333,19 +333,6 @@ const mappedBody = computed(() => {
     templateDetail.value?.placeholders ?? ([] as TTemplatePlaceholder[]),
   );
 });
-
-async function fetchReason(controller?: AbortController) {
-  const res = await getEliminateReason(controller);
-  if (!res) {
-    return null;
-  }
-
-  reasons.value = res.data.map((reason: any) => ({
-    label: reason.description,
-    value: reason.name,
-  }));
-  return res.data;
-}
 
 async function fetchTemplate(params: any, controller?: AbortController) {
   const res = await getMailTemplates(params, controller);
@@ -380,20 +367,11 @@ function handleCancel() {
 }
 
 const isSubmitDisabled = computed(() => {
-  if (!formInput.value.reason) {
+  if (!isUseBlankTemplate.value && !formInput.value.emailTemplate) {
     return true;
   }
 
   if (
-    formInput.value.sendEmail &&
-    !isUseBlankTemplate.value &&
-    !formInput.value.emailTemplate
-  ) {
-    return true;
-  }
-
-  if (
-    formInput.value.sendEmail &&
     isUseBlankTemplate.value &&
     (!formInput.value.subject.trim() || !formInput.value.template.trim())
   ) {
@@ -405,15 +383,9 @@ const isSubmitDisabled = computed(() => {
 
 async function handleSubmit() {
   const payload: Record<string, any> = {
-    jobAdCandidateId: props.rejectingTarget?.id,
-    reason: formInput.value.reason.value,
-    reasonDetail: formInput.value.reasonDetail,
-    sendEmail: formInput.value.sendMail,
+    jobAdId: props.jobAdInfo.jobAd.id,
+    candidateInfoId: props.candidateInfo?.id,
   };
-
-  if (formInput.value.sendEmail && !isUseBlankTemplate.value) {
-    payload.emailTemplateId = formInput.value.emailTemplate.value;
-  }
 
   if (isUseBlankTemplate.value) {
     payload.subject = formInput.value.subject;
@@ -425,32 +397,25 @@ async function handleSubmit() {
       placeholderSet.add(`\${${placeholder.code}}`);
     }
     payload.placeholders = [...placeholderSet];
+  } else {
+    payload.emailTemplateId = formInput.value.emailTemplate.value;
   }
 
   isLoading.value = true;
-  const success = await eliminateCandidate(payload);
+  const success = await sendEmail(payload);
   isLoading.value = false;
 
   if (success) {
-    emits("rejected");
+    emits("sent");
   }
 }
 
 const isSubmitAndCreateDisabled = computed(() => {
-  if (!formInput.value.reason) {
+  if (!isUseBlankTemplate.value && !formInput.value.emailTemplate) {
     return true;
   }
 
   if (
-    formInput.value.sendEmail &&
-    !isUseBlankTemplate.value &&
-    !formInput.value.emailTemplate
-  ) {
-    return true;
-  }
-
-  if (
-    formInput.value.sendEmail &&
     isUseBlankTemplate.value &&
     (!formInput.value.subject.trim() ||
       !formInput.value.template.trim() ||
@@ -487,17 +452,15 @@ async function handleSubmitAndCreate() {
   }
 
   const payload: Record<string, any> = {
-    jobAdCandidateId: props.rejectingTarget?.id,
-    reason: formInput.value.reason.value,
-    reasonDetail: formInput.value.reasonDetail,
-    sendEmail: formInput.value.sendMail,
+    jobAdId: props.jobAdInfo.jobAd.id,
+    candidateInfoId: props.candidateInfo?.id,
     emailTemplateId: createRes.data.id,
   };
 
-  const success = await eliminateCandidate(payload);
+  const success = await sendEmail(payload);
   isLoading.value = false;
   if (success) {
-    emits("rejected");
+    emits("sent");
   }
 }
 
@@ -507,9 +470,6 @@ watch(
     if (!newVal) {
       // clear everything
       formInput.value = {
-        reason: undefined,
-        reasonDetail: "",
-        sendEmail: false,
         emailTemplate: undefined,
         subject: "",
         template: "",
@@ -519,13 +479,6 @@ watch(
       isUseBlankTemplate.value = false;
       templateDetail.value = undefined;
     }
-  },
-);
-
-watch(
-  () => props.rejectingTarget,
-  (newVal) => {
-    console.log("rejecting ", newVal);
   },
 );
 
@@ -545,6 +498,63 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  .job-ad-info {
+    font-size: 14px;
+    border: 1px solid $color-gray-300;
+    border-radius: 6px;
+    padding: 6px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .hr-info {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      .hr-info-label {
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        align-items: center;
+
+        .iconify {
+          display: block;
+          font-size: 20px;
+        }
+      }
+    }
+
+    .info-dept-pos {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+    }
+
+    .info-top {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+
+      .chip {
+        border-radius: 4px;
+        padding: 4px;
+        border: 1px solid $color-gray-300;
+        font-size: 12px;
+        font-weight: 500;
+      }
+    }
+
+    .misc-text {
+      font-style: italic;
+    }
+  }
 
   :deep(textarea) {
     max-height: 90px;

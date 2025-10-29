@@ -16,6 +16,11 @@
       :candidate-info="props.candidateInfo"
       @submit="handleChangeProcess"
     />
+    <OrgCandidateChangeOnboardDateModal
+      v-model="isChangeOnboardDateModalOpen"
+      :change-date-target="changeDateTarget"
+      @submit="handleChangeOnboardDate"
+    />
 
     <div class="info">
       <AppNoData v-if="!props.jobAdInfos.length" />
@@ -82,38 +87,113 @@
               </div>
             </div>
             <div class="actions">
-              <template
-                v-if="
-                  !isOnboardStep(displayJobAd) &&
-                  displayJobAd.candidateStatus != 'REJECTED'
-                "
-              >
-                <div
-                  title="Chuyển vòng"
-                  class="action-btn next-step-btn"
-                  @click="handleChangeProcessClick(displayJobAd)"
+              <template v-if="displayJobAd.candidateStatus != 'REJECTED'">
+                <template v-if="!isOnboardStep(displayJobAd)">
+                  <div
+                    title="Chuyển vòng"
+                    class="action-btn next-step-btn"
+                    @click="handleChangeProcessClick(displayJobAd)"
+                  >
+                    <Icon name="material-symbols:arrow-right-alt-rounded" />
+                  </div>
+                  <div
+                    title="Loại ứng viên"
+                    class="action-btn reject-btn"
+                    @click="handleRejectClick(displayJobAd)"
+                  >
+                    <Icon name="material-symbols:close-rounded" />
+                  </div>
+                </template>
+                <template
+                  v-if="displayJobAd.candidateStatus === 'WAITING_ONBOARDING'"
                 >
-                  <Icon name="material-symbols:arrow-right-alt-rounded" />
-                </div>
-                <div
-                  title="Loại ứng viên"
-                  class="action-btn reject-btn"
-                  @click="handleRejectClick(displayJobAd)"
+                  <div class="flex flex-row gap-1 justify-end flex-wrap">
+                    <div
+                      title="Onboard"
+                      class="action-btn onboard-btn"
+                      @click="handleMarkOnboard(displayJobAd.id, true)"
+                    >
+                      <Icon name="ci:check" />
+                    </div>
+                    <div
+                      title="Không onboard"
+                      class="action-btn not-onboard-btn"
+                      @click="handleMarkOnboard(displayJobAd.id, false)"
+                    >
+                      <Icon name="ci:stop-sign" />
+                    </div>
+                    <div
+                      title="Sửa ngày onboard"
+                      class="action-btn edit-onboard-date-btn"
+                      @click="handleChangeOnboardDateClick(displayJobAd)"
+                    >
+                      <Icon name="ci:edit-pencil-01" />
+                    </div>
+                  </div>
+                  <div class="flex flex-row justify-end">
+                    <div
+                      title="Loại ứng viên"
+                      class="action-btn reject-btn"
+                      @click="handleRejectClick(displayJobAd)"
+                    >
+                      <Icon name="material-symbols:close-rounded" />
+                    </div>
+                  </div>
+                </template>
+                <template
+                  v-if="
+                    displayJobAd.candidateStatus === 'ONBOARDED' ||
+                    displayJobAd.candidateStatus === 'NOT_ONBOARDED'
+                  "
                 >
-                  <Icon name="material-symbols:close-rounded" />
-                </div>
+                  <div class="flex flex-row gap-1 justify-end flex-wrap">
+                    <div
+                      title="Onboard"
+                      class="action-btn onboard-btn"
+                      @click="handleMarkOnboard(displayJobAd.id, true)"
+                    >
+                      <Icon name="ci:check" />
+                    </div>
+                    <div
+                      title="Không onboard"
+                      class="action-btn not-onboard-btn"
+                      @click="handleMarkOnboard(displayJobAd.id, false)"
+                    >
+                      <Icon name="ci:stop-sign" />
+                    </div>
+                  </div>
+                  <div class="flex flex-row justify-end">
+                    <div
+                      title="Loại ứng viên"
+                      class="action-btn reject-btn"
+                      @click="handleRejectClick(displayJobAd)"
+                    >
+                      <Icon name="material-symbols:close-rounded" />
+                    </div>
+                  </div>
+                </template>
               </template>
             </div>
           </div>
           <template v-if="displayJobAd.candidateStatus === 'REJECTED'">
-            <div class="eliminate-reason">
+            <div class="misc-text">
               {{ `Lý do loại: ${displayJobAd.eliminateReason.description}` }}
             </div>
             <div
-              class="eliminate-reason"
+              class="misc-text"
               v-if="displayJobAd.eliminateReasonDetail"
             >
               {{ `${displayJobAd.eliminateReasonDetail}` }}
+            </div>
+          </template>
+          <template
+            v-if="
+              displayJobAd.candidateStatus === 'WAITING_ONBOARDING' ||
+              displayJobAd.candidateStatus === 'ONBOARDED'
+            "
+          >
+            <div class="misc-text">
+              {{ `Thời gian onboard: ${formatDateTime(displayJobAd.onboardDate, "DD/MM/YYYY - HH:mm")}` }}
             </div>
           </template>
         </div>
@@ -134,10 +214,15 @@ const emits = defineEmits<{
   (e: "refetch"): void;
 }>();
 
+const { markOnboard } = useCandidateApi();
+const { setLoading } = useLoadingStore();
+
 const isRejectModalOpen = ref<boolean>(false);
 const isChangeProcessModalOpen = ref<boolean>(false);
+const isChangeOnboardDateModalOpen = ref<boolean>(false);
 const rejectingTarget = ref<any>(null);
 const changeProcessTarget = ref<any>(null);
+const changeDateTarget = ref<any>(null);
 
 const processTooltip = computed(() => {
   return (process: any) => {
@@ -196,6 +281,10 @@ function clearChangeProcessTarget() {
   changeProcessTarget.value = null;
 }
 
+function clearChangeOnboardDateTarget() {
+  changeDateTarget.value = null;
+}
+
 function handleRejectClick(jobAd: any) {
   isRejectModalOpen.value = true;
   rejectingTarget.value = jobAd;
@@ -205,6 +294,20 @@ function handleChangeProcessClick(jobAd: any) {
   console.log("change process of ", jobAd);
   isChangeProcessModalOpen.value = true;
   changeProcessTarget.value = jobAd;
+}
+
+function handleChangeOnboardDateClick(jobAd: any) {
+  isChangeOnboardDateModalOpen.value = true;
+  changeDateTarget.value = jobAd;
+}
+
+async function handleMarkOnboard(id: number | string, status: boolean) {
+  setLoading(true);
+  const res = await markOnboard(id, status);
+  setLoading(false);
+  if (res) {
+    emits("refetch");
+  }
 }
 
 function handleCandidateEliminated() {
@@ -217,6 +320,11 @@ function handleChangeProcess() {
   emits("refetch");
 }
 
+function handleChangeOnboardDate() {
+  isChangeOnboardDateModalOpen.value = false;
+  emits("refetch");
+}
+
 watch(isRejectModalOpen, (newVal) => {
   if (!newVal) {
     clearRejectTarget();
@@ -226,6 +334,12 @@ watch(isRejectModalOpen, (newVal) => {
 watch(isChangeProcessModalOpen, (newVal) => {
   if (!newVal) {
     clearChangeProcessTarget();
+  }
+});
+
+watch(isChangeOnboardDateModalOpen, (newVal) => {
+  if (!newVal) {
+    clearChangeOnboardDateTarget();
   }
 });
 </script>
@@ -277,7 +391,7 @@ watch(isChangeProcessModalOpen, (newVal) => {
       flex-direction: column;
       gap: 8px;
 
-      .eliminate-reason {
+      .misc-text {
         font-style: italic;
       }
     }
@@ -377,8 +491,22 @@ watch(isChangeProcessModalOpen, (newVal) => {
 
         &.next-step-btn {
           border-color: $color-success;
-          color: $text-dark;
-          background-color: $color-success;
+          color: $color-success;
+        }
+
+        &.onboard-btn {
+          border-color: $color-success;
+          color: $color-success;
+        }
+
+        &.not-onboard-btn {
+          border-color: $color-danger;
+          color: $color-danger;
+        }
+
+        &.edit-onboard-date-btn {
+          border-color: $color-warning;
+          color: $color-warning;
         }
 
         &.reject-btn {

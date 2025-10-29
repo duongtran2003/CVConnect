@@ -95,7 +95,7 @@ export const useCandidateApi = () => {
       console.error(err);
       return false;
     }
-  }
+  };
 
   const changeProcessCandidate = async (payload: any) => {
     try {
@@ -118,7 +118,108 @@ export const useCandidateApi = () => {
       console.error(err);
       return false;
     }
-  }
+  };
+
+  const markOnboard = async (id: number | string, status: boolean) => {
+    const payload = {
+      jobAdCandidateId: id,
+      isOnboarded: status,
+    };
+
+    try {
+      const res = await $axios.put(
+        `/_api/core/job-ad-candidate/mark-onboard`,
+        payload,
+      );
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  const changeOnboardDate = async (id: number | string, date: string) => {
+    const payload = {
+      jobAdCandidateId: id,
+      newOnboardDate: date,
+    };
+
+    try {
+      const res = await $axios.put(
+        `/_api/core/job-ad-candidate/change-onboard-date`,
+        payload,
+      );
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  const getEmailLog = async (
+    candidateInfoId: string | number,
+    jobAdId: string | number,
+  ) => {
+    try {
+      const res = await $axios.get(
+        `/_api/notify/email-log/log-by-candidate-info/${candidateInfoId}/${jobAdId}`,
+      );
+
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  const sendEmail = async (payload: any) => {
+    try {
+      const res = await $axios.post(
+        `/_api/core/job-ad-candidate/send-email`,
+        payload,
+      );
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
 
   const createDepartment = async (payload: any) => {
     try {
@@ -212,13 +313,13 @@ export const useCandidateApi = () => {
 
   return {
     getJobAdCandidates,
-    createDepartment,
-    deleteDepartment,
     getJobAdCandidateDetail,
-    updateDepartment,
-    changeDepartmentStatus,
+    markOnboard,
+    changeOnboardDate,
+    sendEmail,
     saveSummary,
     eliminateCandidate,
     changeProcessCandidate,
+    getEmailLog,
   };
 };
