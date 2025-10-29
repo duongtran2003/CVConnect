@@ -64,9 +64,7 @@
                   : ''
               "
               :class="{ 'no-preview': !isPreviewable }"
-              @click="
-                isPreviewable ? () => (isPreviewModalOpen = true) : () => {}
-              "
+              @click="handlePreviewClick"
             >
               <Icon name="icon-park-outline:preview-open" />
               <span>Xem trước</span>
@@ -284,7 +282,7 @@ const previewData = computed(() => {
   data.orgName = userInfo.value?.userDetails?.[0]?.detailInfo?.org?.name;
   data.candidateName = props.candidateInfo?.fullName;
   data.candidateInfoApplyId = props.candidateInfo?.id;
-  data.hrContactId = props.rejectingTarget?.hrContactId;
+  data.hrContactId = props.rejectingTarget?.jobAd?.hrContactId;
 
   let placeholderCodes: string[] = [];
   if (isUseBlankTemplate.value) {
@@ -303,13 +301,13 @@ const previewData = computed(() => {
       placeholderCodes,
     };
   } else {
-    placeholderCodes = templateDetail.value?.map(
+    placeholderCodes = templateDetail.value?.placeholders.map(
       (placeholder: any) => placeholder.code,
     );
 
     return {
       subject: templateDetail.value?.subject,
-      body: templateDetail.value?.template,
+      body: templateDetail.value?.body,
       dataReplacePlaceholder: data,
       placeholderCodes,
     };
@@ -367,6 +365,14 @@ function handleInput(key: string, value: any) {
 
 function onDragStart(e: DragEvent, placeholder: any) {
   e.dataTransfer?.setData("application/json", JSON.stringify(placeholder));
+}
+
+async function handlePreviewClick() {
+  console.log("clicked");
+  if (!isPreviewable.value) {
+    return;
+  }
+  isPreviewModalOpen.value = true;
 }
 
 function handleCancel() {

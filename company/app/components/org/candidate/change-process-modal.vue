@@ -97,9 +97,7 @@
                   : ''
               "
               :class="{ 'no-preview': !isPreviewable }"
-              @click="
-                isPreviewable ? () => (isPreviewModalOpen = true) : () => {}
-              "
+              @click="handlePreviewClick"
             >
               <Icon name="icon-park-outline:preview-open" />
               <span>Xem trước</span>
@@ -334,7 +332,7 @@ const previewData = computed(() => {
   data.orgName = userInfo.value?.userDetails?.[0]?.detailInfo?.org?.name;
   data.candidateName = props.candidateInfo?.fullName;
   data.candidateInfoApplyId = props.candidateInfo?.id;
-  data.hrContactId = props.changeProcessTarget?.hrContactId;
+  data.hrContactId = props.changeProcessTarget?.jobAd?.hrContactId;
 
   let placeholderCodes: string[] = [];
   if (isUseBlankTemplate.value) {
@@ -353,13 +351,13 @@ const previewData = computed(() => {
       placeholderCodes,
     };
   } else {
-    placeholderCodes = templateDetail.value?.map(
+    placeholderCodes = templateDetail.value?.placeholders.map(
       (placeholder: any) => placeholder.code,
     );
 
     return {
       subject: templateDetail.value?.subject,
-      body: templateDetail.value?.template,
+      body: templateDetail.value?.body,
       dataReplacePlaceholder: data,
       placeholderCodes,
     };
@@ -462,6 +460,14 @@ const isSubmitDisabled = computed(() => {
   return false;
 });
 
+async function handlePreviewClick() {
+  console.log("clicked");
+  if (!isPreviewable.value) {
+    return;
+  }
+  isPreviewModalOpen.value = true;
+}
+
 async function handleSubmit() {
   const payload: Record<string, any> = {
     toJobAdProcessCandidateId: formInput.value.process.value,
@@ -470,7 +476,6 @@ async function handleSubmit() {
   };
 
   if (formInput.value.process.label === "Onboard") {
-    console.log(formInput.value.onboardDate)
     payload.onboardDate = toUtcDateWithTime(formInput.value.onboardDate);
   }
 
