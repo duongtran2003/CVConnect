@@ -33,6 +33,26 @@ export const useCandidateApi = () => {
     }
   };
 
+  const resendEmail = async (mailLogId: number | string) => {
+    try {
+      const res = await $axios.post(`/_api/notify/email/resend/${mailLogId}`);
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
   const getJobAdCandidateDetail = async (id: number) => {
     try {
       const res = await $axios.get(
@@ -321,5 +341,6 @@ export const useCandidateApi = () => {
     eliminateCandidate,
     changeProcessCandidate,
     getEmailLog,
+    resendEmail,
   };
 };

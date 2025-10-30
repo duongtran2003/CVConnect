@@ -278,11 +278,14 @@ const previewData = computed(() => {
 
   data.positionName = props.jobAdInfo?.jobAd?.positionName;
   data.hrContactId = props.jobAdInfo?.jobAd?.hrContactId;
+  data.hrContactName = props.jobAdInfo?.jobAd?.hrContactName;
 
   data.jobAdName = props.jobAdInfo?.jobAd.title;
   data.orgName = userInfo.value?.userDetails?.[0]?.detailInfo?.org?.name;
   data.candidateName = props.candidateInfo?.fullName;
   data.candidateInfoApplyId = props.candidateInfo?.id;
+
+  console.log({ data });
 
   let placeholderCodes: string[] = [];
   if (isUseBlankTemplate.value) {

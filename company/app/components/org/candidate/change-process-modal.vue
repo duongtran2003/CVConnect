@@ -9,7 +9,9 @@
       <OrgCandidatePreviewEmailModal
         v-model="isPreviewModalOpen"
         :data="previewData"
-        :template-id="isUseBlankTemplate ? null : formInput.emailTemplate?.value"
+        :template-id="
+          isUseBlankTemplate ? null : formInput.emailTemplate?.value
+        "
       />
       <div class="body" id="modal-body">
         <div class="process-section">
@@ -329,11 +331,21 @@ const previewData = computed(() => {
 
   data.positionName = props.changeProcessTarget?.jobAd?.positionName;
   data.hrContactId = props.changeProcessTarget?.jobAd?.hrContactId;
+  data.hrContactName = props.changeProcessTarget?.jobAd?.hrContactName;
 
   data.jobAdName = props.changeProcessTarget?.jobAd.title;
   data.orgName = userInfo.value?.userDetails?.[0]?.detailInfo?.org?.name;
   data.candidateName = props.candidateInfo?.fullName;
   data.candidateInfoApplyId = props.candidateInfo?.id;
+
+  if (
+    formInput.value.process?.label == "Onboard" &&
+    formInput.value.onboardDate
+  ) {
+    data.examStartTime = toUtcDateWithTime(formInput.value.onboardDate);
+  }
+
+  console.log({ data });
 
   const jobProcess = props.changeProcessTarget?.jobAdProcessCandidates.find(
     (process: any) => process.id == formInput.value.process?.value,

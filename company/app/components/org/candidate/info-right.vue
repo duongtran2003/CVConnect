@@ -65,7 +65,6 @@ async function handleTabSwitch(index: number) {
   flex-direction: column;
   gap: 8px;
   max-height: 100%;
-  overflow-y: auto;
   padding-top: 12px;
 
   :deep(.tab) {
@@ -74,6 +73,9 @@ async function handleTabSwitch(index: number) {
 
   .content {
     flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    max-height: 100%;
   }
 }
 </style>

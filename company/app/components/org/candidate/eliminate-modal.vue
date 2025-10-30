@@ -8,7 +8,9 @@
       <OrgCandidatePreviewEmailModal
         v-model="isPreviewModalOpen"
         :data="previewData"
-        :template-id="isUseBlankTemplate ? null : formInput.emailTemplate?.value"
+        :template-id="
+          isUseBlankTemplate ? null : formInput.emailTemplate?.value
+        "
       />
       <div class="body">
         <AppInputSearchSelect
@@ -280,9 +282,12 @@ const previewData = computed(() => {
   data.positionName = props.rejectingTarget?.jobAd?.positionName;
   data.jobAdName = props.rejectingTarget?.jobAd.title;
   data.hrContactId = props.rejectingTarget?.jobAd?.hrContactId;
+  data.hrContactName = props.rejectingTarget?.jobAd?.hrContactName;
   data.orgName = userInfo.value?.userDetails?.[0]?.detailInfo?.org?.name;
   data.candidateName = props.candidateInfo?.fullName;
   data.candidateInfoApplyId = props.candidateInfo?.id;
+
+  console.log({ data });
 
   let placeholderCodes: string[] = [];
   if (isUseBlankTemplate.value) {
@@ -408,7 +413,7 @@ async function handleSubmit() {
     jobAdCandidateId: props.rejectingTarget?.id,
     reason: formInput.value.reason.value,
     reasonDetail: formInput.value.reasonDetail,
-    sendEmail: formInput.value.sendMail,
+    sendEmail: formInput.value.sendEmail,
   };
 
   if (formInput.value.sendEmail && !isUseBlankTemplate.value) {
@@ -490,7 +495,7 @@ async function handleSubmitAndCreate() {
     jobAdCandidateId: props.rejectingTarget?.id,
     reason: formInput.value.reason.value,
     reasonDetail: formInput.value.reasonDetail,
-    sendEmail: formInput.value.sendMail,
+    sendEmail: formInput.value.sendEmail,
     emailTemplateId: createRes.data.id,
   };
 

@@ -23,13 +23,28 @@
         @input="($event) => (selectedJobAd = $event)"
         @clear-value="() => (selectedJobAd = null)"
       />
-      <AppButton
-        :text="'Gửi email'"
-        class="send-mail-button"
-        :title="!selectedJobAd ? 'Hãy chọn tin tuyển dụng để gửi email' : ''"
-        :is-disabled="!selectedJobAd"
-        @click="() => (isSendEmailModalOpen = true)"
-      />
+      <div class="right">
+        <AppButton
+          :text="''"
+          class="refresh"
+          :is-disabled="!selectedJobAd"
+          @click="() => fetchEmailLogs()"
+        >
+          <template #icon>
+            <Icon
+              class="refresh-icon"
+              name="material-symbols:refresh-rounded"
+            />
+          </template>
+        </AppButton>
+        <AppButton
+          :text="'Gửi email'"
+          class="send-mail-button"
+          :title="!selectedJobAd ? 'Hãy chọn tin tuyển dụng để gửi email' : ''"
+          :is-disabled="!selectedJobAd"
+          @click="() => (isSendEmailModalOpen = true)"
+        />
+      </div>
     </div>
     <div class="email-list">
       <AppNoData v-if="isNodata" />
@@ -125,6 +140,15 @@ watch(selectedJobAd, async (newVal) => {
     flex-wrap: wrap;
     row-gap: 8px;
 
+    .right {
+      display: flex;
+      flex-direction: row;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      row-gap: 8px;
+    }
+
     .job-ad-select {
       max-width: 420px;
     }
@@ -138,6 +162,14 @@ watch(selectedJobAd, async (newVal) => {
 
       &.disabled {
         background-color: $color-gray-400;
+      }
+    }
+
+    .refresh {
+      padding: 0px;
+      gap: 0px;
+      .refresh-icon {
+        font-size: 20px;
       }
     }
   }

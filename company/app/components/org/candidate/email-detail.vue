@@ -3,6 +3,13 @@
     <div class="wrapper" @click="() => (isExpanded = !isExpanded)">
       <div class="subject">{{ props.emailInfo.subject }}</div>
       <div class="right">
+        <AppButton
+          v-if="mailStatus === 'FAILURE'"
+          :text="'Gửi lại'"
+          class="resend-button"
+          :is-loading="isSubmitting"
+          @click="resendMail"
+        />
         <div class="send-at">
           {{ formatDateTime(props.emailInfo.sentAt, "DD/MM/YYYY - HH:mm") }}
         </div>
@@ -29,7 +36,9 @@
           <div class="company-name">
             {{ props.emailInfo.sender }}
           </div>
-          <div class="recipient">{{`Đến: ${props.emailInfo.recipients}`}}</div>
+          <div class="recipient">
+            {{ `Đến: ${props.emailInfo.recipients}` }}
+          </div>
         </div>
         <div class="detail-content" v-html="props.emailInfo.body || ''"></div>
       </div>
@@ -43,13 +52,30 @@ type TProps = {
   emailInfo: any;
 };
 
+const { resendEmail } = useCandidateApi();
+
 const props = defineProps<TProps>();
 
 const isExpanded = ref<boolean>(false);
+const localStatus = ref<any>(null);
+const isSubmitting = ref<boolean>(false);
 
 const mailStatus = computed(() => {
+  if (localStatus.value) {
+    return localStatus.value;
+  }
+
   return props.emailInfo.status;
 });
+
+async function resendMail() {
+  isSubmitting.value = true;
+  const res = await resendEmail(props.emailInfo.id);
+  isSubmitting.value = false;
+  if (res) {
+    localStatus.value = "SENDING";
+  }
+}
 </script>
 <style lang="scss" scoped>
 .email-detail {
@@ -59,6 +85,7 @@ const mailStatus = computed(() => {
   border: 1px solid $color-gray-300;
   border-radius: 6px;
   overflow: hidden;
+  min-height: fit-content;
 
   .wrapper {
     display: flex;
@@ -69,6 +96,14 @@ const mailStatus = computed(() => {
     flex-wrap: wrap;
     padding: 8px;
     cursor: pointer;
+
+    .resend-button {
+      padding: 7px 12px;
+      font-size: 14px;
+      line-height: 20px;
+      background-color: $color-primary-500;
+      color: $text-dark;
+    }
 
     .subject {
       font-weight: 600;

@@ -132,15 +132,23 @@ const userInfo = computed(() => {
 
     .left {
       width: 30%;
-      max-height: 100%;
     }
 
     .right {
       width: 70%;
     }
 
+    @media (min-width: 880px) {
+      .left,
+      .right {
+        overflow-y: auto;
+        max-height: 100%;
+      }
+    }
+
     @media (max-width: 880px) {
       flex-direction: column;
+      overflow-y: auto;
       .vert-divider {
         height: 1px;
         width: 100%;

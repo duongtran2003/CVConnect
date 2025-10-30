@@ -3,7 +3,7 @@
     class="button"
     :class="{ disabled: isDisabled, loading: isLoading }"
     :disabled="isDisabled"
-    @click="handleClick($event)"
+    @click.stop="handleClick($event)"
   >
     <slot name="icon" />
     <div class="button-text">{{ text }}</div>

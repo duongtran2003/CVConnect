@@ -23,8 +23,5 @@ const emits = defineEmits<{
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 </style>
