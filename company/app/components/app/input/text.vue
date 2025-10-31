@@ -134,11 +134,11 @@ const isTextHidden = ref(true);
       //   border: 3px solid rgba($color-danger, 0.3);
       // }
       .input {
-        border: 2px solid rgba($color-danger, 1);
+        border: 1px solid rgba($color-danger, 1);
 
         &:hover,
         &:focus-within {
-          border: 2px solid rgba($color-danger, 1);
+          border: 1px solid rgba($color-danger, 1);
         }
       }
     }
@@ -146,7 +146,7 @@ const isTextHidden = ref(true);
     .input {
       border-radius: 10px;
       padding: 8px 10px;
-      border: 2px solid rgba($color-primary-800, 0.1);
+      border: 1px solid rgba($color-primary-800, 0.1);
       flex: 1;
       gap: 8px;
       transition-duration: 200ms;
@@ -171,12 +171,12 @@ const isTextHidden = ref(true);
       }
 
       &.disabled {
-        border: 2px solid rgba($color-gray-300, 1);
+        border: 1px solid rgba($color-gray-300, 1);
       }
 
       &:hover:not(.disabled),
       &:focus-within:not(.disabled) {
-        border: 2px solid rgba($color-primary-400, 1);
+        border: 1px solid rgba($color-primary-400, 1);
       }
     }
     // &:focus-within {

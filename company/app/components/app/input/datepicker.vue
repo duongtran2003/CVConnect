@@ -95,12 +95,12 @@ function handleInput(value: any) {
   :deep(.date-input) {
     &.error {
       .dp__input {
-        border: 2px solid $color-danger !important;
+        border: 1px solid $color-danger !important;
       }
     }
     &:disabled {
       .dp__input {
-        border: 2px solid rgba($color-gray-300, 1) !important;
+        border: 1px solid rgba($color-gray-300, 1) !important;
         cursor: default;
         opacity: 100%;
       }
@@ -114,7 +114,7 @@ function handleInput(value: any) {
       font-size: 14px;
     }
     .dp__input {
-      margin: 2px 0px;
+      margin: 1px 0px;
       border-radius: 10px;
       padding-top: 6px;
       padding-bottom: 6px;
@@ -125,10 +125,10 @@ function handleInput(value: any) {
       line-height: 20px;
       background-color: white !important;
 
-      border: 2px solid rgba($color-primary-800, 0.1) !important;
+      border: 1px solid rgba($color-primary-800, 0.1) !important;
 
       &:hover:not(:disabled) {
-        border: 2px solid rgba($color-primary-400, 1) !important;
+        border: 1px solid rgba($color-primary-400, 1) !important;
       }
 
       &::placeholder {
@@ -140,10 +140,10 @@ function handleInput(value: any) {
       }
 
       &.error {
-        border: 2px solid $color-danger !important;
+        border: 1px solid $color-danger !important;
       }
       &:disabled {
-        border: 2px solid rgba($color-gray-300, 1) !important;
+        border: 1px solid rgba($color-gray-300, 1) !important;
         cursor: default;
         opacity: 100%;
       }

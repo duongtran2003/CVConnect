@@ -33,6 +33,36 @@ export const useCandidateApi = () => {
     }
   };
 
+  const getJobAdCandidatesByProcess = async (
+    processId: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const res = await $axios.get(
+        `/_api/core/candidate-info-apply/get-candidate-in-current-process/${processId}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   const resendEmail = async (mailLogId: number | string) => {
     try {
       const res = await $axios.post(`/_api/notify/email/resend/${mailLogId}`);
@@ -241,9 +271,15 @@ export const useCandidateApi = () => {
     }
   };
 
-  const createDepartment = async (payload: any) => {
+  const createEvaluation = async (
+    jobAdCandidateId: number | string,
+    payload: any,
+  ) => {
     try {
-      const res = await $axios.post(`/_api/core/department/create`, payload);
+      const res = await $axios.post(`/_api/core/candidate-evaluation/create`, {
+        ...payload,
+        jobAdCandidateId,
+      });
       toast.add({
         title: res.data.message,
         color: "success",
@@ -252,7 +288,7 @@ export const useCandidateApi = () => {
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message || "Có lỗi xảy ra",
+          title: err.response.data.message,
           color: "error",
         });
       }
@@ -261,68 +297,44 @@ export const useCandidateApi = () => {
     }
   };
 
-  const changeDepartmentStatus = async (payload: any) => {
+  const editEvaluation = async (
+    evaluationId: number | string,
+    jobAdCandidateId: number | string,
+    payload: any,
+  ) => {
     try {
-      const res = await $axios.put(
-        `/_api/core/department/change-status-active`,
-        payload,
+      const res = await $axios.post(`/_api/core/candidate-evaluation/update/${evaluationId}`, {
+        ...payload,
+        jobAdCandidateId,
+      });
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  const getEvaluations = async (jobAdCandidateId: string | number) => {
+    try {
+      const res = await $axios.get(
+        `/_api/core/candidate-evaluation/get-by-job-ad-candidate/${jobAdCandidateId}`,
       );
-      toast.add({
-        title: res.data.message,
-        color: "success",
-      });
-      return true;
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        toast.add({
-          title: err.response.data.message || "Có lỗi xảy ra",
-          color: "error",
-        });
-      }
-      console.error(err);
-      return false;
-    }
-  };
 
-  const updateDepartment = async (id: number, payload: any) => {
-    try {
-      const res = await $axios.put(
-        `/_api/core/department/update/${id}`,
-        payload,
-      );
-      toast.add({
-        title: res.data.message,
-        color: "success",
-      });
-      return true;
+      return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message || "Có lỗi xảy ra",
-          color: "error",
-        });
-      }
-      console.error(err);
-      return false;
-    }
-  };
-
-  const deleteDepartment = async (payload: any) => {
-    try {
-      const res = await $axios.delete(`/_api/core/department/delete`, {
-        data: payload.ids,
-      });
-      if (res.data.message) {
-        toast.add({
-          title: res.data.message,
-          color: "success",
-        });
-      }
-      return true;
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        toast.add({
-          title: err.response.data.message || "Có lỗi xảy ra",
+          title: err.response.data.message,
           color: "error",
         });
       }
@@ -342,5 +354,9 @@ export const useCandidateApi = () => {
     changeProcessCandidate,
     getEmailLog,
     resendEmail,
+    createEvaluation,
+    getEvaluations,
+    editEvaluation,
+    getJobAdCandidatesByProcess,
   };
 };

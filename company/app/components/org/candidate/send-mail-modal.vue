@@ -151,7 +151,7 @@
               />
             </div>
             <div class="placeholders">
-              <div class="label">Placeholders</div>
+              <div class="label">Trường thông tin</div>
               <AppSpinnerHalfCircle v-if="isFetchingPlaceholder" />
               <div class="placeholder-list">
                 <div

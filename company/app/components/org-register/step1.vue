@@ -263,7 +263,7 @@ watch(companySize, (newVal) => {
           }
           :deep(button.selector) {
             cursor: pointer;
-            border: 2px solid rgba($color-primary-800, 0.1);
+            border: 1px solid rgba($color-primary-800, 0.1);
             border-radius: 10px !important;
             padding: 4px 48px 4px 6px !important;
             font-weight: 500 !important;
@@ -274,7 +274,7 @@ watch(companySize, (newVal) => {
             max-width: 100%;
 
             &:hover {
-              border: 2px solid rgba($color-primary-400, 1);
+              border: 1px solid rgba($color-primary-400, 1);
             }
 
             span {

@@ -657,16 +657,16 @@ onBeforeUnmount(() => {
 
           :deep(button.selector) {
             cursor: pointer;
-            border: 2px solid rgba($color-primary-800, 0.1);
+            border: 1px solid rgba($color-primary-800, 0.1);
 
             &:disabled {
-              border: 2px solid rgba($color-gray-300, 1);
+              border: 1px solid rgba($color-gray-300, 1);
               cursor: default;
               opacity: 100%;
             }
 
             &.error {
-              border: 2px solid $color-danger;
+              border: 1px solid $color-danger;
             }
 
             border-radius: 10px !important;
@@ -679,7 +679,7 @@ onBeforeUnmount(() => {
             max-width: 100%;
 
             &:hover:not(:disabled) {
-              border: 2px solid rgba($color-primary-400, 1);
+              border: 1px solid rgba($color-primary-400, 1);
             }
 
             span {

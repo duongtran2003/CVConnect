@@ -80,7 +80,7 @@
                 />
               </div>
               <div v-if="currentMode == 'edit'" class="placeholders">
-                <div class="label">Trường trộn</div>
+                <div class="label">Trường thông tin</div>
                 <AppSpinnerHalfCircle v-if="isFetchingPlaceholder" />
                 <div class="placeholder-list">
                   <div

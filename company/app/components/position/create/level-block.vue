@@ -269,7 +269,7 @@ const handleAddNew = (newItem: any) => {
 
     .select-input {
       :deep(button.selector) {
-        border: 2px dashed $color-primary-400;
+        border: 1px dashed $color-primary-400;
         background-color: rgba($color-primary-400, 0.05);
         padding: 8px;
         cursor: pointer;

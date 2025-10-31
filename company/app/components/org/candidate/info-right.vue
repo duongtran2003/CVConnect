@@ -10,6 +10,16 @@
         v-show="currentTabIndex == 1"
         :cv-link="props.detail.candidateInfo.attachFile.secureUrl"
       />
+      <OrgCandidateInfoRightEvaluation
+        v-show="currentTabIndex == 2"
+        :job-ads="props.detail.jobAdCandidates"
+        :candidate-info="props.detail.candidateInfo"
+      />
+      <OrgCandidateInfoRightCalendar
+        v-show="currentTabIndex == 3"
+        :job-ads="props.detail.jobAdCandidates"
+        :candidate-info="props.detail.candidateInfo"
+      />
       <OrgCandidateInfoRightEmailLog
         v-show="currentTabIndex == 5"
         :job-ads="props.detail.jobAdCandidates"

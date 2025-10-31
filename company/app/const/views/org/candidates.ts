@@ -250,3 +250,12 @@ export const CANDIDATE_DETAIL_RIGHT_TABS = [
     paramKey: "emails",
   },
 ];
+
+
+export const DETAIL_BASE_BREADCRUMBS: TBreadcumbItem[] = [
+  {
+    name: "Ứng viên",
+    icon: "material-symbols:person-pin-outline",
+    url: "/org/candidate",
+  },
+];

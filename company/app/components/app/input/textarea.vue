@@ -135,13 +135,13 @@ const isTextHidden = ref(true);
       // border: 3px solid rgba($color-danger, 0.3);
 
       .input {
-        border: 2px solid rgba($color-danger, 1);
+        border: 1px solid rgba($color-danger, 1);
       }
     }
 
     .input {
       border-radius: 10px;
-      border: 2px solid rgba($color-primary-800, 0.1);
+      border: 1px solid rgba($color-primary-800, 0.1);
       display: flex;
       align-items: center;
       color: $text-light;
@@ -166,11 +166,11 @@ const isTextHidden = ref(true);
 
       &:hover:not(.disabled),
       &:focus-within:not(.disabled) {
-        border: 2px solid rgba($color-primary-400, 1);
+        border: 1px solid rgba($color-primary-400, 1);
       }
 
       &.disabled {
-        border: 2px solid $color-gray-300;
+        border: 1px solid $color-gray-300;
       }
     }
     //

@@ -229,12 +229,12 @@ defineExpose({ getUsedPlaceholders });
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  border: 2px solid rgba($color-primary-800, 0.1);
+  border: 1px solid rgba($color-primary-800, 0.1);
   border-radius: 10px;
   transition: border 200ms;
 
   &:focus-within {
-    border: 2px solid rgba($color-primary-400, 1);
+    border: 1px solid rgba($color-primary-400, 1);
   }
 
   .editor-toolbar {
@@ -294,7 +294,7 @@ defineExpose({ getUsedPlaceholders });
     // background-color: #ffffff;
     // border: 1px solid $color-gray-300;
     // border-radius: 9999px;
-    // padding: 2px 6px;
+    // padding: 1px 6px;
     cursor: grab;
     user-select: none;
   }

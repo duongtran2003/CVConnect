@@ -1,81 +1,75 @@
 <template>
-  <div class="mail-preview-modal">
-    <UModal
-      v-model:open="isOpen"
-      title="Xem trước email"
-      :ui="{ content: 'w-[900px] max-w-[900px] max-h-[90vh]' }"
-    >
-      <template #body>
-        <div v-if="isLoading" class="spinner">
-          <AppSpinnerHalfCircle />
-        </div>
-        <div v-else class="content">
-          <div class="header">
-            <div class="notice">
-              <Icon name="material-symbols:info-outline-rounded" />
-              <span>Dữ liệu dưới đây là dữ liệu mẫu</span>
+  <UModal
+    v-model:open="isOpen"
+    title="Xem trước email"
+    :ui="{ content: 'w-[900px] max-w-[900px] max-h-[90vh]' }"
+  >
+    <template #body>
+      <div v-if="isLoading" class="spinner">
+        <AppSpinnerHalfCircle />
+      </div>
+      <div v-else class="content">
+        <div class="header">
+          <div class="notice">
+            <Icon name="material-symbols:info-outline-rounded" />
+            <span>Dữ liệu dưới đây là dữ liệu mẫu</span>
+          </div>
+          <div class="mode-switcher">
+            <div
+              class="button website"
+              :class="{ active: currentMode == 'website' }"
+              @click="currentMode = 'website'"
+            >
+              <Icon name="material-symbols:computer-outline-rounded" />
+              <span class="text">Website</span>
             </div>
-            <div class="mode-switcher">
-              <div
-                class="button website"
-                :class="{ active: currentMode == 'website' }"
-                @click="currentMode = 'website'"
-              >
-                <Icon name="material-symbols:computer-outline-rounded" />
-                <span class="text">Website</span>
-              </div>
-              <div
-                class="button mobile"
-                :class="{ active: currentMode == 'mobile' }"
-                @click="currentMode = 'mobile'"
-              >
-                <Icon name="material-symbols:phone-android-outline-rounded" />
-                <span class="text">Mobile</span>
-              </div>
+            <div
+              class="button mobile"
+              :class="{ active: currentMode == 'mobile' }"
+              @click="currentMode = 'mobile'"
+            >
+              <Icon name="material-symbols:phone-android-outline-rounded" />
+              <span class="text">Mobile</span>
             </div>
           </div>
-          <div
-            class="mail-content"
-            :class="{ 'is-mobile': currentMode == 'mobile' }"
-          >
-            <div class="mail-subject">
-              {{ mailDetail?.subject || "Tiêu đề" }}
+        </div>
+        <div
+          class="mail-content"
+          :class="{ 'is-mobile': currentMode == 'mobile' }"
+        >
+          <div class="mail-subject">
+            {{ mailDetail?.subject || "Tiêu đề" }}
+          </div>
+          <div class="content">
+            <div class="avatar-col">
+              <div class="avatar">
+                <img src="/blankuser.jpg" />
+              </div>
             </div>
-            <div class="content">
-              <div class="avatar-col">
-                <div class="avatar">
-                  <img src="/blankuser.jpg" />
+            <div class="content-col">
+              <div class="title">
+                <div class="company-name">
+                  {{ orgInfo?.name || "Tên công ty" }}
                 </div>
+                <div class="recipient">Đến: Nguyễn Minh Quân</div>
               </div>
-              <div class="content-col">
-                <div class="title">
-                  <div class="company-name">
-                    {{ orgInfo?.name || "Tên công ty" }}
-                  </div>
-                  <div class="recipient">Đến: Nguyễn Minh Quân</div>
-                </div>
-                <div
-                  class="detail-content"
-                  v-html="mailDetail?.bodyPreview || ''"
-                ></div>
-              </div>
+              <div
+                class="detail-content"
+                v-html="mailDetail?.bodyPreview || ''"
+              ></div>
             </div>
           </div>
         </div>
-      </template>
-      <template #footer>
-        <div class="footer">
-          <div class="buttons">
-            <AppButton
-              :text="'OK'"
-              class="submit-button"
-              @click="handleClose"
-            />
-          </div>
+      </div>
+    </template>
+    <template #footer>
+      <div class="footer">
+        <div class="buttons">
+          <AppButton :text="'OK'" class="submit-button" @click="handleClose" />
         </div>
-      </template>
-    </UModal>
-  </div>
+      </div>
+    </template>
+  </UModal>
 </template>
 
 <script setup lang="ts">

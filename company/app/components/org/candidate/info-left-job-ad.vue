@@ -46,7 +46,7 @@
             >
           </div>
           <div class="info-dept-pos">
-            <span>{{ displayJobAd.jobAd.departmentName }}</span>
+            <span :title="displayJobAd.jobAd.departmentName">{{ displayJobAd.jobAd.departmentCode }}</span>
             <span>•</span>
             <span>{{ displayJobAd.jobAd.positionName }}</span>
           </div>

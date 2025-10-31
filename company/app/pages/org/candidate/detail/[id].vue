@@ -17,20 +17,32 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { DETAIL_BASE_BREADCRUMBS } from "~/const/views/org/candidates";
+
 definePageMeta({
   layout: "org",
 });
+
+const detail = ref<Record<string, any> | null>(null);
 
 const route = useRoute();
 const router = useRouter();
 
 const { getJobAdCandidateDetail } = useCandidateApi();
 const { setLoading } = useLoadingStore();
-
-const detail = ref<Record<string, any> | null>(null);
+const breadcrumbStore = useBreadcrumbStore();
+const { overrideItems, clearOverrideItems } = breadcrumbStore;
 
 onBeforeMount(async () => {
   await fetchData();
+  overrideItems([
+    ...DETAIL_BASE_BREADCRUMBS,
+    {
+      name: detail.value?.candidateInfo.fullName,
+      icon: "",
+      url: "/org/candidate/detail/" + detail.value?.candidateInfo.id,
+    },
+  ]);
 });
 
 async function fetchData() {
@@ -43,6 +55,7 @@ async function fetchData() {
   }
   const res = await getJobAdCandidateDetail(+candidateId);
   detail.value = res.data;
+  document.title = `${detail.value?.candidateInfo.fullName} - CVConnect`;
   console.log(res);
   setLoading(false);
 }
@@ -57,6 +70,10 @@ const userInfo = computed(() => {
     fullName: detail.value.candidateInfo.fullName,
     id: detail.value.candidateInfo.id,
   };
+});
+
+onBeforeUnmount(() => {
+  clearOverrideItems();
 });
 </script>
 <style lang="scss" scoped>
