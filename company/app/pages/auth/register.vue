@@ -129,7 +129,6 @@ definePageMeta({ layout: "auth" });
 useHead({
   title: "Đăng kí",
 });
-const { register, verifyToken } = useAuth();
 const router = useRouter();
 const duration = ref<number>(0);
 const formInput = ref({
@@ -148,13 +147,47 @@ const formError = ref({
   passwordConfirm: "",
 });
 
-const { handleRoleValidation } = useDefaultRole();
+const { setLoading } = useLoadingStore();
+const { getMyRoles } = useRoleApi();
+const authStore = useAuthStore();
+const { setRoles } = authStore;
+const { currentRole } = storeToRefs(authStore);
+const route = useRoute();
+const { setMenus } = useSidebarStore();
+const { verifyToken, register, getMenus } = useAuth();
+const { handleSetRole, getInitialRoute } = usePermission();
+
 onBeforeMount(async () => {
+  setLoading(true);
   const res = await verifyToken();
-  if (res.data.isValid) {
-    handleRoleValidation();
+  if (res?.data?.isValid) {
+    const rolesRes = await getMyRoles();
+    setLoading(false);
+    if (rolesRes) {
+      setRoles(rolesRes.data);
+      await handleRouting();
+    }
+  }
+  setLoading(false);
+  const username = route.query.username as string;
+  if (username) {
+    formInput.value.username = username;
   }
 });
+
+async function handleRouting() {
+  handleSetRole();
+  setLoading(true);
+  const menusRes = await getMenus(currentRole.value!);
+  console.log(menusRes);
+  setLoading(false);
+  if (menusRes) {
+    setMenus(menusRes);
+    const route = await getInitialRoute();
+    router.push({ path: route });
+    return;
+  }
+}
 
 const passwordChecklist = ref([
   {

@@ -47,30 +47,109 @@
           "
         />
       </div>
+      <div class="row">
+        <UCheckbox
+          class="checkbox"
+          :model-value="formInput.batchPartake"
+          :label="'Các ứng viên tham gia đồng thời'"
+          @update:model-value="
+            ($event) => (formInput.batchPartake = $event as boolean)
+          "
+        />
+      </div>
+      <div class="content">
+        <draggable
+          v-if="formInput.candidates?.length"
+          :list="formInput.candidates"
+          item-key="id"
+          handle=".drag-handle"
+          ghost-class="drag-ghost"
+          chosen-class="drag-chosen"
+          animation="200"
+          class="drag-list"
+        >
+          <template #item="{ element, index }">
+            <div class="candidate-card">
+              <div class="drag-handle">
+                <Icon name="uil:draggabledots" />
+              </div>
+              <div class="info">
+                <div class="name">{{ stripCandidateEmail(element.label) }}</div>
+                <div class="time">{{ candidateTimeframe(index) }}</div>
+              </div>
+
+              <div class="remove-icon" @click="handleRemove(index)">
+                <Icon name="material-symbols:close-rounded" />
+              </div>
+            </div>
+          </template>
+        </draggable>
+      </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import draggable from "vuedraggable";
+import moment from "moment";
+
 type TProps = {
-  isBatchPartake: boolean;
-  startTime: string;
-  duration: number;
+  startTime: any;
+  duration: any;
   jobAdInfo: any;
+  candidateInfo: any;
 };
 
 const { getOrgMembers } = useOrgMemberApi();
 const { getJobAdCandidatesByProcess } = useCandidateApi();
 
 const props = defineProps<TProps>();
+const emits = defineEmits<{
+  (e: "formInput", payload: any): void;
+}>();
 
 const defaultFormInput = {
+  candidates: [
+    {
+      label: `${props.candidateInfo.fullName} - ${props.candidateInfo.email}`,
+      value: props.candidateInfo.id,
+    },
+  ] as any[],
   orgMembers: [] as any[],
-  candidates: [] as any[],
+  batchPartake: undefined,
 };
 
 const formInput = ref<any>(defaultFormInput);
 const orgMembersList = ref<any>([]);
 const candidatesList = ref<any>([]);
+
+const stripCandidateEmail = computed(() => {
+  return (label: string) => {
+    const tokens = label.split(" - ");
+    return tokens.slice(0, tokens.length - 1).join(" - ");
+  };
+});
+
+const candidateTimeframe = computed(() => {
+  return (index: number) => {
+    const start = props.startTime ? moment(props.startTime) : null;
+    const duration = props.duration ?? null;
+
+    // Missing data → show placeholder
+    if (!start || !duration) return "--:-- - --:--";
+
+    // Start time for this candidate
+    const slotStart = start.clone();
+
+    // If not batch mode, shift time by index * duration
+    if (!formInput.value.batchPartake) {
+      slotStart.add(duration * index, "minutes");
+    }
+
+    const slotEnd = slotStart.clone().add(duration, "minutes");
+
+    return `${slotStart.format("HH:mm")} - ${slotEnd.format("HH:mm")}`;
+  };
+});
 
 const orgMemberOpts = computed(() => {
   return orgMembersList.value.map((orgMember: any) => ({
@@ -92,6 +171,10 @@ const currentProcess = computed(() => {
   );
 });
 
+function handleRemove(index: any) {
+  formInput.value.candidates.splice(index, 1);
+}
+
 function handleInput(key: string, value: any) {
   formInput.value[key] = value;
 }
@@ -110,7 +193,7 @@ async function fetchOrgMembers(params: any, controller?: AbortController) {
 
 async function fetchCandidates(params: any, controller?: AbortController) {
   const res = await getJobAdCandidatesByProcess(
-    currentProcess.value.id,
+    currentProcess.value.jobAdProcessId,
     controller,
   );
   if (!res) {
@@ -122,6 +205,14 @@ async function fetchCandidates(params: any, controller?: AbortController) {
 
   return res.data;
 }
+
+watch(
+  () => formInput.value,
+  (newVal) => {
+    emits("formInput", newVal);
+  },
+  { immediate: true, deep: true },
+);
 </script>
 <style lang="scss" scoped>
 .right {
@@ -152,6 +243,71 @@ async function fetchCandidates(params: any, controller?: AbortController) {
     gap: 8px;
     overflow: auto;
     min-height: 0;
+
+    .checkbox {
+      max-width: fit-content;
+      :deep(label) {
+        color: $text-light;
+        font-weight: 400;
+        cursor: pointer !important;
+      }
+      :deep(button) {
+        cursor: pointer !important;
+      }
+    }
+
+    .drag-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .candidate-card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      color: $text-light;
+      gap: 8px;
+      padding: 6px;
+      background-color: $color-gray-100;
+      border-radius: 6px;
+
+      .drag-handle {
+        .iconify {
+          display: block;
+          height: 16px;
+          width: 16px;
+          cursor: grabbing;
+        }
+      }
+      .remove-icon {
+        .iconify {
+          display: block;
+          height: 16px;
+          width: 16px;
+          cursor: pointer;
+        }
+      }
+
+      .info {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        align-items: center;
+        flex: 1;
+
+        .name {
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        .time {
+          font-size: 14px;
+          font-weight: 400;
+          color: $color-gray-600;
+        }
+      }
+    }
   }
 
   :deep(.search-select-input) {

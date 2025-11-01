@@ -19,13 +19,13 @@
         <span>{{ props.candidateData.candidateInfo.phone }}</span>
       </div>
       <div
-        v-if="props.candidateData.candidateInfo.candidateSummaryOrg.level.name"
+        v-if="props.candidateData.candidateInfo.candidateSummaryOrg.level.levelName"
         class="level row"
         title="Cấp bậc"
       >
         <Icon name="carbon:skill-level-basic" />
         <span>{{
-          props.candidateData.candidateInfo.candidateSummaryOrg.level.name
+          props.candidateData.candidateInfo.candidateSummaryOrg.level.levelName
         }}</span>
       </div>
     </div>
@@ -162,8 +162,10 @@ defineExpose({
     display: flex;
     flex-direction: row;
     gap: 48px;
+    row-gap: 8px;
     align-items: center;
     font-size: 14px;
+    flex-wrap: wrap;
   }
 
   .row {

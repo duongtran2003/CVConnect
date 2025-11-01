@@ -1,6 +1,6 @@
 export type TCandidateSummaryOrg = {
   level: {
-    name: string;
+    levelName: string;
   };
 };
 

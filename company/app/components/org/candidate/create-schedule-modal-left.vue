@@ -72,16 +72,6 @@
         </div>
       </div>
       <div class="row">
-        <UCheckbox
-          class="checkbox"
-          :model-value="formInput.batchPartake"
-          :label="'Các ứng viên tham gia đồng thời'"
-          @update:model-value="
-            ($event) => (formInput.batchPartake = $event as boolean)
-          "
-        />
-      </div>
-      <div class="row">
         <AppInputSearchSelect
           :label="'Loại lịch'"
           :required="true"

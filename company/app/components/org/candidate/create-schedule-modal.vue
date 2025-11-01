@@ -9,9 +9,13 @@
         <OrgCandidateCreateScheduleModalLeft
           :job-ad-info="props.jobAdInfo"
           :candidate-info="props.candidateInfo"
+          @form-input="($event) => (formInput = $event)"
         />
         <OrgCandidateCreateScheduleModalRight
           :job-ad-info="props.jobAdInfo"
+          :duration="formInput.duration"
+          :start-time="formInput.startTime"
+          :candidate-info="props.candidateInfo"
         />
       </div>
     </template>
@@ -25,9 +29,9 @@
         <AppButton
           class="submit-btn btn"
           :text="'Tạo'"
-          :is-disabled="isSubmitDisabled"
+          :is-disabled="false"
           :is-loading="isLoading"
-          @click="handleSubmit"
+          @click="() => {}"
         />
       </div>
     </template>
@@ -41,11 +45,9 @@ type TProps = {
   candidateInfo: any;
 };
 
-const { createEvaluation } = useCandidateApi();
-
 const props = defineProps<TProps>();
 
-console.log('in create modal', props.candidateInfo)
+console.log("in create modal", props.candidateInfo);
 
 const emits = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
@@ -61,45 +63,10 @@ const isOpen = computed({
 
 const isLoading = ref<boolean>(false);
 
-const formInput = ref<Record<string, any>>({
-  comments: "",
-  score: undefined,
-});
-
-const statusTooltip = computed(() => {
-  return (displayJobAd: any) => {
-    if (displayJobAd.candidateStatus === "REJECTED") {
-      return formatDateTime(displayJobAd.eliminateDate, "DD/MM/YYYY - HH:mm");
-    }
-    return "";
-  };
-});
+const formInput = ref<any>({});
 
 function handleCancel() {
   emits("update:modelValue", false);
-}
-
-const isSubmitDisabled = computed(() => {
-  if (!formInput.value.comments?.trim()) {
-    return true;
-  }
-  return false;
-});
-
-async function handleSubmit() {
-  isLoading.value = true;
-  const payload: any = {
-    comments: formInput.value.comments,
-  };
-  if (formInput.value.score != undefined) {
-    payload.score = formInput.value.score;
-  }
-
-  const res = await createEvaluation(props.jobAdCandidateId, payload);
-  isLoading.value = false;
-  if (res) {
-    emits("submit");
-  }
 }
 
 watch(
@@ -107,10 +74,7 @@ watch(
   (newVal) => {
     if (!newVal) {
       // clear everything
-      formInput.value = {
-        comments: "",
-        score: undefined,
-      };
+      formInput.value = {};
     }
   },
 );
