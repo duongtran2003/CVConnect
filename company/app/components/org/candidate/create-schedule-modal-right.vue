@@ -33,11 +33,11 @@
           :error="''"
           :is-disabled="false"
           :placeholder="''"
-          :remote-filter="true"
+          :remote-filter="false"
           :multiple="true"
           :slim-error="true"
           :is-paginated="true"
-          :fetch-fn="fetchCandidates"
+          :fetch-fn="null"
           @input="handleInput('candidates', $event)"
           @clear-value="handleInput('candidates', null)"
           @search-filter="
@@ -51,7 +51,7 @@
         <UCheckbox
           class="checkbox"
           :model-value="formInput.batchPartake"
-          :label="'Các ứng viên tham gia đồng thời'"
+          :label="'Tham gia đồng thời'"
           @update:model-value="
             ($event) => (formInput.batchPartake = $event as boolean)
           "
@@ -115,17 +115,33 @@ const defaultFormInput = {
     },
   ] as any[],
   orgMembers: [] as any[],
-  batchPartake: undefined,
+  batchPartake: false,
 };
 
 const formInput = ref<any>(defaultFormInput);
 const orgMembersList = ref<any>([]);
 const candidatesList = ref<any>([]);
 
+onBeforeMount(async () => {
+  await fetchCandidates({});
+  const currentCandidate = candidatesList.value.find(
+    (candidate: any) => candidate.id == props.candidateInfo.id,
+  );
+  if (currentCandidate) {
+    formInput.value.candidates = [
+      {
+        label: `${currentCandidate.fullName} - ${currentCandidate.email}${currentCandidate.hasSchedule ? " - Đã đặt lịch" : ""}`,
+        value: currentCandidate.id,
+      },
+    ];
+  }
+  console.log(formInput.value.candidates);
+});
+
 const stripCandidateEmail = computed(() => {
   return (label: string) => {
     const tokens = label.split(" - ");
-    return tokens.slice(0, tokens.length - 1).join(" - ");
+    return tokens[0];
   };
 });
 
@@ -154,7 +170,7 @@ const candidateTimeframe = computed(() => {
 const orgMemberOpts = computed(() => {
   return orgMembersList.value.map((orgMember: any) => ({
     label: `${orgMember.fullName} - ${orgMember.email}`,
-    value: orgMember.id,
+    value: orgMember.userId,
   }));
 });
 
@@ -294,6 +310,7 @@ watch(
         flex-direction: row;
         gap: 8px;
         align-items: center;
+        justify-content: space-between;
         flex: 1;
 
         .name {

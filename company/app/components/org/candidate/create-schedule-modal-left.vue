@@ -288,7 +288,6 @@
 const defaultFormInput = {
   startTime: undefined,
   duration: undefined,
-  batchPartake: false,
   location: undefined,
   scheduleType: undefined,
   meetingLink: undefined,
@@ -298,6 +297,9 @@ const defaultFormInput = {
   subject: undefined,
   template: undefined,
   useBlankTemplate: false,
+  placeholders: [],
+  templateName: undefined,
+  templateCode: undefined,
 };
 
 const { getAllLocations } = useLocationApi();
@@ -428,7 +430,8 @@ const previewData = computed(() => {
     (process: any) => process.isCurrentProcess,
   ).processName;
   data.interviewLink = formInput.value.meetingLink;
-  data.orgAddress = formInput.value.location?.label;
+  data.locationName = formInput.value.location?.label;
+  data.examDuration = formInput.value.duration;
 
   console.log("props job ad info", props.jobAdInfo.jobAdProcessCandidates);
 
@@ -463,6 +466,32 @@ const previewData = computed(() => {
     };
   }
 });
+
+function getUsedPlaceholdersCode() {
+  let placeholderCodes: string[] = [];
+  const usedPlaceholders = (editorRef.value?.getUsedPlaceholders?.() ||
+    []) as any[];
+  const placeholderSet: Set<string> = new Set();
+  for (const placeholder of usedPlaceholders) {
+    placeholderSet.add(`\${${placeholder.code}}`);
+  }
+  placeholderCodes = [...placeholderSet];
+
+  return placeholderCodes;
+}
+function getUsedPlaceholdersId() {
+  let placeholderCodes: number[] = [];
+  const usedPlaceholders = (editorRef.value?.getUsedPlaceholders?.() ||
+    []) as any[];
+  const placeholderSet: Set<number> = new Set();
+  for (const placeholder of usedPlaceholders) {
+    placeholderSet.add(+placeholder.id);
+  }
+  placeholderCodes = [...placeholderSet];
+
+  return placeholderCodes;
+}
+defineExpose({ getUsedPlaceholdersCode, getUsedPlaceholdersId, currentScheduleType });
 
 function handleInput(key: string, value: any) {
   formInput.value[key] = value;

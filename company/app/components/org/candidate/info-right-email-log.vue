@@ -14,6 +14,7 @@
         :value="selectedJobAd"
         :error="''"
         :placeholder="'Mời chọn tin tuyển dụng'"
+        :allow-clear="false"
         :remote-filter="false"
         :multiple="false"
         :is-disabled="false"

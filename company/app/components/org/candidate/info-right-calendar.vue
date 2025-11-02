@@ -5,27 +5,56 @@
       :job-ad-info="selectedJobAdInfo"
       :job-ad-candidate-id="selectedJobAdInfo.id"
       :candidate-info="props.candidateInfo"
-      @submit="handleCreateEvaluation"
+      @submit="handleCreateSchedule"
+    />
+    <OrgCandidateViewScheduleModal
+      v-model="isViewScheduleModalOpen"
+      :target-id="detailId"
     />
     <div class="top">
-      <AppInputSearchSelect
-        :label="''"
-        :required="false"
-        :options="jobAdOpts"
-        :value="selectedJobAd"
-        :error="''"
-        :placeholder="'Mời chọn tin tuyển dụng'"
-        :remote-filter="false"
-        :multiple="false"
-        :is-disabled="false"
-        :slim-error="true"
-        :fetch-fn="null"
-        class="job-ad-select"
-        @input="($event) => (selectedJobAd = $event)"
-        @clear-value="() => (selectedJobAd = null)"
-      />
+      <div class="left">
+        <AppInputSearchSelect
+          :label="''"
+          :required="false"
+          :options="jobAdOpts"
+          :value="selectedJobAd"
+          :error="''"
+          :placeholder="'Mời chọn tin tuyển dụng'"
+          :remote-filter="false"
+          :allow-clear="false"
+          :multiple="false"
+          :is-disabled="false"
+          :slim-error="true"
+          :fetch-fn="null"
+          class="job-ad-select"
+          @input="($event) => (selectedJobAd = $event)"
+          @clear-value="() => (selectedJobAd = null)"
+        />
+        <AppInputSearchSelect
+          :label="''"
+          :required="false"
+          :options="participationTypeOpts"
+          :value="participationType"
+          :error="''"
+          :placeholder="'Mời chọn loại'"
+          :remote-filter="false"
+          :allow-clear="false"
+          :multiple="false"
+          :is-disabled="false"
+          :slim-error="true"
+          :fetch-fn="null"
+          class="type-select"
+          @input="($event) => (participationType = $event)"
+          @clear-value="() => (participationType = null)"
+        />
+      </div>
       <div class="right">
-        <AppButton :text="''" class="refresh" :is-disabled="!selectedJobAd" @click="fetchGrades">
+        <AppButton
+          :text="''"
+          class="refresh"
+          :is-disabled="!selectedJobAd"
+          @click="fetchSchedules"
+        >
           <template #icon>
             <Icon
               class="refresh-icon"
@@ -45,13 +74,13 @@
       </div>
     </div>
     <div class="schedule-list">
-      <OrgCandidateEvaluationGroup
-        v-for="(evaluatioGroup, index) of evaluationList"
+      <OrgCandidateInfoRightCalendarGroup
+        v-for="(group, index) of scheduleList"
         :key="index"
-        :process="evaluatioGroup.jobAdProcess"
-        :evaluations="evaluatioGroup.evaluations"
-        :job-ad-candidate-id="selectedJobAdInfo.id"
-        @refetch="fetchGrades"
+        :label-date="group.labelDate"
+        :quant="group.numOfCalendars"
+        :list="group.calendars"
+        @schedule-click="handleScheduleClick"
       />
       <AppNoData v-if="isNodata" />
     </div>
@@ -64,18 +93,22 @@ type TProps = {
 };
 
 const { setLoading } = useLoadingStore();
-const { getEvaluations } = useCandidateApi();
+const { getSchedules } = useCandidateApi();
 
 const selectedJobAd = ref<any>(null);
+const participationType = ref<any>({
+  label: "Tất cả",
+  value: null,
+});
 const isNodata = ref<boolean>(false);
 const isCreateScheduleModalOpen = ref<boolean>(false);
-const evaluationList = ref<any>([]);
+const isViewScheduleModalOpen = ref<boolean>(false);
+const scheduleList = ref<any>([]);
+const detailId = ref<any>(-1);
 
 const props = defineProps<TProps>();
 
-console.log('info right canlendar', props.candidateInfo)
-
-onBeforeMount(() => {
+onBeforeMount(async () => {
   if (props.jobAds.length) {
     const ad = props.jobAds[0];
     selectedJobAd.value = {
@@ -83,7 +116,23 @@ onBeforeMount(() => {
       value: ad.jobAd.id,
     };
   }
+  await fetchSchedules();
 });
+
+const participationTypeOpts = [
+  {
+    label: "Tôi tạo",
+    value: "CREATED_BY_ME",
+  },
+  {
+    label: "Tôi tham gia",
+    value: "JOINED_BY_ME",
+  },
+  {
+    label: "Tất cả",
+    value: null,
+  },
+];
 
 const jobAdOpts = computed(() => {
   return props.jobAds.map((ad) => ({
@@ -96,32 +145,49 @@ const selectedJobAdInfo = computed(() => {
   return props.jobAds.find((ad) => ad.jobAd.id === selectedJobAd.value?.value);
 });
 
-async function fetchGrades() {
+function handleScheduleClick(schedule: any) {
+  detailId.value = schedule.calendarCandidateInfoId;
+  isViewScheduleModalOpen.value = true;
+}
+
+async function fetchSchedules() {
   setLoading(true);
-  const res = await getEvaluations(selectedJobAdInfo.value.id);
-  evaluationList.value = res.data;
-  if (res.data.length == 0) {
+  console.log(selectedJobAdInfo.value);
+  const params: any = {
+    jobAdCandidateId: selectedJobAdInfo.value.id,
+  };
+
+  if (participationType.value.value) {
+    params.participationType = participationType.value.value;
+  }
+
+  console.log(params);
+
+  const res = await getSchedules(params);
+  scheduleList.value = res.data;
+  if (!res.data?.length) {
     isNodata.value = true;
   } else {
     isNodata.value = false;
   }
-
   setLoading(false);
 }
 
-function handleCreateEvaluation() {
+function handleCreateSchedule() {
   isCreateScheduleModalOpen.value = false;
-  fetchGrades();
+  fetchSchedules();
 }
 
 watch(selectedJobAd, async (newVal) => {
-  if (!newVal || newVal.value == -1) {
+  if (newVal != undefined && newVal != null) {
     return;
   }
 
-  console.log(selectedJobAd);
+  fetchSchedules();
+});
 
-  fetchGrades();
+watch(participationType, async (newVal) => {
+  fetchSchedules();
 });
 </script>
 <style lang="scss" scoped>
@@ -140,6 +206,15 @@ watch(selectedJobAd, async (newVal) => {
     flex-wrap: wrap;
     row-gap: 8px;
 
+    .left {
+      display: flex;
+      flex-direction: row;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      row-gap: 8px;
+    }
+
     .right {
       display: flex;
       flex-direction: row;
@@ -151,6 +226,9 @@ watch(selectedJobAd, async (newVal) => {
 
     .job-ad-select {
       max-width: 420px;
+    }
+    .type-select {
+      min-width: 136px;
     }
 
     .create-schedule-btn {
@@ -189,6 +267,7 @@ watch(selectedJobAd, async (newVal) => {
     flex-direction: column;
     gap: 6px;
     margin-top: 12px;
+    padding-bottom: 24px;
   }
 }
 </style>

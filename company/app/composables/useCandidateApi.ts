@@ -303,10 +303,13 @@ export const useCandidateApi = () => {
     payload: any,
   ) => {
     try {
-      const res = await $axios.post(`/_api/core/candidate-evaluation/update/${evaluationId}`, {
-        ...payload,
-        jobAdCandidateId,
-      });
+      const res = await $axios.post(
+        `/_api/core/candidate-evaluation/update/${evaluationId}`,
+        {
+          ...payload,
+          jobAdCandidateId,
+        },
+      );
       toast.add({
         title: res.data.message,
         color: "success",
@@ -343,6 +346,69 @@ export const useCandidateApi = () => {
     }
   };
 
+  const getSchedules = async (params: any) => {
+    try {
+      const queryString = objectToQuery(params);
+      const res = await $axios.get(
+        `/_api/core/calendar/filter-view-candidate?${queryString}`,
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const createSchedule = async (payload: any) => {
+    try {
+      const res = await $axios.post(`/_api/core/calendar/create`, {
+        ...payload,
+      });
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  const getScheduleDetail = async (id: any) => {
+    try {
+      const res = await $axios.get(
+        `/_api/core/calendar/detail-in-view-candidate/${id}`,
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  }
+
   return {
     getJobAdCandidates,
     getJobAdCandidateDetail,
@@ -358,5 +424,8 @@ export const useCandidateApi = () => {
     getEvaluations,
     editEvaluation,
     getJobAdCandidatesByProcess,
+    createSchedule,
+    getSchedules,
+    getScheduleDetail,
   };
 };

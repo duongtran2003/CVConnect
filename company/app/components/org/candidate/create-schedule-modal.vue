@@ -7,15 +7,17 @@
     <template #body>
       <div class="body">
         <OrgCandidateCreateScheduleModalLeft
+          ref="leftSideRef"
           :job-ad-info="props.jobAdInfo"
           :candidate-info="props.candidateInfo"
-          @form-input="($event) => (formInput = $event)"
+          @form-input="($event) => (formInput = { ...formInput, ...$event })"
         />
         <OrgCandidateCreateScheduleModalRight
           :job-ad-info="props.jobAdInfo"
           :duration="formInput.duration"
           :start-time="formInput.startTime"
           :candidate-info="props.candidateInfo"
+          @form-input="($event) => (formInput = { ...formInput, ...$event })"
         />
       </div>
     </template>
@@ -29,15 +31,25 @@
         <AppButton
           class="submit-btn btn"
           :text="'Tạo'"
-          :is-disabled="false"
+          :is-disabled="isSubmitDisabled"
           :is-loading="isLoading"
-          @click="() => {}"
+          @click="handleSubmit"
+        />
+        <AppButton
+          v-if="formInput.useBlankTemplate"
+          class="submit-btn btn"
+          :text="'Tạo và lưu mẫu email'"
+          :is-disabled="isSubmitCreateDisabled"
+          :is-loading="isLoading"
+          @click="handleSubmitCreate"
         />
       </div>
     </template>
   </UModal>
 </template>
 <script setup lang="ts">
+import moment from "moment";
+
 type TProps = {
   modelValue: boolean;
   jobAdInfo: any;
@@ -45,9 +57,10 @@ type TProps = {
   candidateInfo: any;
 };
 
-const props = defineProps<TProps>();
+const { createSchedule } = useCandidateApi();
+const { createMailTemplateWithId } = useMailTemplateApi();
 
-console.log("in create modal", props.candidateInfo);
+const props = defineProps<TProps>();
 
 const emits = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
@@ -64,11 +77,210 @@ const isOpen = computed({
 const isLoading = ref<boolean>(false);
 
 const formInput = ref<any>({});
+const leftSideRef = ref<any>(null);
 
 function handleCancel() {
   emits("update:modelValue", false);
 }
 
+function convertDate(dateStr: string) {
+  const m = moment(dateStr);
+
+  return {
+    date: m.format("YYYY-MM-DD"),
+    timeFrom: m.format("HH:mm") + ":00",
+  };
+}
+
+const isSubmitDisabled = computed(() => {
+  const form = formInput.value;
+
+  if (
+    !form.startTime ||
+    !form.duration ||
+    !form.scheduleType ||
+    !form.orgMembers?.length ||
+    !form.candidates?.length
+  ) {
+    return true;
+  }
+
+  // Schedule type check
+  if (currentScheduleType.value == "OFFLINE" && !form.location) {
+    return true;
+  }
+  if (currentScheduleType.value == "ONLINE" && !form.meetingLink) {
+    return true;
+  }
+
+  // Send email check
+  if (form.sendEmail && !form.useBlankTemplate && !form.emailTemplate) {
+    return true;
+  }
+
+  if (
+    form.sendEmail &&
+    form.useBlankTemplate &&
+    (!form.subject?.trim() || !form.template?.trim())
+  ) {
+    return true;
+  }
+  return false;
+});
+async function handleSubmit() {
+  const form = formInput.value;
+
+  // Mapping the generic ones
+  const payload: any = {
+    jobAdProcessId: currentProcess.value.jobAdProcessId,
+    calendarType: form.scheduleType.value,
+    joinSameTime: form.batchPartake,
+    durationMinutes: form.duration,
+    note: form.note,
+    participantIds: form.orgMembers.map((member: any) => member.value),
+    candidateInfoIds: form.candidates.map((candidate: any) => candidate.value),
+    sendEmail: form.sendEmail,
+    ...convertDate(form.startTime),
+  };
+
+  if (currentScheduleType.value === "OFFLINE") {
+    payload.orgAddressId = form.location.value;
+  } else {
+    payload.meetingLink = form.meetingLink;
+  }
+
+  if (form.sendEmail && !form.useBlankTemplate) {
+    payload.emailTemplateId = form.emailTemplate.value;
+  }
+
+  if (form.sendEmail && form.useBlankTemplate) {
+    payload.subject = form.subject;
+    payload.template = parseHtmlToMergeTags(form.template);
+    payload.placeholders = getUsedPlaceholdersCode();
+  }
+
+  isLoading.value = true;
+  const res = await createSchedule(payload);
+  isLoading.value = false;
+  if (res) {
+    emits("submit");
+  }
+}
+
+const currentProcess = computed(() => {
+  return props.jobAdInfo.jobAdProcessCandidates.find(
+    (process: any) => process.isCurrentProcess,
+  );
+});
+
+const isSubmitCreateDisabled = computed(() => {
+  const form = formInput.value;
+
+  if (
+    !form.startTime ||
+    !form.duration ||
+    !form.scheduleType ||
+    !form.orgMembers?.length ||
+    !form.candidates?.length
+  ) {
+    return true;
+  }
+
+  // Schedule type check
+  if (currentScheduleType.value == "OFFLINE" && !form.location) {
+    return true;
+  }
+  if (currentScheduleType.value == "ONLINE" && !form.meetingLink) {
+    return true;
+  }
+
+  // Send email check
+  if (form.sendEmail && !form.useBlankTemplate && !form.emailTemplate) {
+    return true;
+  }
+
+  if (
+    form.sendEmail &&
+    form.useBlankTemplate &&
+    (!form.subject?.trim() ||
+      !form.template?.trim() ||
+      !form.templateName?.trim() ||
+      !form.templateCode?.trim())
+  ) {
+    return true;
+  }
+  return false;
+});
+async function handleSubmitCreate() {
+  const form = formInput.value;
+
+  const createTemplatePayload: any = {
+    code: form.templateCode,
+    name: form.templateName,
+    subject: form.subject,
+    body: parseHtmlToMergeTags(form.template),
+    placeholderIds: getUsedPlaceholdersId(),
+  };
+
+  isLoading.value = true;
+  const createRes = await createMailTemplateWithId(createTemplatePayload);
+  if (createRes === false) {
+    isLoading.value = false;
+    return;
+  }
+
+  // Mapping the generic ones
+  const payload: any = {
+    jobAdProcessId: currentProcess.value.jobAdProcessId,
+    calendarType: form.scheduleType.value,
+    joinSameTime: form.batchPartake,
+    durationMinutes: form.duration,
+    note: form.note,
+    participantIds: form.orgMembers.map((member: any) => member.value),
+    candidateInfoIds: form.candidates.map((candidate: any) => candidate.value),
+    sendEmail: form.sendEmail,
+    ...convertDate(form.startTime),
+    emailTemplateId: createRes.data.id,
+  };
+
+  if (currentScheduleType.value === "OFFLINE") {
+    payload.orgAddressId = form.location.value;
+  } else {
+    payload.meetingLink = form.meetingLink;
+  }
+
+  const res = await createSchedule(payload);
+  isLoading.value = false;
+  if (res) {
+    emits("submit");
+  }
+}
+
+function getUsedPlaceholdersCode() {
+  if (leftSideRef.value) {
+    const placeholders = leftSideRef.value.getUsedPlaceholdersCode();
+    return placeholders;
+  }
+
+  return [];
+}
+
+function getUsedPlaceholdersId() {
+  if (leftSideRef.value) {
+    const placeholders = leftSideRef.value.getUsedPlaceholdersId();
+    return placeholders;
+  }
+
+  return [];
+}
+
+const currentScheduleType = computed(() => {
+  if (leftSideRef.value) {
+    return leftSideRef.value.currentScheduleType;
+  }
+
+  return "OFFLINE";
+});
 watch(
   () => props.modelValue,
   (newVal) => {
