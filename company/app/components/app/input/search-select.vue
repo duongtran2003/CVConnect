@@ -105,7 +105,6 @@ const title = computed(() => {
   if (props.value?.length) {
     return props.value?.map((i: any) => i.label).join(", ") ?? "";
   } else {
-    console.log(props.value);
     return props.value?.label;
   }
 });
@@ -142,7 +141,6 @@ async function handleOpenUpdate(isOpen: boolean) {
 }
 
 function handleSearchInput(value: string) {
-  console.log(value);
   searchValue.value = value;
 }
 
@@ -213,7 +211,6 @@ async function resetAndFetch(searchTerm = "") {
 
 async function fetchData(searchTerm = "") {
   if (!props.fetchFn) {
-    console.log("no fetch?");
     return;
   }
   if (hasReachBottom.value) {
@@ -233,7 +230,6 @@ async function fetchData(searchTerm = "") {
   if (searchTerm) params.name = searchTerm;
 
   isLoading.value = true;
-  console.log("here!");
   const res = await props.fetchFn(params, controller.value);
   isLoading.value = false;
   if (!res) {

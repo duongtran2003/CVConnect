@@ -19,6 +19,7 @@
     </div>
     <div :class="{ error: error }" class="input-wrapper">
       <div class="input" :class="{ disabled: isDisabled }">
+        <slot name="input-icon"></slot>
         <input
           :disabled="isDisabled"
           :maxlength="maxLength"

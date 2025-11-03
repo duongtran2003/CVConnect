@@ -2,6 +2,7 @@
   <div class="datepicker-input">
     <div v-if="props.label" class="label">
       <span v-if="props.label" class="text">{{ props.label }}</span>
+      <slot name="icon"></slot>
       <span v-if="props.required" class="required">Bắt buộc</span>
     </div>
     <VueDatePicker
