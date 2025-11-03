@@ -78,7 +78,10 @@
       <div class="body">
         <div class="content"></div>
         <div v-show="isFilterShow" class="filter-tab">
-          <OrgAdJobFilter :filter-data="filter" />
+          <OrgAdJobFilter
+            :filter-data="filter"
+            @filter-change="handleFilterChange"
+          />
         </div>
       </div>
     </div>
@@ -119,13 +122,6 @@ const isFilterShow = ref<boolean>(false);
 const jobAdStatusList = ref<any[]>([]);
 const currentSort = ref<any>(undefined);
 
-onBeforeMount(() => {
-  filter.value.isPublic = {
-    label: "Công khai",
-    value: true,
-  };
-});
-
 const allowActions = computed(() => {
   const url = route.path;
   const menuItem = getMenuItem(url);
@@ -164,8 +160,20 @@ async function fetchJobAdStatus() {
   return res.data;
 }
 
+function handleFilterChange(_filter: any) {
+  console.log("filter change", _filter);
+  filter.value = _filter;
+}
+
 function handleSort(sort: any) {
   currentSort.value = sort;
+  if (!currentSort.value) {
+    filter.value.sortBy = undefined;
+    filter.value.sortDirection = undefined;
+    return;
+  }
+  filter.value.sortBy = currentSort.value.value;
+  filter.value.sortDirection = "DESC";
 }
 
 function handleInput(key: string, value: any) {
@@ -184,10 +192,60 @@ const handleCreate = () => {
   router.push({ path: "/org/job-ad/create" });
 };
 
+function convertFilterToQuery(f: any) {
+  const q: Record<string, any> = {};
+
+  if (f.keyword?.trim()) {
+    q.keyword = f.keyword.trim();
+  }
+  if (f.jobAdStatus) {
+    q.jobAdStatus = f.jobAdStatus.value;
+  }
+  if (f.isPublic != undefined || f.isPublic != null) {
+    q.isPublic = f.isPublic.value;
+  }
+  if (f.departmentIds?.length) {
+    q.departmentIds = f.departmentIds.map((dept: any) => dept.value).join(",");
+  }
+  if (f.hrContactId) {
+    q.hrContactId = f.hrContactId.value;
+  }
+  if (f.createdBy.trim()) {
+    q.createdBy = f.createdBy.trim();
+  }
+  if (f.createdAtStart) {
+    q.createdAtStart = toDateStart(f.createdAtStart);
+  }
+  if (f.createdAtEnd) {
+    q.createdAtEnd = toDateEnd(f.createdAtEnd);
+  }
+  if (f.dueDateStart) {
+    q.dueDateStart = toDateStart(f.dueDateStart);
+  }
+  if (f.dueDateEnd) {
+    q.dueDateEnd = toDateEnd(f.dueDateEnd);
+  }
+  if (f.sortBy && f.sortDirection) {
+    q.sortBy = f.sortBy;
+    q.sortDirection = f.sortDirection;
+  }
+  q.pageIndex = f.pageIndex;
+  q.pageSize = f.pageSize;
+
+  return q;
+}
+
+function syncQueryToRoute(query: any) {
+  router.replace({
+    query,
+  });
+}
+
 watch(
   filter,
   (newVal) => {
-    console.log({ filter: newVal });
+    const query = convertFilterToQuery(newVal);
+    syncQueryToRoute(query);
   },
   { deep: true },
 );
@@ -295,6 +353,7 @@ watch(
   .job-ad-status-select {
     max-width: 180px;
     width: 180px;
+    min-width: 180px;
   }
 }
 

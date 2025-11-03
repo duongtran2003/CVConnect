@@ -8,7 +8,7 @@
         :value="filter.isPublic"
         :error="''"
         :placeholder="''"
-        :allow-clear="false"
+        :allow-clear="true"
         :remote-filter="false"
         :multiple="false"
         :is-disabled="false"
@@ -26,7 +26,7 @@
         :placeholder="''"
         :allow-clear="true"
         :remote-filter="false"
-        :multiple="false"
+        :multiple="true"
         :is-disabled="false"
         :slim-error="true"
         :fetch-fn="null"
@@ -120,6 +120,7 @@ const departmentList = ref<any[]>([]);
 
 onBeforeMount(() => {
   fetchHr({});
+  fetchDepartments({});
 });
 
 const dateRangeValue = computed(() => {
@@ -216,7 +217,7 @@ function handleDateRangeInput(key: string, range: any) {
     filter.value[`${key}Start`] = from;
   }
   if (to) {
-    filter.value[`${key}End`] = from;
+    filter.value[`${key}End`] = to;
   }
 }
 
@@ -230,7 +231,17 @@ function handleSetFilter() {
 }
 
 function handleResetFilter() {
-  filter.value = {};
+  filter.value = {
+    ...filter.value,
+    isPublic: undefined,
+    departmentIds: [],
+    hrContactId: undefined,
+    createdBy: "",
+    createdAtStart: undefined,
+    createdAtEnd: undefined,
+    dueDateStart: undefined,
+    dueDateEnd: undefined,
+  };
   emits("filterChange", filter.value);
 }
 
