@@ -41,7 +41,7 @@
           :remote-filter="false"
           :allow-clear="false"
           :multiple="false"
-          :fetch-fn="fetchJobAdStatus"
+          :fetch-fn="null"
           @input="handleInput('jobAdStatus', $event)"
           @clear-value="filter.jobAdStatus = undefined"
         />
@@ -121,6 +121,18 @@ const filter = ref<any>({
 const isFilterShow = ref<boolean>(false);
 const jobAdStatusList = ref<any[]>([]);
 const currentSort = ref<any>(undefined);
+const isInitialSync = ref(true);
+
+onBeforeMount(async () => {
+  const q = route.query;
+
+  await fetchJobAdStatus();
+
+  if (Object.keys(q).length) {
+    const newFilter = convertQueryToFilter(q);
+    filter.value = { ...filter.value, ...newFilter };
+  }
+});
 
 const allowActions = computed(() => {
   const url = route.path;
@@ -192,6 +204,68 @@ const handleCreate = () => {
   router.push({ path: "/org/job-ad/create" });
 };
 
+function convertQueryToFilter(q: any) {
+  const f: Record<string, any> = {};
+
+  if (q.keyword) {
+    f.keyword = String(q.keyword);
+  }
+
+  if (q.jobAdStatus) {
+    const jobAdStatus = jobAdStatusOpts.value.find(
+      (status) => status.value == q.jobAdStatus,
+    );
+    f.jobAdStatus = jobAdStatus;
+  }
+
+  if (q.isPublic !== undefined) {
+    f.isPublic = { label: "", value: q.isPublic === "true" };
+  }
+
+  if (q.departmentIds) {
+    f.departmentIds = String(q.departmentIds)
+      .split(",")
+      .map((id: string) => ({ label: "", value: Number(id) }));
+  }
+
+  if (q.hrContactId) {
+    f.hrContactId = { label: "", value: Number(q.hrContactId) };
+  }
+
+  if (q.createdBy) {
+    f.createdBy = String(q.createdBy);
+  }
+
+  if (q.createdAtStart) {
+    f.createdAtStart = q.createdAtStart;
+  }
+
+  if (q.createdAtEnd) {
+    f.createdAtEnd = q.createdAtEnd;
+  }
+
+  if (q.dueDateStart) {
+    f.dueDateStart = q.dueDateStart;
+  }
+
+  if (q.dueDateEnd) {
+    f.dueDateEnd = q.dueDateEnd;
+  }
+
+  if (q.sortBy && q.sortDirection) {
+    f.sortBy = q.sortBy;
+    f.sortDirection = q.sortDirection;
+    const sort = sortOpts.value.find((s) => s.value == f.sortBy);
+    currentSort.value = sort;
+  }
+
+  f.pageIndex = q.pageIndex ? Number(q.pageIndex) : 0;
+  f.pageSize = q.pageSize ? Number(q.pageSize) : 10;
+
+  console.log({ f });
+  return f;
+}
+
 function convertFilterToQuery(f: any) {
   const q: Record<string, any> = {};
 
@@ -244,8 +318,14 @@ function syncQueryToRoute(query: any) {
 watch(
   filter,
   (newVal) => {
+    if (isInitialSync.value) {
+      isInitialSync.value = false;
+      return; // ✅ do NOT push router on first run
+    }
+
     const query = convertFilterToQuery(newVal);
     syncQueryToRoute(query);
+    console.log("call api");
   },
   { deep: true },
 );

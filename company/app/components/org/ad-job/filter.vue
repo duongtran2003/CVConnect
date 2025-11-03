@@ -93,7 +93,6 @@
         :text="'Đặt lại'"
         @click="handleResetFilter"
       />
-      <AppButton class="submit-button" :text="'Lọc'" @click="handleSetFilter" />
     </div>
   </div>
 </template>
@@ -118,9 +117,9 @@ const filter = ref<any>({});
 const hrList = ref<Record<string, any>[]>([]);
 const departmentList = ref<any[]>([]);
 
-onBeforeMount(() => {
-  fetchHr({});
-  fetchDepartments({});
+onBeforeMount(async () => {
+  await Promise.all([fetchHr({}), fetchDepartments({})]);
+  syncFilterOptions();
 });
 
 const dateRangeValue = computed(() => {
@@ -219,10 +218,12 @@ function handleDateRangeInput(key: string, range: any) {
   if (to) {
     filter.value[`${key}End`] = to;
   }
+  emits("filterChange", filter.value);
 }
 
 function handleInput(key: string, value: any) {
   filter.value[key] = value;
+  emits("filterChange", filter.value);
 }
 
 function handleSetFilter() {
@@ -252,14 +253,6 @@ async function fetchHr(params: any, controller?: AbortController) {
   }
 
   hrList.value = res.data;
-  if (filter.value.hrContact) {
-    const hrOpt = hrOptions.value.find(
-      (hr) => hr.value == filter.value.hrContact?.value,
-    );
-    if (hrOpt) {
-      filter.value.hrContact = hrOpt;
-    }
-  }
 
   return res.data;
 }
@@ -271,7 +264,38 @@ async function fetchDepartments(params: any, controller?: AbortController) {
   }
   const nextPage = res.data.data;
   departmentList.value = [...departmentList.value, ...nextPage];
+  console.log("fetch dept done", departmentsOpts.value);
   return res.data.data;
+}
+
+function syncFilterOptions() {
+  const f = filter.value;
+  console.log({ f });
+
+  // isPublic
+  if (f.isPublic?.value !== undefined) {
+    const m = isPublicOpts.value.find((opt) => opt.value === f.isPublic.value);
+    f.isPublic = m;
+  }
+
+  // departmentIds (array of {label:"", value:id})
+  if (Array.isArray(f.departmentIds) && f.departmentIds.length) {
+    const mapped = f.departmentIds
+      .map((item: any) =>
+        departmentsOpts.value.find((opt) => opt.value === item.value),
+      )
+      .filter(Boolean);
+
+    f.departmentIds = mapped;
+  }
+
+  // HR Contact
+  if (f.hrContactId?.value !== undefined) {
+    const m = hrOptions.value.find((opt) => opt.value === f.hrContactId.value);
+    f.hrContactId = m;
+  }
+
+  emits("filterChange", filter.value);
 }
 
 watch(
@@ -279,6 +303,7 @@ watch(
   (newVal) => {
     console.log({ newVal });
     filter.value = cloneDeep(newVal);
+    console.log("after clone", filter.value);
   },
   {
     immediate: true,
