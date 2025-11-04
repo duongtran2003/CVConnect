@@ -22,8 +22,38 @@ export const useJobAdApi = () => {
     }
   };
 
+  const getJobAdOrg = async (
+    params: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+    const queryString = objectToQuery(params);
+    try {
+      const res = await $axios.get(
+        `/_api/core/job-ad/org/filter?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return "aborted";
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
 
   return {
     createJobAd,
+    getJobAdOrg,
   };
 };

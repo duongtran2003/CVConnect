@@ -4,7 +4,7 @@
       <AppInputSearchSelect
         :label="'Loại tin tuyển dụng'"
         :required="false"
-        :options="isPublicOpts"
+        :options="props.isPublicOpts"
         :value="filter.isPublic"
         :error="''"
         :placeholder="''"
@@ -20,7 +20,7 @@
       <AppInputSearchSelect
         :label="'Phòng ban'"
         :required="false"
-        :options="departmentsOpts"
+        :options="props.departmentsOpts"
         :value="filter.departmentIds"
         :error="''"
         :placeholder="''"
@@ -36,7 +36,7 @@
       <AppInputSearchSelect
         :label="'HR phụ trách'"
         :required="false"
-        :options="hrOptions"
+        :options="props.hrOptions"
         :value="filter.hrContactId"
         :error="''"
         :placeholder="'Mời chọn'"
@@ -47,11 +47,6 @@
         :fetch-fn="null"
         @input="handleInput('hrContactId', $event)"
         @clear-value="handleInput('hrContactId', null)"
-        @search-filter="
-          () => {
-            hrList = [];
-          }
-        "
       />
       <AppInputText
         :label="'Người tạo'"
@@ -101,6 +96,9 @@ import { cloneDeep } from "lodash";
 
 type TProps = {
   filterData?: any;
+  hrOptions: any;
+  departmentsOpts: any;
+  isPublicOpts: any;
 };
 
 const props = withDefaults(defineProps<TProps>(), {
@@ -110,17 +108,7 @@ const emits = defineEmits<{
   (e: "filterChange" | "sortChange", payload: any): void;
 }>();
 
-const { getByRoleCode } = useUserApi();
-const { getDepartments } = useDepartmentApi();
-
 const filter = ref<any>({});
-const hrList = ref<Record<string, any>[]>([]);
-const departmentList = ref<any[]>([]);
-
-onBeforeMount(async () => {
-  await Promise.all([fetchHr({}), fetchDepartments({})]);
-  syncFilterOptions();
-});
 
 const dateRangeValue = computed(() => {
   return (key: string) => {
@@ -147,67 +135,12 @@ const dateRangeValue = computed(() => {
   };
 });
 
-const sortIcon = computed(() => {
-  return (key: string) => {
-    if (filter.value.sortBy !== key) {
-      return "mdi:sort";
-    }
-    if (filter.value.sortDirection === "ASC") {
-      return "mdi:sort-ascending";
-    } else if (filter.value.sortDirection === "DESC") {
-      return "mdi:sort-descending";
-    } else {
-      return "mdi:sort";
-    }
-  };
-});
-
-const isPublicOpts = computed(() => {
-  return [
-    {
-      label: "Công khai",
-      value: true,
-    },
-    {
-      label: "Nội bộ",
-      value: false,
-    },
-  ];
-});
-
-const hrOptions = computed(() => {
-  return hrList.value.map((hr) => ({
-    label: hr.fullName,
-    value: hr.id,
-  }));
-});
-
-const departmentsOpts = computed(() => {
-  return departmentList.value.map((dept) => ({
-    label: dept.name,
-    value: dept.id,
-  }));
-});
-
-function handleSortClick(key: string) {
-  if (filter.value.sortBy === key) {
-    const currType = filter.value.sortDirection;
-    if (currType === "ASC") {
-      emits("sortChange", { key, type: "DESC" });
-    } else if (currType === "DESC") {
-      emits("sortChange", { key: undefined, type: undefined });
-    } else {
-      emits("sortChange", { key, type: "ASC" });
-    }
-  } else {
-    emits("sortChange", { key, type: "ASC" });
-  }
-}
-
 function handleDateRangeInput(key: string, range: any) {
+  console.log({ range });
   if (!range?.length) {
     filter.value[`${key}Start`] = undefined;
     filter.value[`${key}End`] = undefined;
+    emits("filterChange", filter.value);
     return;
   }
   const from = range[0];
@@ -226,11 +159,6 @@ function handleInput(key: string, value: any) {
   emits("filterChange", filter.value);
 }
 
-function handleSetFilter() {
-  console.log("clicked", filter.value);
-  emits("filterChange", filter.value);
-}
-
 function handleResetFilter() {
   filter.value = {
     ...filter.value,
@@ -246,64 +174,10 @@ function handleResetFilter() {
   emits("filterChange", filter.value);
 }
 
-async function fetchHr(params: any, controller?: AbortController) {
-  const res = await getByRoleCode("HR");
-  if (!res) {
-    return null;
-  }
-
-  hrList.value = res.data;
-
-  return res.data;
-}
-
-async function fetchDepartments(params: any, controller?: AbortController) {
-  const res = await getDepartments(params, controller);
-  if (!res) {
-    return null;
-  }
-  const nextPage = res.data.data;
-  departmentList.value = [...departmentList.value, ...nextPage];
-  console.log("fetch dept done", departmentsOpts.value);
-  return res.data.data;
-}
-
-function syncFilterOptions() {
-  const f = filter.value;
-  console.log({ f });
-
-  // isPublic
-  if (f.isPublic?.value !== undefined) {
-    const m = isPublicOpts.value.find((opt) => opt.value === f.isPublic.value);
-    f.isPublic = m;
-  }
-
-  // departmentIds (array of {label:"", value:id})
-  if (Array.isArray(f.departmentIds) && f.departmentIds.length) {
-    const mapped = f.departmentIds
-      .map((item: any) =>
-        departmentsOpts.value.find((opt) => opt.value === item.value),
-      )
-      .filter(Boolean);
-
-    f.departmentIds = mapped;
-  }
-
-  // HR Contact
-  if (f.hrContactId?.value !== undefined) {
-    const m = hrOptions.value.find((opt) => opt.value === f.hrContactId.value);
-    f.hrContactId = m;
-  }
-
-  emits("filterChange", filter.value);
-}
-
 watch(
   () => props.filterData,
   (newVal) => {
-    console.log({ newVal });
     filter.value = cloneDeep(newVal);
-    console.log("after clone", filter.value);
   },
   {
     immediate: true,

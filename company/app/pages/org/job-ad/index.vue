@@ -3,7 +3,10 @@
     <div class="job-ad-content">
       <div class="top">
         <div class="left">
-          <div class="title">Tin tuyển dụng</div>
+          <div class="title">
+            Tin tuyển dụng
+            <span class="count">{{ `Tổng số: ${totalElements} tin` }}</span>
+          </div>
         </div>
         <div class="right">
           <AppButton
@@ -20,7 +23,7 @@
           :required="false"
           :error="''"
           :placeholder="'Tìm kiếm'"
-          :value="filter.keyword"
+          :value="filter.keyword ?? ''"
           :slim-error="true"
           class="search-bar"
           @input="handleInputDebounce('keyword', $event)"
@@ -61,6 +64,9 @@
           @input="handleSort($event)"
           @clear-value="handleSort(undefined)"
         />
+        <div class="sort-btn" @click="handleSortDirection">
+          <Icon :name="sortIcon" />
+        </div>
         <div
           :title="'Lọc ứng viên'"
           class="filter-btn"
@@ -76,10 +82,30 @@
         </div>
       </div>
       <div class="body">
-        <div class="content"></div>
+        <div class="content">
+          <div v-if="isLoading" class="spinner">
+            <AppSpinnerHalfCircle />
+          </div>
+          <AppNoData v-if="isNoData" />
+          <OrgAdJobCard
+            v-for="jobAd of jobAdList"
+            :key="jobAd.id"
+            :data="jobAd"
+          />
+          <div
+            v-if="!isLoading && hasMore && jobAdList.length"
+            class="show-more"
+            @click="handleShowMore"
+          >
+            Hiển thị thêm
+          </div>
+        </div>
         <div v-show="isFilterShow" class="filter-tab">
           <OrgAdJobFilter
             :filter-data="filter"
+            :departments-opts="departmentsOpts"
+            :is-public-opts="isPublicOpts"
+            :hr-options="hrOptions"
             @filter-change="handleFilterChange"
           />
         </div>
@@ -101,6 +127,9 @@ const router = useRouter();
 const route = useRoute();
 const { getMenuItem } = useSidebarStore();
 const { getJobAdStatus } = useEnumApi();
+const { getJobAdOrg } = useJobAdApi();
+const { getByRoleCode } = useUserApi();
+const { getDepartments } = useDepartmentApi();
 
 const filter = ref<any>({
   keyword: "",
@@ -121,17 +150,55 @@ const filter = ref<any>({
 const isFilterShow = ref<boolean>(false);
 const jobAdStatusList = ref<any[]>([]);
 const currentSort = ref<any>(undefined);
-const isInitialSync = ref(true);
+const abortController = ref<AbortController | null>(null);
+const isLoading = ref<boolean>(false);
+const hrList = ref<Record<string, any>[]>([]);
+const departmentList = ref<any[]>([]);
+const totalElements = ref<any>(0);
+const jobAdList = ref<any>([]);
+const isNoData = ref<boolean>(false);
+const hasMore = ref<boolean>(true);
 
 onBeforeMount(async () => {
   const q = route.query;
 
-  await fetchJobAdStatus();
+  await Promise.all([
+    fetchJobAdStatus(),
+    fetchHr({ pageSize: 100 }),
+    fetchDepartments({ pageSize: 100 }),
+  ]);
 
-  if (Object.keys(q).length) {
-    const newFilter = convertQueryToFilter(q);
-    filter.value = { ...filter.value, ...newFilter };
+  const newFilter = convertQueryToFilter(q);
+  if (newFilter) {
+    filter.value = newFilter;
   }
+});
+
+const isPublicOpts = computed(() => {
+  return [
+    {
+      label: "Công khai",
+      value: true,
+    },
+    {
+      label: "Nội bộ",
+      value: false,
+    },
+  ];
+});
+
+const hrOptions = computed(() => {
+  return hrList.value.map((hr) => ({
+    label: hr.fullName,
+    value: hr.id,
+  }));
+});
+
+const departmentsOpts = computed(() => {
+  return departmentList.value.map((dept) => ({
+    label: dept.name,
+    value: dept.id,
+  }));
 });
 
 const allowActions = computed(() => {
@@ -165,6 +232,37 @@ const sortOpts = computed(() => {
   ];
 });
 
+const sortIcon = computed(() => {
+  if (filter.value.sortDirection === "ASC") {
+    return "mdi:sort-ascending";
+  } else if (filter.value.sortDirection === "DESC") {
+    return "mdi:sort-descending";
+  } else {
+    return "mdi:sort";
+  }
+});
+
+async function fetchHr(params: any, controller?: AbortController) {
+  const res = await getByRoleCode("HR");
+  if (!res) {
+    return null;
+  }
+
+  hrList.value = res.data;
+
+  return res.data;
+}
+
+async function fetchDepartments(params: any, controller?: AbortController) {
+  const res = await getDepartments(params, controller);
+  if (!res) {
+    return null;
+  }
+  const nextPage = res.data.data;
+  departmentList.value = [...departmentList.value, ...nextPage];
+  return res.data.data;
+}
+
 async function fetchJobAdStatus() {
   const res = await getJobAdStatus();
   jobAdStatusList.value = res.data;
@@ -173,7 +271,6 @@ async function fetchJobAdStatus() {
 }
 
 function handleFilterChange(_filter: any) {
-  console.log("filter change", _filter);
   filter.value = _filter;
 }
 
@@ -185,7 +282,6 @@ function handleSort(sort: any) {
     return;
   }
   filter.value.sortBy = currentSort.value.value;
-  filter.value.sortDirection = "DESC";
 }
 
 function handleInput(key: string, value: any) {
@@ -219,17 +315,27 @@ function convertQueryToFilter(q: any) {
   }
 
   if (q.isPublic !== undefined) {
-    f.isPublic = { label: "", value: q.isPublic === "true" };
+    const m = isPublicOpts.value.find((opt) => opt.value === q.isPublic);
+    f.isPublic = m;
   }
 
   if (q.departmentIds) {
-    f.departmentIds = String(q.departmentIds)
-      .split(",")
-      .map((id: string) => ({ label: "", value: Number(id) }));
+    const splitted = String(q.departmentIds).split(",");
+
+    if (Array.isArray(splitted)) {
+      const mapped = splitted
+        .map((item: any) =>
+          departmentsOpts.value.find((opt) => opt.value === item.value),
+        )
+        .filter(Boolean);
+
+      f.departmentIds = mapped;
+    }
   }
 
-  if (q.hrContactId) {
-    f.hrContactId = { label: "", value: Number(q.hrContactId) };
+  if (f.hrContactId?.value !== undefined) {
+    const m = hrOptions.value.find((opt) => opt.value === q.hrContactId);
+    f.hrContactId = m;
   }
 
   if (q.createdBy) {
@@ -252,17 +358,19 @@ function convertQueryToFilter(q: any) {
     f.dueDateEnd = q.dueDateEnd;
   }
 
-  if (q.sortBy && q.sortDirection) {
+  if (q.sortBy) {
     f.sortBy = q.sortBy;
-    f.sortDirection = q.sortDirection;
     const sort = sortOpts.value.find((s) => s.value == f.sortBy);
     currentSort.value = sort;
+  }
+
+  if (q.sortDirection) {
+    f.sortDirection = q.sortDirection;
   }
 
   f.pageIndex = q.pageIndex ? Number(q.pageIndex) : 0;
   f.pageSize = q.pageSize ? Number(q.pageSize) : 10;
 
-  console.log({ f });
   return f;
 }
 
@@ -284,7 +392,7 @@ function convertFilterToQuery(f: any) {
   if (f.hrContactId) {
     q.hrContactId = f.hrContactId.value;
   }
-  if (f.createdBy.trim()) {
+  if (f.createdBy?.trim()) {
     q.createdBy = f.createdBy.trim();
   }
   if (f.createdAtStart) {
@@ -299,8 +407,10 @@ function convertFilterToQuery(f: any) {
   if (f.dueDateEnd) {
     q.dueDateEnd = toDateEnd(f.dueDateEnd);
   }
-  if (f.sortBy && f.sortDirection) {
+  if (f.sortBy) {
     q.sortBy = f.sortBy;
+  }
+  if (f.sortDirection) {
     q.sortDirection = f.sortDirection;
   }
   q.pageIndex = f.pageIndex;
@@ -315,17 +425,74 @@ function syncQueryToRoute(query: any) {
   });
 }
 
+function handleSortDirection() {
+  if (filter.value.sortDirection === "ASC") {
+    filter.value.sortDirection = "DESC";
+  } else if (filter.value.sortDirection === "DESC") {
+    filter.value.sortDirection = undefined;
+  } else {
+    filter.value.sortDirection = "ASC";
+  }
+}
+
+async function fetchData(params: Record<string, any>) {
+  if (abortController.value) {
+    abortController.value.abort();
+  }
+  abortController.value = new AbortController();
+  isLoading.value = true;
+
+  if (params.createdAtStart) {
+    params.createdAtStart = toUtcDateStart(params.createdAtStart);
+  }
+  if (params.createdAtEnd) {
+    params.createdAtEnd = toUtcDateEnd(params.createdAtEnd);
+  }
+
+  if (params.dueDateStart) {
+    params.dueDateStart = toUtcDateStart(params.dueDateStart);
+  }
+  if (params.dueDateEnd) {
+    params.dueDateEnd = toUtcDateEnd(params.dueDateEnd);
+  }
+
+  const res = await getJobAdOrg(params, abortController.value);
+  totalElements.value = res.data.pageInfo.totalElements;
+  if (res.data.pageInfo.totalElements == 0) {
+    isNoData.value = true;
+  }
+  jobAdList.value = [...jobAdList.value, ...res.data.data];
+  if (jobAdList.value.length >= totalElements.value) {
+    hasMore.value = false;
+  }
+  if (res != "aborted") {
+    isLoading.value = false;
+  }
+}
+
+function handleShowMore() {
+  filter.value.pageIndex += 1;
+}
+
 watch(
   filter,
-  (newVal) => {
-    if (isInitialSync.value) {
-      isInitialSync.value = false;
-      return; // ✅ do NOT push router on first run
+  (newVal, oldVal) => {
+    // If any filter except pagination changes → reset to first page
+    const keysToIgnore = ["pageIndex", "pageSize"];
+
+    const hasFilterChanged = Object.keys(newVal).some((key) => {
+      if (keysToIgnore.includes(key)) return false;
+      return JSON.stringify(newVal[key]) !== JSON.stringify(oldVal[key]);
+    });
+
+    if (hasFilterChanged && filter.value.pageIndex != 0) {
+      filter.value.pageIndex = 0;
+      return;
     }
 
     const query = convertFilterToQuery(newVal);
     syncQueryToRoute(query);
-    console.log("call api");
+    fetchData(query);
   },
   { deep: true },
 );
@@ -369,6 +536,15 @@ watch(
       font-weight: 700;
       font-size: 16px;
       line-height: 20px;
+
+      .count {
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 20px;
+        font-style: italic;
+        color: $color-gray-400;
+        margin-left: 12px;
+      }
     }
   }
 
@@ -404,7 +580,8 @@ watch(
     flex-wrap: wrap;
   }
 
-  .filter-btn {
+  .filter-btn,
+  .sort-btn {
     background-color: $color-gray-100;
     border-radius: 999px;
     cursor: pointer;
@@ -448,6 +625,28 @@ watch(
     max-height: 100%;
     overflow-y: auto;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    .spinner {
+      height: 120px;
+      width: 100%;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .show-more {
+      color: $color-primary-500;
+      text-decoration: underline;
+      cursor: pointer;
+      width: fit-content;
+      font-size: 14px;
+      margin-top: 12px;
+    }
   }
 
   .filter-tab {
