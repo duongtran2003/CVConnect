@@ -196,6 +196,7 @@ const { updateJobAdStatus, updateJobAdPublicity } = useJobAdApi();
 const route = useRoute();
 const router = useRouter();
 const { getMenuItem } = useSidebarStore();
+const toast = useToast();
 
 const localStatus = ref<any>(null);
 const localIsPublic = ref<any>(null);
@@ -249,7 +250,7 @@ const dotsActions = computed(() => {
   });
   if (allowActions.value.includes("VIEW")) {
     actions.push({
-      label: "Xem chi tiết",
+      label: "Xem tin tuyển dụng",
       onSelect: () => handleViewDetail(),
     });
   }
@@ -306,7 +307,7 @@ async function handleChangePublicity(isPublic: boolean) {
 
 function handleEditJobAd() {
   const link = router.resolve({
-    path: `/org/job-ad/detail/${props.data.id}`,
+    path: `/job-ad/detail/${props.data.id}`,
     query: {
       isEdit: "true",
     },
@@ -317,6 +318,16 @@ function handleEditJobAd() {
 
 function handleCopyLink() {
   console.log("copy link");
+
+  const link = router.resolve({
+    path: `/job-ad/detail/${props.data.id}`,
+  });
+
+  navigator.clipboard.writeText(window.location.origin + link.href);
+  toast.add({
+    title: "Đã sao chép đường dẫn",
+    color: "success",
+  });
 }
 
 function handleClickTitle() {
@@ -327,7 +338,7 @@ function handleClickTitle() {
   }
 
   const link = router.resolve({
-    path: `/org/job-ad/detail/${props.data.id}`,
+    path: `/job-ad/detail/${props.data.id}`,
   });
 
   window.open(link.href, "_blank");
@@ -335,7 +346,7 @@ function handleClickTitle() {
 
 function handleViewDetail() {
   const link = router.resolve({
-    path: `/org/job-ad/detail/${props.data.id}`,
+    path: `/job-ad/detail/${props.data.id}`,
   });
 
   window.open(link.href, "_blank");
@@ -343,7 +354,7 @@ function handleViewDetail() {
 
 function handleViewDetailWithProcess(process: any) {
   const link = router.resolve({
-    path: `/org/job-ad/detail/${props.data.id}`,
+    path: `/job-ad/detail/${props.data.id}`,
     query: {
       processId: process.id,
     },

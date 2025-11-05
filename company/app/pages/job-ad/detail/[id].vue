@@ -91,6 +91,17 @@
             {{ localIsPublic ? "Công khai" : "Nội bộ" }}
             <Icon name="mdi:chevron-down" />
           </div>
+          <UDropdownMenu
+            :items="dotsActions"
+            :ui="{
+              item: 'cursor-pointer hover:bg-gray-100',
+              content: 'w-[180px]',
+            }"
+          >
+            <div class="dots-btn">
+              <Icon name="mdi:dots-vertical" />
+            </div>
+          </UDropdownMenu>
         </div>
       </div>
       <div class="detail-content">
@@ -206,7 +217,7 @@
             v-for="process of processList"
             :key="process.sortOrder"
             class="process-block"
-            :class="{'selected': currentProcessId == process.id}"
+            :class="{ selected: currentProcessId == process.id }"
             @click="handleSetProcess(process)"
           >
             <div class="count">{{ process.count }}</div>
@@ -233,6 +244,7 @@ const breadcrumbStore = useBreadcrumbStore();
 const { overrideItems, clearOverrideItems } = breadcrumbStore;
 const { getMenuItem } = useSidebarStore();
 const { getJobAdStatus } = useEnumApi();
+const toast = useToast();
 
 const detail = ref<any>(null);
 const isEdit = ref<boolean>(false);
@@ -328,6 +340,39 @@ const allowActions = computed(() => {
   return permissions;
 });
 
+const dotsActions = computed(() => {
+  const actions = [];
+  if (allowActions.value.includes("UPDATE")) {
+    actions.push({
+      label: "Sửa tin",
+      onSelect: () => handleEditJobAd(),
+    });
+  }
+  actions.push({
+    label: "Sao chép đường dẫn",
+    onSelect: () => handleCopyLink(),
+  });
+  return actions;
+});
+
+function handleEditJobAd() {
+  console.log("open modal");
+}
+
+function handleCopyLink() {
+  console.log("copy link");
+
+  const link = router.resolve({
+    path: `/job-ad/detail/${detail.value.id}`,
+  });
+
+  navigator.clipboard.writeText(window.location.origin + link.href);
+  toast.add({
+    title: "Đã sao chép đường dẫn",
+    color: "success",
+  });
+}
+
 async function handleChangeStatus(status: any) {
   setLoading(true);
   const payload = {
@@ -384,7 +429,7 @@ watch(currentProcessId, (newId) => {
       processId: newId,
     },
   });
-})
+});
 </script>
 <style lang="scss" scoped>
 .dropdown-select-item {
@@ -427,6 +472,22 @@ watch(currentProcessId, (newId) => {
     gap: 16px;
     row-gap: 8px;
     flex-wrap: wrap;
+
+    .dots-btn {
+      background-color: $color-gray-100;
+      border-radius: 999px;
+      cursor: pointer;
+      height: 28px;
+      width: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $color-primary-500;
+      .iconify {
+        display: block;
+        font-size: 20px;
+      }
+    }
 
     .back-btn {
       background-color: $color-gray-100;
@@ -574,10 +635,11 @@ watch(currentProcessId, (newId) => {
         cursor: pointer;
 
         &.selected {
-          .count, .name {
+          .count,
+          .name {
             color: $color-primary-400;
             font-weight: 600;
-          } 
+          }
         }
 
         transition: background-color 0.2s;
