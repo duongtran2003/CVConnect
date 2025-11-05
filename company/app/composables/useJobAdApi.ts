@@ -52,11 +52,12 @@ export const useJobAdApi = () => {
     }
   };
 
-  const updateJobAdStatus = async (
-    payload: any
-  ) => {
+  const updateJobAdStatus = async (payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/job-ad/update-status/${payload.jobAdId}`, payload);
+      const res = await $axios.put(
+        `/_api/core/job-ad/update-status/${payload.jobAdId}`,
+        payload,
+      );
       toast.add({
         title: res.data.message,
         color: "success",
@@ -72,11 +73,14 @@ export const useJobAdApi = () => {
       console.error(err);
       return false;
     }
-  }
+  };
 
   const updateJobAdPublicity = async (payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/job-ad/update-public/${payload.jobAdId}`, payload);
+      const res = await $axios.put(
+        `/_api/core/job-ad/update-public/${payload.jobAdId}`,
+        payload,
+      );
       toast.add({
         title: res.data.message,
         color: "success",
@@ -92,12 +96,35 @@ export const useJobAdApi = () => {
       console.error(err);
       return false;
     }
-  }
+  };
+
+  const getJobAdDetailOrg = async (id: any) => {
+    try {
+      const res = await $axios.get(
+        `/_api/core/job-ad/org/detail/${id}`,
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return "aborted";
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
 
   return {
     createJobAd,
     getJobAdOrg,
     updateJobAdStatus,
     updateJobAdPublicity,
+    getJobAdDetailOrg,
   };
 };

@@ -1,7 +1,7 @@
 <template>
   <div class="job-ad-card">
     <div class="top">
-      <div class="left">
+      <div class="left" @click="handleClickTitle">
         <Icon
           :name="
             props.data.isPublic
@@ -175,6 +175,7 @@
         v-for="process of processList"
         :key="process.sortOrder"
         class="process-block"
+        @click="handleViewDetailWithProcess(process)"
       >
         <div class="count">{{ process.count }}</div>
         <div class="name">{{ process.name }}</div>
@@ -206,6 +207,7 @@ onBeforeMount(() => {
 
 const processList = computed(() => {
   return props.data.jobAdProcess.map((process: any) => ({
+    id: process.id,
     sortOrder: process.sortOrder,
     count: process.numberOfApplicants,
     name: process.name,
@@ -303,15 +305,51 @@ async function handleChangePublicity(isPublic: boolean) {
 }
 
 function handleEditJobAd() {
-  console.log("edit");
+  const link = router.resolve({
+    path: `/org/job-ad/detail/${props.data.id}`,
+    query: {
+      isEdit: "true",
+    },
+  });
+
+  window.open(link.href, "_blank");
 }
 
 function handleCopyLink() {
   console.log("copy link");
 }
 
+function handleClickTitle() {
+  const selection = window.getSelection()?.toString();
+
+  if (selection && selection.length > 0) {
+    return;
+  }
+
+  const link = router.resolve({
+    path: `/org/job-ad/detail/${props.data.id}`,
+  });
+
+  window.open(link.href, "_blank");
+}
+
 function handleViewDetail() {
-  console.log("view detail");
+  const link = router.resolve({
+    path: `/org/job-ad/detail/${props.data.id}`,
+  });
+
+  window.open(link.href, "_blank");
+}
+
+function handleViewDetailWithProcess(process: any) {
+  const link = router.resolve({
+    path: `/org/job-ad/detail/${props.data.id}`,
+    query: {
+      processId: process.id,
+    },
+  });
+
+  window.open(link.href, "_blank");
 }
 </script>
 <style lang="scss" scoped>
@@ -440,6 +478,10 @@ function handleViewDetail() {
     }
   }
 
+  .left {
+    cursor: pointer;
+  }
+
   .left,
   .right {
     display: flex;
@@ -500,6 +542,12 @@ function handleViewDetail() {
       align-items: center;
       padding-left: 16px;
       padding-right: 16px;
+      cursor: pointer;
+
+      transition: background-color 0.2s;
+      &:hover {
+        background-color: $color-gray-100;
+      }
 
       &:not(:last-child) {
         border-right: 2px solid $color-gray-300;

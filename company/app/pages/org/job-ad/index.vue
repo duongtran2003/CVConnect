@@ -476,7 +476,7 @@ async function fetchData(params: Record<string, any>) {
 }
 
 function handleShowMore() {
-  filter.value.pageIndex += 1;
+  filter.value = { ...filter.value, pageIndex: filter.value.pageIndex + 1 };
 }
 
 watch(

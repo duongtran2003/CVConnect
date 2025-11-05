@@ -21,3 +21,11 @@ export const CREATE_BREADCRUMBS: TBreadcumbItem[] = [
     url: "/org/job-ad/create",
   },
 ];
+
+export const DETAIL_BREADCRUMBS: TBreadcumbItem[] = [
+  {
+    name: "Tin tuyển dụng",
+    icon: "hugeicons:job-search",
+    url: "/org/job-ad",
+  },
+];
