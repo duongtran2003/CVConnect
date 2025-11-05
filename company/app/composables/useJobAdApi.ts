@@ -52,8 +52,52 @@ export const useJobAdApi = () => {
     }
   };
 
+  const updateJobAdStatus = async (
+    payload: any
+  ) => {
+    try {
+      const res = await $axios.put(`/_api/core/job-ad/update-status/${payload.jobAdId}`, payload);
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  }
+
+  const updateJobAdPublicity = async (payload: any) => {
+    try {
+      const res = await $axios.put(`/_api/core/job-ad/update-public/${payload.jobAdId}`, payload);
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  }
+
   return {
     createJobAd,
     getJobAdOrg,
+    updateJobAdStatus,
+    updateJobAdPublicity,
   };
 };

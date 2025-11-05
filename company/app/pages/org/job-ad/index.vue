@@ -42,7 +42,7 @@
           :slim-error="true"
           :placeholder="'Trạng thái tin'"
           :remote-filter="false"
-          :allow-clear="false"
+          :allow-clear="true"
           :multiple="false"
           :fetch-fn="null"
           @input="handleInput('jobAdStatus', $event)"
@@ -83,14 +83,12 @@
       </div>
       <div class="body">
         <div class="content">
-          <div v-if="isLoading" class="spinner">
-            <AppSpinnerHalfCircle />
-          </div>
           <AppNoData v-if="isNoData" />
           <OrgAdJobCard
             v-for="jobAd of jobAdList"
             :key="jobAd.id"
             :data="jobAd"
+            :job-ad-status="jobAdStatusOpts"
           />
           <div
             v-if="!isLoading && hasMore && jobAdList.length"
@@ -98,6 +96,9 @@
             @click="handleShowMore"
           >
             Hiển thị thêm
+          </div>
+          <div v-if="isLoading" class="spinner">
+            <AppSpinnerHalfCircle />
           </div>
         </div>
         <div v-show="isFilterShow" class="filter-tab">
@@ -460,10 +461,14 @@ async function fetchData(params: Record<string, any>) {
   totalElements.value = res.data.pageInfo.totalElements;
   if (res.data.pageInfo.totalElements == 0) {
     isNoData.value = true;
+  } else {
+    isNoData.value = false;
   }
   jobAdList.value = [...jobAdList.value, ...res.data.data];
   if (jobAdList.value.length >= totalElements.value) {
     hasMore.value = false;
+  } else {
+    hasMore.value = true;
   }
   if (res != "aborted") {
     isLoading.value = false;
@@ -477,17 +482,19 @@ function handleShowMore() {
 watch(
   filter,
   (newVal, oldVal) => {
-    // If any filter except pagination changes → reset to first page
-    const keysToIgnore = ["pageIndex", "pageSize"];
+    if (newVal.pageIndex == oldVal.pageIndex) {
+      // other filter changed, not paging
 
-    const hasFilterChanged = Object.keys(newVal).some((key) => {
-      if (keysToIgnore.includes(key)) return false;
-      return JSON.stringify(newVal[key]) !== JSON.stringify(oldVal[key]);
-    });
-
-    if (hasFilterChanged && filter.value.pageIndex != 0) {
-      filter.value.pageIndex = 0;
-      return;
+      console.log("filter change");
+      if (filter.value.pageIndex != 0) {
+        filter.value.pageIndex = 0;
+        jobAdList.value = [];
+        console.log("cleared", jobAdList.value);
+        return;
+      } else {
+        jobAdList.value = [];
+        console.log("cleared", jobAdList.value);
+      }
     }
 
     const query = convertFilterToQuery(newVal);
