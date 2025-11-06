@@ -224,6 +224,10 @@
             <div class="name">{{ process.name }}</div>
           </div>
         </div>
+        <OrgAdJobCandidateTable
+          :job-ad-process-id="currentProcessId"
+          :is-onboard="isOnboard"
+        />
       </div>
     </div>
   </div>
@@ -274,6 +278,17 @@ onBeforeMount(async () => {
       url: `/org/job-ad/detail/${id}`,
     },
   ]);
+});
+
+const isOnboard = computed(() => {
+  const process = detail.value.jobAdProcess.find(
+    (process: any) => process.id == currentProcessId.value,
+  );
+  console.log({ process });
+  if (process && process.name == "Onboard") {
+    return true;
+  }
+  return false;
 });
 
 const processList = computed(() => {
@@ -352,8 +367,23 @@ const dotsActions = computed(() => {
     label: "Sao chép đường dẫn",
     onSelect: () => handleCopyLink(),
   });
+  if (allowActions.value.includes("VIEW")) {
+    actions.push({
+      label: "Xem tin tuyển dụng",
+      onSelect: () => handleViewDetail(),
+    });
+  }
   return actions;
 });
+
+function handleViewDetail() {
+  // TODO: Should link to public page, update me
+  const link = router.resolve({
+    path: `/org/job-ad/detail/${detail.value.id}`,
+  });
+
+  window.open(link.href, "_blank");
+}
 
 function handleEditJobAd() {
   console.log("open modal");

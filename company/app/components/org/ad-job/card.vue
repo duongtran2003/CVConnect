@@ -307,7 +307,7 @@ async function handleChangePublicity(isPublic: boolean) {
 
 function handleEditJobAd() {
   const link = router.resolve({
-    path: `/job-ad/detail/${props.data.id}`,
+    path: `/org/job-ad/detail/${props.data.id}`,
     query: {
       isEdit: "true",
     },
@@ -319,8 +319,9 @@ function handleEditJobAd() {
 function handleCopyLink() {
   console.log("copy link");
 
+  // TODO: Should link to public page, update me
   const link = router.resolve({
-    path: `/job-ad/detail/${props.data.id}`,
+    path: `/org/job-ad/detail/${props.data.id}`,
   });
 
   navigator.clipboard.writeText(window.location.origin + link.href);
@@ -338,15 +339,16 @@ function handleClickTitle() {
   }
 
   const link = router.resolve({
-    path: `/job-ad/detail/${props.data.id}`,
+    path: `/org/job-ad/detail/${props.data.id}`,
   });
 
   window.open(link.href, "_blank");
 }
 
 function handleViewDetail() {
+  // TODO: Should link to public page, update me
   const link = router.resolve({
-    path: `/job-ad/detail/${props.data.id}`,
+    path: `/org/job-ad/detail/${props.data.id}`,
   });
 
   window.open(link.href, "_blank");
@@ -354,7 +356,7 @@ function handleViewDetail() {
 
 function handleViewDetailWithProcess(process: any) {
   const link = router.resolve({
-    path: `/job-ad/detail/${props.data.id}`,
+    path: `/org/job-ad/detail/${props.data.id}`,
     query: {
       processId: process.id,
     },

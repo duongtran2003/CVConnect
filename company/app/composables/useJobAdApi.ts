@@ -100,8 +100,37 @@ export const useJobAdApi = () => {
 
   const getJobAdDetailOrg = async (id: any) => {
     try {
+      const res = await $axios.get(`/_api/core/job-ad/org/detail/${id}`);
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return "aborted";
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getJobAdCandidateByProcess = async (
+    jobAdProcessId: any,
+    controller: AbortController | null,
+    params: any,
+  ) => {
+    const _abortController = controller;
+    const queryString = objectToQuery(params);
+    try {
       const res = await $axios.get(
-        `/_api/core/job-ad/org/detail/${id}`,
+        `/_api/core/candidate-info-apply/filter-by-job-ad-process/${jobAdProcessId}?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
       );
       return res.data;
     } catch (err: any) {
@@ -126,5 +155,6 @@ export const useJobAdApi = () => {
     updateJobAdStatus,
     updateJobAdPublicity,
     getJobAdDetailOrg,
+    getJobAdCandidateByProcess,
   };
 };
