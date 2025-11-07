@@ -1,5 +1,10 @@
 <template>
   <div class="wrapper">
+    <OrgAdJobEditModal
+      v-model="isEditModalOpen"
+      :data="detail"
+      @submit="handleUpdateSubmit"
+    />
     <div v-if="detail" class="content">
       <div class="top">
         <div class="left">
@@ -250,8 +255,8 @@ const { getMenuItem } = useSidebarStore();
 const { getJobAdStatus } = useEnumApi();
 const toast = useToast();
 
+const isEditModalOpen = ref<boolean>(false);
 const detail = ref<any>(null);
-const isEdit = ref<boolean>(false);
 const localStatus = ref<any>(null);
 const localIsPublic = ref<any>(null);
 const jobAdStatusList = ref<any[]>([]);
@@ -266,10 +271,6 @@ onBeforeMount(async () => {
   await fetchDetail();
   await fetchJobAdStatus();
   setLoading(false);
-  const isEditQuery = route.query.isEdit;
-  if (isEditQuery === "true") {
-    isEdit.value = true;
-  }
   overrideItems([
     ...DETAIL_BREADCRUMBS,
     {
@@ -278,6 +279,10 @@ onBeforeMount(async () => {
       url: `/org/job-ad/detail/${id}`,
     },
   ]);
+  const isEdit = route.query.isEdit;
+  if (isEdit) {
+    isEditModalOpen.value = true;
+  }
 });
 
 const isOnboard = computed(() => {
@@ -330,6 +335,11 @@ const jobAdPublicityActions = computed(() => {
     },
   ];
 });
+
+function handleUpdateSubmit() {
+  isEditModalOpen.value = false;
+  fetchDetail();
+}
 
 async function fetchDetail() {
   const id = Number(route.params.id);
@@ -386,6 +396,7 @@ function handleViewDetail() {
 }
 
 function handleEditJobAd() {
+  isEditModalOpen.value = true;
   console.log("open modal");
 }
 
@@ -459,6 +470,18 @@ watch(currentProcessId, (newId) => {
       processId: newId,
     },
   });
+});
+
+watch(isEditModalOpen, (value) => {
+  const query = { ...route.query };
+
+  if (value) {
+    query.isEdit = "true";
+  } else {
+    delete query.isEdit;
+  }
+
+  router.replace({ query });
 });
 </script>
 <style lang="scss" scoped>
@@ -627,6 +650,11 @@ watch(currentProcessId, (newId) => {
 
         .iconify {
           color: $color-primary-400;
+          font-size: 16px;
+          display: block;
+          width: 16px;
+          min-width: 16px;
+          height: 16px;
         }
 
         &:not(:last-child) {
