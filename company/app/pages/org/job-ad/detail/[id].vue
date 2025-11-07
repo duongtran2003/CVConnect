@@ -103,6 +103,9 @@
               content: 'w-[180px]',
             }"
           >
+            <template #item-trailing="{ item }">
+              <Icon :name="item.iconName" class="text-[16px] mr-[2px]" />
+            </template>
             <div class="dots-btn">
               <Icon name="mdi:dots-vertical" />
             </div>
@@ -371,16 +374,19 @@ const dotsActions = computed(() => {
     actions.push({
       label: "Sửa tin",
       onSelect: () => handleEditJobAd(),
+      iconName: "material-symbols:edit-document-outline-rounded",
     });
   }
   actions.push({
     label: "Sao chép đường dẫn",
     onSelect: () => handleCopyLink(),
+    iconName: "material-symbols:content-copy-outline-rounded",
   });
   if (allowActions.value.includes("VIEW")) {
     actions.push({
       label: "Xem tin tuyển dụng",
       onSelect: () => handleViewDetail(),
+      iconName: "material-symbols:frame-inspect-rounded",
     });
   }
   return actions;

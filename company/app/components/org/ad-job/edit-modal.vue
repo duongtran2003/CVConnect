@@ -2,7 +2,7 @@
   <UModal
     v-model:open="isOpen"
     title="Chỉnh sửa tin đăng"
-    :ui="{ content: 'max-w-[840px]' }"
+    :ui="{ content: 'max-w-[980px]' }"
   >
     <template #body>
       <div class="body">
@@ -111,7 +111,7 @@
                 :slim-error="true"
                 :fetch-fn="null"
                 @input="handleInput('mailTemplate', $event)"
-                @clear-value="handleInput(`emailTemplate`, null)"
+                @clear-value="handleInput(`mailTemplate`, null)"
                 @search-filter="
                   () => {
                     mailTemplateList = [];
@@ -254,7 +254,7 @@ const mappedBody = computed(() => {
 async function handleSubmit() {
   const form = cloneDeep(formInput.value);
 
-  const payload = {
+  const payload: any = {
     title: form.title.trim(),
     dueDate: toUtcDate(form.dueDate),
     quantity: form.quantity,
@@ -266,7 +266,8 @@ async function handleSubmit() {
   };
 
   if (form.isAutoSendEmail) {
-    form.emailTemplateId = selectedTemplate.value?.value;
+    console.log({ selectedTemplate: selectedTemplate.value });
+    payload.emailTemplateId = selectedTemplate.value?.id;
   }
 
   isLoading.value = true;
