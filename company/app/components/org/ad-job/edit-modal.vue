@@ -47,16 +47,6 @@
           <div class="row">
             <div class="textarea-block">
               <div class="label">
-                <span class="text">Từ khóa</span>
-                <!-- ><span class="required">Bắt buộc</span> -->
-              </div>
-              <AppInputBasicTextEditor
-                :value="formInput.keyword"
-                @input="handleInput('keyword', $event)"
-              />
-            </div>
-            <div class="textarea-block">
-              <div class="label">
                 <span class="text">Mô tả công việc</span>
                 <!-- ><span class="required">Bắt buộc</span> -->
               </div>
@@ -85,6 +75,18 @@
               <AppInputBasicTextEditor
                 :value="formInput.benefit"
                 @input="handleInput('benefit', $event)"
+              />
+            </div>
+          </div>
+          <div class="row">
+            <div class="textarea-block">
+              <div class="label">
+                <span class="text">Từ khóa</span>
+                <!-- ><span class="required">Bắt buộc</span> -->
+              </div>
+              <AppInputBasicTextEditor
+                :value="formInput.keyword"
+                @input="handleInput('keyword', $event)"
               />
             </div>
           </div>
@@ -267,7 +269,7 @@ async function handleSubmit() {
   };
 
   if (isDateChange.value) {
-    payload.dueDate= toUtcDate(form.dueDate)
+    payload.dueDate = toUtcDate(form.dueDate);
   } else {
     payload.dueDate = originalDueDate.value;
   }
@@ -290,7 +292,7 @@ function handleCancel() {
 }
 
 function handleInput(key: string, value: any) {
-  if (key == 'dueDate') {
+  if (key == "dueDate") {
     isDateChange.value = true;
   }
   formInput.value[key] = value;

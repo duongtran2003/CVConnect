@@ -75,3 +75,13 @@ export function toDateEnd(dateString: string): string {
     .endOf("day") // set time to 23:59:59.999 in local time FIRST
     .format("YYYY-MM-DDTHH:mm:ss[Z]");
 }
+
+export function getLocalWeek() {
+  const startOfWeek = moment().startOf("isoWeek");
+  const endOfWeek = moment().endOf("isoWeek");
+
+  return {
+    start: startOfWeek.format("YYYY/MM/DD"),
+    end: endOfWeek.format("YYYY/MM/DD"),
+  };
+}

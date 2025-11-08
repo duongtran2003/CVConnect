@@ -369,6 +369,29 @@ export const useCandidateApi = () => {
     }
   };
 
+  const getSchedulesGeneral = async (params: any) => {
+    try {
+      const queryString = objectToQuery(params);
+      const res = await $axios.get(
+        `/_api/core/calendar/filter-view-candidate?${queryString}`,
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  }
+
   const createSchedule = async (payload: any) => {
     try {
       const res = await $axios.post(`/_api/core/calendar/create`, {
