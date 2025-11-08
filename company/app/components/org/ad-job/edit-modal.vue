@@ -189,6 +189,8 @@ const emits = defineEmits<{
 const { getMailTemplates, getMailTemplateDetail } = useMailTemplateApi();
 const { updateJobAd } = useJobAdApi();
 
+const isDateChange = ref<boolean>(false);
+const originalDueDate = ref<any>(null);
 const mailTemplateDetail = ref<Record<string, any> | null>(null);
 const isFetchingMailDetail = ref<boolean>(false);
 const isLoading = ref<boolean>(false);
@@ -256,7 +258,6 @@ async function handleSubmit() {
 
   const payload: any = {
     title: form.title.trim(),
-    dueDate: toUtcDate(form.dueDate),
     quantity: form.quantity,
     keyword: form.keyword,
     description: form.description,
@@ -264,6 +265,12 @@ async function handleSubmit() {
     benefit: form.benefit,
     isAutoSendEmail: form.isAutoSendEmail,
   };
+
+  if (isDateChange.value) {
+    payload.dueDate= toUtcDate(form.dueDate)
+  } else {
+    payload.dueDate = originalDueDate.value;
+  }
 
   if (form.isAutoSendEmail) {
     console.log({ selectedTemplate: selectedTemplate.value });
@@ -283,6 +290,9 @@ function handleCancel() {
 }
 
 function handleInput(key: string, value: any) {
+  if (key == 'dueDate') {
+    isDateChange.value = true;
+  }
   formInput.value[key] = value;
 }
 
@@ -312,6 +322,8 @@ watch(
     if (value) {
       formInput.value = cloneDeep(props.data);
       const localDate = moment(props.data.dueDate * 1000).format("L");
+      isDateChange.value = false;
+      originalDueDate.value = props.data.dueDate;
       formInput.value.dueDate = localDate;
       syncMailTemplate();
     } else {
