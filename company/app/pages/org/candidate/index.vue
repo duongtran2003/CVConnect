@@ -93,7 +93,7 @@ import type { TCandidateFilter, TJobAdCandidate } from "~/types/candidate";
 import { POSITIVE_INT_REGEX } from "~/const/validation";
 
 definePageMeta({
-  layout: "org-admin",
+  layout: "org",
 });
 useHead({
   title: "Danh sách ứng viên",
