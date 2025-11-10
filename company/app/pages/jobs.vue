@@ -1,7 +1,7 @@
 <template>
-  <div class="home">
+  <div class="jobs-result">
     <HomeSearchSection />
-    <HomeHotJobs />
+    <JobsFilter />
   </div>
 </template>
 <script setup lang="ts">
@@ -10,6 +10,6 @@ definePageMeta({
 });
 </script>
 <style lang="scss" scoped>
-.home {
+.jobs-result {
 }
 </style>
