@@ -17,12 +17,17 @@
           :title="''"
           class="text-input"
           @input="($event) => (searchKeyword = $event)"
+          @enter="handleSearch"
         >
           <template #input-icon>
             <Icon name="material-symbols:search-rounded" class="mag-icon" />
           </template>
         </AppInputText>
-        <AppButton :text="'Tìm kiếm ngay'" class="search-btn">
+        <AppButton
+          :text="'Tìm kiếm ngay'"
+          class="search-btn"
+          @click="handleSearch"
+        >
           <template #icon>
             <Icon name="material-symbols:search-rounded" class="search-icon" />
           </template>
@@ -36,7 +41,22 @@ definePageMeta({
   layout: "public",
 });
 
+const emits = defineEmits<{
+  (e: "search", keyword: string): void;
+}>();
+
 const searchKeyword = ref<string>("");
+
+const jobsSearchStore = useJobsSearchStore();
+const { filter } = storeToRefs(jobsSearchStore);
+
+function handleSearch() {
+  emits("search", searchKeyword.value);
+}
+
+watch(filter, (newFilter) => {
+  searchKeyword.value = newFilter?.keyword ?? "";
+}, { immediate: true })
 </script>
 <style lang="scss" scoped>
 .search-section {

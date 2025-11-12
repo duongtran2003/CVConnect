@@ -29,6 +29,7 @@
           :class="{ disabled: isDisabled }"
           @input="updateValue"
           @blur="emit('blur')"
+          @keydown.enter="emit('enter')"
         />
         <Icon
           v-if="isSecured"
@@ -61,7 +62,7 @@ export type TInputTextProps = {
 
 const emit = defineEmits<{
   (e: "input", value: string): void;
-  (e: "blur"): void;
+  (e: "blur" | "enter"): void;
 }>();
 
 const props = withDefaults(defineProps<TInputTextProps>(), {

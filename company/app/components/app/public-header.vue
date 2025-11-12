@@ -1,11 +1,17 @@
 <template>
   <header class="public-header">
-    <div class="logo">
+    <div class="logo" @click="handleClickLogo">
       <img src="/logo-horizontal.svg" />
     </div>
   </header>
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const router = useRouter();
+
+function handleClickLogo() {
+  router.push({ path: "/" });
+}
+</script>
 <style lang="scss" scoped>
 .public-header {
   position: sticky;
@@ -22,13 +28,13 @@
   align-items: center;
 
   .logo {
+    cursor: pointer;
     img {
       height: 38px;
     }
   }
 
   .right {
-
   }
 }
 </style>

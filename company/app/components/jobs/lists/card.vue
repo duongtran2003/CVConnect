@@ -69,6 +69,9 @@ const location = computed(() => {
   padding: 16px;
   @include box-shadow;
   cursor: pointer;
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid white;
 
   .divider {
     display: block;
@@ -114,6 +117,7 @@ const location = computed(() => {
       display: block;
       height: 48px;
       width: 48px;
+      border-radius: 12px;
       background-color: wheat;
     }
 

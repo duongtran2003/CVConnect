@@ -20,9 +20,11 @@ const mockedJobAds = [
         displayAddress: "89 Le Van Luong St, Thanh Xuan dist, Hanoi",
       },
     ],
-    description: "Responsible for creating and executing automated test scripts for web applications.",
+    description:
+      "Responsible for creating and executing automated test scripts for web applications.",
     benefit: "Transportation support, flexible working hours, free snacks.",
-    requirement: "Basic knowledge of testing tools such as Selenium or Cypress.",
+    requirement:
+      "Basic knowledge of testing tools such as Selenium or Cypress.",
   },
   {
     id: 1,
@@ -39,8 +41,10 @@ const mockedJobAds = [
         displayAddress: "17 Duy Tan St, Cau Giay dist, Hanoi",
       },
     ],
-    description: "Develop and maintain user interfaces for enterprise web applications using React and TypeScript.",
-    benefit: "13th-month salary, hybrid work model, professional training courses.",
+    description:
+      "Develop and maintain user interfaces for enterprise web applications using React and TypeScript.",
+    benefit:
+      "13th-month salary, hybrid work model, professional training courses.",
     requirement: "1+ years experience with ReactJS and RESTful APIs.",
   },
   {
@@ -55,12 +59,15 @@ const mockedJobAds = [
     location: [
       {
         id: 0,
-        displayAddress: "475A Dien Bien Phu St, Binh Thanh dist, Ho Chi Minh City",
+        displayAddress:
+          "475A Dien Bien Phu St, Binh Thanh dist, Ho Chi Minh City",
       },
     ],
-    description: "Design and implement scalable backend services using Node.js and PostgreSQL.",
+    description:
+      "Design and implement scalable backend services using Node.js and PostgreSQL.",
     benefit: "Free gym membership, annual company trip, performance bonus.",
-    requirement: "Strong knowledge of Node.js, databases, and microservices architecture.",
+    requirement:
+      "Strong knowledge of Node.js, databases, and microservices architecture.",
   },
   {
     id: 3,
@@ -77,7 +84,8 @@ const mockedJobAds = [
         displayAddress: "52 Ut Tich St, Tan Binh dist, Ho Chi Minh City",
       },
     ],
-    description: "Create intuitive and attractive user interfaces for Tiki’s e-commerce platform.",
+    description:
+      "Create intuitive and attractive user interfaces for Tiki’s e-commerce platform.",
     benefit: "MacBook provided, health insurance, creative work environment.",
     requirement: "Proficiency in Figma or Adobe XD, strong portfolio required.",
   },
@@ -96,26 +104,43 @@ const mockedJobAds = [
         displayAddress: "Vinhomes Times City, Hai Ba Trung dist, Hanoi",
       },
     ],
-    description: "Develop machine learning models and analyze data to improve AI-driven solutions.",
-    benefit: "Cutting-edge research projects, flexible schedule, stock options.",
-    requirement: "3+ years in data science, strong skills in Python, TensorFlow, and statistical analysis.",
+    description:
+      "Develop machine learning models and analyze data to improve AI-driven solutions.",
+    benefit:
+      "Cutting-edge research projects, flexible schedule, stock options.",
+    requirement:
+      "3+ years in data science, strong skills in Python, TensorFlow, and statistical analysis.",
   },
-]
+];
 
 export const useJobsSearchStore = defineStore("jobsSearch", () => {
   const jobsList = ref<any[]>(mockedJobAds);
-  const selectedJob = ref<any>(null);
-
+  const selectedJob = ref<any>(jobsList.value[0]);
+  const filterOptions = ref<any>({});
+  const filter = ref<any>({});
   const isNoData = ref<any>(false);
 
   function setSelectedJob(job: any) {
     selectedJob.value = job;
   }
 
+  function setFilterOptions(filter: any) {
+    filterOptions.value = filter;
+  }
+
+  function setFilter(_filter: any) {
+    filter.value = _filter;
+    console.log("dcm sao deo call vao day????", filter.value);
+  }
+
   return {
     jobsList,
     selectedJob,
     isNoData,
+    filter,
+    filterOptions,
     setSelectedJob,
-  }
+    setFilterOptions,
+    setFilter,
+  };
 });
