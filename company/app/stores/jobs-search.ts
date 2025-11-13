@@ -115,7 +115,7 @@ const mockedJobAds = [
 
 export const useJobsSearchStore = defineStore("jobsSearch", () => {
   const jobsList = ref<any[]>(mockedJobAds);
-  const selectedJob = ref<any>(jobsList.value[0]);
+  const selectedJob = ref<any>(null);
   const filterOptions = ref<any>({});
   const filter = ref<any>({});
   const isNoData = ref<any>(false);

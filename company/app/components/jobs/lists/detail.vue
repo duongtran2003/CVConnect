@@ -1,5 +1,11 @@
 <template>
   <div class="detail">
+    <div class="control">
+      <Icon
+        name="material-symbols:close-rounded"
+        @click="() => setSelectedJob(null)"
+      />
+    </div>
     <div class="header">
       <div class="logo"></div>
       <div class="info">
@@ -37,9 +43,7 @@
         <div class="name">Remote</div>
       </div>
       <div class="row">
-        <Icon
-          name="material-symbols:more-time-rounded"
-        />
+        <Icon name="material-symbols:more-time-rounded" />
         <div class="name">4 hour ago</div>
       </div>
       <div class="divider"></div>
@@ -49,6 +53,7 @@
 </template>
 <script setup lang="ts">
 const jobsSearchStore = useJobsSearchStore();
+const { setSelectedJob } = jobsSearchStore;
 const { selectedJob } = storeToRefs(jobsSearchStore);
 
 function handleApply() {
@@ -79,6 +84,15 @@ function handleApply() {
     height: 20px;
     width: 20px;
     min-width: 20px;
+  }
+
+  .control {
+    display: flex;
+    justify-content: flex-end;
+
+    .iconify {
+      cursor: pointer;
+    }
   }
 
   display: flex;

@@ -5,7 +5,7 @@
         v-for="job of jobsList"
         :key="job.id"
         :data="job"
-        :class="{ selected: job.id == selectedJob.id }"
+        :class="{ selected: job.id == selectedJob?.id }"
         @click="setSelectedJob(job)"
       />
     </div>

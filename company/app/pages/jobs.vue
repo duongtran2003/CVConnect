@@ -1,10 +1,22 @@
 <template>
   <div class="jobs-result">
     <HomeSearchSection @search="handleSearch" />
-    <JobsFilter @filter="handleFilter" />
     <div class="content">
-      <JobsList class="left" />
-      <JobsListsDetail class="right" />
+      <JobsFilter
+        v-if="selectedJob == null"
+        class="filtter-col"
+        :class="{ 'has-filter': selectedJob == null }"
+        @filter="handleFilter"
+      />
+      <JobsList
+        class="list-col"
+        :class="{ 'has-filter': selectedJob == null }"
+      />
+      <JobsListsDetail
+        v-if="selectedJob != null"
+        class="detail-col"
+        :class="{ 'has-filter': selectedJob == null }"
+      />
     </div>
     <div class="pagination">phan trang</div>
   </div>
@@ -19,7 +31,7 @@ const router = useRouter();
 
 const jobsSearchStore = useJobsSearchStore();
 const { setFilterOptions, setFilter } = jobsSearchStore;
-const { filter, filterOptions } = storeToRefs(jobsSearchStore);
+const { filter, filterOptions, selectedJob } = storeToRefs(jobsSearchStore);
 const { getFilter } = useJobsSearchApi();
 
 onBeforeMount(async () => {
@@ -32,11 +44,62 @@ onBeforeMount(async () => {
     label: level.name,
     value: level.id,
   }));
+  res.data.levels.unshift({
+    label: "Tất cả",
+    value: 0,
+  });
   res.data.jobTypes = res.data.jobTypes.map((t: any) => ({
     label: t.description,
     value: t.name,
   }));
-  setFilterOptions(res.data);
+  res.data.jobTypes.unshift({
+    label: "Tất cả",
+    value: "ALL",
+  });
+
+  const filters = {
+    ...res.data,
+    salary: [
+      {
+        label: "Tất cả",
+        value: "ALL",
+      },
+      {
+        label: "Dưới 10 triệu",
+        value: "0,10000000",
+      },
+      {
+        label: "10 - 15 triệu",
+        value: "10000000,15000000",
+      },
+      {
+        label: "15 - 20 triệu",
+        value: "15000000,20000000",
+      },
+      {
+        label: "20 - 25 triệu",
+        value: "20000000,25000000",
+      },
+      {
+        label: "25 - 30 triệu",
+        value: "25000000,30000000",
+      },
+      {
+        label: "30 - 50 triệu",
+        value: "30000000,50000000",
+      },
+      {
+        label: "Trên 50 triệu",
+        value: "50000000,",
+      },
+      {
+        label: "Thỏa thuận",
+        value: "negotiable,",
+      },
+    ],
+  };
+
+  setFilterOptions(filters);
   syncFromQuery();
 });
 
@@ -51,7 +114,7 @@ function syncFromQuery() {
     const careersFilter = [];
     for (const c of careers) {
       const career = filterOptions.value.careers.find(
-        (_c: any) => (_c.value == +c),
+        (_c: any) => _c.value == +c,
       );
       if (career) {
         careersFilter.push(career);
@@ -61,31 +124,37 @@ function syncFromQuery() {
   }
 
   if (q.levels) {
-    const levels = (q.levels as string).split(",");
-    const levelsFilter = [];
-    for (const c of levels) {
-      const level = filterOptions.value.levels.find(
-        (_c: any) => (_c.value == +c),
-      );
-      if (level) {
-        levelsFilter.push(level);
-      }
+    const levels = q.levels as string;
+    const level = filterOptions.value.levels.find(
+      (_c: any) => _c.value == +levels,
+    );
+    if (level) {
+      f.levels = level.value;
     }
-    f.levels = levelsFilter;
   }
 
   if (q.jobTypes) {
-    const jobTypes = (q.jobTypes as string).split(",");
-    const jobTypesFilter = [];
-    for (const c of jobTypes) {
-      const level = filterOptions.value.jobTypes.find(
-        (_c: any) => (_c.value == c),
+    const jobTypes = q.jobTypes as string;
+    const jobType = filterOptions.value.jobTypes.find(
+      (_c: any) => _c.value == jobTypes,
+    );
+    if (jobType) {
+      f.jobTypes = jobType;
+    }
+  }
+
+  if (q.salary) {
+    const salaries = (q.salary as string).split(",");
+    let salaryFilter = null;
+    for (const c of salaries) {
+      const salary = filterOptions.value.salary.find(
+        (_c: any) => _c.value == c,
       );
-      if (level) {
-        jobTypesFilter.push(level);
+      if (salary) {
+        salaryFilter = salary;
       }
     }
-    f.jobTypes = jobTypesFilter;
+    f.salary = salaryFilter;
   }
 
   console.log({ f });
@@ -102,11 +171,14 @@ function syncToQuery() {
   if (f.careers && f.careers.length) {
     q.careers = f.careers.map((career: any) => career.value).join(",");
   }
-  if (f.levels && f.levels.length) {
-    q.levels = f.levels.map((level: any) => level.value).join(",");
+  if (f.levels != undefined && f.levels != null) {
+    q.levels = f.levels;
   }
-  if (f.jobTypes && f.jobTypes.length) {
-    q.jobTypes = f.jobTypes.map((t: any) => t.value).join(",");
+  if (f.jobTypes) {
+    q.jobTypes = f.jobTypes;
+  }
+  if (f.salary) {
+    q.salary = f.salary;
   }
 
   router.replace({ query: q });
@@ -127,18 +199,31 @@ function handleFilter(newValue: any) {
   overflow: auto;
 
   .content {
+    max-width: 75%;
+    @media (max-width: 768px) {
+      max-width: 100%;
+    }
+    margin: auto;
     display: flex;
     flex-direction: row;
     gap: 8px;
     padding: 8px;
 
-    .left {
-      width: 40%;
-      max-width: 40%;
+    .filtter-col {
+      max-width: 280px;
+      width: 280px;
     }
-    .right {
-      width: 60%;
-      max-width: 60%;
+
+    .list-col {
+      max-width: 360px;
+
+      &.has-filter {
+        flex: 1;
+        max-width: none;
+      }
+    }
+    .detail-col {
+      flex: 1;
     }
   }
 

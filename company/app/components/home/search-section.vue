@@ -76,9 +76,11 @@ watch(filter, (newFilter) => {
   gap: 8px;
 
   .inner {
-    width: 80%;
+    width: calc(75% - 16px);
+    max-width: calc(75% - 16px);
     @media (max-width: 768px) {
-      width: 95%;
+      max-width: calc(100% - 32px);
+      width: calc(100% - 32px);
     }
     display: flex;
     flex-direction: column;

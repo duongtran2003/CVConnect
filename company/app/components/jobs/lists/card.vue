@@ -36,7 +36,6 @@
     </div>
     <div class="divider"></div>
     <div class="benefit row">
-      <Icon name="material-symbols:arrow-shape-up-stack-rounded" />
       <div class="content" v-html="props.data.benefit"></div>
     </div>
   </div>
@@ -64,13 +63,13 @@ const location = computed(() => {
 .job-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   color: $text-light;
-  padding: 16px;
+  padding: 8px;
   @include box-shadow;
   cursor: pointer;
   background-color: white;
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px solid white;
 
   .divider {
@@ -89,19 +88,19 @@ const location = computed(() => {
 
   .iconify {
     display: block;
-    font-size: 20px;
-    height: 20px;
-    width: 20px;
-    min-width: 20px;
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+    min-width: 16px;
   }
 
   .posted-time {
     color: $color-gray-400;
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
   }
 
@@ -110,6 +109,7 @@ const location = computed(() => {
     flex-direction: row;
     gap: 8px;
     align-items: center;
+    font-size: 13px;
   }
 
   .company-info {
