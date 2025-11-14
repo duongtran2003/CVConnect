@@ -1,0 +1,74 @@
+<template>
+  <div class="top-filter">
+    <div class="location-section">
+      <div
+        v-for="location of filterOptions.location"
+        :key="location.value"
+        class="location-tag"
+        :class="{ selected: filter.location == location.value }"
+        @click="handleSelectLocation(location)"
+      >
+        {{ location.label }}
+      </div>
+    </div>
+    <div class="sort-section">
+      <div class="label">Xếp theo:</div>
+    </div>
+  </div>
+</template>
+<script setup lang="ts">
+const jobsSearchStore = useJobsSearchStore();
+const { filter, filterOptions } = storeToRefs(jobsSearchStore);
+
+const emits = defineEmits<{
+  (e: "filter", newFilter: any): void;
+}>();
+
+function handleSelectLocation(location: any) {
+  emits("filter", { location: location.value });
+}
+</script>
+<style lang="scss" scoped>
+.top-filter {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font-size: 14px;
+
+  .location-section {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    border-right: 1px solid $color-gray-300;
+    padding: 0px 8px 0px 0px;
+
+    .location-tag {
+      padding: 4px 10px;
+      font-size: 13px;
+      border: 1px solid $color-gray-300;
+      border-radius: 999px;
+      background-color: white;
+      min-width: fit-content;
+      cursor: pointer;
+
+      &.selected {
+        border-color: $color-primary-400;
+        background-color: $color-primary-50;
+        color: $color-primary-400;
+      }
+    }
+  }
+  .sort-section {
+    width: 240px;
+
+    .label {
+      color: $text-light;
+    }
+  }
+}
+</style>

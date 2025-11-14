@@ -7,18 +7,24 @@
       />
     </div>
     <div class="header">
-      <div class="logo"></div>
+      <div class="logo">
+        <img :src="selectedJob.org.logoUrl" alt="Logo công ty" />
+      </div>
       <div class="info">
         <div class="title">{{ selectedJob.title }}</div>
-        <div class="company-name">{{ selectedJob.companyName }}</div>
-        <div class="salary-range row">
+        <div class="company-name">{{ selectedJob.org.name }}</div>
+        <div
+          v-if="selectedJob.salaryType?.name != 'NEGOTIABLE'"
+          class="salary-range row"
+        >
           <Icon name="material-symbols:money-range-outline-rounded" />
           <span class="salary">
             {{
-              `${selectedJob.salaryFrom} - ${selectedJob.salaryTo} (${selectedJob.currencyType})`
+              `${selectedJob.salaryFrom} - ${selectedJob.salaryTo} (${selectedJob.currencyType?.name})`
             }}
           </span>
         </div>
+        <div v-else class="salary-range">Thỏa thuận</div>
       </div>
     </div>
     <AppButton
@@ -29,11 +35,17 @@
     <div class="divider"></div>
     <div class="content">
       <div
-        v-for="location of selectedJob.location"
+        v-for="location of selectedJob.workLocations"
         :key="location.id"
         class="row"
       >
-        <Icon name="material-symbols:location-on-outline-rounded" />
+        <Icon
+          :name="
+            location.isHeadquarter
+              ? 'material-symbols:home-work-outline-rounded'
+              : 'material-symbols:location-on-outline-rounded'
+          "
+        />
         <div class="name">{{ location.displayAddress }}</div>
       </div>
       <div class="row">
@@ -44,10 +56,9 @@
       </div>
       <div class="row">
         <Icon name="material-symbols:more-time-rounded" />
-        <div class="name">4 hour ago</div>
+        <div class="name">{{ relativeTime }}</div>
       </div>
       <div class="divider"></div>
-      {{ selectedJob }}
     </div>
   </div>
 </template>
@@ -55,6 +66,7 @@
 const jobsSearchStore = useJobsSearchStore();
 const { setSelectedJob } = jobsSearchStore;
 const { selectedJob } = storeToRefs(jobsSearchStore);
+const relativeTime = useMomentRelativeTime(selectedJob.value.createdAt);
 
 function handleApply() {
   console.log("apply");
@@ -89,6 +101,7 @@ function handleApply() {
   .control {
     display: flex;
     justify-content: flex-end;
+    margin-bottom: -18px;
 
     .iconify {
       cursor: pointer;
@@ -105,11 +118,18 @@ function handleApply() {
     gap: 12px;
 
     .logo {
+      display: block;
       height: 84px;
       width: 84px;
       min-width: 84px;
-      border-radius: 6px;
-      background-color: wheat;
+      border-radius: 12px;
+      overflow: hidden;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: inherit;
+      }
     }
 
     .info {

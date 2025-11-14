@@ -133,7 +133,6 @@ const emits = defineEmits<{
 }>();
 
 function handleSetFilter(key: string, value: any) {
-  console.log("set filter", key, value);
   emits("filter", { [key]: value });
 }
 </script>

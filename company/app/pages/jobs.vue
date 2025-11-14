@@ -1,6 +1,7 @@
 <template>
   <div class="jobs-result">
     <HomeSearchSection @search="handleSearch" />
+    <JobsTopFilter class="top-filter" @filter="handleFilter" />
     <div class="content">
       <JobsFilter
         v-if="selectedJob == null"
@@ -22,6 +23,8 @@
   </div>
 </template>
 <script setup lang="ts">
+import { SALARY_FILTER } from "~/const/views/public/jobs";
+
 definePageMeta({
   layout: "public",
 });
@@ -30,9 +33,10 @@ const route = useRoute();
 const router = useRouter();
 
 const jobsSearchStore = useJobsSearchStore();
-const { setFilterOptions, setFilter } = jobsSearchStore;
+const { setFilterOptions, setFilter, setJobsList } = jobsSearchStore;
 const { filter, filterOptions, selectedJob } = storeToRefs(jobsSearchStore);
-const { getFilter } = useJobsSearchApi();
+const { getFilter, getJobAds } = useJobsSearchApi();
+const currentPage = ref<any>(0);
 
 onBeforeMount(async () => {
   const res = await getFilter();
@@ -59,48 +63,26 @@ onBeforeMount(async () => {
 
   const filters = {
     ...res.data,
-    salary: [
-      {
-        label: "Tất cả",
-        value: "ALL",
-      },
-      {
-        label: "Dưới 10 triệu",
-        value: "0,10000000",
-      },
-      {
-        label: "10 - 15 triệu",
-        value: "10000000,15000000",
-      },
-      {
-        label: "15 - 20 triệu",
-        value: "15000000,20000000",
-      },
-      {
-        label: "20 - 25 triệu",
-        value: "20000000,25000000",
-      },
-      {
-        label: "25 - 30 triệu",
-        value: "25000000,30000000",
-      },
-      {
-        label: "30 - 50 triệu",
-        value: "30000000,50000000",
-      },
-      {
-        label: "Trên 50 triệu",
-        value: "50000000,",
-      },
-      {
-        label: "Thỏa thuận",
-        value: "negotiable,",
-      },
-    ],
+    salary: SALARY_FILTER,
   };
 
   setFilterOptions(filters);
   syncFromQuery();
+  const jobAdsRes = await getJobAds({});
+  console.log({ jobAdsRes });
+  setJobsList(jobAdsRes.data.data.data);
+  const locationFilter = jobAdsRes.data.locations.map((loc: any) => ({
+    value: loc.province,
+    label: `${loc.province} (${loc.jobAdCount})`,
+  }));
+
+  setFilterOptions({
+    ...filters,
+    location: locationFilter,
+  });
+
+  const q = route.query;
+  const f: any = {};
 });
 
 function syncFromQuery() {
@@ -135,29 +117,25 @@ function syncFromQuery() {
 
   if (q.jobTypes) {
     const jobTypes = q.jobTypes as string;
-    const jobType = filterOptions.value.jobTypes.find(
-      (_c: any) => _c.value == jobTypes,
-    );
-    if (jobType) {
-      f.jobTypes = jobType;
+    if (jobTypes) {
+      f.jobTypes = jobTypes;
     }
   }
 
   if (q.salary) {
-    const salaries = (q.salary as string).split(",");
-    let salaryFilter = null;
-    for (const c of salaries) {
-      const salary = filterOptions.value.salary.find(
-        (_c: any) => _c.value == c,
-      );
-      if (salary) {
-        salaryFilter = salary;
-      }
+    const salaries = q.salary as string;
+
+    if (salaries) {
+      f.salary = salaries;
     }
-    f.salary = salaryFilter;
   }
 
-  console.log({ f });
+  if (q.location) {
+    const locations = q.location as string;
+    if (locations) {
+      f.location = locations;
+    }
+  }
 
   setFilter(f);
 }
@@ -180,6 +158,9 @@ function syncToQuery() {
   if (f.salary) {
     q.salary = f.salary;
   }
+  if (f.location) {
+    q.location = f.location;
+  }
 
   router.replace({ query: q });
 }
@@ -190,6 +171,7 @@ function handleSearch(keyword: string) {
 }
 
 function handleFilter(newValue: any) {
+  console.log(newValue);
   setFilter({ ...filter.value, ...newValue });
   syncToQuery();
 }
@@ -198,12 +180,18 @@ function handleFilter(newValue: any) {
 .jobs-result {
   overflow: auto;
 
-  .content {
+  .top-filter {
+    margin-top: 8px;
+  }
+
+  .content,
+  .top-filter {
     max-width: 75%;
     @media (max-width: 768px) {
       max-width: 100%;
     }
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
     display: flex;
     flex-direction: row;
     gap: 8px;

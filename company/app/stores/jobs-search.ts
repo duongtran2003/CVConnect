@@ -130,7 +130,14 @@ export const useJobsSearchStore = defineStore("jobsSearch", () => {
 
   function setFilter(_filter: any) {
     filter.value = _filter;
-    console.log("dcm sao deo call vao day????", filter.value);
+  }
+
+  function setNoData(state: boolean) {
+    isNoData.value = state;
+  }
+
+  function setJobsList(list: any) {
+    jobsList.value = list;
   }
 
   return {
@@ -142,5 +149,7 @@ export const useJobsSearchStore = defineStore("jobsSearch", () => {
     setSelectedJob,
     setFilterOptions,
     setFilter,
+    setNoData,
+    setJobsList,
   };
 });
