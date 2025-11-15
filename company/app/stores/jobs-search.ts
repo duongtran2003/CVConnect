@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { JOBS_SORTER } from "~/const/views/public/jobs";
 
 export const useJobsSearchStore = defineStore("jobsSearch", () => {
   const jobsList = ref<any[]>([]);
@@ -7,6 +8,7 @@ export const useJobsSearchStore = defineStore("jobsSearch", () => {
   const filter = ref<any>({});
   const isNoData = ref<any>(false);
   const isFetchingJobs = ref<boolean>(false);
+  const sort = ref<any>(JOBS_SORTER[0]);
 
   function setSelectedJob(job: any) {
     selectedJob.value = job;
@@ -32,6 +34,10 @@ export const useJobsSearchStore = defineStore("jobsSearch", () => {
     isFetchingJobs.value = state;
   }
 
+  function setSort(_sort: any) {
+    sort.value = _sort;
+  }
+
   return {
     jobsList,
     selectedJob,
@@ -39,11 +45,13 @@ export const useJobsSearchStore = defineStore("jobsSearch", () => {
     filter,
     filterOptions,
     isFetchingJobs,
+    sort,
     setSelectedJob,
     setFilterOptions,
     setFilter,
     setNoData,
     setJobsList,
     setIsFetchingJobs,
+    setSort,
   };
 });

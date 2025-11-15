@@ -42,7 +42,7 @@ const {
   setNoData,
   setIsFetchingJobs,
 } = jobsSearchStore;
-const { filter, filterOptions, selectedJob, jobsList } =
+const { filter, filterOptions, selectedJob, jobsList, sort } =
   storeToRefs(jobsSearchStore);
 const { getFilter, getJobAds } = useJobsSearchApi();
 const currentPage = ref<any>(0);
@@ -89,7 +89,12 @@ async function fetchJobs() {
   }
   controller.value = new AbortController();
 
-  const jobAdsRes = await getJobAds(convertFilter(), controller.value);
+  const queryObj = {
+    ...convertFilter(),
+    ...sort.value.value,
+  };
+
+  const jobAdsRes = await getJobAds(queryObj, controller.value);
   setJobsList([...jobsList.value, ...jobAdsRes.data.data.data]);
 
   if (jobAdsRes.data.data.data.length == 0) {
@@ -259,7 +264,7 @@ async function handleFetchMore() {
 }
 
 watch(
-  () => filter.value,
+  [() => filter.value, () => sort.value],
   async () => {
     if (scroller.value) {
       console.log({ scroller: scroller.value });
@@ -272,6 +277,7 @@ watch(
     setJobsList([]);
     await fetchJobs();
   },
+  { deep: true },
 );
 </script>
 <style lang="scss" scoped>
@@ -284,7 +290,7 @@ watch(
 
   .content,
   .top-filter {
-    max-width: 75%;
+    max-width: min(75%, 1080px);
     @media (max-width: 768px) {
       max-width: 100%;
     }

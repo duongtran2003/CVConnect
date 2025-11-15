@@ -5,11 +5,6 @@
         <span class="title-span">
           {{ props.data.title }}
         </span>
-        <Icon
-          class="external-link"
-          name="ci:external-link"
-          @click.stop="handleGoToJobAd"
-        />
       </div>
       <div class="right">
         <div class="due-date">{{ props.data.dueDateStr }}</div>
@@ -40,19 +35,25 @@
           <Icon name="material-symbols:location-on-outline-rounded" />
           <div class="name">{{ location }}</div>
         </div>
-        <AppButton
-          v-if="props.data.dueDateStr != 'Đã hết hạn'"
-          :text="'Ứng tuyển'"
-          class="apply-btn"
-          @click.stop="handleApply"
-        />
+        <div class="row ml-auto flex-wrap">
+          <AppButton
+            :text="'Xem nhanh'"
+            class="preview-btn"
+            @click.stop="handlePreview"
+          />
+          <AppButton
+            v-if="props.data.dueDateStr != 'Đã hết hạn'"
+            :text="'Ứng tuyển'"
+            class="apply-btn"
+            @click.stop="handleApply"
+          />
+        </div>
       </div>
     </div>
     <!-- <div class="divider"></div> -->
     <!-- <div class="benefit row"> -->
     <!--   <div class="content" v-html="props.data.benefit"></div> -->
     <!-- </div> -->
-    <div class="posted-time">{{ relativeTime }}</div>
   </div>
 </template>
 <script setup lang="ts">
@@ -62,7 +63,8 @@ type TProps = {
 
 const props = defineProps<TProps>();
 
-const relativeTime = useMomentRelativeTime(props.data.createdAt);
+const jobsSearchStore = useJobsSearchStore();
+const { setSelectedJob } = jobsSearchStore;
 
 const location = computed(() => {
   if (!props.data.workLocations || props.data.workLocations.length == 0) {
@@ -91,12 +93,12 @@ const tags = computed(() => {
   return props.data.tags?.slice(0, 4) || [];
 });
 
-function handleGoToJobAd() {
-  alert("Mo cua so moi");
-}
-
 function handleApply() {
   alert("Mo modal apply");
+}
+
+function handlePreview() {
+  setSelectedJob(props.data);
 }
 </script>
 <style lang="scss" scoped>
@@ -111,19 +113,29 @@ function handleApply() {
   background-color: white;
   border-radius: 6px;
   border: 1px solid white;
-  .external-link {
-    display: inline-block !important;
-    color: $color-info;
-  }
 
   .apply-btn {
     background-color: $color-primary-400;
+    border: 1px solid $color-primary-400;
     min-width: fit-content;
     font-size: 14px;
     margin-left: auto;
     color: $text-dark;
-    padding: 4px 18px;
+    padding: 4px 0px;
     align-self: flex-end;
+    width: 104px;
+  }
+
+  .preview-btn {
+    background-color: white;
+    border: 1px solid $color-primary-400;
+    min-width: fit-content;
+    font-size: 14px;
+    margin-left: auto;
+    color: $color-primary-400;
+    padding: 4px 0px;
+    align-self: flex-end;
+    width: 104px;
   }
 
   .top {
@@ -138,6 +150,7 @@ function handleApply() {
       flex-direction: row;
       align-items: flex-start;
       gap: 8px;
+      min-width: fit-content;
 
       .due-date {
         color: $color-gray-400;

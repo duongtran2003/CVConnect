@@ -77,7 +77,7 @@ watch(filter, (newFilter) => {
 
   .inner {
     width: calc(75% - 16px);
-    max-width: calc(75% - 16px);
+    max-width: min(calc(75% - 16px), 1064px);
     @media (max-width: 768px) {
       max-width: calc(100% - 32px);
       width: calc(100% - 32px);

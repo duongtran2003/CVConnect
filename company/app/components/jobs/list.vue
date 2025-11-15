@@ -6,7 +6,7 @@
         :key="job.id"
         :data="job"
         :class="{ selected: job.id == selectedJob?.id }"
-        @click="setSelectedJob(job)"
+        @click="handleViewDetail(job)"
       />
       <div v-if="isFetchingJobs" class="spinner">
         <AppSpinnerHalfCircle />
@@ -21,13 +21,16 @@
 </template>
 <script setup lang="ts">
 const jobsSearchStore = useJobsSearchStore();
-const { setSelectedJob } = jobsSearchStore;
 const { jobsList, selectedJob, isFetchingJobs, isNoData } =
   storeToRefs(jobsSearchStore);
 
 const emits = defineEmits<{
   (e: "fetchMore"): void;
 }>();
+
+function handleViewDetail(job: any) {
+  alert('mo cua so moi')
+}
 </script>
 <style lang="scss" scoped>
 .jobs-list {
@@ -54,6 +57,7 @@ const emits = defineEmits<{
     justify-content: center;
     align-items: center;
     height: 21px;
+    width: 360px;
   }
 
   .show-more {

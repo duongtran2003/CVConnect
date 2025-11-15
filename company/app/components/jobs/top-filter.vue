@@ -13,12 +13,30 @@
     </div>
     <div class="sort-section">
       <div class="label">Sắp xếp theo:</div>
+      <AppInputSearchSelect
+        :label="''"
+        :required="false"
+        :options="JOBS_SORTER"
+        :value="sort"
+        :error="''"
+        :placeholder="'Sắp xếp'"
+        :search-placeholder="'Tìm kiếm'"
+        :remote-filter="false"
+        :multiple="false"
+        :slim-error="true"
+        :fetch-fn="null"
+        @input="handleSetSort($event)"
+        @clear-value="handleSetSort($event)"
+      />
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import { JOBS_SORTER } from "~/const/views/public/jobs";
+
 const jobsSearchStore = useJobsSearchStore();
-const { filter, filterOptions } = storeToRefs(jobsSearchStore);
+const { setSort } = jobsSearchStore;
+const { filter, filterOptions, sort } = storeToRefs(jobsSearchStore);
 
 const emits = defineEmits<{
   (e: "filter", newFilter: any): void;
@@ -30,6 +48,10 @@ function handleSelectLocation(location: any) {
   } else {
     emits("filter", { location: location.value });
   }
+}
+
+function handleSetSort(sort: any) {
+  setSort(sort);
 }
 </script>
 <style lang="scss" scoped>
@@ -69,7 +91,11 @@ function handleSelectLocation(location: any) {
     }
   }
   .sort-section {
-    width: 240px;
+    width: 288px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
 
     .label {
       color: $text-light;
