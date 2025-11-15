@@ -164,8 +164,14 @@ function handleViewOrg() {
       display: flex;
       flex-direction: row;
       align-items: flex-start;
+      flex-wrap: wrap;
       gap: 8px;
       min-width: fit-content;
+
+      @media (max-width: 768px) {
+        flex-direction: column-reverse;
+        gap: 2px;
+      }
 
       .due-date {
         color: $color-gray-400;
@@ -258,6 +264,7 @@ function handleViewOrg() {
       .tags {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
         gap: 8px;
 
         .tag {
