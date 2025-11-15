@@ -20,6 +20,22 @@ export const useOrgApi = () => {
     }
   };
 
+  const getOrgInfoPublic = async (id: any) => {
+    try {
+      const res = await $axios.get(`/_api/core/org/outside/org-info/${id}`);
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  }
+
   const updateLogo = async (payload: any) => {
     try {
       const res = await $axios.put(`/_api/core/org/update-logo`, payload);
@@ -85,5 +101,6 @@ export const useOrgApi = () => {
     updateLogo,
     updateCover,
     updateInfo,
+    getOrgInfoPublic,
   };
 };

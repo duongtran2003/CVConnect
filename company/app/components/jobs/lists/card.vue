@@ -16,7 +16,10 @@
         <img :src="props.data.org?.logoUrl" alt="Logo công ty" />
       </div>
       <div class="info-block">
-        <div class="name">{{ props.data.org?.name }}</div>
+        <div class="name">
+          {{ props.data.org?.name }}
+          <Icon class="external-link" name="ci:external-link" @click.stop="handleViewOrg" />
+        </div>
         <div class="tags">
           <div v-for="(tag, index) of tags" :key="index" class="tag">
             {{ tag }}
@@ -63,6 +66,7 @@ type TProps = {
 
 const props = defineProps<TProps>();
 
+const router = useRouter();
 const jobsSearchStore = useJobsSearchStore();
 const { setSelectedJob } = jobsSearchStore;
 
@@ -100,6 +104,11 @@ function handleApply() {
 function handlePreview() {
   setSelectedJob(props.data);
 }
+
+function handleViewOrg() {
+  const link = router.resolve({ path: `/org-profile/${props.data.org.id}` });
+  window.open(link.href, "_blank");
+}
 </script>
 <style lang="scss" scoped>
 .job-card {
@@ -113,6 +122,12 @@ function handlePreview() {
   background-color: white;
   border-radius: 6px;
   border: 1px solid white;
+
+  .external-link {
+    display: inline-block !important;
+    color: $color-info;
+    cursor: pointer;
+  }
 
   .apply-btn {
     background-color: $color-primary-400;
@@ -214,10 +229,12 @@ function handlePreview() {
   }
 
   .company-info {
+    align-items: flex-start !important;
     .logo {
       display: block;
       height: 48px;
       width: 48px;
+      min-width: 48px;
       border-radius: 12px;
       overflow: hidden;
       img {

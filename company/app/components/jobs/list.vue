@@ -12,7 +12,11 @@
         <AppSpinnerHalfCircle />
       </div>
       <AppNoData v-if="isNoData && jobsList.length == 0 && !isFetchingJobs" />
-      <div v-if="!isNoData && !isFetchingJobs" class="show-more" @click="() => emits('fetchMore')">
+      <div
+        v-if="!isNoData && !isFetchingJobs"
+        class="show-more"
+        @click="() => emits('fetchMore')"
+      >
         Hiển thị thêm
       </div>
     </div>
@@ -29,7 +33,7 @@ const emits = defineEmits<{
 }>();
 
 function handleViewDetail(job: any) {
-  alert('mo cua so moi')
+  alert("mo cua so moi");
 }
 </script>
 <style lang="scss" scoped>
@@ -57,7 +61,7 @@ function handleViewDetail(job: any) {
     justify-content: center;
     align-items: center;
     height: 21px;
-    width: 360px;
+    min-width: 360px;
   }
 
   .show-more {
