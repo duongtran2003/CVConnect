@@ -55,8 +55,39 @@ export const useJobsSearchApi = () => {
     }
   };
 
+  const getJobAdPreview = async (
+    id: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const res = await $axios.get(
+        `/_api/core/job-ad/outside/detail/${id}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   return {
     getFilter,
     getJobAds,
+    getJobAdPreview,
   };
 };
