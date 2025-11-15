@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="sort-section">
-      <div class="label">Xếp theo:</div>
+      <div class="label">Sắp xếp theo:</div>
     </div>
   </div>
 </template>
@@ -25,7 +25,11 @@ const emits = defineEmits<{
 }>();
 
 function handleSelectLocation(location: any) {
-  emits("filter", { location: location.value });
+  if (filter.value.location == location.value) {
+    emits("filter", { location: undefined });
+  } else {
+    emits("filter", { location: location.value });
+  }
 }
 </script>
 <style lang="scss" scoped>
@@ -36,6 +40,7 @@ function handleSelectLocation(location: any) {
   gap: 8px;
   width: 100%;
   font-size: 14px;
+  min-height: 45px;
 
   .location-section {
     flex: 1;

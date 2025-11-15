@@ -1,5 +1,5 @@
 <template>
-  <div class="jobs-result">
+  <div class="jobs-result" ref="scroller">
     <HomeSearchSection @search="handleSearch" />
     <JobsTopFilter class="top-filter" @filter="handleFilter" />
     <div class="content">
@@ -12,6 +12,7 @@
       <JobsList
         class="list-col"
         :class="{ 'has-filter': selectedJob == null }"
+        @fetch-more="handleFetchMore"
       />
       <JobsListsDetail
         v-if="selectedJob != null"
@@ -19,10 +20,11 @@
         :class="{ 'has-filter': selectedJob == null }"
       />
     </div>
-    <div class="pagination">phan trang</div>
+    <AppFooter />
   </div>
 </template>
 <script setup lang="ts">
+import { cloneDeep } from "lodash";
 import { SALARY_FILTER } from "~/const/views/public/jobs";
 
 definePageMeta({
@@ -33,10 +35,19 @@ const route = useRoute();
 const router = useRouter();
 
 const jobsSearchStore = useJobsSearchStore();
-const { setFilterOptions, setFilter, setJobsList } = jobsSearchStore;
-const { filter, filterOptions, selectedJob } = storeToRefs(jobsSearchStore);
+const {
+  setFilterOptions,
+  setFilter,
+  setJobsList,
+  setNoData,
+  setIsFetchingJobs,
+} = jobsSearchStore;
+const { filter, filterOptions, selectedJob, jobsList } =
+  storeToRefs(jobsSearchStore);
 const { getFilter, getJobAds } = useJobsSearchApi();
 const currentPage = ref<any>(0);
+const controller = ref<AbortController | null>(null);
+const scroller = useTemplateRef("scroller");
 
 onBeforeMount(async () => {
   const res = await getFilter();
@@ -65,25 +76,91 @@ onBeforeMount(async () => {
     ...res.data,
     salary: SALARY_FILTER,
   };
-
   setFilterOptions(filters);
+
   syncFromQuery();
-  const jobAdsRes = await getJobAds({});
-  console.log({ jobAdsRes });
-  setJobsList(jobAdsRes.data.data.data);
+});
+
+async function fetchJobs() {
+  setIsFetchingJobs(true);
+
+  if (controller.value) {
+    controller.value.abort();
+  }
+  controller.value = new AbortController();
+
+  const jobAdsRes = await getJobAds(convertFilter(), controller.value);
+  setJobsList([...jobsList.value, ...jobAdsRes.data.data.data]);
+
+  if (jobAdsRes.data.data.data.length == 0) {
+    setNoData(true);
+  } else {
+    setNoData(false);
+  }
+
   const locationFilter = jobAdsRes.data.locations.map((loc: any) => ({
     value: loc.province,
     label: `${loc.province} (${loc.jobAdCount})`,
   }));
 
   setFilterOptions({
-    ...filters,
+    ...filterOptions.value,
     location: locationFilter,
   });
 
-  const q = route.query;
-  const f: any = {};
-});
+  setIsFetchingJobs(false);
+}
+
+function convertFilter() {
+  const f = cloneDeep(filter.value);
+  console.log({ f });
+  const payload: any = {
+    pageIndex: currentPage.value,
+    pageSize: 20,
+  };
+
+  if (f.keyword?.trim()) {
+    payload.keyword = f.keyword.trim();
+  }
+  if (f.careers?.length) {
+    payload.careerIds = f.careers.map((c: any) => c.value);
+  }
+  if (f.levels && f.levels != 0) {
+    payload.levelIds = [f.levels];
+  }
+  if (f.location) {
+    if (f.location == "Remote") {
+      payload.isRemote = true;
+    } else {
+      payload.jobAdLocation = f.location;
+    }
+  }
+  if (f.salary && f.salary != "ALL") {
+    if (f.salary == "negotiable") {
+      payload.negotiable = true;
+    } else {
+      const salaries = f.salary.split(",");
+
+      const from = salaries[0];
+      let to = null;
+      if (salaries[1]) {
+        to = salaries[1];
+      }
+
+      payload.salaryFrom = from;
+      if (to != null) {
+        payload.salaryTo = to;
+      }
+    }
+  }
+  if (f.jobTypes && f.jobTypes != "ALL") {
+    payload.jobType = f.jobTypes;
+  }
+
+  console.log({ payload });
+
+  return payload;
+}
 
 function syncFromQuery() {
   const q = route.query;
@@ -171,10 +248,31 @@ function handleSearch(keyword: string) {
 }
 
 function handleFilter(newValue: any) {
-  console.log(newValue);
   setFilter({ ...filter.value, ...newValue });
+  console.log({ newValue, filter: filter.value });
   syncToQuery();
 }
+
+async function handleFetchMore() {
+  currentPage.value += 1;
+  await fetchJobs();
+}
+
+watch(
+  () => filter.value,
+  async () => {
+    if (scroller.value) {
+      console.log({ scroller: scroller.value });
+      scroller.value.scrollTo({
+        top: 219,
+      });
+    }
+
+    currentPage.value = 0;
+    setJobsList([]);
+    await fetchJobs();
+  },
+);
 </script>
 <style lang="scss" scoped>
 .jobs-result {
@@ -215,12 +313,8 @@ function handleFilter(newValue: any) {
     }
   }
 
-  .pagination {
-    display: flex;
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 8px;
-    justify-content: center;
+  .content {
+    padding-bottom: 128px;
   }
 }
 </style>

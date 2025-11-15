@@ -41,6 +41,7 @@
           <div class="name">{{ location }}</div>
         </div>
         <AppButton
+          v-if="props.data.dueDateStr != 'Đã hết hạn'"
           :text="'Ứng tuyển'"
           class="apply-btn"
           @click.stop="handleApply"
@@ -87,7 +88,7 @@ const locationTooltip = computed(() => {
 });
 
 const tags = computed(() => {
-  return props.data.tags.slice(0, 4);
+  return props.data.tags?.slice(0, 4) || [];
 });
 
 function handleGoToJobAd() {

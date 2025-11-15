@@ -33,6 +33,44 @@ export const SALARY_FILTER = [
   },
   {
     label: "Thỏa thuận",
-    value: "negotiable,",
+    value: "negotiable",
+  },
+];
+
+export const JOBS_SORTER = [
+  {
+    label: "Việc làm nổi bật",
+    value: {
+      sortBy: "viewCount",
+      sortDirection: "DESC",
+    },
+  },
+  {
+    label: "Tin mới nhất",
+    value: {
+      sortBy: "createdAt",
+      sortDirection: "DESC",
+    },
+  },
+  {
+    label: "Lương cao đến thấp",
+    value: {
+      sortBy: "salaryTo",
+      sortDirection: "DESC",
+    },
+  },
+  {
+    label: "Lương thấp đến cao",
+    value: {
+      sortBy: "salaryTo",
+      sortDirection: "ASC",
+    },
+  },
+  {
+    label: "Hạn ứng tuyển",
+    value: {
+      sortBy: "dueDate",
+      sortDirection: "DESC",
+    },
   },
 ];
