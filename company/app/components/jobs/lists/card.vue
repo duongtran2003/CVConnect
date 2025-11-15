@@ -1,24 +1,34 @@
 <template>
   <div class="job-card">
-    <div class="posted-time">{{ relativeTime }}</div>
-    <div class="title">{{ props.data.title }}</div>
+    <div class="top">
+      <div class="title">
+        <span class="title-span">
+          {{ props.data.title }}
+        </span>
+        <Icon
+          class="external-link"
+          name="ci:external-link"
+          @click.stop="handleGoToJobAd"
+        />
+      </div>
+      <div class="right">
+        <div class="due-date">{{ props.data.dueDateStr }}</div>
+        <div class="salary">{{ props.data.salaryStr }}</div>
+      </div>
+    </div>
     <div class="company-info row">
       <div class="logo">
         <img :src="props.data.org?.logoUrl" alt="Logo công ty" />
       </div>
-      <div class="name">{{ props.data.org?.name }}</div>
-    </div>
-    <div class="divider"></div>
-    <div class="salary row">
-      <Icon name="material-symbols:money-range-outline-rounded" />
-      <div v-if="props.data.salaryType?.name != 'NEGOTIABLE'" class="range">
-        {{
-          `${props.data.salaryFrom} - ${props.data.salaryTo} (${props.data.currencyType?.name})`
-        }}
+      <div class="info-block">
+        <div class="name">{{ props.data.org?.name }}</div>
+        <div class="tags">
+          <div v-for="(tag, index) of tags" :key="index" class="tag">
+            {{ tag }}
+          </div>
+        </div>
       </div>
-      <div v-else class="range">Thỏa thuận</div>
     </div>
-    <div class="row job-type">{{ props.data.jobType?.description }}</div>
     <div class="divider"></div>
     <div class="block">
       <div class="position row">
@@ -26,22 +36,22 @@
         <div class="name">{{ props.data.position?.name }}</div>
       </div>
       <div class="row">
-        <div v-if="props.data.isRemote" class="remote row">
-          <Icon
-            name="material-symbols:nest-remote-comfort-sensor-outline-rounded"
-          />
-          <div class="name">Remote</div>
-        </div>
-        <div v-if="location" class="location row">
+        <div v-if="location" class="location row" :title="locationTooltip">
           <Icon name="material-symbols:location-on-outline-rounded" />
           <div class="name">{{ location }}</div>
         </div>
+        <AppButton
+          :text="'Ứng tuyển'"
+          class="apply-btn"
+          @click.stop="handleApply"
+        />
       </div>
     </div>
     <!-- <div class="divider"></div> -->
     <!-- <div class="benefit row"> -->
     <!--   <div class="content" v-html="props.data.benefit"></div> -->
     <!-- </div> -->
+    <div class="posted-time">{{ relativeTime }}</div>
   </div>
 </template>
 <script setup lang="ts">
@@ -58,12 +68,35 @@ const location = computed(() => {
     return "";
   }
 
-  if (props.data.workLocations.length <= 1) {
-    return props.data.workLocations[0].displayAddress;
+  if (props.data.workLocations.length <= 2) {
+    return props.data.workLocations.map((loc: any) => loc.province).join(", ");
   }
 
-  return `${props.data.workLocations[0].displayAddress}, +${props.data.workLocations.length - 1}`;
+  const showStr = props.data.workLocations
+    .map((loc: any) => loc.province)
+    .join(", ");
+  const countRest = props.data.workLocations.length - 2;
+  return `${showStr} và ${countRest} địa điểm khác.`;
 });
+
+const locationTooltip = computed(() => {
+  const showStr = props.data.workLocations
+    .map((loc: any) => loc.province)
+    .join(", ");
+  return showStr;
+});
+
+const tags = computed(() => {
+  return props.data.tags.slice(0, 4);
+});
+
+function handleGoToJobAd() {
+  alert("Mo cua so moi");
+}
+
+function handleApply() {
+  alert("Mo modal apply");
+}
 </script>
 <style lang="scss" scoped>
 .job-card {
@@ -77,6 +110,48 @@ const location = computed(() => {
   background-color: white;
   border-radius: 6px;
   border: 1px solid white;
+  .external-link {
+    display: inline-block !important;
+    color: $color-info;
+  }
+
+  .apply-btn {
+    background-color: $color-primary-400;
+    min-width: fit-content;
+    font-size: 14px;
+    margin-left: auto;
+    color: $text-dark;
+    padding: 4px 18px;
+    align-self: flex-end;
+  }
+
+  .top {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: space-between;
+
+    .right {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 8px;
+
+      .due-date {
+        color: $color-gray-400;
+        font-size: 13px;
+        min-width: fit-content;
+      }
+
+      .salary {
+        color: $color-gray-700;
+        font-weight: 600;
+        font-size: 13px;
+        min-width: fit-content;
+      }
+    }
+  }
 
   .divider {
     display: block;
@@ -101,6 +176,8 @@ const location = computed(() => {
   }
 
   .posted-time {
+    text-align: right;
+    width: 100%;
     color: $color-gray-400;
     font-size: 12px;
   }
@@ -108,6 +185,10 @@ const location = computed(() => {
   .title {
     font-size: 14px;
     font-weight: 600;
+
+    .title-span {
+      margin-right: 4px;
+    }
   }
 
   .row {
@@ -133,19 +214,29 @@ const location = computed(() => {
       }
     }
 
-    .name {
-      color: $color-gray-600;
-    }
-  }
+    .info-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
 
-  .salary {
-    .iconify {
-      color: $color-gray-600;
-    }
+      .name {
+        color: $text-light;
+        font-weight: 500;
+      }
 
-    .range {
-      color: $color-gray-600;
-      font-weight: 600;
+      .tags {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+
+        .tag {
+          padding: 2px 10px;
+          border: 1px solid $color-gray-300;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 500;
+        }
+      }
     }
   }
 
@@ -160,7 +251,6 @@ const location = computed(() => {
     }
   }
 
-  .remote,
   .location {
     margin-right: 16px;
     .iconify {
@@ -168,21 +258,6 @@ const location = computed(() => {
     }
 
     .name {
-      color: $color-gray-600;
-      font-weight: 400;
-    }
-  }
-
-  .job-type {
-    color: $color-gray-600;
-  }
-
-  .benefit {
-    .iconify {
-      color: $color-gray-600;
-    }
-
-    :deep(.content) {
       color: $color-gray-600;
       font-weight: 400;
     }
