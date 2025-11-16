@@ -1,8 +1,8 @@
 <template>
-  <div v-if="isLoading || jobs.length > 0"  class="hot-jobs">
+  <div v-if="isLoading || jobs.length > 0" class="recommended-jobs">
     <div class="title">
-      <Icon name="fluent-color:megaphone-loud-32" />
-      Việc làm hot nhất
+      <Icon name="fluent-color:lightbulb-checkmark-32" />
+      Việc làm thích hợp cho bạn
     </div>
     <div class="content">
       <div v-if="isLoading" class="spinner">
@@ -32,14 +32,13 @@
   </div>
 </template>
 <script setup lang="ts">
-const { getFeaturedJobAds } = useJobsSearchApi();
+const { getRecommendedJobAds } = useJobsSearchApi();
 
 const isLoading = ref<boolean>(false);
 const controller = ref<AbortController | null>(null);
 const jobs = ref<any>([]);
 const pageInfo = ref<any>({});
 const currentPage = ref<any>(1);
-const router = useRouter();
 
 onBeforeMount(async () => {
   await fetchData();
@@ -54,7 +53,7 @@ async function fetchData() {
 
   controller.value = new AbortController();
 
-  const res = await getFeaturedJobAds(
+  const res = await getRecommendedJobAds(
     { pageIndex: currentPage.value - 1, pageSize: 20 },
     controller.value,
   );
@@ -75,7 +74,7 @@ function handleViewDetail(job: any) {
 }
 </script>
 <style lang="scss" scoped>
-.hot-jobs {
+.recommended-jobs {
   display: flex;
   flex-direction: column;
   gap: 8px;

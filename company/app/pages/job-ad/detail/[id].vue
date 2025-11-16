@@ -63,7 +63,7 @@ onBeforeMount(async () => {
 
     .main-col {
       width: 60%;
-      height: fit-content;
+      max-height: calc(100vh - 54px - 12px - 12px);
     }
 
     .sub-col {

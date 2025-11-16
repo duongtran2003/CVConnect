@@ -1,45 +1,41 @@
 <template>
-  <div v-if="isLoading || jobs.length > 0"  class="hot-jobs">
+  <div v-if="isLoading || orgs.length > 0" class="hot-orgs">
     <div class="title">
-      <Icon name="fluent-color:megaphone-loud-32" />
-      Việc làm hot nhất
+      <Icon name="fluent-color:building-government-search-32" />
+      Doanh nghiệp nổi bật
     </div>
     <div class="content">
       <div v-if="isLoading" class="spinner">
         <AppSpinnerHalfCircle />
       </div>
-      <JobsListsCard
-        v-for="job of jobs"
-        :key="job.id"
-        :data="job"
-        :allow-preview="false"
-        :allow-apply="false"
-        @click="handleViewDetail(job)"
+      <HomeOrgCard
+        v-for="org of orgs"
+        :key="org.id"
+        :data="org"
       />
     </div>
-    <div class="paginator">
-      <UPagination
-        :show-edges="true"
-        :sibling-count="1"
-        :variant="'ghost'"
-        active-variant="subtle"
-        :items-per-page="20"
-        :page="currentPage"
-        :total="pageInfo.totalElements"
-        @update:page="handlePageIndexChange($event)"
-      />
-    </div>
+    <!-- <div class="paginator"> -->
+    <!--   <UPagination -->
+    <!--     :show-edges="true" -->
+    <!--     :sibling-count="1" -->
+    <!--     :variant="'ghost'" -->
+    <!--     active-variant="subtle" -->
+    <!--     :items-per-page="20" -->
+    <!--     :page="currentPage" -->
+    <!--     :total="pageInfo.totalElements" -->
+    <!--     @update:page="handlePageIndexChange($event)" -->
+    <!--   /> -->
+    <!-- </div> -->
   </div>
 </template>
 <script setup lang="ts">
-const { getFeaturedJobAds } = useJobsSearchApi();
+const { getFeaturedOrgs } = useJobsSearchApi();
 
 const isLoading = ref<boolean>(false);
 const controller = ref<AbortController | null>(null);
-const jobs = ref<any>([]);
+const orgs = ref<any>([]);
 const pageInfo = ref<any>({});
 const currentPage = ref<any>(1);
-const router = useRouter();
 
 onBeforeMount(async () => {
   await fetchData();
@@ -54,11 +50,14 @@ async function fetchData() {
 
   controller.value = new AbortController();
 
-  const res = await getFeaturedJobAds(
-    { pageIndex: currentPage.value - 1, pageSize: 20 },
+  const res = await getFeaturedOrgs(
+    { pageIndex: currentPage.value - 1, pageSize: 10 },
     controller.value,
   );
-  jobs.value = res.data.data;
+
+  console.log({ res });
+
+  orgs.value = res.data;
   pageInfo.value = res.data.pageInfo;
 
   isLoading.value = false;
@@ -68,14 +67,9 @@ function handlePageIndexChange(page: any) {
   currentPage.value = page;
   fetchData();
 }
-
-function handleViewDetail(job: any) {
-  const link = router.resolve({ path: `/job-ad/detail/${job.id}` });
-  window.open(link.href, "_blank");
-}
 </script>
 <style lang="scss" scoped>
-.hot-jobs {
+.hot-orgs {
   display: flex;
   flex-direction: column;
   gap: 8px;

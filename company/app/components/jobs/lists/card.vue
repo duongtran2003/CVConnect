@@ -41,7 +41,7 @@
           <div class="name">{{ location }}</div>
         </div>
       </div>
-      <div class="row ml-auto flex-wrap">
+      <div v-if="props.allowPreview || props.allowApply" class="row ml-auto flex-wrap">
         <AppButton
           v-if="props.allowPreview"
           :text="'Xem nhanh'"
@@ -49,7 +49,7 @@
           @click.stop="handlePreview"
         />
         <AppButton
-          v-if="props.data.dueDateStr != 'Đã hết hạn'"
+          v-if="props.data.dueDateStr != 'Đã hết hạn' && props.allowApply"
           :text="'Ứng tuyển'"
           class="apply-btn"
           @click.stop="handleApply"
@@ -66,10 +66,12 @@
 type TProps = {
   data: any;
   allowPreview?: boolean;
+  allowApply?:boolean;
 };
 
 const props = withDefaults(defineProps<TProps>(), {
-  allowPreview: true
+  allowPreview: true,
+  allowApply: true,
 });
 
 const router = useRouter();
