@@ -13,18 +13,7 @@
         </div>
       </div>
       <div class="company-info row">
-        <div class="logo">
-          <img :src="info.org?.logoUrl" alt="Logo công ty" />
-        </div>
         <div class="info-block">
-          <div class="name">
-            {{ info.org?.name }}
-            <Icon
-              class="external-link"
-              name="ci:external-link"
-              @click.stop="handleViewOrg"
-            />
-          </div>
           <div class="tags">
             <div v-for="(tag, index) of tags" :key="index" class="tag">
               {{ tag }}
@@ -75,7 +64,7 @@
             class="text-content"
             v-html="info.description"
           />
-          <div v-else class="text-content-empty" v-html="'Không có'" />
+          <div v-else class="text-content empty" v-html="'Không có'" />
         </div>
 
         <div class="text-block">
@@ -85,13 +74,13 @@
             class="text-content"
             v-html="info.requirement"
           />
-          <div v-else class="text-content-empty" v-html="'Không có'" />
+          <div v-else class="text-content empty" v-html="'Không có'" />
         </div>
 
         <div class="text-block">
           <div class="label">Quyền lợi</div>
           <div v-if="info.benefit" class="text-content" v-html="info.benefit" />
-          <div v-else class="text-content-empty" v-html="'Không có'" />
+          <div v-else class="text-content empty" v-html="'Không có'" />
         </div>
       </div>
     </div>
@@ -421,6 +410,12 @@ function handleViewOrg() {
       :deep(.text-content) {
         color: $text-light;
         font-size: 14px;
+
+        &.empty {
+          color: $color-gray-400;
+          font-size: 14px;
+          font-style: italic;
+        }
       }
     }
   }

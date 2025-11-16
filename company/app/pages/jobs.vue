@@ -293,7 +293,7 @@ watch(
     width: min(75%, 1080px);
     @media (max-width: 768px) {
       max-width: 100%;
-      width: min(75%, 1080px);
+      width: 100%;
     }
   }
 
@@ -329,12 +329,11 @@ watch(
     flex: 1;
     width: 100%;
 
-    padding-left: 12.5%;
-    padding-right: 12.5%;
-
+    max-width: min(75%, 1080px);
+    width: min(75%, 1080px);
     @media (max-width: 768px) {
-      padding-left: 12px;
-      padding-right: 12px;
+      max-width: 100%;
+      width: 100%;
     }
   }
 }

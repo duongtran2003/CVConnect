@@ -2,10 +2,7 @@
   <div class="job-ad-detail">
     <div class="content">
       <JobsJobDetail v-if="info != null" class="main-col" :data="info" />
-      <div class="sub-col">
-        <div class="card">card 1</div>
-        <div class="card card-sticky">card 2</div>
-      </div>
+      <JobsOrgDetail v-if="info != null" class="sub-col" :data="info" />
     </div>
     <AppFooter />
   </div>
@@ -47,16 +44,17 @@ onBeforeMount(async () => {
     flex: 1;
     width: 100%;
 
+    margin: 0 auto;
+
     padding-top: 12px;
     padding-bottom: 128px;
     min-height: calc(100vh - 54px);
 
-    padding-left: 12.5%;
-    padding-right: 12.5%;
-
+    max-width: min(75%, 1080px);
+    width: min(75%, 1080px);
     @media (max-width: 768px) {
-      padding-left: 12px;
-      padding-right: 12px;
+      max-width: 100%;
+      width: 100%;
     }
     display: flex;
     flex-direction: row;

@@ -24,6 +24,7 @@
   </div>
 </template>
 <script setup lang="ts">
+const router = useRouter();
 const jobsSearchStore = useJobsSearchStore();
 const { jobsList, selectedJob, isFetchingJobs, isNoData } =
   storeToRefs(jobsSearchStore);
@@ -33,7 +34,8 @@ const emits = defineEmits<{
 }>();
 
 function handleViewDetail(job: any) {
-  alert("mo cua so moi");
+  const link = router.resolve({ path: `/job-ad/detail/${job.id}` });
+  window.open(link.href, "_blank");
 }
 </script>
 <style lang="scss" scoped>
