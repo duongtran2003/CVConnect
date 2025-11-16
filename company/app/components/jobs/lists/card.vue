@@ -2,9 +2,7 @@
   <div class="job-card">
     <div class="top">
       <div class="title">
-        <span class="title-span">
-          {{ props.data.title }}
-        </span>
+        {{ props.data.title }}
       </div>
       <div class="right">
         <div class="due-date">{{ props.data.dueDateStr }}</div>
@@ -18,7 +16,11 @@
       <div class="info-block">
         <div class="name">
           {{ props.data.org?.name }}
-          <Icon class="external-link" name="ci:external-link" @click.stop="handleViewOrg" />
+          <Icon
+            class="external-link"
+            name="ci:external-link"
+            @click.stop="handleViewOrg"
+          />
         </div>
         <div class="tags">
           <div v-for="(tag, index) of tags" :key="index" class="tag">
@@ -38,19 +40,19 @@
           <Icon name="material-symbols:location-on-outline-rounded" />
           <div class="name">{{ location }}</div>
         </div>
-        <div class="row ml-auto flex-wrap">
-          <AppButton
-            :text="'Xem nhanh'"
-            class="preview-btn"
-            @click.stop="handlePreview"
-          />
-          <AppButton
-            v-if="props.data.dueDateStr != 'Đã hết hạn'"
-            :text="'Ứng tuyển'"
-            class="apply-btn"
-            @click.stop="handleApply"
-          />
-        </div>
+      </div>
+      <div class="row ml-auto flex-wrap">
+        <AppButton
+          :text="'Xem nhanh'"
+          class="preview-btn"
+          @click.stop="handlePreview"
+        />
+        <AppButton
+          v-if="props.data.dueDateStr != 'Đã hết hạn'"
+          :text="'Ứng tuyển'"
+          class="apply-btn"
+          @click.stop="handleApply"
+        />
       </div>
     </div>
     <!-- <div class="divider"></div> -->
@@ -162,16 +164,11 @@ function handleViewOrg() {
 
     .right {
       display: flex;
-      flex-direction: row;
-      align-items: flex-start;
+      flex-direction: column-reverse;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 2px;
       min-width: fit-content;
-
-      @media (max-width: 768px) {
-        flex-direction: column-reverse;
-        gap: 2px;
-      }
+      justify-content: flex-end;
 
       .due-date {
         color: $color-gray-400;

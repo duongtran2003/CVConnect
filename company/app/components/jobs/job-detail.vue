@@ -70,17 +70,28 @@
       <div class="content">
         <div class="text-block">
           <div class="label">Mô tả công việc</div>
-          <div class="text-content" v-html="info.description" />
+          <div
+            v-if="info.description"
+            class="text-content"
+            v-html="info.description"
+          />
+          <div v-else class="text-content-empty" v-html="'Không có'" />
         </div>
 
         <div class="text-block">
           <div class="label">Yêu cầu công việc</div>
-          <div class="text-content" v-html="info.requirement" />
+          <div
+            v-if="info.requirement"
+            class="text-content"
+            v-html="info.requirement"
+          />
+          <div v-else class="text-content-empty" v-html="'Không có'" />
         </div>
 
         <div class="text-block">
           <div class="label">Quyền lợi</div>
-          <div class="text-content" v-html="info.benefit" />
+          <div v-if="info.benefit" class="text-content" v-html="info.benefit" />
+          <div v-else class="text-content-empty" v-html="'Không có'" />
         </div>
       </div>
     </div>
@@ -229,11 +240,6 @@ function handleViewOrg() {
         align-items: flex-start;
         gap: 8px;
         min-width: fit-content;
-
-        @media (max-width: 1124px) {
-          flex-direction: column-reverse;
-          gap: 2px;
-        }
 
         .due-date {
           color: $color-gray-400;
