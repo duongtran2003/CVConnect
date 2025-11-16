@@ -13,8 +13,10 @@
   display: flex;
   min-height: 100vh;
   height: 100vh;
+  max-height: 100vh;
   background-color: $color-gray-100;
   width: 100%;
+  overflow: hidden;
 
   :deep(.main-content) {
     width: 100%;

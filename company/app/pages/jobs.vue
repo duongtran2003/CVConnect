@@ -283,17 +283,22 @@ watch(
 <style lang="scss" scoped>
 .jobs-result {
   overflow: auto;
+  min-height: calc(100vh - 54px);
+  display: flex;
+  flex-direction: column;
 
   .top-filter {
     margin-top: 8px;
+    max-width: min(75%, 1080px);
+    width: min(75%, 1080px);
+    @media (max-width: 768px) {
+      max-width: 100%;
+      width: min(75%, 1080px);
+    }
   }
 
   .content,
   .top-filter {
-    max-width: min(75%, 1080px);
-    @media (max-width: 768px) {
-      max-width: 100%;
-    }
     margin-left: auto;
     margin-right: auto;
     display: flex;
@@ -321,6 +326,16 @@ watch(
 
   .content {
     padding-bottom: 128px;
+    flex: 1;
+    width: 100%;
+
+    padding-left: 12.5%;
+    padding-right: 12.5%;
+
+    @media (max-width: 768px) {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
   }
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div class="job-ad-detail">
-    <div class="wrapper">
-      <JobsJobDetail v-if="info != null" class="detail-col" :data="info" />
+    <div class="content">
+      <JobsJobDetail v-if="info != null" class="main-col" :data="info" />
       <div class="sub-col">
         <div class="card">card 1</div>
         <div class="card card-sticky">card 2</div>
@@ -38,47 +38,40 @@ onBeforeMount(async () => {
 </script>
 <style lang="scss" scoped>
 .job-ad-detail {
+  overflow: auto;
+  min-height: calc(100vh - 54px);
   display: flex;
   flex-direction: column;
-  overflow: auto;
 
-  .wrapper {
+  .content {
+    flex: 1;
+    width: 100%;
+
+    padding-top: 12px;
+    padding-bottom: 128px;
+    min-height: calc(100vh - 54px);
+
+    padding-left: 12.5%;
+    padding-right: 12.5%;
+
+    @media (max-width: 768px) {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
     display: flex;
     flex-direction: row;
-    gap: 12px;
-    padding-bottom: 128px;
-    padding-top: 24px;
-    flex: 1;
-    min-height: calc(100vh - 54px);
-    overflow: auto;
-    justify-content: center;
+    gap: 8px;
 
-    .detail-col {
-      width: 40%;
+    .main-col {
+      width: 60%;
+      height: fit-content;
     }
+
     .sub-col {
-      width: 25%;
-      background-color: wheat;
-
-      .card {
-        background-color: red;
-        height: 800px;
-        &.card-sticky {
-          position: sticky;
-          top: 12px;
-          background-color: blue;
-          height: 800px;
-        }
-      }
-    }
-
-    @media (max-width: 972px) {
-      .detail-col {
-        width: 60%;
-      }
-      .sub-col {
-        width: 30%;
-      }
+      width: 40%;
+      position: sticky;
+      top: 12px;
+      height: fit-content;
     }
   }
 }
