@@ -46,7 +46,11 @@
       </div>
     </div>
     <div class="divider"></div>
-    <JobsRelevantJobs class="relevant-job" />
+    <JobsRelevantJobs
+      v-if="jobAdId"
+      :source-id="jobAdId"
+      class="relevant-job"
+    />
   </div>
 </template>
 <script setup lang="ts">
@@ -57,6 +61,12 @@ type TProps = {
 const props = defineProps<TProps>();
 
 const router = useRouter();
+const route = useRoute();
+
+const jobAdId = computed(() => {
+  const id = route.params.id;
+  return id;
+});
 
 const employeeCount = computed(() => {
   if (!props.data) {

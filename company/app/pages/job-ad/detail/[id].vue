@@ -59,6 +59,7 @@ onBeforeMount(async () => {
     display: flex;
     flex-direction: row;
     gap: 8px;
+    min-height: fit-content;
 
     .main-col {
       width: 60%;
@@ -70,6 +71,9 @@ onBeforeMount(async () => {
       position: sticky;
       top: 12px;
       height: fit-content;
+      max-height: calc(100vh - 54px - 12px - 12px);
+      display: flex;
+      flex-direction: column;
     }
   }
 }

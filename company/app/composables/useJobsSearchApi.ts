@@ -85,9 +85,32 @@ export const useJobsSearchApi = () => {
     }
   };
 
+  const getRelevantJobAds = async (jobAdId: any) => {
+    try {
+      const res = await $axios.get(
+        `/_api/core/job-ad/outside/relate/${jobAdId}`,
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  }
+
   return {
     getFilter,
     getJobAds,
     getJobAdPreview,
+    getRelevantJobAds,
   };
 };

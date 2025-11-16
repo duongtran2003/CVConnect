@@ -43,6 +43,7 @@
       </div>
       <div class="row ml-auto flex-wrap">
         <AppButton
+          v-if="props.allowPreview"
           :text="'Xem nhanh'"
           class="preview-btn"
           @click.stop="handlePreview"
@@ -64,9 +65,12 @@
 <script setup lang="ts">
 type TProps = {
   data: any;
+  allowPreview?: boolean;
 };
 
-const props = defineProps<TProps>();
+const props = withDefaults(defineProps<TProps>(), {
+  allowPreview: true
+});
 
 const router = useRouter();
 const jobsSearchStore = useJobsSearchStore();
