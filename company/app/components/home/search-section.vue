@@ -5,7 +5,7 @@
         <div class="title">Kết nối tới nhà tuyển dụng</div>
         <div class="sub">miễn phí ngay với CVConnect</div>
       </div>
-      <div class="search-bar">
+      <div v-on-click-outside="handleClickOutside" class="search-bar">
         <AppInputText
           :label="''"
           :required="false"
@@ -18,6 +18,7 @@
           class="text-input"
           @input="($event) => (searchKeyword = $event)"
           @enter="handleSearch"
+          @focus="handleFocusInput"
         >
           <template #input-icon>
             <Icon name="material-symbols:search-rounded" class="mag-icon" />
@@ -32,31 +33,90 @@
             <Icon name="material-symbols:search-rounded" class="search-icon" />
           </template>
         </AppButton>
+        <div v-if="isPopoverShow" class="popover">
+          <div class="top">
+            <UCheckbox
+              :model-value="localSearchOrg"
+              :label="'Tìm kiếm theo tên doanh nghiệp'"
+              class="checkbox cursor-pointer"
+              @update:model-value="localSearchOrg = $event as boolean"
+            />
+          </div>
+          <div class="history-list">
+            <div v-for="(keyword, index) of historyList" :key="index">
+              {{ keyword }}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
+import { vOnClickOutside } from "@vueuse/components";
+
 definePageMeta({
   layout: "public",
 });
 
 const emits = defineEmits<{
-  (e: "search", keyword: string): void;
+  (e: "search", payload: any): void;
 }>();
 
 const searchKeyword = ref<string>("");
+const isPopoverShow = ref<boolean>(false);
+const localSearchOrg = ref<boolean>(false);
+const controller = ref<any>(null);
+const historyList = ref<any>([]);
 
 const jobsSearchStore = useJobsSearchStore();
 const { filter } = storeToRefs(jobsSearchStore);
+const { getHistory } = useSearchHistoryApi();
+const userStore = useUserStore();
+const { userInfo } = storeToRefs(userStore);
 
 function handleSearch() {
-  emits("search", searchKeyword.value);
+  emits("search", {
+    keyword: searchKeyword.value,
+    searchOrg: localSearchOrg.value,
+  });
+  isPopoverShow.value = false;
 }
 
-watch(filter, (newFilter) => {
-  searchKeyword.value = newFilter?.keyword ?? "";
-}, { immediate: true })
+function handleClickOutside() {
+  isPopoverShow.value = false;
+}
+
+function handleFocusInput() {
+  isPopoverShow.value = true;
+}
+
+async function fetchHistory() {
+  if (controller.value) {
+    controller.value.abort();
+  }
+
+  controller.value = new AbortController();
+  const res = await getHistory(controller.value);
+  historyList.value = res.data;
+}
+
+watch(
+  filter,
+  (newFilter) => {
+    searchKeyword.value = newFilter?.keyword ?? "";
+    if (userInfo.value != null) {
+      fetchHistory();
+    }
+  },
+  { immediate: true },
+);
+
+watch(isPopoverShow, (val) => {
+  if (val) {
+    localSearchOrg.value = filter.value.searchOrg;
+  }
+});
 </script>
 <style lang="scss" scoped>
 .search-section {
@@ -118,6 +178,46 @@ watch(filter, (newFilter) => {
       flex-direction: row;
       gap: 12px;
 
+      position: relative;
+
+      .popover {
+        top: 46px;
+        position: absolute;
+        background-color: white;
+        padding: 12px;
+        @include box-shadow;
+        width: 100%;
+        border-radius: 4px;
+
+        .checkbox {
+          :deep(button) {
+            cursor: pointer;
+
+            &:disabled {
+              cursor: default;
+            }
+          }
+
+          :deep(label) {
+            font-size: 14px;
+            line-height: 21px;
+            font-weight: 400;
+            color: $text-light;
+            cursor: pointer;
+
+            &.cursor-not-allowed {
+              cursor: default;
+            }
+          }
+        }
+
+        .history-list {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+      }
+
       .text-input {
         flex: 1;
       }
@@ -141,7 +241,7 @@ watch(filter, (newFilter) => {
       .search-btn {
         background-color: $color-primary-400;
         color: $text-dark;
-        height: 43px;
+        height: 42px;
       }
     }
   }

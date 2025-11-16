@@ -22,11 +22,17 @@ const { setFilter } = jobsSearchStore;
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
 
-function handleSearch(keyword: string) {
-  setFilter({ ...filter.value, keyword: keyword });
+function handleSearch(payload: any) {
+  const newFilter: any = {
+    ...filter.value,
+    keyword: payload.keyword,
+    searchOrg: payload.searchOrg,
+  }
+
+  setFilter(newFilter);
   router.push({
     path: "/jobs",
-    query: { keyword: filter.value.keyword ?? "" },
+    query: { keyword: filter.value.keyword ?? "", searchOrg: "" },
   });
 }
 </script>

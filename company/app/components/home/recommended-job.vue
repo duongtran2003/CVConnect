@@ -39,6 +39,7 @@ const controller = ref<AbortController | null>(null);
 const jobs = ref<any>([]);
 const pageInfo = ref<any>({});
 const currentPage = ref<any>(1);
+const router = useRouter();
 
 onBeforeMount(async () => {
   await fetchData();

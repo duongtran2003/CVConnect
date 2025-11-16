@@ -127,6 +127,9 @@ function convertFilter() {
   if (f.keyword?.trim()) {
     payload.keyword = f.keyword.trim();
   }
+  if (f.searchOrg) {
+    payload.searchOrg = true;
+  }
   if (f.careers?.length) {
     payload.careerIds = f.careers.map((c: any) => c.value);
   }
@@ -172,6 +175,9 @@ function syncFromQuery() {
   const f: any = {};
   if (q.keyword) {
     f.keyword = q.keyword;
+  }
+  if (q.searchOrg == "") {
+    f.searchOrg = true;
   }
   if (q.careers) {
     const careers = (q.careers as string).split(",");
@@ -228,6 +234,9 @@ function syncToQuery() {
   if (f.keyword) {
     q.keyword = f.keyword;
   }
+  if (f.searchOrg) {
+    q.searchOrg = "";
+  }
   if (f.careers && f.careers.length) {
     q.careers = f.careers.map((career: any) => career.value).join(",");
   }
@@ -247,8 +256,14 @@ function syncToQuery() {
   router.replace({ query: q });
 }
 
-function handleSearch(keyword: string) {
-  setFilter({ ...filter.value, keyword: keyword });
+function handleSearch(payload: any) {
+  const newFilter: any = {
+    ...filter.value,
+    keyword: payload.keyword,
+    searchOrg: payload.searchOrg,
+  }
+
+  setFilter(newFilter);
   syncToQuery();
 }
 

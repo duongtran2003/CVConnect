@@ -30,6 +30,7 @@
           @input="updateValue"
           @blur="emit('blur')"
           @keydown.enter="emit('enter')"
+          @focus="emit('focus')"
         />
         <Icon
           v-if="isSecured"
@@ -62,7 +63,7 @@ export type TInputTextProps = {
 
 const emit = defineEmits<{
   (e: "input", value: string): void;
-  (e: "blur" | "enter"): void;
+  (e: "blur" | "enter" | "focus"): void;
 }>();
 
 const props = withDefaults(defineProps<TInputTextProps>(), {

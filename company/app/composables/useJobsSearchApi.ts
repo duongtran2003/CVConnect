@@ -4,9 +4,7 @@ export const useJobsSearchApi = () => {
 
   const getFilter = async () => {
     try {
-      const res = await $axios.get(`/_api/core/job-ad/outside/data-filter`, {
-        skipAuth: true,
-      });
+      const res = await $axios.get(`/_api/core/job-ad/outside/data-filter`);
       // toast.add({
       //   title: res.data.message,
       //   color: "success",
@@ -33,6 +31,7 @@ export const useJobsSearchApi = () => {
         `/_api/core/job-ad/outside/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
+          skipAuth: true,
         },
       );
       return res.data;
@@ -64,6 +63,7 @@ export const useJobsSearchApi = () => {
         `/_api/core/job-ad/outside/filter-featured?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
+          skipAuth: true,
         },
       );
       return res.data;
@@ -95,6 +95,7 @@ export const useJobsSearchApi = () => {
         `/_api/core/job-ad/outside/filter-suitable?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
+          skipAuth: true,
         },
       );
       return res.data;
@@ -126,6 +127,7 @@ export const useJobsSearchApi = () => {
         `/_api/core/org/outside/org-featured?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
+          skipAuth: true,
         },
       );
       return res.data;
@@ -154,6 +156,7 @@ export const useJobsSearchApi = () => {
     try {
       const res = await $axios.get(`/_api/core/job-ad/outside/detail/${id}`, {
         signal: _abortController ? _abortController.signal : undefined,
+        skipAuth: true,
       });
       return res.data;
     } catch (err: any) {
@@ -176,6 +179,9 @@ export const useJobsSearchApi = () => {
     try {
       const res = await $axios.get(
         `/_api/core/job-ad/outside/relate/${jobAdId}`,
+        {
+          skipAuth: true,
+        },
       );
       return res.data;
     } catch (err: any) {
