@@ -43,8 +43,15 @@
             />
           </div>
           <div class="history-list">
-            <div v-for="(keyword, index) of historyList" :key="index">
-              {{ keyword }}
+            <div
+              v-for="(keyword, index) of historyList"
+              :key="index"
+              class="keyword"
+            >
+              <div class="text" @click="handleSetKeyword(keyword.keyword)">
+                {{ keyword.keyword }}
+              </div>
+              <Icon name="material-symbols:close-rounded" @click="handleDeleteKeyword(keyword.id)" />
             </div>
           </div>
         </div>
@@ -71,7 +78,7 @@ const historyList = ref<any>([]);
 
 const jobsSearchStore = useJobsSearchStore();
 const { filter } = storeToRefs(jobsSearchStore);
-const { getHistory } = useSearchHistoryApi();
+const { getHistory, deleteHistory } = useSearchHistoryApi();
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
 
@@ -91,6 +98,11 @@ function handleFocusInput() {
   isPopoverShow.value = true;
 }
 
+function handleSetKeyword(keyword: string) {
+  searchKeyword.value = keyword;
+  handleSearch();
+}
+
 async function fetchHistory() {
   if (controller.value) {
     controller.value.abort();
@@ -101,13 +113,15 @@ async function fetchHistory() {
   historyList.value = res.data;
 }
 
+async function handleDeleteKeyword(id: any) {
+  historyList.value = historyList.value.filter((keyword: any) => keyword.id != id);
+  deleteHistory(id);
+}
+
 watch(
   filter,
   (newFilter) => {
     searchKeyword.value = newFilter?.keyword ?? "";
-    if (userInfo.value != null) {
-      fetchHistory();
-    }
   },
   { immediate: true },
 );
@@ -115,6 +129,9 @@ watch(
 watch(isPopoverShow, (val) => {
   if (val) {
     localSearchOrg.value = filter.value.searchOrg;
+    if (userInfo.value != null) {
+      fetchHistory();
+    }
   }
 });
 </script>
@@ -188,6 +205,7 @@ watch(isPopoverShow, (val) => {
         @include box-shadow;
         width: calc(100% - 182px);
         border-radius: 4px;
+        z-index: 2;
 
         .checkbox {
           :deep(button) {
@@ -214,7 +232,36 @@ watch(isPopoverShow, (val) => {
         .history-list {
           display: flex;
           flex-direction: column;
+          padding: 4px 0px;
           gap: 4px;
+
+          .keyword {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            .text {
+              font-size: 13px;
+              font-weight: 500;
+              color: $text-light;
+              cursor: pointer;
+              flex: 1;
+              word-break: break-all;
+            }
+            .iconify {
+              font-size: 20px;
+              display: block;
+              width: 20px;
+              height: 20px;
+              min-width: 20px;
+              cursor: pointer;
+              color: $color-gray-300;
+
+              &:hover {
+                color: $color-gray-400;
+              }
+            }
+          }
         }
       }
 

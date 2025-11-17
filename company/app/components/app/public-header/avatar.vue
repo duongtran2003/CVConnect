@@ -15,7 +15,11 @@
         <Icon name="mdi:clipboard-account" class="icon" />
         <div class="text">{{ userInfo?.fullName || "Hồ sơ cá nhân" }}</div>
       </div>
-      <!-- <div class="divider"></div> -->
+      <div v-if="isOrgMember" class="dropdown__item">
+        <Icon name="material-symbols-light:bookmark-manager-rounded" class="icon" />
+        <div class="text">Quản lý tuyển dụng</div>
+      </div>
+      <div class="divider"></div>
       <div class="dropdown__item" @click="handleLogout">
         <Icon name="mdi:logout" class="icon" />
         <div class="text">Đăng xuất</div>
@@ -32,6 +36,8 @@ import {
 
 const { logout } = useAuth();
 const { clearToken } = useAuthStore();
+const authStore = useAuthStore();
+const { currentRole, roles } = storeToRefs(authStore);
 
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
@@ -61,6 +67,13 @@ const handleLogout = async () => {
     clearToken();
   }
 };
+
+const isOrgMember = computed(() => {
+  const orgRole = roles.value?.find(
+    (role) => role.memberType == "ORGANIZATION",
+  );
+  return orgRole != undefined;
+});
 
 const monogramText = computed(() => {
   const names = userInfo.value?.fullName?.split(/\s+/);
@@ -139,8 +152,8 @@ const monogramColor = computed(() => {
       display: block;
       width: 100%;
       background-color: $color-gray-200;
-      margin-top: 4px;
-      margin-bottom: 4px;
+      // margin-top: 4px;
+      // margin-bottom: 4px;
     }
 
     &__item {

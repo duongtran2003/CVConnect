@@ -7,11 +7,8 @@
       <template v-if="avatarInfo">
         <div class="name">
           <div class="text">{{ avatarInfo.fullName }}</div>
-          <NuxtLink v-if="isOrgMember" :to="'/org-info'" class="link"
-            >Trang nhà tuyển dụng</NuxtLink
-          >
         </div>
-        <AppHeaderAvatar />
+        <AppPublicHeaderAvatar />
       </template>
       <template v-else>
         <NuxtLink :to="registerRedirectLink" class="link"
@@ -45,13 +42,6 @@ const avatarInfo = computed(() => {
 
 const registerRedirectLink = computed(() => {
   return `/auth/register?redirect=${route.fullPath}`;
-});
-
-const isOrgMember = computed(() => {
-  const orgRole = roles.value?.find(
-    (role) => role.memberType == "ORGANIZATION",
-  );
-  return orgRole != undefined;
 });
 
 function handleClickLogo() {

@@ -29,7 +29,20 @@ export const useSearchHistoryApi = () => {
     }
   };
 
+  const deleteHistory = async (id: any) => {
+    try {
+      const res = await $axios.delete(`/_api/core/search-history-outside/delete`, {
+        data: [id]
+      });
+      return true;
+    } catch (err: any) {
+      console.error(err);
+      return false;
+    }
+  }
+
   return {
     getHistory,
+    deleteHistory,
   };
 };
