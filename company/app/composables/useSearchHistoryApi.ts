@@ -41,8 +41,19 @@ export const useSearchHistoryApi = () => {
     }
   }
 
+  const deleteAllHistory = async () => {
+    try {
+      const res = await $axios.delete(`/_api/core/search-history-outside/delete-all`);
+      return true;
+    } catch (err: any) {
+      console.error(err);
+      return false;
+    }
+  }
+
   return {
     getHistory,
     deleteHistory,
+    deleteAllHistory,
   };
 };

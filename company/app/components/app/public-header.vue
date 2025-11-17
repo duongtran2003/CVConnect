@@ -5,9 +5,6 @@
     </div>
     <div class="right">
       <template v-if="avatarInfo">
-        <div class="name">
-          <div class="text">{{ avatarInfo.fullName }}</div>
-        </div>
         <AppPublicHeaderAvatar />
       </template>
       <template v-else>
@@ -56,7 +53,7 @@ function handleClickLogo() {
   background-color: white;
   @include box-shadow;
   height: 54px;
-  padding: 8px;
+  padding: 8px 36px;
   display: flex;
   flex-direction: row;
   gap: 8px;

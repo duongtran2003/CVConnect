@@ -15,8 +15,15 @@
         <Icon name="mdi:clipboard-account" class="icon" />
         <div class="text">{{ userInfo?.fullName || "Hồ sơ cá nhân" }}</div>
       </div>
-      <div v-if="isOrgMember" class="dropdown__item">
-        <Icon name="material-symbols-light:bookmark-manager-rounded" class="icon" />
+      <div
+        v-if="isOrgMember"
+        class="dropdown__item"
+        @click="handleManageHiring"
+      >
+        <Icon
+          name="material-symbols-light:bookmark-manager-rounded"
+          class="icon"
+        />
         <div class="text">Quản lý tuyển dụng</div>
       </div>
       <div class="divider"></div>
@@ -38,6 +45,7 @@ const { logout } = useAuth();
 const { clearToken } = useAuthStore();
 const authStore = useAuthStore();
 const { currentRole, roles } = storeToRefs(authStore);
+const router = useRouter();
 
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
@@ -51,6 +59,10 @@ const closeDropdown = () => {
 
 const handleClickAvatar = () => {
   isDropdownShow.value = !isDropdownShow.value;
+};
+
+const handleManageHiring = () => {
+  router.push({ path: "/org-info" });
 };
 
 const handleLogout = async () => {

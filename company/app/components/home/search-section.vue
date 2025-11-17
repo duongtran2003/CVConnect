@@ -41,19 +41,25 @@
               class="checkbox cursor-pointer"
               @update:model-value="localSearchOrg = $event as boolean"
             />
+            <div v-if="historyList.length" class="delete-all" @click="handleDeleteAll">Xóa tất cả</div>
           </div>
-          <div class="history-list">
-            <div
-              v-for="(keyword, index) of historyList"
-              :key="index"
-              class="keyword"
-            >
-              <div class="text" @click="handleSetKeyword(keyword.keyword)">
-                {{ keyword.keyword }}
+          <template v-if="historyList.length">
+            <div class="history-list">
+              <div
+                v-for="(keyword, index) of historyList"
+                :key="index"
+                class="keyword"
+              >
+                <div class="text" @click="handleSetKeyword(keyword.keyword)">
+                  {{ keyword.keyword }}
+                </div>
+                <Icon
+                  name="material-symbols:close-rounded"
+                  @click="handleDeleteKeyword(keyword.id)"
+                />
               </div>
-              <Icon name="material-symbols:close-rounded" @click="handleDeleteKeyword(keyword.id)" />
             </div>
-          </div>
+          </template>
         </div>
       </div>
     </div>
@@ -78,7 +84,7 @@ const historyList = ref<any>([]);
 
 const jobsSearchStore = useJobsSearchStore();
 const { filter } = storeToRefs(jobsSearchStore);
-const { getHistory, deleteHistory } = useSearchHistoryApi();
+const { getHistory, deleteHistory, deleteAllHistory } = useSearchHistoryApi();
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
 
@@ -114,8 +120,15 @@ async function fetchHistory() {
 }
 
 async function handleDeleteKeyword(id: any) {
-  historyList.value = historyList.value.filter((keyword: any) => keyword.id != id);
+  historyList.value = historyList.value.filter(
+    (keyword: any) => keyword.id != id,
+  );
   deleteHistory(id);
+}
+
+async function handleDeleteAll() {
+  historyList.value = [];
+  deleteAllHistory();
 }
 
 watch(
@@ -206,6 +219,19 @@ watch(isPopoverShow, (val) => {
         width: calc(100% - 182px);
         border-radius: 4px;
         z-index: 2;
+
+        .top {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          gap: 8px;
+        }
+
+        .delete-all {
+          font-size: 14px;
+          color: $color-primary-500;
+          cursor: pointer;
+        }
 
         .checkbox {
           :deep(button) {
