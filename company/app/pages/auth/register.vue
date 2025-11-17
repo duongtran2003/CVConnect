@@ -96,7 +96,7 @@
         </div>
         <div class="form-footer">
           <div v-if="mode === 'registering'" class="forgot-password">
-            Bạn đã có tài khoản?<NuxtLink class="link" to="/auth/login">
+            Bạn đã có tài khoản?<NuxtLink class="link" :to="loginPageLink">
               Đăng nhập ngay
             </NuxtLink>
           </div>
@@ -300,6 +300,15 @@ const formRules = {
 type TRegisteringMode = "confirming" | "registering";
 const mode = ref<TRegisteringMode>("registering");
 
+const loginPageLink = computed(() => {
+  let link = "/auth/login";
+  if (route.query.redirect) {
+    link += `?redirect=${route.query.redirect}`;
+  }
+
+  return link;
+});
+
 const isFormValid = computed(() => {
   for (const key of Object.keys(
     formError.value,
@@ -359,7 +368,14 @@ const handleRegisterClick = async () => {
       } else {
         const username = res.data.username || "";
         isLoading.value = false;
-        router.push({ path: "/auth/login", query: { username } });
+        if (route.query.redirect) {
+          router.push({
+            path: "/auth/login",
+            query: { username, redirect: route.query.redirect },
+          });
+        } else {
+          router.push({ path: "/auth/login", query: { username } });
+        }
       }
     }
     isLoading.value = false;

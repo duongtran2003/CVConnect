@@ -10,7 +10,6 @@ export const useSearchHistoryApi = () => {
         `/_api/core/search-history-outside/my-search-history`,
         {
           signal: _abortController ? _abortController.signal : undefined,
-          skipAuth: true,
         },
       );
       // toast.add({
@@ -19,12 +18,12 @@ export const useSearchHistoryApi = () => {
       // });
       return res.data;
     } catch (err: any) {
-      if (err.response && err.response.data) {
-        toast.add({
-          title: err.response.data.message || "Có lỗi xảy ra",
-          color: "error",
-        });
-      }
+      // if (err.response && err.response.data) {
+      //   toast.add({
+      //     title: err.response.data.message || "Có lỗi xảy ra",
+      //     color: "error",
+      //   });
+      // }
       console.error(err);
       return null;
     }

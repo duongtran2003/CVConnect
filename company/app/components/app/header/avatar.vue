@@ -1,12 +1,13 @@
 <template>
   <div v-on-click-outside="closeDropdown" class="user-avatar">
-    <div
-      class="avatar"
-      :style="{ 'background-color': monogramColor }"
-      @click="handleClickAvatar"
-    >
-      <div class="text">
-        {{ monogramText }}
+    <div v-if="userInfo" class="avatar" @click="handleClickAvatar">
+      <img v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl" />
+      <div
+        v-else
+        class="monogram"
+        :style="{ backgroundColor: getMonogramColor(userInfo.id) }"
+      >
+        {{ getMonogramText(userInfo.fullName) }}
       </div>
     </div>
     <div v-show="isDropdownShow" class="dropdown">
@@ -90,22 +91,32 @@ const monogramColor = computed(() => {
   position: relative;
   z-index: 3;
   .avatar {
-    height: 36px;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-    min-height: 36px;
+    height: 36px;
     width: 36px;
     min-width: 36px;
     border-radius: 999px;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: white;
-    .text {
-      height: 16px;
-      font-weight: 600;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .monogram {
+      width: 100%;
+      height: 100%;
+      color: $text-dark;
       font-size: 16px;
-      line-height: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 

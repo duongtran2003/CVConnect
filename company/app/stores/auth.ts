@@ -11,7 +11,7 @@ export type TAccountRole = {
   id: number;
   code: TRole;
   name: string;
-  memberType?: TRole;
+  memberType?: any;
   isDefault?: boolean;
 };
 

@@ -186,7 +186,7 @@ watch(isPopoverShow, (val) => {
         background-color: white;
         padding: 12px;
         @include box-shadow;
-        width: 100%;
+        width: calc(100% - 182px);
         border-radius: 4px;
 
         .checkbox {
