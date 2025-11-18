@@ -16,6 +16,28 @@
         <div class="text">{{ userInfo?.fullName || "Hồ sơ cá nhân" }}</div>
       </div>
       <div
+        v-if="isCandidate"
+        class="dropdown__item"
+        @click="handleManageHiring"
+      >
+        <Icon
+          name="material-symbols:newsstand-rounded"
+          class="icon"
+        />
+        <div class="text">Tin đã ứng tuyển</div>
+      </div>
+      <div
+        v-if="isManagement"
+        class="dropdown__item"
+        @click="handleManageHiring"
+      >
+        <Icon
+          name="material-symbols:folder-managed-rounded"
+          class="icon"
+        />
+        <div class="text">Quản lý hệ thống</div>
+      </div>
+      <div
         v-if="isOrgMember"
         class="dropdown__item"
         @click="handleManageHiring"
@@ -81,11 +103,26 @@ const handleLogout = async () => {
 };
 
 const isOrgMember = computed(() => {
-  const orgRole = roles.value?.find(
-    (role) => role.memberType == "ORGANIZATION",
+  console.log(userInfo.value)
+  const orgRole = userInfo.value?.userDetails?.find(
+    (detail: any) => detail.role.memberType == "ORGANIZATION",
   );
   return orgRole != undefined;
 });
+
+const isCandidate = computed(() => {
+  const candidateRole = userInfo.value?.userDetails?.find(
+    (detail: any) => detail.role.memberType == "CANDIDATE",
+  );
+  return candidateRole != undefined;
+})
+
+const isManagement = computed(() => {
+  const candidateRole = userInfo.value?.userDetails?.find(
+    (detail: any) => detail.role.memberType == "MANAGEMENT",
+  );
+  return candidateRole != undefined;
+})
 
 const monogramText = computed(() => {
   const names = userInfo.value?.fullName?.split(/\s+/);
@@ -116,7 +153,6 @@ const monogramColor = computed(() => {
   position: relative;
   z-index: 3;
   .avatar {
-    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     height: 36px;
     width: 36px;
     min-width: 36px;

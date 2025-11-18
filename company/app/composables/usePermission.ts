@@ -37,9 +37,7 @@ export const usePermission = () => {
   async function getInitialRoute() {
     if (sidebarData.value.length == 0) {
       // No menus => return to public (in this case, to login)
-      console.log('no menus, logout!')
-      await logout();
-      return;
+      return "/";
     }
 
     if (!sidebarData.value[0]?.children?.length) {

@@ -31,7 +31,7 @@ export const useJobsSearchApi = () => {
         `/_api/core/job-ad/outside/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
-          skipAuth: true,
+          // skipAuth: true,
         },
       );
       return res.data;
@@ -95,7 +95,7 @@ export const useJobsSearchApi = () => {
         `/_api/core/job-ad/outside/filter-suitable?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
-          skipAuth: true,
+          // skipAuth: true,
         },
       );
       return res.data;

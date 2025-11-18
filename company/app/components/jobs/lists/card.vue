@@ -41,7 +41,7 @@
           <div class="name">{{ location }}</div>
         </div>
       </div>
-      <div v-if="props.allowPreview || props.allowApply" class="row ml-auto flex-wrap">
+      <div v-if="props.allowPreview || props.allowApply" class="row ml-auto flex-wrap mt-auto">
         <AppButton
           v-if="props.allowPreview"
           :text="'Xem nhanh'"
@@ -203,6 +203,7 @@ function handleViewOrg() {
     flex-direction: column;
     gap: 4px;
     color: $text-light;
+    flex: 1;
   }
 
   .iconify {

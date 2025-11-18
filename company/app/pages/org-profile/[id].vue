@@ -5,105 +5,87 @@
         <div class="org-cover">
           <img :src="orgInfo?.coverPhotoUrl ?? '/orgcover.jpg'" alt="" />
         </div>
-        <div class="org-logo">
-          <div class="logo-wrapper">
-            <img :src="orgInfo?.logoUrl ?? '/blankuser.jpg'" alt="" />
+      </div>
+      <div class="org-logo">
+        <div class="logo-wrapper">
+          <img :src="orgInfo?.logoUrl ?? '/blankuser.jpg'" alt="" />
+        </div>
+        <div class="company-info-misc">
+          <div class="name">
+            {{ orgInfo?.name }}
           </div>
-          <div class="company-info-misc">
-            <div class="name">
-              {{ orgInfo?.name }}
+          <div class="info-row">
+            <div class="info-row-block">
+              <Icon name="mdi:web" />
+              <a :href="orgInfo?.website" target="_blank" class="value link">{{
+                orgInfo?.website
+              }}</a>
             </div>
-            <div v-if="location" class="address truncate">
+            <div class="info-row-block">
+              <Icon name="streamline-plump:office-worker-remix" />
+              <div class="value">{{ employeeCount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-content">
+        <div class="info-block left">
+          <div class="title">Thông tin chung</div>
+          <div class="block-content">
+            <div class="line">
+              <div class="col">
+                <div class="row">
+                  <div class="label">
+                    <Icon name="iconoir:suitcase" />
+                    Lĩnh vực
+                  </div>
+                  <div class="value">
+                    <div class="industry-list">
+                      <div
+                        v-for="indus of orgInfo?.industryList ?? []"
+                        :key="indus.id"
+                        class="industry-item"
+                      >
+                        {{ indus.name }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="description-block">
+              <div class="label">
+                <Icon name="fluent:text-description-ltr-24-filled" />
+                Mô tả chung
+              </div>
+              <div class="content" v-html="orgInfo?.description"></div>
+            </div>
+          </div>
+        </div>
+        <div class="info-block right">
+          <div class="title">Địa chỉ</div>
+          <div class="block-content">
+            <div
+              v-for="(loc, index) of location"
+              :key="index"
+              class="address truncate"
+            >
               <Icon
-                name="streamline:travel-map-location-pin-navigation-map-maps-pin-gps-location"
+                :name="
+                  loc.isHeadquarter
+                    ? 'material-symbols-light:home-work-rounded'
+                    : 'streamline:travel-map-location-pin-navigation-map-maps-pin-gps-location'
+                "
               />
               <span>
-                {{ location }}
+                {{ loc.displayAddress }}
               </span>
             </div>
           </div>
         </div>
       </div>
-      <div class="info-block">
-        <div class="line">
-          <div class="col">
-            <div class="row">
-              <div class="label">
-                <Icon name="mdi:web" />
-                Website
-              </div>
-              <a :href="orgInfo?.website" target="_blank" class="value link">{{
-                orgInfo?.website
-              }}</a>
-            </div>
-            <div class="row">
-              <div class="label">
-                <Icon name="streamline-plump:office-worker-remix" />
-                Số lượng nhân viên
-              </div>
-              <div class="value">{{ employeeCount }}</div>
-            </div>
-            <div class="row">
-              <div class="label">
-                <Icon name="iconoir:suitcase" />
-                Lĩnh vực
-              </div>
-              <div class="value">
-                <div class="industry-list">
-                  <div
-                    v-for="indus of orgInfo?.industryList ?? []"
-                    :key="indus.id"
-                    class="industry-item"
-                  >
-                    {{ indus.name }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col">
-            <div class="row">
-              <div class="label">
-                <Icon name="material-symbols:add-home-rounded" />
-                Ngày tạo
-              </div>
-              <div class="value">
-                {{ formatDateTime(orgInfo?.createdAt, "DD/MM/YYYY") }}
-              </div>
-            </div>
-            <div class="row">
-              <div class="label">
-                <Icon name="material-symbols:person-add-rounded" />
-                Người tạo
-              </div>
-              <div class="value">{{ orgInfo?.createdBy }}</div>
-            </div>
-            <div v-if="orgInfo?.updatedAt" class="row">
-              <div class="label">
-                <Icon name="material-symbols:add-home-rounded" />
-                Ngày cập nhật
-              </div>
-              <div class="value">
-                {{ formatDateTime(orgInfo?.updatedAt, "DD/MM/YYYY") }}
-              </div>
-            </div>
-            <div v-if="orgInfo?.updatedBy" class="row">
-              <div class="label">
-                <Icon name="material-symbols:person-edit-rounded" />
-                Người cập nhật
-              </div>
-              <div class="value">{{ orgInfo?.updatedBy }}</div>
-            </div>
-          </div>
-        </div>
-        <div class="description-block">
-          <div class="label">
-            <Icon name="fluent:text-description-ltr-24-filled" />
-            Mô tả chung
-          </div>
-          <div class="content" v-html="orgInfo?.description"></div>
-        </div>
-      </div>
+      <OrgProfileJobs />
     </div>
     <AppFooter />
   </div>
@@ -126,26 +108,7 @@ onBeforeMount(async () => {
 });
 
 const location = computed(() => {
-  if (
-    !orgInfo.value ||
-    !orgInfo.value?.addresses ||
-    orgInfo.value?.addresses.length == 0
-  ) {
-    return "";
-  }
-
-  if (orgInfo.value.addresses.length <= 2) {
-    return orgInfo.value.addresses
-      .map((loc: any) => loc.displayAddress)
-      .join(" - ");
-  }
-
-  const showStr = orgInfo.value.addresses
-    .map((loc: any) => loc.displayAddress)
-    .join(" - ");
-
-  const countRest = orgInfo.value.addresses.length - 2;
-  return `${showStr} và ${countRest} địa điểm khác.`;
+  return orgInfo.value?.addresses;
 });
 
 const employeeCount = computed(() => {
@@ -188,13 +151,9 @@ async function fetchInfo() {
 
 .org-info {
   padding: 24px 0px 128px 0px;
-  max-width: 60%;
+  max-width: 85%;
   margin: 0px auto;
-  @media (max-width: 968px) {
-    max-width: 80%;
-  }
-
-  @media (max-width: 768px) {
+  @media (max-width: 1186px) {
     max-width: 95%;
   }
   display: flex;
@@ -255,79 +214,97 @@ async function fetchInfo() {
         cursor: pointer;
       }
     }
+  }
 
-    .org-logo {
-      position: absolute;
-      bottom: -64px;
-      left: 16px;
+  .org-logo {
+    display: flex;
+    flex-direction: row;
+    margin-top: -64px;
+    margin-left: 32px;
+
+    max-width: 100%;
+    gap: 12px;
+    .company-info-misc {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 72px;
 
-      @media (max-width: 1330px) {
-        flex-direction: column;
-        left: 16px;
-        bottom: -128px;
-        .company-info-misc {
-          margin-top: 0px !important;
-        }
-      }
-      max-width: 100%;
-      gap: 12px;
-      .company-info-misc {
-        align-self: flex-start;
-        margin-top: 72px;
+      .info-row {
+        display: flex;
+        flex-direction: row;
+        gap: 24px;
+        align-items: center;
 
-        .name {
-          font-size: 20px;
-          font-weight: 600;
-        }
-        .address {
+        .info-row-block {
           font-size: 14px;
-          font-weight: 400;
           display: flex;
+          flex-direction: row;
+          gap: 4px;
           align-items: center;
-          gap: 8px;
-          margin-top: 8px;
-          .iconify {
-            display: block;
-          }
-        }
-      }
-      .logo-wrapper {
-        width: 128px;
-        height: 128px;
-        border-radius: 4px;
-        overflow: hidden;
-        position: relative;
-        &:hover {
-          .change-image {
-            opacity: 100%;
-          }
-        }
-        .change-image {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          background-color: rgba($color-gray-800, 0.2);
-          top: 0px;
-          cursor: pointer;
-          display: flex;
-          transition: opacity 0.2s;
-          opacity: 0%;
-          align-items: center;
-          justify-content: center;
-          .iconify {
-            display: block;
-            font-size: 48px;
-          }
-        }
 
-        img {
-          object-fit: cover;
-          width: 100%;
-          height: 100%;
+          .iconify {
+            display: block;
+            font-size: 20px;
+            height: 20px;
+            width: 20px;
+            min-width: 20px;
+          }
         }
       }
+
+      .name {
+        font-size: 20px;
+        font-weight: 600;
+      }
+    }
+    .logo-wrapper {
+      width: 128px;
+      height: 128px;
+      min-width: 128px;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      &:hover {
+        .change-image {
+          opacity: 100%;
+        }
+      }
+      .change-image {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: rgba($color-gray-800, 0.2);
+        top: 0px;
+        cursor: pointer;
+        display: flex;
+        transition: opacity 0.2s;
+        opacity: 0%;
+        align-items: center;
+        justify-content: center;
+        .iconify {
+          display: block;
+          font-size: 48px;
+        }
+      }
+
+      img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+        min-width: 100%;
+      }
+    }
+  }
+
+  .address {
+    font-size: 14px;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    .iconify {
+      display: block;
     }
   }
   .line {
@@ -383,58 +360,91 @@ async function fetchInfo() {
       margin-top: 156px;
     }
   }
-  .info-block {
-    margin: 124px auto 24px auto;
-    max-width: min(840px, 90%);
-    min-width: min(840px, 90%);
+  .info-content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    gap: 12px;
+    margin: 24px 0px;
 
-    @media (max-width: 1330px) {
-      margin-top: 156px;
-    }
+    @media (max-width: 1186px) {
+      flex-direction: column;
 
-    .industry-list {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 4px;
-      justify-content: flex-end;
-
-      .industry-item {
-        font-size: 13px;
-        padding: 1px 2px;
-        border: 1px solid $color-gray-300;
-        color: $color-gray-500;
-        border-radius: 6px;
-        text-align: center;
+      .left,
+      .right {
+        max-width: 100% !important;
+        min-width: 100% !important;
       }
     }
+  }
 
-    .label {
+  .info-block {
+    border-radius: 12px;
+    overflow: hidden;
+    max-height: fit-content;
+
+    &.left {
+      max-width: calc((100% - 12px) * 0.6);
+      min-width: calc((100% - 12px) * 0.6);
+    }
+    &.right {
+      max-width: calc((100% - 12px) * 0.4);
+      min-width: calc((100% - 12px) * 0.4);
+    }
+
+    .title {
+      background-color: $color-primary-500;
+      color: $text-dark;
+      padding: 8px 12px;
+    }
+    @include box-shadow;
+    .block-content {
+      background-color: white;
+      padding: 16px;
       display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 4px;
-      font-size: 14px;
-      line-height: 20px;
-      min-width: 156px;
-      .iconify {
-        display: block;
-        font-size: 18px;
+      flex-direction: column;
+      gap: 6px;
+
+      .industry-list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: flex-end;
+
+        .industry-item {
+          font-size: 13px;
+          padding: 1px 2px;
+          border: 1px solid $color-gray-300;
+          color: $color-gray-500;
+          border-radius: 6px;
+          text-align: center;
+        }
       }
-    }
 
-    .value {
-      font-size: 14px;
-      line-height: 20px;
-    }
-
-    .description-block {
-      margin-top: 12px;
-      :deep(.content) {
+      .label {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
         font-size: 14px;
-        word-break: break-all;
+        line-height: 20px;
+        min-width: 156px;
+        .iconify {
+          display: block;
+          font-size: 18px;
+        }
+      }
+
+      .value {
+        font-size: 14px;
+        line-height: 20px;
+      }
+
+      .description-block {
+        :deep(.content) {
+          font-size: 14px;
+          word-break: break-all;
+        }
       }
     }
   }
