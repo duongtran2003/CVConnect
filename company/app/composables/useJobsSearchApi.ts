@@ -149,12 +149,17 @@ export const useJobsSearchApi = () => {
 
   const getJobAdPreview = async (
     id: any,
+    keyCodeInternal: any,
     abortController?: AbortController,
   ) => {
     const _abortController = abortController;
 
     try {
-      const res = await $axios.get(`/_api/core/job-ad/outside/detail/${id}`, {
+      let url = `/_api/core/job-ad/outside/detail/${id}`;
+      if (keyCodeInternal) {
+        url += `?keyCodeInternal=${keyCodeInternal}`;
+      }
+      const res = await $axios.get(url, {
         signal: _abortController ? _abortController.signal : undefined,
         skipAuth: true,
       });

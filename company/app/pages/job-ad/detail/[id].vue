@@ -28,7 +28,8 @@ onBeforeMount(async () => {
     setLoading(false);
     return;
   }
-  const res = await getJobAdPreview(id);
+  const keyCodeInternal = route.query.keyCodeInternal;
+  const res = await getJobAdPreview(id, keyCodeInternal);
   info.value = res.data;
   setLoading(false);
 });

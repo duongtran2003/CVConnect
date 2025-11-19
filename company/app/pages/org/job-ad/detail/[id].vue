@@ -393,10 +393,19 @@ const dotsActions = computed(() => {
 });
 
 function handleViewDetail() {
+  console.log({ detail: detail.value });
+
   // TODO: Should link to public page, update me
   const link = router.resolve({
-    path: `/org/job-ad/detail/${detail.value.id}`,
+    path: `/job-ad/detail/${detail.value.id}`,
+    query: {
+      keyCodeInternal: detail.value.isPublic
+        ? undefined
+        : detail.value.keyCodeInternal,
+    },
   });
+
+  console.log({ link });
 
   window.open(link.href, "_blank");
 }

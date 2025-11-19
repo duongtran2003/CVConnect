@@ -371,8 +371,9 @@ async function fetchInfo() {
 
       .left,
       .right {
-        max-width: 100% !important;
-        min-width: 100% !important;
+        max-width: 80% !important;
+        min-width: 80% !important;
+        margin: 0px auto;
       }
     }
   }

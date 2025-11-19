@@ -1,5 +1,10 @@
 <template>
   <div class="detail">
+    <ModalsApply
+      v-model="isApplyModalOpen"
+      :job-ad="jobAdInfo"
+      @submit="handleApplyModalSubmit"
+    />
     <div class="job-card">
       <div class="top">
         <div class="title">
@@ -94,6 +99,10 @@ type TProps = {
 };
 const props = defineProps<TProps>();
 
+const route = useRoute();
+
+const isApplyModalOpen = ref<boolean>(false);
+
 const info = computed(() => {
   return props.data;
 });
@@ -113,6 +122,14 @@ const levelTags = computed(() => {
   }
 
   return levelTagsArr;
+});
+
+const jobAdInfo = computed(() => {
+  console.log({ data: props.data });
+  return {
+    ...props.data,
+    id: route.params.id,
+  };
 });
 
 const location = computed(() => {
@@ -139,12 +156,16 @@ const locationTooltip = computed(() => {
 });
 
 function handleApply() {
-  console.log("apply");
+  isApplyModalOpen.value = true;
 }
 
 function handleViewOrg() {
   const link = router.resolve({ path: `/org-profile/${info.value.org.id}` });
   window.open(link.href, "_blank");
+}
+
+function handleApplyModalSubmit() {
+  isApplyModalOpen.value = false;
 }
 </script>
 <style lang="scss" scoped>

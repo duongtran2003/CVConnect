@@ -1,10 +1,10 @@
 <template>
   <div class="sidebar">
     <div class="main-sidebar" :class="{ isExpanded: isExpanded }">
-      <div v-if="isExpanded" class="logo">
+      <div v-if="isExpanded" class="logo cursor-pointer" @click="handleGoToHome">
         <img src="/logo-horizontal.svg" />
       </div>
-      <div v-else class="small-logo">
+      <div v-else class="small-logo cursor-pointer" @click="handleGoToHome">
         <img src="/favicon-icon.svg" />
       </div>
       <div
@@ -147,6 +147,10 @@ watch(
   { immediate: true },
 );
 
+function handleGoToHome() {
+  router.push({ path: "/" });
+}
+
 const isCurrentRole = computed(() => {
   return (role: TAccountRole) => {
     return role.id === currentRole.value?.id;
@@ -176,7 +180,7 @@ const roleIcon = computed(() => {
   };
 });
 
-const handleSetRole = async  (role: TAccountRole) => {
+const handleSetRole = async (role: TAccountRole) => {
   if (currentRole.value && currentRole.value.id == role.id) {
     return;
   }

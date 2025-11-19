@@ -31,7 +31,7 @@
       <div v-if="isSidebarExpanded" class="item-expand-icon">
         <Icon
           v-if="!isFloat"
-          :name="props.item.isExpanded ? 'mdi:chevron-down' : 'mdi:chevron-up'"
+          :name="props.item.isExpanded ? 'mdi:chevron-up' : 'mdi:chevron-down'"
         />
         <Icon v-else name="mdi:chevron-right" />
       </div>

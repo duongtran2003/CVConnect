@@ -1,5 +1,10 @@
 <template>
   <div class="job-card">
+    <ModalsApply
+      v-model="isApplyModalOpen"
+      :job-ad="props.data"
+      @submit="handleApplyModalSubmit"
+    />
     <div class="top">
       <div class="title">
         {{ props.data.title }}
@@ -41,7 +46,10 @@
           <div class="name">{{ location }}</div>
         </div>
       </div>
-      <div v-if="props.allowPreview || props.allowApply" class="row ml-auto flex-wrap mt-auto">
+      <div
+        v-if="props.allowPreview || props.allowApply"
+        class="row ml-auto flex-wrap mt-auto"
+      >
         <AppButton
           v-if="props.allowPreview"
           :text="'Xem nhanh'"
@@ -66,7 +74,7 @@
 type TProps = {
   data: any;
   allowPreview?: boolean;
-  allowApply?:boolean;
+  allowApply?: boolean;
 };
 
 const props = withDefaults(defineProps<TProps>(), {
@@ -77,6 +85,8 @@ const props = withDefaults(defineProps<TProps>(), {
 const router = useRouter();
 const jobsSearchStore = useJobsSearchStore();
 const { setSelectedJob } = jobsSearchStore;
+
+const isApplyModalOpen = ref<boolean>(false);
 
 const location = computed(() => {
   if (!props.data.workLocations || props.data.workLocations.length == 0) {
@@ -106,7 +116,7 @@ const tags = computed(() => {
 });
 
 function handleApply() {
-  alert("Mo modal apply");
+  isApplyModalOpen.value = true;
 }
 
 function handlePreview() {
@@ -116,6 +126,10 @@ function handlePreview() {
 function handleViewOrg() {
   const link = router.resolve({ path: `/org-profile/${props.data.org.id}` });
   window.open(link.href, "_blank");
+}
+
+function handleApplyModalSubmit() {
+  isApplyModalOpen.value = false;
 }
 </script>
 <style lang="scss" scoped>

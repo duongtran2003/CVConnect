@@ -86,9 +86,14 @@ type TProps = {
   cityInfo: Record<string, any>[];
   value: TAddressValue;
   addressIndex: number;
-  isViewOnly: boolean;
+  isViewOnly?: boolean;
 };
-const props = defineProps<TProps>();
+const props = withDefaults(
+defineProps<TProps>(),
+  {
+    isViewOnly: false,
+  }
+)
 
 const emits = defineEmits<{
   (e: "input", value: TAddressValue): void;
