@@ -1,5 +1,6 @@
 <template>
   <div class="applied-job-card">
+    <ModalsAppliedDetail v-model="isDetailModalShow" :detail="props.data" />
     <div class="top row space-between">
       <div class="logo-section">
         <div class="logo">
@@ -100,6 +101,7 @@
         >
           Tin nhắn
         </div>
+        <div class="detail-btn" @click="handleViewDetail">Thông tin ứng tuyển</div>
       </div>
     </div>
   </div>
@@ -116,10 +118,16 @@ const router = useRouter();
 
 const props = defineProps<TProps>();
 
+const isDetailModalShow = ref<boolean>(false);
+
 function handleViewDetailJob() {
   const link = router.resolve({ path: `/job-ad/detail/${props.data.id}` });
 
   window.open(link.href, "_blank");
+}
+
+function handleViewDetail() {
+  isDetailModalShow.value = true;
 }
 </script>
 <style lang="scss" scoped>
@@ -240,6 +248,7 @@ function handleViewDetailJob() {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+    gap: 8px;
 
     .message-btn {
       padding: 4px 8px;
@@ -264,6 +273,17 @@ function handleViewDetailJob() {
           right: -4px;
         }
       }
+    }
+
+    .detail-btn {
+      padding: 4px 8px;
+      background-color: $color-primary-400;
+      border: 1px solid $color-primary-400;
+      color: $text-dark;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      position: relative;
     }
   }
 }

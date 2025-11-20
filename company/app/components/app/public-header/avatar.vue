@@ -19,11 +19,11 @@
         <Icon name="material-symbols:newsstand-rounded" class="icon" />
         <div class="text">Tin đã ứng tuyển</div>
       </div>
-      <div class="divider"></div>
+      <div v-if="isManagement || isOrgMember" class="divider"></div>
       <div
         v-if="isManagement"
         class="dropdown__item"
-        @click="handleManageHiring"
+        @click="handleManageSystem"
       >
         <Icon name="material-symbols:folder-managed-rounded" class="icon" />
         <div class="text">Quản lý hệ thống</div>
@@ -31,7 +31,7 @@
       <div
         v-if="isOrgMember"
         class="dropdown__item"
-        @click="handleManageSystem"
+        @click="handleManageHiring"
       >
         <Icon
           name="material-symbols-light:bookmark-manager-rounded"
@@ -58,6 +58,7 @@ const { logout } = useAuth();
 const { clearToken } = useAuthStore();
 const authStore = useAuthStore();
 const { currentRole, roles } = storeToRefs(authStore);
+const { setCurrentRole } = authStore;
 const router = useRouter();
 
 const userStore = useUserStore();
@@ -75,15 +76,39 @@ const handleClickAvatar = () => {
 };
 
 const handleManageHiring = () => {
-  router.push({ path: "/org-info" });
+  const requiredRole = roles.value.find(
+    (role: any) => role.memberType == "ORGANIZATION",
+  );
+
+  if (requiredRole) {
+    setCurrentRole(requiredRole);
+    router.push({ path: "/org-info" });
+    isDropdownShow.value = false;
+  }
 };
 
 const handleManageSystem = () => {
-  router.push({ path: "/system-admin/report/candidate" });
+  const requiredRole = roles.value.find(
+    (role: any) => role.memberType == "MANAGEMENT",
+  );
+
+  if (requiredRole) {
+    setCurrentRole(requiredRole);
+    router.push({ path: "/system-admin/report/candidate" });
+    isDropdownShow.value = false;
+  }
 };
 
 const handleViewApplied = () => {
-  router.push({ path: "/job-ad/applied" });
+  const requiredRole = roles.value.find(
+    (role: any) => role.memberType == "CANDIDATE",
+  );
+
+  if (requiredRole) {
+    setCurrentRole(requiredRole);
+    router.push({ path: "/job-ad/applied" });
+    isDropdownShow.value = false;
+  }
 };
 
 const handleLogout = async () => {

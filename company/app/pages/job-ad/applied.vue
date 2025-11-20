@@ -45,6 +45,7 @@
           <div v-if="isLoading" class="spinner">
             <AppSpinnerHalfCircle />
           </div>
+          <AppNoData v-if="list.length == 0 && !isLoading" />
           <div v-if="!isEmpty && !isLoading" class="show-more" @click="handleShowMore">Hiển thị thêm</div>
         </div>
       </div>
