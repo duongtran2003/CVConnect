@@ -28,7 +28,7 @@ export default defineNuxtPlugin(() => {
         //   setCurrentRole(tokenRefreshResponse.data.data.roles[0]);
         // }
         failedRequest.response.config.headers["Authorization"] =
-          "Bearer " + token;
+          "Bearer " + token.value;
         return Promise.resolve();
       })
       .catch((err) => {

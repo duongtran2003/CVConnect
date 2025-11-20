@@ -15,32 +15,23 @@
         <Icon name="mdi:clipboard-account" class="icon" />
         <div class="text">{{ userInfo?.fullName || "Hồ sơ cá nhân" }}</div>
       </div>
-      <div
-        v-if="isCandidate"
-        class="dropdown__item"
-        @click="handleManageHiring"
-      >
-        <Icon
-          name="material-symbols:newsstand-rounded"
-          class="icon"
-        />
+      <div class="dropdown__item" @click="handleViewApplied">
+        <Icon name="material-symbols:newsstand-rounded" class="icon" />
         <div class="text">Tin đã ứng tuyển</div>
       </div>
+      <div class="divider"></div>
       <div
         v-if="isManagement"
         class="dropdown__item"
         @click="handleManageHiring"
       >
-        <Icon
-          name="material-symbols:folder-managed-rounded"
-          class="icon"
-        />
+        <Icon name="material-symbols:folder-managed-rounded" class="icon" />
         <div class="text">Quản lý hệ thống</div>
       </div>
       <div
         v-if="isOrgMember"
         class="dropdown__item"
-        @click="handleManageHiring"
+        @click="handleManageSystem"
       >
         <Icon
           name="material-symbols-light:bookmark-manager-rounded"
@@ -87,6 +78,14 @@ const handleManageHiring = () => {
   router.push({ path: "/org-info" });
 };
 
+const handleManageSystem = () => {
+  router.push({ path: "/system-admin/report/candidate" });
+};
+
+const handleViewApplied = () => {
+  router.push({ path: "/job-ad/applied" });
+};
+
 const handleLogout = async () => {
   try {
     setLoading(true);
@@ -103,7 +102,7 @@ const handleLogout = async () => {
 };
 
 const isOrgMember = computed(() => {
-  console.log(userInfo.value)
+  console.log(userInfo.value);
   const orgRole = userInfo.value?.userDetails?.find(
     (detail: any) => detail.role.memberType == "ORGANIZATION",
   );
@@ -115,14 +114,19 @@ const isCandidate = computed(() => {
     (detail: any) => detail.role.memberType == "CANDIDATE",
   );
   return candidateRole != undefined;
-})
+});
 
 const isManagement = computed(() => {
-  const candidateRole = userInfo.value?.userDetails?.find(
-    (detail: any) => detail.role.memberType == "MANAGEMENT",
+  const managementRole = roles.value.find(
+    (role) => role.memberType == "MANAGEMENT",
   );
-  return candidateRole != undefined;
-})
+  return managementRole != undefined;
+  //
+  // const candidateRole = userInfo.value?.userDetails?.find(
+  //   (detail: any) => detail.role.memberType == "MANAGEMENT",
+  // );
+  // return candidateRole != undefined;
+});
 
 const monogramText = computed(() => {
   const names = userInfo.value?.fullName?.split(/\s+/);
