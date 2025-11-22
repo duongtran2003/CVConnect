@@ -1,45 +1,62 @@
 <template>
-  <div class="applied-job-card">
-    <ModalsAppliedDetail v-model="isDetailModalShow" :detail="props.data" />
-    <div class="top row space-between">
-      <div class="logo-section">
-        <div class="logo">
-          <img :src="props.data.org?.logoUrl" alt="Logo công ty" />
-        </div>
-        <div class="info-section">
-          <div class="title">
-            {{ props.data.jobAd.title }}
-            <Icon
-              class="external-link"
-              name="ci:external-link"
-              @click="handleViewDetailJob"
-            />
-          </div>
-          <div class="company-name">{{ props.data.org.name }}</div>
-          <div class="block">
-            <div class="label">
-              <Icon name="material-symbols:event-available-rounded" />
-              <span>Ngày ứng tuyển</span>
-            </div>
-            <span class="value">{{
-              formatDateTime(props.data.applyDate, "DD/MM/YYYY HH:mm")
-            }}</span>
-          </div>
-        </div>
-      </div>
-      <span
-        class="value chip"
-        :style="{
-          borderColor:
-            CANDIDATE_STATUS[props.data.candidateStatusDto.name].color,
-          color: CANDIDATE_STATUS[props.data.candidateStatusDto.name].color,
-          backgroundColor:
-            CANDIDATE_STATUS[props.data.candidateStatusDto.name].background,
-        }"
-        >{{ props.data.candidateStatusDto.label }}</span
-      >
-    </div>
+  <div class="job-ad-info">
+    <!-- <div class="top row space-between"> -->
+    <!-- <div class="logo-section"> -->
+    <!--   <div class="logo"> -->
+    <!--     <img :src="props.data.org?.logoUrl" alt="Logo công ty" /> -->
+    <!--   </div> -->
+    <!--   <div class="info-section"> -->
+    <!--     <div class="title"> -->
+    <!--       {{ props.data.jobAd.title }} -->
+    <!--       <Icon -->
+    <!--         class="external-link" -->
+    <!--         name="ci:external-link" -->
+    <!--         @click="handleViewDetailJob" -->
+    <!--       /> -->
+    <!--     </div> -->
+    <!--     <div class="company-name">{{ props.data.org.name }}</div> -->
+    <!--     <div class="block"> -->
+    <!--       <div class="label"> -->
+    <!--         <Icon name="material-symbols:event-available-rounded" /> -->
+    <!--         <span>Ngày ứng tuyển</span> -->
+    <!--       </div> -->
+    <!--       <span class="value">{{ -->
+    <!--         formatDateTime(props.data.applyDate, "DD/MM/YYYY HH:mm") -->
+    <!--       }}</span> -->
+    <!--     </div> -->
+    <!--   </div> -->
+    <!-- </div> -->
+    <!-- </div> -->
     <div class="body">
+      <div class="title">Thông tin thêm</div>
+      <div class="block">
+        <div class="label">
+          <Icon name="pajamas:status-neutral" />
+          <span>Trạng thái</span>
+        </div>
+        <span class="value">
+          <span
+            class="value chip"
+            :style="{
+              borderColor:
+                CANDIDATE_STATUS[props.data.candidateStatusDto.name].color,
+              color: CANDIDATE_STATUS[props.data.candidateStatusDto.name].color,
+              backgroundColor:
+                CANDIDATE_STATUS[props.data.candidateStatusDto.name].background,
+            }"
+            >{{ props.data.candidateStatusDto.label }}</span
+          ></span
+        >
+      </div>
+      <div class="block">
+        <div class="label">
+          <Icon name="material-symbols:event-available-rounded" />
+          <span>Ngày ứng tuyển</span>
+        </div>
+        <span class="value">{{
+          formatDateTime(props.data.applyDate, "DD/MM/YYYY HH:mm")
+        }}</span>
+      </div>
       <div class="block">
         <div class="label">
           <Icon name="fluent:step-24-filled" />
@@ -94,17 +111,45 @@
         <span class="value">{{ props.data.eliminateReason.description }}</span>
       </div>
       <div class="divider"></div>
-      <div class="bottom">
-        <div
-          class="message-btn"
-          :class="{ 'has-new': props.data.hasMessageUnread }"
-          @click="handleViewMessage"
-        >
-          Tin nhắn
+      <div class="misc">
+        <div class="row">
+          <AppInputText
+            :label="'Tên'"
+            :required="false"
+            :error="''"
+            :placeholder="''"
+            :value="props.data.candidateInfo.fullName"
+            :is-disabled="true"
+            :slim-error="true"
+            :title="''"
+            class="text-input"
+          />
         </div>
-        <div class="detail-btn" @click="handleViewDetail">
-          Thông tin ứng tuyển
+        <AppInputText
+          :label="'Email'"
+          :required="false"
+          :error="''"
+          :placeholder="''"
+          :value="props.data.candidateInfo.email"
+          :is-disabled="true"
+          :slim-error="true"
+          :title="''"
+          class="text-input"
+        />
+        <div class="preview-cv" @click="handlePreviewCV">
+          <div class="text">Xem CV</div>
+          <Icon name="ci:external-link" />
         </div>
+        <AppInputTextarea
+          :model-value="props.data.candidateInfo.coverLetter"
+          :label="'Cover letter'"
+          :required="false"
+          :is-disabled="true"
+          :placeholder="''"
+          :error="''"
+          :show-error="false"
+          :slim-error="true"
+        />
       </div>
     </div>
   </div>
@@ -120,29 +165,13 @@ type TProps = {
 const router = useRouter();
 
 const props = defineProps<TProps>();
-const emits = defineEmits<{
-  (e: "view-message"): void;
-}>();
 
-const isDetailModalShow = ref<boolean>(false);
-
-function handleViewDetailJob() {
-  const link = router.resolve({ path: `/job-ad/detail/${props.data.id}` });
-
-  window.open(link.href, "_blank");
-}
-
-function handleViewDetail() {
-  isDetailModalShow.value = true;
-}
-
-function handleViewMessage() {
-  console.log(props.data.id);
-  router.push({ path: "/message", query: { id: props.data.id } });
+function handlePreviewCV() {
+  window.open(props.data.candidateInfo.cvUrl, "_blank");
 }
 </script>
 <style lang="scss" scoped>
-.applied-job-card {
+.job-ad-info {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -247,6 +276,48 @@ function handleViewMessage() {
     display: flex;
     flex-direction: column;
     gap: 8px;
+
+    .misc {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      :deep(.text-input) {
+        flex: 1;
+        .input {
+          padding: 6px 8px;
+          input {
+            font-size: 14px;
+          }
+        }
+      }
+
+      :deep(textarea) {
+        max-height: 280px;
+      }
+
+      .preview-cv {
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        cursor: pointer;
+        width: fit-content;
+
+        .text {
+          color: $text-light;
+          font-size: 14px;
+        }
+
+        .iconify {
+          font-size: 20px;
+          display: block;
+          width: 20px;
+          height: 20px;
+          min-width: 20px;
+
+          color: $color-info;
+        }
+      }
+    }
   }
 
   .divider {

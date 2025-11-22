@@ -1,118 +1,33 @@
 <template>
-  <div class="applied-job-card">
-    <ModalsAppliedDetail v-model="isDetailModalShow" :detail="props.data" />
+  <div class="message-card">
+    <div v-if="props.data.hasMessageUnread" class="unseen"></div>
+    <div class="title">
+      <span :title="props.data.jobAd.title" class="title-text">{{
+        props.data.jobAd.title
+      }}</span>
+      <Icon
+        class="external-link"
+        name="ci:external-link"
+        @click="handleViewDetailJob"
+      />
+    </div>
     <div class="top row space-between">
       <div class="logo-section">
         <div class="logo">
           <img :src="props.data.org?.logoUrl" alt="Logo công ty" />
         </div>
         <div class="info-section">
-          <div class="title">
-            {{ props.data.jobAd.title }}
-            <Icon
-              class="external-link"
-              name="ci:external-link"
-              @click="handleViewDetailJob"
-            />
-          </div>
           <div class="company-name">{{ props.data.org.name }}</div>
-          <div class="block">
-            <div class="label">
-              <Icon name="material-symbols:event-available-rounded" />
-              <span>Ngày ứng tuyển</span>
-            </div>
-            <span class="value">{{
-              formatDateTime(props.data.applyDate, "DD/MM/YYYY HH:mm")
-            }}</span>
-          </div>
-        </div>
-      </div>
-      <span
-        class="value chip"
-        :style="{
-          borderColor:
-            CANDIDATE_STATUS[props.data.candidateStatusDto.name].color,
-          color: CANDIDATE_STATUS[props.data.candidateStatusDto.name].color,
-          backgroundColor:
-            CANDIDATE_STATUS[props.data.candidateStatusDto.name].background,
-        }"
-        >{{ props.data.candidateStatusDto.label }}</span
-      >
-    </div>
-    <div class="body">
-      <div class="block">
-        <div class="label">
-          <Icon name="fluent:step-24-filled" />
-          <span>Vòng hiện tại</span>
-        </div>
-        <span
-          class="chip"
-          :style="{
-            borderColor: PROCESS_COLOR_CODE[props.data.currentRound.code],
-            color: PROCESS_COLOR_CODE[props.data.currentRound.code],
-            backgroundColor: `${PROCESS_COLOR_CODE[props.data.currentRound.code]}0D`,
-          }"
-        >
-          {{ props.data.currentRound.name }}
-        </span>
-      </div>
-      <div
-        v-if="
-          props.data.onboardDate &&
-          props.data.candidateStatusDto.name != 'REJECTED'
-        "
-        class="block"
-      >
-        <div class="label">
-          <Icon name="material-symbols:event-available-rounded" />
-          <span>Ngày onboard</span>
-        </div>
-        <span class="value">{{
-          formatDateTime(props.data.onboardDate, "DD/MM/YYYY HH:mm")
-        }}</span>
-      </div>
-      <div
-        v-if="props.data.candidateStatusDto.name == 'REJECTED'"
-        class="block"
-      >
-        <div class="label">
-          <Icon name="material-symbols:event-busy-rounded" />
-          <span>Ngày bị loại</span>
-        </div>
-        <span class="value">{{
-          formatDateTime(props.data.eliminateDate, "DD/MM/YYYY HH:mm")
-        }}</span>
-      </div>
-      <div
-        v-if="props.data.candidateStatusDto.name == 'REJECTED'"
-        class="block"
-      >
-        <div class="label">
-          <Icon name="material-symbols:edit-note-rounded" />
-          <span>Lí do bị loại</span>
-        </div>
-        <span class="value">{{ props.data.eliminateReason.description }}</span>
-      </div>
-      <div class="divider"></div>
-      <div class="bottom">
-        <div
-          class="message-btn"
-          :class="{ 'has-new': props.data.hasMessageUnread }"
-          @click="handleViewMessage"
-        >
-          Tin nhắn
-        </div>
-        <div class="detail-btn" @click="handleViewDetail">
-          Thông tin ứng tuyển
+          <span v-if="lastMessage" class="last-message">{{ lastMessage }}</span>
+          <span v-if="lastMessage" class="message-timestamp">{{
+            relativeTime
+          }}</span>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { CANDIDATE_STATUS } from "~/const/views/org/candidates";
-import { PROCESS_COLOR_CODE } from "~/const/views/system-admin/process-type";
-
 type TProps = {
   data: any;
 };
@@ -124,7 +39,20 @@ const emits = defineEmits<{
   (e: "view-message"): void;
 }>();
 
+const userStore = useUserStore();
+const { userInfo } = storeToRefs(userStore);
+const relativeTime = useMomentRelativeTime(
+  props.data.conversation?.lastMessageSentAt,
+);
+
 const isDetailModalShow = ref<boolean>(false);
+
+const lastMessage = computed(() => {
+  if (userInfo.value?.id == props.data.conversation?.lastMessageSenderId) {
+    return `Bạn: ${props.data.conversation?.lastMessage}`;
+  }
+  return props.data.conversation?.lastMessage;
+});
 
 function handleViewDetailJob() {
   const link = router.resolve({ path: `/job-ad/detail/${props.data.id}` });
@@ -142,15 +70,31 @@ function handleViewMessage() {
 }
 </script>
 <style lang="scss" scoped>
-.applied-job-card {
+.message-card {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 12px;
+  gap: 8px;
+  padding: 8px;
   border-radius: 12px;
   border: 1px solid $color-gray-300;
   width: 100%;
   color: $text-light;
+  position: relative;
+
+  &.selected {
+    border: 1px solid $color-primary-400;
+  }
+
+  .unseen {
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background-color: $color-danger;
+    position: absolute;
+    right: 12px;
+    top: 12px;
+  }
 
   .iconify {
     display: inline-block;
@@ -164,6 +108,10 @@ function handleViewMessage() {
   .external-link {
     color: $color-info;
     cursor: pointer;
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 16px !important;
+    min-width: 16px !important;
   }
 
   .row {
@@ -180,6 +128,20 @@ function handleViewMessage() {
   .title {
     font-size: 14px;
     font-weight: 600;
+
+    display: block; // ensures width constraints apply
+    max-width: 100%; // fill available space
+    white-space: nowrap; // single line
+    overflow: hidden; // hide overflow
+    text-overflow: ellipsis; // show "..."
+    .title-text {
+      display: inline-block;
+      max-width: calc(100% - 20px); // leave space for the icon
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      vertical-align: middle;
+    }
   }
 
   .top {
@@ -189,10 +151,33 @@ function handleViewMessage() {
       display: flex;
       flex-direction: column;
       gap: 2px;
+      min-width: 0px;
 
       .company-name {
-        color: $color-gray-400;
+        color: $text-light;
         font-size: 14px;
+      }
+
+      .last-message {
+        color: $text-light;
+        font-style: italic;
+        font-size: 13px;
+        display: block;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .message-timestamp {
+        color: $color-gray-400;
+        font-style: italic;
+        font-size: 13px;
+        display: block;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
     }
 
@@ -200,13 +185,14 @@ function handleViewMessage() {
       display: flex;
       flex-direction: row;
       gap: 8px;
+      max-width: 100%;
 
       .logo {
         display: block;
-        height: 64px;
-        width: 64px;
-        min-width: 64px;
-        border-radius: 12px;
+        height: 48px;
+        width: 48px;
+        min-width: 48px;
+        border-radius: 8px;
         overflow: hidden;
         img {
           width: 100%;

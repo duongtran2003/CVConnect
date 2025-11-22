@@ -2,13 +2,14 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import moment from "moment-timezone";
 import "moment/locale/vi";
 
-// Set the locale globally
-
 export function useMomentRelativeTime(
   timestamp: number | string,
   timezone?: string,
 ) {
   const relative = ref("");
+
+  // Default timezone = Ho Chi Minh (GMT+7)
+  const effectiveTimezone = timezone || "Asia/Ho_Chi_Minh";
 
   function updateTime() {
     if (!timestamp) {
@@ -21,7 +22,7 @@ export function useMomentRelativeTime(
         ? moment.unix(timestamp)
         : moment(timestamp);
 
-    const localizedTime = timezone ? time.tz(timezone) : time;
+    const localizedTime = time.tz(effectiveTimezone);
 
     moment.updateLocale("vi", {
       relativeTime: {
@@ -44,7 +45,7 @@ export function useMomentRelativeTime(
       },
     });
 
-    const diffDays = moment().diff(localizedTime, "days");
+    const diffDays = moment().tz(effectiveTimezone).diff(localizedTime, "days");
 
     if (diffDays >= 1) {
       relative.value = localizedTime.format("DD/MM/YYYY - HH:mm");

@@ -46,7 +46,13 @@
             <AppSpinnerHalfCircle />
           </div>
           <AppNoData v-if="list.length == 0 && !isLoading" />
-          <div v-if="!isEmpty && !isLoading" class="show-more" @click="handleShowMore">Hiển thị thêm</div>
+          <div
+            v-if="!isEmpty && !isLoading"
+            class="show-more"
+            @click="handleShowMore"
+          >
+            Hiển thị thêm
+          </div>
         </div>
       </div>
     </div>
@@ -109,12 +115,15 @@ async function fetchData() {
     return;
   }
   list.value = [...list.value, ...res.data.data];
-  
+
   if (res.data.data.length) {
     isEmpty.value = false;
   } else {
     isEmpty.value = true;
   }
+
+  total.value = res.data.data.length;
+
   isLoading.value = false;
 }
 

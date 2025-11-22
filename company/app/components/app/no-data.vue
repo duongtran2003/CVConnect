@@ -21,6 +21,7 @@ const props = withDefaults(defineProps<TNoDataProps>(), {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-align: center;
 
   .icon {
     display: block;

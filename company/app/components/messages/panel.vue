@@ -1,0 +1,338 @@
+<template>
+  <div class="panel">
+    <div class="top">
+      <div v-if="orgInfo" class="org-info">
+        <div class="logo">
+          <img :src="orgInfo.logoUrl" alt="Logo công ty" />
+        </div>
+        <div class="names">
+          <div class="org-name">{{ orgInfo.name }}</div>
+          <div class="hr-name">{{ orgInfo.hrContact.fullName }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="chat-container">
+      <div v-if="isLoading" class="spinner">
+        <AppSpinnerHalfCircle />
+      </div>
+      <MessagesBubble
+        v-for="(message, index) of messagesList"
+        :key="index"
+        :sender-info="message.senderInfo"
+        :member-ids="conversationMembers"
+        :messages="message.messages"
+      />
+      <div v-if="isNoConversation" class="no-conversation">
+        <AppButton
+          :text="'Tạo đoạn hội thoại'"
+          class="add-conversation"
+          @click="handleAddConversation"
+        >
+          <template #icon>
+            <Icon name="mdi:chat-plus" />
+          </template>
+        </AppButton>
+      </div>
+    </div>
+    <div v-if="!isNoConversation" class="input-container">
+      <AppInputText
+        :label="''"
+        :required="false"
+        :error="''"
+        :placeholder="'Gửi tin nhắn'"
+        :value="chatInput"
+        :is-disabled="false"
+        :slim-error="true"
+        class="text-input"
+        @input="($event) => (chatInput = $event)"
+      />
+      <div class="send-button" :class="{ disabled: !chatInput.trim() }">
+        <Icon name="material-symbols:send-rounded" />
+      </div>
+    </div>
+  </div>
+</template>
+<script setup lang="ts">
+type TProps = {
+  detail: any;
+};
+
+const {
+  checkExistConversation,
+  getConversationOrgInfo,
+  createConversation,
+  getConversationMessages,
+} = useConversationApi();
+
+const userStore = useUserStore();
+const { userInfo } = storeToRefs(userStore);
+
+const isNoConversation = ref<boolean>(false);
+const checkExistController = ref<any>(null);
+const getOrgInfoController = ref<any>(null);
+const getMessagesController = ref<any>(null);
+const orgInfo = ref<any>(null);
+const isLoading = ref<boolean>(false);
+const chatInput = ref<string>("");
+const messages = ref<any>([]);
+const currentPage = ref<any>(null);
+const hasMoreMessage = ref<any>(true);
+const conversationMembers = ref<any>([]);
+
+const props = defineProps<TProps>();
+
+const messagesList = computed(() => {
+  const list = messages.value;
+
+  const result: any[] = [];
+  let currentGroup: any = null;
+
+  list.forEach((msg: any) => {
+    if (!currentGroup || currentGroup.senderInfo.id !== msg.senderId) {
+      currentGroup = {
+        senderInfo: getInfo.value(msg.senderId),
+        messages: [],
+      };
+      result.push(currentGroup);
+    }
+
+    const { senderId, ...rest } = msg;
+    currentGroup.messages.push(rest);
+  });
+
+  console.log({ result });
+  return result;
+});
+
+const getInfo = computed(() => {
+  return (id: any) => {
+    if (id == userInfo.value?.id) {
+      return {
+        id: userInfo.value?.id,
+      };
+    } else {
+      const info = {
+        id: orgInfo.value.id,
+        logo: orgInfo.value.logoUrl,
+      };
+      return info;
+    }
+  };
+});
+
+async function checkExist() {
+  if (checkExistController.value) {
+    checkExistController.value.abort();
+  }
+
+  checkExistController.value = new AbortController();
+
+  const res = await checkExistConversation(
+    props.detail.jobAd.id,
+    props.detail.candidateInfo.candidateId,
+    checkExistController.value,
+  );
+  if (!res) {
+    isNoConversation.value = true;
+  } else {
+    isNoConversation.value = false;
+  }
+}
+
+async function getMessages() {
+  isLoading.value = true;
+  if (getMessagesController.value) {
+    getMessagesController.value.abort();
+  }
+
+  getMessagesController.value = new AbortController();
+
+  const res = await getConversationMessages(
+    props.detail.jobAd.id,
+    props.detail.candidateInfo.candidateId,
+    currentPage.value,
+    getMessagesController.value,
+  );
+
+  messages.value = [...res.data.messagesWithFilter.data, ...messages.value];
+  conversationMembers.value = res.data.participantIds;
+
+  if (res.data.messagesWithFilter.data.length <= 20) {
+    hasMoreMessage.value = false;
+  } else {
+    hasMoreMessage.value = true;
+  }
+  isLoading.value = false;
+}
+
+async function getOrgInfo() {
+  if (getOrgInfoController.value) {
+    getOrgInfoController.value.abort();
+  }
+
+  getOrgInfoController.value = new AbortController();
+
+  const res = await getConversationOrgInfo(
+    props.detail.org.id,
+    getOrgInfoController.value,
+  );
+  if (res) {
+    orgInfo.value = res.data;
+  }
+}
+
+async function fetchData() {
+  isLoading.value = true;
+
+  messages.value = [];
+  currentPage.value = null;
+  chatInput.value = "";
+  hasMoreMessage.value = true;
+  conversationMembers.value = [];
+
+  await Promise.allSettled([getOrgInfo(), checkExist()]);
+  isLoading.value = false;
+  if (!isNoConversation.value) {
+    await getMessages();
+  }
+}
+
+async function handleAddConversation() {
+  isLoading.value = true;
+  const res = await createConversation(
+    props.detail.jobAd.id,
+    props.detail.candidateInfo.candidateId,
+  );
+  if (res) {
+    isNoConversation.value = false;
+  }
+  isLoading.value = false;
+}
+
+watch(
+  () => props.detail.id,
+  async (newId) => {
+    await fetchData();
+  },
+  { immediate: true, deep: true },
+);
+</script>
+<style lang="scss" scoped>
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid $color-gray-300;
+  min-height: calc(100vh - 166px);
+
+  .top {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+
+    .org-info {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      align-items: flex-start;
+
+      .names {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .org-name {
+          color: $text-light;
+        }
+        .hr-name {
+          color: $color-gray-600;
+          font-size: 13px;
+        }
+      }
+
+      .logo {
+        display: block;
+        height: 48px;
+        width: 48px;
+        min-width: 48px;
+        border-radius: 12px;
+        overflow: hidden;
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: inherit;
+        }
+      }
+    }
+  }
+
+  .chat-container {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .spinner,
+    .no-conversation {
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .add-conversation {
+        padding: 4px 8px;
+        border: 1px solid $color-primary-500;
+        color: $color-primary-500;
+      }
+    }
+  }
+
+  .input-container {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    align-items: center;
+    :deep(.text-input) {
+      flex: 1;
+      .input-wrapper {
+        .input {
+          padding: 6px 8px;
+          input {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+
+    .send-button {
+      background-color: $color-primary-500;
+      cursor: pointer;
+      height: calc(100% - 4px);
+      aspect-ratio: 1/1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      .iconify {
+        display: block;
+        font-size: 20px;
+        height: 20px;
+        min-width: 20px;
+        color: $text-dark;
+        margin-right: -4px;
+      }
+
+      &.disabled {
+        background-color: $color-gray-400;
+        cursor: default;
+      }
+    }
+  }
+}
+</style>

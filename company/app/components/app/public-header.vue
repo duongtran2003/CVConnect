@@ -13,9 +13,7 @@
     </div>
     <div class="right">
       <template v-if="avatarInfo">
-        <div class="header-btn">
-          <Icon name="mingcute:wechat-fill" />
-        </div>
+        <AppPublicHeaderChatPopup />
         <AppPublicHeaderAvatar />
       </template>
       <template v-else>
