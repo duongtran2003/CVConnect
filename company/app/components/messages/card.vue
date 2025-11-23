@@ -13,11 +13,17 @@
     </div>
     <div class="top row space-between">
       <div class="logo-section">
-        <div class="logo">
+        <div v-if="!props.isHr" class="logo">
           <img :src="props.data.org?.logoUrl" alt="Logo công ty" />
         </div>
         <div class="info-section">
-          <div class="company-name">{{ props.data.org.name }}</div>
+          <div class="company-name">
+            {{
+              !props.isHr
+                ? props.data.org.name
+                : props.data.candidateInfo.fullName
+            }}
+          </div>
           <span v-if="lastMessage" class="last-message">{{ lastMessage }}</span>
           <span v-if="lastMessage" class="message-timestamp">{{
             relativeTime
@@ -30,6 +36,7 @@
 <script setup lang="ts">
 type TProps = {
   data: any;
+  isHr: boolean;
 };
 
 const router = useRouter();
@@ -141,6 +148,11 @@ function handleViewMessage() {
       overflow: hidden;
       text-overflow: ellipsis;
       vertical-align: middle;
+    }
+
+    .iconify {
+      display: inline-block !important;
+      margin-left: 4px;
     }
   }
 

@@ -88,6 +88,28 @@ export const useConversationApi = () => {
     }
   };
 
+  const checkExistUnreadMessage = async (isCandidate: boolean) => {
+    try {
+      const res = await $axios.get(
+        `/_api/notify/conversation/check-exists-message-unread?isCandidate=${isCandidate}`,
+      );
+      // toast.add({
+      //   title: res.data.message,
+      //   color: "success",
+      // });
+      return res.data;
+    } catch (err: any) {
+      // if (err.response && err.response.data) {
+      //   toast.add({
+      //     title: err.response.data.message || "Có lỗi xảy ra",
+      //     color: "error",
+      //   });
+      // }
+      console.error(err);
+      return null;
+    }
+  };
+
   const createConversation = async (jobAdId: any, candidateId: any) => {
     try {
       const res = await $axios.post(`/_api/notify/conversation/create`, {
@@ -111,37 +133,11 @@ export const useConversationApi = () => {
     }
   };
 
-  const deleteHistory = async (id: any) => {
-    try {
-      const res = await $axios.delete(
-        `/_api/core/search-history-outside/delete`,
-        {
-          data: [id],
-        },
-      );
-      return true;
-    } catch (err: any) {
-      console.error(err);
-      return false;
-    }
-  };
-
-  const deleteAllHistory = async () => {
-    try {
-      const res = await $axios.delete(
-        `/_api/core/search-history-outside/delete-all`,
-      );
-      return true;
-    } catch (err: any) {
-      console.error(err);
-      return false;
-    }
-  };
-
   return {
     checkExistConversation,
     getConversationOrgInfo,
     createConversation,
     getConversationMessages,
+    checkExistUnreadMessage,
   };
 };

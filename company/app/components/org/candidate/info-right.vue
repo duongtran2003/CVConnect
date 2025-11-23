@@ -20,6 +20,11 @@
         :job-ads="props.detail.jobAdCandidates"
         :candidate-info="props.detail.candidateInfo"
       />
+      <OrgCandidateInfoRightConversation
+        v-show="currentTabIndex == 4"
+        :job-ads="props.detail.jobAdCandidates"
+        :candidate-info="props.detail.candidateInfo"
+      />
       <OrgCandidateInfoRightEmailLog
         v-show="currentTabIndex == 5"
         :job-ads="props.detail.jobAdCandidates"
@@ -42,6 +47,14 @@ const props = defineProps<TProps>();
 
 const currentTabIndex = ref<number>(1);
 
+const authStore = useAuthStore();
+const { currentRole } = storeToRefs(authStore);
+
+const isHr = computed(() => {
+  console.log({ role: currentRole.value });
+  return currentRole.value?.code == "HR";
+});
+
 onMounted(() => {
   const tabParam = route.query.tab as string | undefined;
   if (tabParam) {
@@ -53,6 +66,11 @@ onMounted(() => {
 });
 
 const tabs = computed(() => {
+  if (!isHr.value) {
+    return CANDIDATE_DETAIL_RIGHT_TABS.filter(
+      (TAB: any) => TAB.paramKey != "discussion",
+    );
+  }
   return CANDIDATE_DETAIL_RIGHT_TABS;
 });
 

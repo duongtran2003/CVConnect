@@ -21,6 +21,7 @@
         <div :title="'Thu gọn'" class="collapse-btn" @click="collapseAll">
           <Icon name="material-symbols:collapse-all" />
         </div>
+        <AppPublicHeaderChatPopup v-if="isHr" class="chat-btn" :is-hr="true" />
         <div :title="'Trò chuyện'" class="collapse-btn" @click="collapseAll">
           <Icon name="material-symbols-light:chat-rounded" />
         </div>
@@ -98,6 +99,9 @@ definePageMeta({
 useHead({
   title: "Danh sách ứng viên",
 });
+
+const authStore = useAuthStore();
+const { currentRole } = storeToRefs(authStore);
 
 const route = useRoute();
 const router = useRouter();
@@ -291,6 +295,11 @@ const handleDelete = async () => {
 const handleAddNew = () => {
   isCreateModalOpen.value = true;
 };
+
+const isHr = computed(() => {
+  console.log({ role: currentRole.value });
+  return currentRole.value?.code == "HR";
+});
 
 const deleteListNames = computed(() => {
   return tableData.value
@@ -630,6 +639,16 @@ watch(isEditViewOpen, (newVal) => {
       .iconify {
         display: block;
         font-size: 20px;
+      }
+    }
+
+    .chat-btn {
+      :deep(.iconify) {
+        color: $color-primary-500;
+        display: block;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
       }
     }
 

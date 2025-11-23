@@ -15,7 +15,7 @@
         <Icon name="mdi:clipboard-account" class="icon" />
         <div class="text">{{ userInfo?.fullName || "Hồ sơ cá nhân" }}</div>
       </div>
-      <div class="dropdown__item" @click="handleViewApplied">
+      <div v-if="isCandidate" class="dropdown__item" @click="handleViewApplied">
         <Icon name="material-symbols:newsstand-rounded" class="icon" />
         <div class="text">Tin đã ứng tuyển</div>
       </div>

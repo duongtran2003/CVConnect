@@ -1,8 +1,8 @@
 <template>
   <div class="job-ad-list">
     <div class="content">
-      <div class="wrapper">
-        <div class="title">Trò chuyện</div>
+      <div ref="chatRef" class="wrapper">
+        <div class="title">Trò chuyện với nhà tuyển dụng</div>
         <div class="content-wrapper">
           <div class="message-card-list-wrapper">
             <div class="filter">
@@ -64,6 +64,7 @@
                 v-for="jobAd of filteredList"
                 :key="jobAd.id"
                 :data="jobAd"
+                :is-hr="false"
                 :class="{ selected: currentOpenMessage?.id == jobAd.id }"
                 class="cursor-pointer"
                 @click="handleSetOpenMessage(jobAd)"
@@ -85,16 +86,21 @@
         </div>
       </div>
     </div>
-    <AppFooter />
   </div>
 </template>
 <script setup lang="ts">
 import { debounce } from "lodash";
+import { PERMISSION_CHECK_TYPE } from "~/const/permission";
 import { CANDIDATE_STATUS } from "~/const/views/org/candidates";
+import type { TPermissionCheckType } from "~/types/permision";
 
 definePageMeta({
   layout: "public",
 });
+
+const permittedRole: string = "CANDIDATE";
+const permissionType: TPermissionCheckType = PERMISSION_CHECK_TYPE.MEMBER_TYPE;
+useLayoutPermission(permissionType, permittedRole);
 
 const router = useRouter();
 const route = useRoute();
@@ -236,8 +242,9 @@ watch(
     margin: 0 auto;
 
     padding-top: 12px;
-    padding-bottom: 128px;
+    padding-bottom: 12px;
     min-height: calc(100vh - 54px);
+    max-height: calc(100vh - 54px);
 
     max-width: min(85%, 1440px);
     width: min(85%, 1440px);
@@ -248,17 +255,18 @@ watch(
     display: flex;
     flex-direction: row;
     gap: 8px;
-    min-height: fit-content;
 
     .wrapper {
       background-color: white;
       padding: 12px;
+      padding-bottom: 14px;
       border-radius: 12px;
       width: 100%;
       @include box-shadow;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      max-height: 100%;
 
       .title {
         font-weight: 700;
@@ -273,7 +281,6 @@ watch(
         align-items: center;
         flex-wrap: wrap;
         background-color: white;
-        max-width: 30%;
 
         .count {
           color: $color-gray-400;
@@ -312,6 +319,7 @@ watch(
             padding: 6px 8px;
             input {
               font-size: 14px;
+              min-width: 0;
             }
           }
         }
@@ -327,13 +335,19 @@ watch(
         display: flex;
         flex-direction: row;
         gap: 8px;
+        flex: 1;
+        min-height: 0;
 
         :deep(.panel) {
           width: 40%;
+          max-height: 100%;
         }
 
         :deep(.job-ad-info) {
           width: 30%;
+          overflow: auto;
+          overscroll-behavior: contain;
+          max-height: 100%;
         }
 
         .message-card-list-wrapper {
@@ -381,6 +395,9 @@ watch(
           flex-direction: column;
           gap: 8px;
           flex: 1;
+          min-height: 0;
+          overflow: auto;
+          scroll-behavior: contain;
 
           .spinner {
             height: 24px;

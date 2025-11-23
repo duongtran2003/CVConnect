@@ -28,6 +28,7 @@ const detail = ref<Record<string, any> | null>(null);
 const route = useRoute();
 const router = useRouter();
 
+
 const { getJobAdCandidateDetail } = useCandidateApi();
 const { setLoading } = useLoadingStore();
 const breadcrumbStore = useBreadcrumbStore();

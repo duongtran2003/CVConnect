@@ -61,11 +61,17 @@
 </template>
 <script setup lang="ts">
 import { debounce } from "lodash";
+import { PERMISSION_CHECK_TYPE } from "~/const/permission";
 import { CANDIDATE_STATUS } from "~/const/views/org/candidates";
+import type { TPermissionCheckType } from "~/types/permision";
 
 definePageMeta({
   layout: "public",
 });
+
+const permittedRole: string = "CANDIDATE";
+const permissionType: TPermissionCheckType = PERMISSION_CHECK_TYPE.MEMBER_TYPE;
+useLayoutPermission(permissionType, permittedRole);
 
 const router = useRouter();
 const route = useRoute();

@@ -2,7 +2,7 @@
   <div v-on-click-outside="handleClickOutside" class="chat-popup">
     <div class="btn" @click="isPopupOpen = !isPopupOpen">
       <Icon name="mingcute:wechat-fill" />
-      <div v-if="unreadBadge" class="badge">{{ unreadBadge }}</div>
+      <div v-if="hasUnread" class="badge"></div>
     </div>
     <div v-if="isPopupOpen" class="popup">
       <div class="top">
@@ -12,17 +12,17 @@
             :class="{ selected: currentTab == 0 }"
             @click="currentTab = 0"
           >
-            {{ `Tất cả ${allCount}` }}
+            {{ props.isHr ? "Tất cả" : `Tất cả ${allCount}` }}
           </div>
           <div
             class="tab"
             :class="{ selected: currentTab == 1 }"
             @click="currentTab = 1"
           >
-            {{ `Chưa đọc ${unseenCount}` }}
+            {{ props.isHr ? "Chưa đọc" : `Chưa đọc ${unseenCount}` }}
           </div>
         </div>
-        <div class="side">
+        <div v-if="!props.isHr" class="side">
           <span class="view-all" @click="handleViewAll">Xem tất cả</span>
         </div>
       </div>
@@ -30,6 +30,7 @@
         <MessagesCard
           v-for="jobAd of filteredList"
           :key="jobAd.id"
+          :is-hr="props.isHr"
           :data="jobAd"
           class="cursor-pointer"
           @click="handleClickConversation(jobAd)"
@@ -45,18 +46,33 @@
 <script setup lang="ts">
 import { vOnClickOutside } from "@vueuse/components";
 
-const { getAppliedJobAdsUnpaged } = useCandidateApi();
+type TProps = {
+  isHr: boolean;
+};
+
+const props = defineProps<TProps>();
+
+const { getAppliedJobAdsUnpaged, getConversationWithCandidates } =
+  useCandidateApi();
+const { checkExistUnreadMessage } = useConversationApi();
 const router = useRouter();
 
 const list = ref<any>([]);
 const isLoading = ref<boolean>(false);
 const isEmpty = ref<boolean>(false);
 const currentTab = ref<number>(0);
+const hasUnread = ref<boolean>(false);
+const nextPage = ref<any>(null);
 
 const isPopupOpen = ref<boolean>(false);
 
+const pubSubStore = usePubSubStore();
+const { subscribe } = storeToRefs(pubSubStore);
+
 onBeforeMount(async () => {
-  await fetchData();
+  isLoading.value = true;
+  await Promise.allSettled([fetchData(), checkUnread()]);
+  isLoading.value = false;
 });
 
 const allCount = computed(() => {
@@ -67,15 +83,6 @@ const unseenCount = computed(() => {
   return list.value.filter((m: any) => m.hasMessageUnread).length;
 });
 
-const unreadBadge = computed(() => {
-  const len = list.value.filter((m: any) => m.hasMessageUnread).length
-  if (len <= 99) {
-    return len;
-  } else {
-    return `${len}+`;
-  }
-})
-
 const filteredList = computed(() => {
   if (currentTab.value == 0) {
     return list.value;
@@ -85,21 +92,41 @@ const filteredList = computed(() => {
 });
 
 async function fetchData() {
-  isLoading.value = true;
-  const res = await getAppliedJobAdsUnpaged({});
+  let res: any = undefined;
+  if (props.isHr) {
+    const payload: any = { pageSize: 20 };
+    if (nextPage.value) {
+      payload.pageIndex = toUtcDateWithTime(nextPage.value);
+    }
+    if (currentTab.value == 1) {
+      payload.hasMessageUnread = true;
+    }
+    res = await getConversationWithCandidates(payload);
+  } else {
+    res = await getAppliedJobAdsUnpaged({});
+  }
   if (!res) {
-    isLoading.value = false;
     return;
   }
   list.value = [...list.value, ...res.data.data];
+  nextPage.value =
+    list.value[list.value.length - 1].conversation.lastMessageSentAt;
+  console.log({ page: nextPage.value });
 
   if (res.data.data.length) {
     isEmpty.value = false;
   } else {
     isEmpty.value = true;
   }
+}
 
-  isLoading.value = false;
+async function checkUnread() {
+  const res = await checkExistUnreadMessage(!props.isHr);
+  if (!res.data) {
+    hasUnread.value = false;
+  } else {
+    hasUnread.value = true;
+  }
 }
 
 function handleClickOutside() {
@@ -108,17 +135,50 @@ function handleClickOutside() {
 
 function handleClickConversation(conversation: any) {
   isPopupOpen.value = false;
-  router.push({ path: "/message", query: { id: conversation?.id } });
+  if (props.isHr) {
+    console.log({ conversation });
+    router.push({
+      path: `/org/candidate/detail/${conversation.candidateInfo.id}`,
+      query: { tab: "discussion", jobAdId: conversation.jobAd.id },
+    });
+  } else {
+    router.push({ path: "/message", query: { id: conversation?.id } });
+  }
 }
 
 function handleViewAll() {
   isPopupOpen.value = false;
   router.push({ path: "/message" });
 }
+
+watch(
+  () => subscribe.value("chat"),
+  (newMessage) => {
+    console.log({ newMessage });
+  },
+);
+
+watch(currentTab, async (newVal) => {
+  if (!props.isHr) {
+    return;
+  }
+  isLoading.value = true;
+  list.value = [];
+  nextPage.value = null;
+  await fetchData();
+  isLoading.value = false;
+});
 </script>
 <style lang="scss" scoped>
 .chat-popup {
   position: relative;
+  .spinner {
+    width: 100%;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .btn {
     background-color: $color-gray-200;
     border-radius: 999px;
@@ -131,12 +191,12 @@ function handleViewAll() {
     cursor: pointer;
 
     .badge {
-      top: -4px;
-      right: -4px;
+      top: -0px;
+      right: -0px;
       font-size: 10px;
       background-color: $color-danger;
-      height: 20px;
-      width: 20px;
+      height: 12px;
+      width: 12px;
       border-radius: 999px;
       color: $text-dark;
       display: flex;
@@ -163,10 +223,13 @@ function handleViewAll() {
     border-radius: 8px;
     max-height: 320px;
     min-width: 360px;
+    max-width: 440px;
+    width: 440px;
     display: flex;
     flex-direction: column;
     gap: 4px;
     border: 1px solid $color-gray-200;
+    z-index: 2;
 
     .content {
       flex: 1;

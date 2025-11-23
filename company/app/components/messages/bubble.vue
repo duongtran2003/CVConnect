@@ -2,7 +2,7 @@
   <div class="wrapper" :class="{ 'is-self': isSelf }">
     <div class="message-bubble">
       <div class="info-col">
-        <div v-if="!isSelf" class="logo">
+        <div v-if="!isSelf && props.showAvatar" class="logo">
           <img :src="props.senderInfo.logo" alt="Logo công ty" />
         </div>
       </div>
@@ -33,9 +33,12 @@ type TProps = {
   senderInfo: any;
   memberIds: any[];
   messages: any[];
+  showAvatar?: boolean;
 };
 
-const props = defineProps<TProps>();
+const props = withDefaults(defineProps<TProps>(), {
+  showAvatar: true
+});
 
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);

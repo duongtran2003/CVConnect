@@ -30,6 +30,21 @@
             class="text-input"
           />
         </div>
+
+        <div class="row">
+          <AppInputText
+            :label="'SĐT'"
+            :required="false"
+            :error="''"
+            :placeholder="''"
+            :value="props.detail.candidateInfo.phone"
+            :is-disabled="true"
+            :slim-error="true"
+            :title="''"
+            class="text-input"
+          />
+        </div>
+
         <div class="preview-cv" @click="handlePreviewCV">
           <div class="text">Xem CV</div>
           <Icon name="ci:external-link" />

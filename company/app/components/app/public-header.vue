@@ -13,7 +13,7 @@
     </div>
     <div class="right">
       <template v-if="avatarInfo">
-        <AppPublicHeaderChatPopup />
+        <AppPublicHeaderChatPopup :is-hr="isHR" />
         <AppPublicHeaderAvatar />
       </template>
       <template v-else>
@@ -95,6 +95,13 @@ const registerRedirectLink = computed(() => {
 const loginRedirectLink = computed(() => {
   return `/auth/login?redirect=${route.fullPath}`;
 });
+
+const isHR = computed(() => {
+  const orgRole = userInfo.value?.userDetails?.find(
+    (detail: any) => detail.role.memberType == "ORGANIZATION",
+  );
+  return orgRole != undefined;
+})
 
 function handleClickLogo() {
   router.push({ path: "/" });

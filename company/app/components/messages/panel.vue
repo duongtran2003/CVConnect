@@ -46,7 +46,11 @@
         class="text-input"
         @input="($event) => (chatInput = $event)"
       />
-      <div class="send-button" :class="{ disabled: !chatInput.trim() }">
+      <div
+        class="send-button"
+        :class="{ disabled: !chatInput.trim() }"
+        @click="() => push('chat', 'Alo')"
+      >
         <Icon name="material-symbols:send-rounded" />
       </div>
     </div>
@@ -79,6 +83,9 @@ const currentPage = ref<any>(null);
 const hasMoreMessage = ref<any>(true);
 const conversationMembers = ref<any>([]);
 
+const pubSubStore = usePubSubStore();
+const { push } = pubSubStore;
+
 const props = defineProps<TProps>();
 
 const messagesList = computed(() => {
@@ -88,7 +95,10 @@ const messagesList = computed(() => {
   let currentGroup: any = null;
 
   list.forEach((msg: any) => {
-    if (!currentGroup || currentGroup.senderInfo.id !== msg.senderId) {
+    if (
+      !currentGroup ||
+      currentGroup.senderInfo.id !== getInfo.value(msg.senderId).id
+    ) {
       currentGroup = {
         senderInfo: getInfo.value(msg.senderId),
         messages: [],
@@ -101,7 +111,8 @@ const messagesList = computed(() => {
   });
 
   console.log({ result });
-  return result;
+  return result.reverse();
+  // return result;
 });
 
 const getInfo = computed(() => {
@@ -189,6 +200,7 @@ async function fetchData() {
   chatInput.value = "";
   hasMoreMessage.value = true;
   conversationMembers.value = [];
+  isNoConversation.value = false;
 
   await Promise.allSettled([getOrgInfo(), checkExist()]);
   isLoading.value = false;
@@ -226,7 +238,6 @@ watch(
   padding: 6px;
   border-radius: 12px;
   border: 1px solid $color-gray-300;
-  min-height: calc(100vh - 166px);
 
   .top {
     display: flex;
@@ -275,9 +286,11 @@ watch(
     flex: 1;
     min-height: 0;
     overflow: auto;
+    overscroll-behavior: contain;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
     gap: 8px;
+    padding: 8px 0px;
 
     .spinner,
     .no-conversation {
