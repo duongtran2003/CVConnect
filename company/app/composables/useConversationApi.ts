@@ -49,20 +49,29 @@ export const useConversationApi = () => {
     }
   };
 
-  const sendMessage = async (
-    jobAdId: any,
-    candidateId: any,
-    text: string,
-  ) => {
+  const readAllMessages = async (jobAdId: any, candidateId: any) => {
     try {
       const res = await $axios.post(
-        `/_api/notify/conversation/new-message`,
+        `/_api/notify/conversation/read-all-messages`,
         {
           jobAdId,
           candidateId,
-          text,
-        }
+        },
       );
+      return res.data;
+    } catch (err: any) {
+      console.error(err);
+      return null;
+    }
+  };
+
+  const sendMessage = async (jobAdId: any, candidateId: any, text: string) => {
+    try {
+      const res = await $axios.post(`/_api/notify/conversation/new-message`, {
+        jobAdId,
+        candidateId,
+        text,
+      });
       return res.data;
     } catch (err: any) {
       console.error(err);
@@ -131,5 +140,6 @@ export const useConversationApi = () => {
     getConversationMessages,
     checkExistUnreadMessage,
     sendMessage,
+    readAllMessages,
   };
 };

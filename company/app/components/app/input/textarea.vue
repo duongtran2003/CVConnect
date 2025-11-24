@@ -26,6 +26,8 @@
           :rows="props.initialRows ?? undefined"
           autoresize
           @keydown.enter="onEnter"
+          @focus="onFocus"
+          @blur="onBlur"
         />
         <Icon
           v-if="props.isSecured"
@@ -78,11 +80,19 @@ const props = withDefaults(defineProps<TInputTextProps>(), {
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
-  (e: "enter"): void;
+  (e: "enter" | "focus" | "blur"): void;
 }>();
 
 const onEnter = () => {
   emit("enter");
+};
+const onFocus = () => {
+  console.log("emit focus");
+  emit("focus");
+};
+const onBlur = () => {
+  console.log("emit blur");
+  emit("blur");
 };
 
 // Handle v-model binding

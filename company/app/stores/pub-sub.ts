@@ -1,4 +1,8 @@
-import { timestamp } from "@vueuse/core";
+export const PUB_SUB_TOPIC = {
+  CHECK_UNREAD: "checkUnread",
+  MESSAGE_READ: "messageRead",
+  NEW_MESSAGE: "newMessage",
+};
 
 export const usePubSubStore = defineStore("pubSub", () => {
   const stream = ref<any>({
@@ -13,7 +17,7 @@ export const usePubSubStore = defineStore("pubSub", () => {
 
   function push(channel: string, message: any) {
     stream.value[channel] = {
-      data: message,
+      ...message,
       timestamp: new Date(),
     };
   }

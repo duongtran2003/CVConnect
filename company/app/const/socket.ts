@@ -6,4 +6,6 @@ export const SOCKET_EVENT = {
 
 export const SOCKET_CHAT_EVENT = {
   NEW_MESSAGE: "new_message",
-}
+  READ_ALL_MESSAGE: "read_all_messages",
+  NEW_CONVERSATION: "new_conversation",
+};

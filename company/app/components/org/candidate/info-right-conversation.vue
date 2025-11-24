@@ -68,6 +68,9 @@
           :show-error="false"
           :initial-rows="1"
           :slim-error="true"
+          @focus="handleFocusInput"
+          @blur="() => (isInputFocused = false)"
+          @enter="handleSendMessage"
         />
         <!-- <AppInputText -->
         <!--   :label="''" -->
@@ -106,12 +109,14 @@ const {
   createConversation,
   getConversationMessages,
   sendMessage,
+  readAllMessages,
 } = useConversationApi();
 
 const { setLoading } = useLoadingStore();
 const route = useRoute();
 
 const pubSubStore = usePubSubStore();
+const { push } = pubSubStore;
 const { subscribe } = storeToRefs(pubSubStore);
 
 const userStore = useUserStore();
@@ -122,11 +127,15 @@ const checkExistController = ref<any>(null);
 const getMessagesController = ref<any>(null);
 const chatContainer = ref<HTMLElement | null>(null);
 
+const isInputFocused = ref<boolean>(false);
+
 const chatInput = ref<string>("");
 const messages = ref<any>([]);
 const currentPage = ref<any>(null);
 const hasMoreMessage = ref<any>(true);
 const conversationMembers = ref<any>([]);
+
+const isCallingReadAll = ref<any>(false);
 
 const selectedJobAd = ref<any>(null);
 const isLoading = ref<boolean>(false);
@@ -209,6 +218,41 @@ const selectedJobAdInfo = computed(() => {
   console.log(props.jobAds, selectedJobAd.value);
   return props.jobAds.find((ad) => ad.jobAd.id === selectedJobAd.value?.value);
 });
+
+async function handleFocusInput() {
+  isInputFocused.value = true;
+  if (isCallingReadAll.value) {
+    return;
+  }
+  if (
+    messages.value[messages.value.length - 1] &&
+    messages.value[messages.value.length - 1].seenBy?.includes(
+      userInfo.value?.id,
+    )
+  ) {
+    return;
+  }
+
+  isCallingReadAll.value = true;
+  const res = await readAllMessages(
+    selectedJobAd.value.value,
+    props.candidateInfo.candidateId,
+  );
+  if (res) {
+    if (
+      messages.value[messages.value.length - 1] &&
+      !messages.value[messages.value.length - 1].seenBy?.includes(
+        userInfo.value?.id,
+      )
+    ) {
+      messages.value[messages.value.length - 1].seenBy.push(userInfo.value?.id);
+    }
+    push("chatStream", {
+      topic: PUB_SUB_TOPIC.CHECK_UNREAD,
+    });
+  }
+  isCallingReadAll.value = false;
+}
 
 async function handleSendMessage() {
   if (isLoading.value || !chatInput.value?.trim()) {
@@ -343,13 +387,41 @@ watch(selectedJobAd, async (newVal) => {
 watch(
   () => subscribe.value("chatStream"),
   (newMessage) => {
-    console.log({ newMessage });
-    messages.value.push(newMessage.data);
-    nextTick(() => {
-      scrollToBottom();
-    });
+    if (newMessage.topic == PUB_SUB_TOPIC.CHECK_UNREAD) {
+      return;
+    }
+    if (newMessage.topic == PUB_SUB_TOPIC.MESSAGE_READ) {
+      if (
+        newMessage.data.candidateId == props.candidateInfo.candidateId &&
+        newMessage.data.jobAdId == selectedJobAd.value.value
+      ) {
+        for (const message of messages.value) {
+          if (!message.seenBy?.includes(props.candidateInfo.candidateId)) {
+            message.seenBy?.push(props.candidateInfo.candidateId);
+          }
+        }
+      }
+
+      return;
+    }
+    if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
+      messages.value.push(newMessage.data);
+      if (isInputFocused.value) {
+        handleFocusInput();
+      }
+      push("chatStream", {
+        topic: PUB_SUB_TOPIC.CHECK_UNREAD,
+      });
+      nextTick(() => {
+        scrollToBottom();
+      });
+    }
   },
 );
+
+watch(isInputFocused, (val) => {
+  console.log({ isInputFocused: val });
+});
 </script>
 <style lang="scss" scoped>
 .chat-log {

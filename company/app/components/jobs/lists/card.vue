@@ -57,8 +57,12 @@
           @click.stop="handlePreview"
         />
         <AppButton
-          v-if="props.data.dueDateStr != 'Đã hết hạn' && props.allowApply"
-          :text="'Ứng tuyển'"
+          v-if="props.allowApply"
+          :text="applyButtonText"
+          :is-disabled="
+            props.data.dueDateStr == 'Đã hết hạn' ||
+            props.data.jobAdStatus != 'OPEN'
+          "
           class="apply-btn"
           @click.stop="handleApply"
         />
@@ -111,6 +115,16 @@ const locationTooltip = computed(() => {
   return showStr;
 });
 
+const applyButtonText = computed(() => {
+  if (props.data.dueDateStr == "Đã hết hạn") {
+    return "Đã hết hạn";
+  }
+  if (props.data.jobAdStatus != "OPEN") {
+    return "Ngừng tuyển";
+  }
+  return "Ứng tuyển";
+});
+
 const tags = computed(() => {
   return props.data.tags?.slice(0, 4) || [];
 });
@@ -161,6 +175,12 @@ function handleApplyModalSubmit() {
     padding: 4px 0px;
     align-self: flex-end;
     width: 104px;
+
+    &.disabled {
+      background-color: $color-gray-400;
+      border: 1px solid $color-gray-400;
+      cursor: default;
+    }
   }
 
   .preview-btn {

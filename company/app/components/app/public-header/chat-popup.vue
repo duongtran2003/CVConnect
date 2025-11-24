@@ -119,8 +119,19 @@ function connect() {
 
   connection.value.on(SOCKET_CHAT_EVENT.NEW_MESSAGE, (newMessage: any) => {
     console.log("event :", SOCKET_CHAT_EVENT.NEW_MESSAGE, newMessage);
-    push("chatStream", newMessage);
+    push("chatStream", {
+      topic: PUB_SUB_TOPIC.NEW_MESSAGE,
+      data: newMessage,
+    });
   });
+
+  connection.value.on(SOCKET_CHAT_EVENT.READ_ALL_MESSAGE, (newMessage: any) => {
+    console.log("event :", SOCKET_CHAT_EVENT.READ_ALL_MESSAGE, newMessage);
+    push("chatStream", {
+      topic: PUB_SUB_TOPIC.MESSAGE_READ,
+      data: newMessage,
+    });
+  })
 }
 
 async function fetchData() {
@@ -184,9 +195,12 @@ function handleViewAll() {
 }
 
 watch(
-  () => subscribe.value("chat"),
+  () => subscribe.value("chatStream"),
   (newMessage) => {
-    console.log({ newMessage });
+    if (newMessage.topic == PUB_SUB_TOPIC.CHECK_UNREAD) {
+      checkUnread();
+      return;
+    }
   },
 );
 

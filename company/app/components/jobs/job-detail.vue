@@ -54,8 +54,11 @@
       </div>
       <div class="row w-full">
         <AppButton
-          v-if="info.dueDateStr != 'Đã hết hạn'"
-          :text="'Ứng tuyển'"
+          :text="applyButtonText"
+          :is-disabled="
+            props.data.dueDateStr == 'Đã hết hạn' ||
+            props.data.jobAdStatus != 'OPEN'
+          "
           class="apply-btn"
           @click.stop="handleApply"
         />
@@ -130,6 +133,16 @@ const jobAdInfo = computed(() => {
     ...props.data,
     id: route.params.id,
   };
+});
+
+const applyButtonText = computed(() => {
+  if (props.data.dueDateStr == "Đã hết hạn") {
+    return "Đã hết hạn";
+  }
+  if (props.data.jobAdStatus != "OPEN") {
+    return "Ngừng tuyển";
+  }
+  return "Ứng tuyển";
 });
 
 const location = computed(() => {
@@ -235,6 +248,12 @@ function handleApplyModalSubmit() {
       padding: 4px 0px;
       align-self: flex-end;
       width: 100%;
+
+      &.disabled {
+        background-color: $color-gray-400;
+        border: 1px solid $color-gray-400;
+        cursor: default;
+      }
     }
 
     .top {

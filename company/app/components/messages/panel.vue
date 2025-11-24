@@ -51,6 +51,9 @@
         :show-error="false"
         :initial-rows="1"
         :slim-error="true"
+        @focus="handleFocusInput"
+        @blur="() => (isInputFocused = false)"
+        @enter="handleSendMessage"
       />
       <!-- <AppInputText -->
       <!--   :label="''" -->
@@ -88,6 +91,7 @@ const {
   createConversation,
   getConversationMessages,
   sendMessage,
+  readAllMessages,
 } = useConversationApi();
 
 const userStore = useUserStore();
@@ -105,6 +109,9 @@ const messages = ref<any>([]);
 const currentPage = ref<any>(null);
 const hasMoreMessage = ref<any>(true);
 const conversationMembers = ref<any>([]);
+const isCallingReadAll = ref<any>(false);
+
+const isInputFocused = ref<boolean>(false);
 
 const chatContainer = ref<HTMLElement | null>(null);
 
@@ -156,6 +163,42 @@ const getInfo = computed(() => {
     }
   };
 });
+
+async function handleFocusInput() {
+  isInputFocused.value = true;
+  console.log("focus");
+  if (isCallingReadAll.value) {
+    return;
+  }
+  if (
+    messages.value[messages.value.length - 1] &&
+    messages.value[messages.value.length - 1].seenBy?.includes(
+      userInfo.value?.id,
+    )
+  ) {
+    return;
+  }
+
+  isCallingReadAll.value = true;
+  const res = await readAllMessages(
+    props.detail.jobAd.id,
+    props.detail.candidateInfo.candidateId,
+  );
+  if (res) {
+    if (
+      messages.value[messages.value.length - 1] &&
+      !messages.value[messages.value.length - 1].seenBy?.includes(
+        userInfo.value?.id,
+      )
+    ) {
+      messages.value[messages.value.length - 1].seenBy.push(userInfo.value?.id);
+    }
+    push("chatStream", {
+      topic: PUB_SUB_TOPIC.CHECK_UNREAD,
+    });
+  }
+  isCallingReadAll.value = false;
+}
 
 function handleViewOrg() {
   const link = router.resolve({ path: `org-profile/${orgInfo.value.id}` });
@@ -309,13 +352,41 @@ watch(
 watch(
   () => subscribe.value("chatStream"),
   (newMessage) => {
-    console.log({ newMessage });
-    messages.value.push(newMessage.data);
-    nextTick(() => {
-      scrollToBottom();
-    });
+    if (newMessage.topic == PUB_SUB_TOPIC.CHECK_UNREAD) {
+      return;
+    }
+    if (newMessage.topic == PUB_SUB_TOPIC.MESSAGE_READ) {
+      if (
+        newMessage.data.candidateId == props.detail.candidateInfo.candidateId &&
+        newMessage.data.jobAdId == props.detail.jobAd.id
+      ) {
+        for (const message of messages.value) {
+          if (!message.seenBy?.includes(orgInfo.value.hrContact.id)) {
+            message.seenBy?.push(orgInfo.value.hrContact.id);
+          }
+        }
+      }
+
+      return;
+    }
+    if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
+      messages.value.push(newMessage.data);
+      if (isInputFocused.value) {
+        handleFocusInput();
+      }
+      push("chatStream", {
+        topic: PUB_SUB_TOPIC.CHECK_UNREAD,
+      });
+      nextTick(() => {
+        scrollToBottom();
+      });
+    }
   },
 );
+
+watch(isInputFocused, (val) => {
+  console.log({ isInputFocused: val });
+});
 </script>
 <style lang="scss" scoped>
 .panel {

@@ -13,7 +13,7 @@
         <div class="company-info-misc">
           <div class="name">
             {{ orgInfo?.name }}
-            <div v-if="!orgInfo.isActive" class="tag">Ngừng hoạt động</div>
+            <div v-if="!orgInfo?.isActive" class="tag">Ngừng hoạt động</div>
           </div>
           <div class="info-row">
             <div class="info-row-block">
