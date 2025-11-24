@@ -13,7 +13,7 @@
     </div>
     <div class="right">
       <template v-if="avatarInfo">
-        <AppPublicHeaderChatPopup :is-hr="isHR" />
+        <AppPublicHeaderChatPopup :is-hr="false" />
         <AppPublicHeaderAvatar />
       </template>
       <template v-else>

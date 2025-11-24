@@ -266,7 +266,7 @@ onBeforeUnmount(() => {
     background-color: white;
     padding: 8px;
     border-radius: 8px;
-    max-height: 320px;
+    max-height: 480px;
     min-width: 360px;
     max-width: 440px;
     width: 440px;
