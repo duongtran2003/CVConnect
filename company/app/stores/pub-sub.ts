@@ -2,6 +2,7 @@ export const PUB_SUB_TOPIC = {
   CHECK_UNREAD: "checkUnread",
   MESSAGE_READ: "messageRead",
   NEW_MESSAGE: "newMessage",
+  NEW_CONVERSATION: "newConversation",
 };
 
 export const usePubSubStore = defineStore("pubSub", () => {

@@ -132,6 +132,14 @@ function connect() {
       data: newMessage,
     });
   })
+
+  connection.value.on(SOCKET_CHAT_EVENT.NEW_CONVERSATION, (newMessage: any) => {
+    console.log("event :", SOCKET_CHAT_EVENT.NEW_CONVERSATION, newMessage);
+    push("chatStream", {
+      topic: PUB_SUB_TOPIC.NEW_CONVERSATION,
+      data: newMessage,
+    });
+  });
 }
 
 async function fetchData() {

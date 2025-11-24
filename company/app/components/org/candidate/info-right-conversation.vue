@@ -37,7 +37,7 @@
           :show-avatar="false"
         />
         <div
-          v-if="hasMoreMessage && !isLoading"
+          v-if="hasMoreMessage && !isLoading && !isNoConversation"
           class="show-more-message"
           @click="getMessages"
         >
@@ -46,7 +46,7 @@
         <div v-if="isLoading" class="spinner">
           <AppSpinnerHalfCircle />
         </div>
-        <div v-if="isNoConversation" class="no-conversation">
+        <div v-if="isNoConversation && !isLoading" class="no-conversation">
           <AppButton
             :text="'Tạo đoạn hội thoại'"
             class="add-conversation"
@@ -132,7 +132,7 @@ const isInputFocused = ref<boolean>(false);
 const chatInput = ref<string>("");
 const messages = ref<any>([]);
 const currentPage = ref<any>(null);
-const hasMoreMessage = ref<any>(true);
+const hasMoreMessage = ref<any>(false);
 const conversationMembers = ref<any>([]);
 
 const isCallingReadAll = ref<any>(false);
@@ -390,6 +390,7 @@ watch(
     if (newMessage.topic == PUB_SUB_TOPIC.CHECK_UNREAD) {
       return;
     }
+
     if (newMessage.topic == PUB_SUB_TOPIC.MESSAGE_READ) {
       if (
         newMessage.data.candidateId == props.candidateInfo.candidateId &&
@@ -404,6 +405,18 @@ watch(
 
       return;
     }
+
+    if (newMessage.topic == PUB_SUB_TOPIC.NEW_CONVERSATION) {
+      if (
+        newMessage.data.candidateId == props.candidateInfo.candidateId &&
+        newMessage.data.jobAdId == selectedJobAd.value.value
+      ) {
+        isNoConversation.value = false;
+      }
+
+      return;
+    }
+
     if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
       messages.value.push(newMessage.data);
       if (isInputFocused.value) {
