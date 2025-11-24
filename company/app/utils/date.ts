@@ -44,6 +44,12 @@ export function toUtcDateWithTime(dateString: string): string {
     .format("YYYY-MM-DDTHH:mm:ss[Z]");
 }
 
+export function toUtcDateWithTimeFromNumber(epoch: number): string {
+  return moment(epoch)
+    .utc() // convert to UTC
+    .format("YYYY-MM-DDTHH:mm:ss[Z]");
+}
+
 export function toDate(dateString: string): string {
   return moment(dateString)
     .startOf("day") // set time to 00:00:00

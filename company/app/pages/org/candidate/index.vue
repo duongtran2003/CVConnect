@@ -21,10 +21,6 @@
         <div :title="'Thu gọn'" class="collapse-btn" @click="collapseAll">
           <Icon name="material-symbols:collapse-all" />
         </div>
-        <AppPublicHeaderChatPopup v-if="isHr" class="chat-btn" :is-hr="true" />
-        <div :title="'Trò chuyện'" class="collapse-btn" @click="collapseAll">
-          <Icon name="material-symbols-light:chat-rounded" />
-        </div>
         <div
           :title="'Lọc ứng viên'"
           class="filter-btn"

@@ -187,7 +187,7 @@ function connect() {
     }
   });
   connection.value.on("connect", () => {
-    console.log("✅ Socket connected:", connection.value.id);
+    console.log("Socket connected:", connection.value.id);
   });
 }
 

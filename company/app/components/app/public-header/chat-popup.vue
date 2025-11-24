@@ -45,6 +45,8 @@
 </template>
 <script setup lang="ts">
 import { vOnClickOutside } from "@vueuse/components";
+import { io } from "socket.io-client";
+import { SOCKET_ENDPOINT, SOCKET_CHAT_EVENT } from "~/const/socket";
 
 type TProps = {
   isHr: boolean;
@@ -57,6 +59,11 @@ const { getAppliedJobAdsUnpaged, getConversationWithCandidates } =
 const { checkExistUnreadMessage } = useConversationApi();
 const router = useRouter();
 
+const authStore = useAuthStore();
+const { token } = storeToRefs(authStore);
+
+const connection = ref<any>(null);
+
 const list = ref<any>([]);
 const isLoading = ref<boolean>(false);
 const isEmpty = ref<boolean>(false);
@@ -68,11 +75,16 @@ const isPopupOpen = ref<boolean>(false);
 
 const pubSubStore = usePubSubStore();
 const { subscribe } = storeToRefs(pubSubStore);
+const { push } = pubSubStore;
 
 onBeforeMount(async () => {
   isLoading.value = true;
   await Promise.allSettled([fetchData(), checkUnread()]);
   isLoading.value = false;
+});
+
+onMounted(() => {
+  connect();
 });
 
 const allCount = computed(() => {
@@ -91,12 +103,32 @@ const filteredList = computed(() => {
   }
 });
 
+function connect() {
+  if (connection.value) {
+    connection.value.disconnect();
+  }
+
+  connection.value = io(SOCKET_ENDPOINT, {
+    path: "/socket",
+    transports: ["websocket"],
+    query: { token: token.value },
+  });
+  connection.value.on("connect", () => {
+    console.log("Chat socket connected:", connection.value.id);
+  });
+
+  connection.value.on(SOCKET_CHAT_EVENT.NEW_MESSAGE, (newMessage: any) => {
+    console.log("event :", SOCKET_CHAT_EVENT.NEW_MESSAGE, newMessage);
+    push("chatStream", newMessage);
+  });
+}
+
 async function fetchData() {
   let res: any = undefined;
   if (props.isHr) {
     const payload: any = { pageSize: 20 };
     if (nextPage.value) {
-      payload.pageIndex = toUtcDateWithTime(nextPage.value);
+      payload.pageIndex = toUtcDateWithTimeFromNumber(nextPage.value);
     }
     if (currentTab.value == 1) {
       payload.hasMessageUnread = true;
@@ -167,6 +199,19 @@ watch(currentTab, async (newVal) => {
   nextPage.value = null;
   await fetchData();
   isLoading.value = false;
+});
+
+watch(token, (newToken, oldToken) => {
+  if (newToken != oldToken) {
+    connect();
+  }
+});
+
+onBeforeUnmount(() => {
+  if (connection.value) {
+    connection.value.disconnect();
+    console.log("Socket cleaned up");
+  }
 });
 </script>
 <style lang="scss" scoped>

@@ -42,18 +42,29 @@ export const useConversationApi = () => {
           signal: _abortController ? _abortController.signal : undefined,
         },
       );
-      // toast.add({
-      //   title: res.data.message,
-      //   color: "success",
-      // });
       return res.data;
     } catch (err: any) {
-      // if (err.response && err.response.data) {
-      //   toast.add({
-      //     title: err.response.data.message || "Có lỗi xảy ra",
-      //     color: "error",
-      //   });
-      // }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const sendMessage = async (
+    jobAdId: any,
+    candidateId: any,
+    text: string,
+  ) => {
+    try {
+      const res = await $axios.post(
+        `/_api/notify/conversation/new-message`,
+        {
+          jobAdId,
+          candidateId,
+          text,
+        }
+      );
+      return res.data;
+    } catch (err: any) {
       console.error(err);
       return null;
     }
@@ -71,18 +82,8 @@ export const useConversationApi = () => {
           signal: controller?.signal,
         },
       );
-      // toast.add({
-      //   title: res.data.message,
-      //   color: "success",
-      // });
       return res.data;
     } catch (err: any) {
-      // if (err.response && err.response.data) {
-      //   toast.add({
-      //     title: err.response.data.message || "Có lỗi xảy ra",
-      //     color: "error",
-      //   });
-      // }
       console.error(err);
       return null;
     }
@@ -93,18 +94,8 @@ export const useConversationApi = () => {
       const res = await $axios.get(
         `/_api/notify/conversation/check-exists-message-unread?isCandidate=${isCandidate}`,
       );
-      // toast.add({
-      //   title: res.data.message,
-      //   color: "success",
-      // });
       return res.data;
     } catch (err: any) {
-      // if (err.response && err.response.data) {
-      //   toast.add({
-      //     title: err.response.data.message || "Có lỗi xảy ra",
-      //     color: "error",
-      //   });
-      // }
       console.error(err);
       return null;
     }
@@ -139,5 +130,6 @@ export const useConversationApi = () => {
     createConversation,
     getConversationMessages,
     checkExistUnreadMessage,
+    sendMessage,
   };
 };

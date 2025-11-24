@@ -1,7 +1,7 @@
 <template>
   <div class="textarea-input" :class="{ disabled: isDisabled }">
     <!-- Label -->
-    <div class="label">
+    <div v-if="props.label" class="label">
       <div class="name">
         <span>{{ props.label }}</span>
         <UTooltip v-if="tooltip" :text="props.tooltip">
@@ -23,7 +23,9 @@
           class="w-full"
           :disabled="props.isDisabled"
           :placeholder="props.placeholder"
+          :rows="props.initialRows ?? undefined"
           autoresize
+          @keydown.enter="onEnter"
         />
         <Icon
           v-if="props.isSecured"
@@ -49,6 +51,7 @@ export type TInputTextProps = {
   tooltip?: string;
   placeholder?: string;
   row?: number;
+  initialRows?: number | null;
   error?: string;
   showError?: boolean;
   slimError?: boolean;
@@ -67,6 +70,7 @@ const props = withDefaults(defineProps<TInputTextProps>(), {
   showError: true,
   row: 4,
   slimError: false,
+  initialRows: null,
   required: false,
   isDisabled: false,
   isSecured: false,
@@ -74,7 +78,12 @@ const props = withDefaults(defineProps<TInputTextProps>(), {
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
+  (e: "enter"): void;
 }>();
+
+const onEnter = () => {
+  emit("enter");
+};
 
 // Handle v-model binding
 const localValue = computed({

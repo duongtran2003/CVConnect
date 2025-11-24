@@ -11,10 +11,7 @@
         </div>
       </div>
     </div>
-    <div class="chat-container">
-      <div v-if="isLoading" class="spinner">
-        <AppSpinnerHalfCircle />
-      </div>
+    <div ref="chatContainer" class="chat-container">
       <MessagesBubble
         v-for="(message, index) of messagesList"
         :key="index"
@@ -22,6 +19,16 @@
         :member-ids="conversationMembers"
         :messages="message.messages"
       />
+      <div
+        v-if="hasMoreMessage && !isLoading"
+        class="show-more-message"
+        @click="getMessages"
+      >
+        Hiển thị thêm
+      </div>
+      <div v-if="isLoading" class="spinner">
+        <AppSpinnerHalfCircle />
+      </div>
       <div v-if="isNoConversation" class="no-conversation">
         <AppButton
           :text="'Tạo đoạn hội thoại'"
@@ -35,21 +42,33 @@
       </div>
     </div>
     <div v-if="!isNoConversation" class="input-container">
-      <AppInputText
+      <AppInputTextarea
+        v-model="chatInput"
         :label="''"
         :required="false"
-        :error="''"
         :placeholder="'Gửi tin nhắn'"
-        :value="chatInput"
-        :is-disabled="false"
+        :error="''"
+        :show-error="false"
+        :initial-rows="1"
         :slim-error="true"
-        class="text-input"
-        @input="($event) => (chatInput = $event)"
       />
+      <!-- <AppInputText -->
+      <!--   :label="''" -->
+      <!--   :required="false" -->
+      <!--   :error="''" -->
+      <!--   :placeholder="'Gửi tin nhắn'" -->
+      <!--   :value="chatInput" -->
+      <!--   :is-disabled="false" -->
+      <!--   :slim-error="true" -->
+      <!--   :max-length="999" -->
+      <!--   class="text-input" -->
+      <!--   @input="($event) => (chatInput = $event)" -->
+      <!--   @enter="handleSendMessage" -->
+      <!-- /> -->
       <div
         class="send-button"
         :class="{ disabled: !chatInput.trim() }"
-        @click="() => push('chat', 'Alo')"
+        @click="handleSendMessage"
       >
         <Icon name="material-symbols:send-rounded" />
       </div>
@@ -57,6 +76,8 @@
   </div>
 </template>
 <script setup lang="ts">
+import moment from "moment";
+
 type TProps = {
   detail: any;
 };
@@ -66,6 +87,7 @@ const {
   getConversationOrgInfo,
   createConversation,
   getConversationMessages,
+  sendMessage,
 } = useConversationApi();
 
 const userStore = useUserStore();
@@ -83,7 +105,10 @@ const currentPage = ref<any>(null);
 const hasMoreMessage = ref<any>(true);
 const conversationMembers = ref<any>([]);
 
+const chatContainer = ref<HTMLElement | null>(null);
+
 const pubSubStore = usePubSubStore();
+const { subscribe } = storeToRefs(pubSubStore);
 const { push } = pubSubStore;
 
 const props = defineProps<TProps>();
@@ -131,6 +156,13 @@ const getInfo = computed(() => {
   };
 });
 
+function scrollToBottom() {
+  if (!chatContainer.value) return;
+
+  // Because column-reverse means bottom = scrollTop = 0
+  chatContainer.value.scrollTop = 0;
+}
+
 async function checkExist() {
   if (checkExistController.value) {
     checkExistController.value.abort();
@@ -168,10 +200,20 @@ async function getMessages() {
   messages.value = [...res.data.messagesWithFilter.data, ...messages.value];
   conversationMembers.value = res.data.participantIds;
 
-  if (res.data.messagesWithFilter.data.length <= 20) {
+  if (res.data.messagesWithFilter.data.length < 20) {
     hasMoreMessage.value = false;
   } else {
     hasMoreMessage.value = true;
+  }
+  if (messages.value[0]) {
+    currentPage.value = toUtcDateWithTimeFromNumber(
+      messages.value[0].sentAt * 1000,
+    );
+    console.log({
+      messages: messages.value,
+      sentAt: messages.value[0].sentAt,
+      utcTime: toUtcDateWithTimeFromNumber(messages.value[0].sentAt * 1000),
+    });
   }
   isLoading.value = false;
 }
@@ -221,12 +263,52 @@ async function handleAddConversation() {
   isLoading.value = false;
 }
 
+async function handleSendMessage() {
+  if (isLoading.value || !chatInput.value?.trim()) {
+    return;
+  }
+
+  console.log("here!");
+
+  const res = await sendMessage(
+    props.detail.jobAd.id,
+    props.detail.candidateInfo.candidateId,
+    chatInput.value,
+  );
+
+  const newMessage = {
+    id: res.data.id,
+    senderId: userInfo.value?.id,
+    seenBy: [userInfo.value?.id],
+    text: chatInput.value,
+    sentAt: moment().utc().unix(),
+  };
+
+  messages.value.push(newMessage);
+
+  chatInput.value = "";
+  nextTick(() => {
+    scrollToBottom();
+  });
+}
+
 watch(
   () => props.detail.id,
   async (newId) => {
     await fetchData();
   },
   { immediate: true, deep: true },
+);
+
+watch(
+  () => subscribe.value("chatStream"),
+  (newMessage) => {
+    console.log({ newMessage });
+    messages.value.push(newMessage.data);
+    nextTick(() => {
+      scrollToBottom();
+    });
+  },
 );
 </script>
 <style lang="scss" scoped>
@@ -286,11 +368,24 @@ watch(
     flex: 1;
     min-height: 0;
     overflow: auto;
+    overflow-x: hidden;
     overscroll-behavior: contain;
     display: flex;
     flex-direction: column-reverse;
     gap: 8px;
     padding: 8px 0px;
+
+    .show-more-message {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+
+      text-decoration: underline;
+      color: $color-primary-500;
+      cursor: pointer;
+      font-size: 13px;
+    }
 
     .spinner,
     .no-conversation {
@@ -309,7 +404,7 @@ watch(
   .input-container {
     display: flex;
     flex-direction: row;
-    gap: 2px;
+    gap: 4px;
     align-items: center;
     :deep(.text-input) {
       flex: 1;
@@ -326,7 +421,7 @@ watch(
     .send-button {
       background-color: $color-primary-500;
       cursor: pointer;
-      height: calc(100% - 4px);
+      height: 28px;
       aspect-ratio: 1/1;
       display: flex;
       align-items: center;

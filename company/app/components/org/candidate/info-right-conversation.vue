@@ -27,10 +27,7 @@
       <!--     </div> -->
       <!--   </div> -->
       <!-- </div> -->
-      <div class="chat-container">
-        <div v-if="isLoading" class="spinner">
-          <AppSpinnerHalfCircle />
-        </div>
+      <div ref="chatContainer" class="chat-container">
         <MessagesBubble
           v-for="(message, index) of messagesList"
           :key="index"
@@ -39,6 +36,16 @@
           :messages="message.messages"
           :show-avatar="false"
         />
+        <div
+          v-if="hasMoreMessage && !isLoading"
+          class="show-more-message"
+          @click="getMessages"
+        >
+          Hiển thị thêm
+        </div>
+        <div v-if="isLoading" class="spinner">
+          <AppSpinnerHalfCircle />
+        </div>
         <div v-if="isNoConversation" class="no-conversation">
           <AppButton
             :text="'Tạo đoạn hội thoại'"
@@ -52,18 +59,34 @@
         </div>
       </div>
       <div v-if="!isNoConversation" class="input-container">
-        <AppInputText
+        <AppInputTextarea
+          v-model="chatInput"
           :label="''"
           :required="false"
-          :error="''"
           :placeholder="'Gửi tin nhắn'"
-          :value="chatInput"
-          :is-disabled="false"
+          :error="''"
+          :show-error="false"
+          :initial-rows="1"
           :slim-error="true"
-          class="text-input"
-          @input="($event) => (chatInput = $event)"
         />
-        <div class="send-button" :class="{ disabled: !chatInput.trim() }">
+        <!-- <AppInputText -->
+        <!--   :label="''" -->
+        <!--   :required="false" -->
+        <!--   :error="''" -->
+        <!--   :placeholder="'Gửi tin nhắn'" -->
+        <!--   :max-length="999" -->
+        <!--   :value="chatInput" -->
+        <!--   :is-disabled="false" -->
+        <!--   :slim-error="true" -->
+        <!--   class="text-input" -->
+        <!--   @input="($event) => (chatInput = $event)" -->
+        <!--   @enter="handleSendMessage" -->
+        <!-- /> -->
+        <div
+          class="send-button"
+          :class="{ disabled: !chatInput.trim() }"
+          @click="handleSendMessage"
+        >
           <Icon name="material-symbols:send-rounded" />
         </div>
       </div>
@@ -71,16 +94,25 @@
   </div>
 </template>
 <script setup lang="ts">
+import moment from "moment";
+
 type TProps = {
   jobAds: any[];
   candidateInfo: any;
 };
 
-const { checkExistConversation, createConversation, getConversationMessages } =
-  useConversationApi();
+const {
+  checkExistConversation,
+  createConversation,
+  getConversationMessages,
+  sendMessage,
+} = useConversationApi();
 
 const { setLoading } = useLoadingStore();
 const route = useRoute();
+
+const pubSubStore = usePubSubStore();
+const { subscribe } = storeToRefs(pubSubStore);
 
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
@@ -88,6 +120,7 @@ const { userInfo } = storeToRefs(userStore);
 const isNoConversation = ref<boolean>(false);
 const checkExistController = ref<any>(null);
 const getMessagesController = ref<any>(null);
+const chatContainer = ref<HTMLElement | null>(null);
 
 const chatInput = ref<string>("");
 const messages = ref<any>([]);
@@ -131,8 +164,7 @@ const getInfo = computed(() => {
       };
     } else {
       const info = {
-        // id: props.candidateInfo.candidateId,
-        id: 3,
+        id: props.candidateInfo.candidateId,
       };
       return info;
     }
@@ -178,6 +210,42 @@ const selectedJobAdInfo = computed(() => {
   return props.jobAds.find((ad) => ad.jobAd.id === selectedJobAd.value?.value);
 });
 
+async function handleSendMessage() {
+  if (isLoading.value || !chatInput.value?.trim()) {
+    return;
+  }
+
+  console.log("here!");
+
+  const res = await sendMessage(
+    selectedJobAd.value.value,
+    props.candidateInfo.candidateId,
+    chatInput.value.trim(),
+  );
+
+  const newMessage = {
+    id: res.data.id,
+    senderId: userInfo.value?.id,
+    seenBy: [userInfo.value?.id],
+    text: chatInput.value,
+    sentAt: moment().utc().unix(),
+  };
+
+  messages.value.push(newMessage);
+
+  chatInput.value = "";
+  nextTick(() => {
+    scrollToBottom();
+  });
+}
+
+function scrollToBottom() {
+  if (!chatContainer.value) return;
+
+  // Because column-reverse means bottom = scrollTop = 0
+  chatContainer.value.scrollTop = 0;
+}
+
 async function checkExist() {
   if (checkExistController.value) {
     checkExistController.value.abort();
@@ -187,8 +255,7 @@ async function checkExist() {
 
   const res = await checkExistConversation(
     selectedJobAd.value.value,
-    // props.candidateInfo.candidateId,
-    3,
+    props.candidateInfo.candidateId,
     checkExistController.value,
   );
   if (!res) {
@@ -225,8 +292,7 @@ async function getMessages() {
 
   const res = await getConversationMessages(
     selectedJobAd.value.value,
-    // props.candidateInfo.candidateId,
-    3,
+    props.candidateInfo.candidateId,
     currentPage.value,
     getMessagesController.value,
   );
@@ -234,10 +300,21 @@ async function getMessages() {
   messages.value = [...res.data.messagesWithFilter.data, ...messages.value];
   conversationMembers.value = res.data.participantIds;
 
-  if (res.data.messagesWithFilter.data.length <= 20) {
+  if (res.data.messagesWithFilter.data.length < 20) {
     hasMoreMessage.value = false;
   } else {
     hasMoreMessage.value = true;
+  }
+
+  if (messages.value[0]) {
+    currentPage.value = toUtcDateWithTimeFromNumber(
+      messages.value[0].sentAt * 1000,
+    );
+    console.log({
+      messages: messages.value,
+      sentAt: messages.value[0].sentAt,
+      utcTime: toUtcDateWithTimeFromNumber(messages.value[0].sentAt * 1000),
+    });
   }
   isLoading.value = false;
 }
@@ -246,8 +323,7 @@ async function handleAddConversation() {
   isLoading.value = true;
   const res = await createConversation(
     selectedJobAd.value.value,
-    // props.candidateInfo.candidateId,
-    3,
+    props.candidateInfo.candidateId,
   );
   if (res) {
     isNoConversation.value = false;
@@ -263,6 +339,17 @@ watch(selectedJobAd, async (newVal) => {
   fetchData();
   setLoading(false);
 });
+
+watch(
+  () => subscribe.value("chatStream"),
+  (newMessage) => {
+    console.log({ newMessage });
+    messages.value.push(newMessage.data);
+    nextTick(() => {
+      scrollToBottom();
+    });
+  },
+);
 </script>
 <style lang="scss" scoped>
 .chat-log {
@@ -369,6 +456,18 @@ watch(selectedJobAd, async (newVal) => {
       gap: 8px;
       padding: 8px 0px;
 
+      .show-more-message {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 32px;
+
+        text-decoration: underline;
+        color: $color-primary-500;
+        cursor: pointer;
+        font-size: 13px;
+      }
+
       .spinner,
       .no-conversation {
         height: 100%;
@@ -403,11 +502,11 @@ watch(selectedJobAd, async (newVal) => {
       .send-button {
         background-color: $color-primary-500;
         cursor: pointer;
-        height: calc(100% - 4px);
+        height: 28px;
         aspect-ratio: 1/1;
         display: flex;
         align-items: center;
-        min-width: 32px;
+        min-width: 28px;
         justify-content: center;
         border-radius: 999px;
         .iconify {

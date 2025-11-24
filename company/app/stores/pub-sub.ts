@@ -11,7 +11,7 @@ export const usePubSubStore = defineStore("pubSub", () => {
     };
   });
 
-  function push(channel: string, message: string) {
+  function push(channel: string, message: any) {
     stream.value[channel] = {
       data: message,
       timestamp: new Date(),

@@ -130,6 +130,10 @@ const messageStatus = computed(() => {
         color: $text-light;
         @include box-shadow;
 
+        .content {
+          word-break: break-word;
+        }
+
         .status-indicator {
           align-self: flex-end;
           margin-bottom: -6px;
