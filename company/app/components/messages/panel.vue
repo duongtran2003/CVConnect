@@ -55,19 +55,6 @@
         @blur="() => (isInputFocused = false)"
         @enter="handleSendMessage"
       />
-      <!-- <AppInputText -->
-      <!--   :label="''" -->
-      <!--   :required="false" -->
-      <!--   :error="''" -->
-      <!--   :placeholder="'Gửi tin nhắn'" -->
-      <!--   :value="chatInput" -->
-      <!--   :is-disabled="false" -->
-      <!--   :slim-error="true" -->
-      <!--   :max-length="999" -->
-      <!--   class="text-input" -->
-      <!--   @input="($event) => (chatInput = $event)" -->
-      <!--   @enter="handleSendMessage" -->
-      <!-- /> -->
       <div
         class="send-button"
         :class="{ disabled: !chatInput.trim() }"
