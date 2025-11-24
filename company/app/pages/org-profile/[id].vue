@@ -13,6 +13,7 @@
         <div class="company-info-misc">
           <div class="name">
             {{ orgInfo?.name }}
+            <div v-if="!orgInfo.isActive" class="tag">Ngừng hoạt động</div>
           </div>
           <div class="info-row">
             <div class="info-row-block">
@@ -256,6 +257,17 @@ async function fetchInfo() {
       .name {
         font-size: 20px;
         font-weight: 600;
+
+        .tag {
+          display: inline-block;
+          font-weight: 400;
+          color: $color-danger;
+          border: 1px solid $color-danger;
+          border-radius: 999px;
+          background-color: rgba($color-danger, 0.15);
+          padding: 4px 12px;
+          font-size: 12px;
+        }
       }
     }
     .logo-wrapper {

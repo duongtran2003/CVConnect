@@ -199,7 +199,7 @@ watch(
       }
       controller.value = new AbortController();
 
-      const res = await getJobAdPreview(job.id, controller.value);
+      const res = await getJobAdPreview(job.id, null, controller.value);
       info.value = res.data;
 
       isLoading.value = false;

@@ -6,7 +6,7 @@
           <img :src="orgInfo.logoUrl" alt="Logo công ty" />
         </div>
         <div class="names">
-          <div class="org-name">{{ orgInfo.name }}</div>
+          <div class="org-name" @click="handleViewOrg">{{ orgInfo.name }}</div>
           <div class="hr-name">{{ orgInfo.hrContact.fullName }}</div>
         </div>
       </div>
@@ -92,6 +92,7 @@ const {
 
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
+const router = useRouter();
 
 const isNoConversation = ref<boolean>(false);
 const checkExistController = ref<any>(null);
@@ -155,6 +156,11 @@ const getInfo = computed(() => {
     }
   };
 });
+
+function handleViewOrg() {
+  const link = router.resolve({ path: `org-profile/${orgInfo.value.id}` });
+  window.open(link.href, "_blank");
+}
 
 function scrollToBottom() {
   if (!chatContainer.value) return;
@@ -340,6 +346,7 @@ watch(
 
         .org-name {
           color: $text-light;
+          cursor: pointer;
         }
         .hr-name {
           color: $color-gray-600;
