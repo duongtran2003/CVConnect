@@ -37,7 +37,12 @@
           :show-avatar="false"
         />
         <div
-          v-if="hasMoreMessage && !isLoading && !isNoConversation && messages.length > 0"
+          v-if="
+            hasMoreMessage &&
+            !isLoading &&
+            !isNoConversation &&
+            messages.length > 0
+          "
           class="show-more-message"
           @click="getMessages"
         >
@@ -410,16 +415,21 @@ watch(
     }
 
     if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
-      messages.value.push(newMessage.data);
-      if (isInputFocused.value) {
-        handleFocusInput();
+      if (
+        newMessage.data.candidateId == props.candidateInfo.candidateId &&
+        newMessage.data.jobAdId == selectedJobAd.value.value
+      ) {
+        messages.value.push(newMessage.data.newMessage);
+        if (isInputFocused.value) {
+          handleFocusInput();
+        }
+        push("chatStream", {
+          topic: PUB_SUB_TOPIC.CHECK_UNREAD,
+        });
+        nextTick(() => {
+          scrollToBottom();
+        });
       }
-      push("chatStream", {
-        topic: PUB_SUB_TOPIC.CHECK_UNREAD,
-      });
-      nextTick(() => {
-        scrollToBottom();
-      });
     }
   },
 );

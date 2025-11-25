@@ -380,16 +380,22 @@ watch(
     }
 
     if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
-      messages.value.push(newMessage.data);
-      if (isInputFocused.value) {
-        handleFocusInput();
+      console.log({ messageFromStream: newMessage.data });
+      if (
+        newMessage.data.candidateId == props.detail.candidateInfo.candidateId &&
+        newMessage.data.jobAdId == props.detail.jobAd.id
+      ) {
+        messages.value.push(newMessage.data.newMessage);
+        if (isInputFocused.value) {
+          handleFocusInput();
+        }
+        push("chatStream", {
+          topic: PUB_SUB_TOPIC.CHECK_UNREAD,
+        });
+        nextTick(() => {
+          scrollToBottom();
+        });
       }
-      push("chatStream", {
-        topic: PUB_SUB_TOPIC.CHECK_UNREAD,
-      });
-      nextTick(() => {
-        scrollToBottom();
-      });
     }
   },
 );
