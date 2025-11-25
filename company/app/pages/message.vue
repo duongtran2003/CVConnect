@@ -105,6 +105,10 @@ useLayoutPermission(permissionType, permittedRole);
 const router = useRouter();
 const route = useRoute();
 
+const pubSubStore = usePubSubStore();
+const { subscribe } = storeToRefs(pubSubStore);
+const { push } = pubSubStore;
+
 const { setLoading } = useLoadingStore();
 const { getAppliedJobAdsUnpaged } = useCandidateApi();
 
@@ -224,6 +228,15 @@ watch(
     if (currentOpenMessage.value.id != newId) {
       const message = list.value.find((m: any) => m.id == newId);
       currentOpenMessage.value = message;
+    }
+  },
+);
+
+watch(
+  () => subscribe.value("chatStream"),
+  (newMessage) => {
+    if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
+      console.log({ messages: list.value, pubSubMessage: newMessage });
     }
   },
 );

@@ -83,7 +83,8 @@ const emit = defineEmits<{
   (e: "enter" | "focus" | "blur"): void;
 }>();
 
-const onEnter = () => {
+const onEnter = (e: KeyboardEvent) => {
+  if (e.shiftKey) return;
   emit("enter");
 };
 const onFocus = () => {

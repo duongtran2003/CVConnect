@@ -112,7 +112,6 @@
               variant="none"
               autocomplete="autocomplete"
               placeholder="Chọn giá trị"
-              :title="selectTooltip(col.accessorKey)"
               :search-input="{
                 placeholder: 'Tìm kiếm',
               }"
@@ -130,14 +129,11 @@
             />
             <Icon
               v-if="
-                col.filterType == 'select' &&
-                filter &&
-                filter[col.accessorKey] &&
-                filter[col.accessorKey].length
+                col.filterType == 'select' && filter && filter[col.accessorKey]
               "
               name="ic:outline-clear"
               class="clear-icon"
-              @click="handleFilterUpdate(col.accessorKey, [])"
+              @click="handleFilterUpdate(col.accessorKey, undefined)"
             />
           </div>
         </div>
@@ -233,17 +229,6 @@ const havePermission = (permission: TPermission) => {
 };
 
 const columns = ref<any[]>(cloneDeep(props.columns));
-const selectTooltip = computed(() => {
-  return (accessorKey: string) => {
-    if (!props.filter) {
-      return "";
-    }
-    const tooltipString = props.filter[accessorKey]
-      ?.map((filter: any) => filter.label)
-      ?.join(", ");
-    return tooltipString;
-  };
-});
 const columnKey = computed(() => {
   return (column: any) => {
     return column.columnDef.accessorKey;
@@ -627,22 +612,18 @@ const handleActionClick = (row: any, action: TTableAction) => {
         }
 
         th:nth-child(1),
-        th:nth-child(2),
-        th:nth-child(3) {
+        th:nth-child(2) {
           z-index: 2;
         }
         td:nth-child(1),
-        td:nth-child(2),
-        td:nth-child(3) {
+        td:nth-child(2) {
           z-index: 1;
         }
 
         th:nth-child(1),
         th:nth-child(2),
-        th:nth-child(3),
         td:nth-child(1),
-        td:nth-child(2),
-        td:nth-child(3) {
+        td:nth-child(2) {
           position: sticky;
           top: 0px;
         }
@@ -653,22 +634,21 @@ const handleActionClick = (row: any, action: TTableAction) => {
         }
         th:nth-child(2),
         td:nth-child(2) {
-          left: 50px;
-        }
-        th:nth-child(3),
-        td:nth-child(3) {
-          left: 106px;
+          left: 56px;
           &::after {
             content: "";
             position: absolute;
             top: 0;
-            right: -1px;
+            right: 1px;
             width: 1px;
             height: 100%;
             background-color: $color-gray-300;
             display: block;
           }
         }
+        // th:nth-child(3),
+        // td:nth-child(3) {
+        // }
 
         td {
           background-color: white;

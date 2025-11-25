@@ -20,7 +20,12 @@
         :messages="message.messages"
       />
       <div
-        v-if="hasMoreMessage && !isLoading && !isNoConversation"
+        v-if="
+          hasMoreMessage &&
+          !isLoading &&
+          !isNoConversation &&
+          messages.length > 0
+        "
         class="show-more-message"
         @click="getMessages"
       >
@@ -233,6 +238,11 @@ async function getMessages() {
     getMessagesController.value,
   );
 
+  if (!res.data.messagesWithFilter) {
+    isLoading.value = false;
+    return;
+  }
+
   messages.value = [...res.data.messagesWithFilter.data, ...messages.value];
   conversationMembers.value = res.data.participantIds;
 
@@ -276,7 +286,7 @@ async function fetchData() {
   messages.value = [];
   currentPage.value = null;
   chatInput.value = "";
-  hasMoreMessage.value = true;
+  hasMoreMessage.value = false;
   conversationMembers.value = [];
   isNoConversation.value = false;
 
