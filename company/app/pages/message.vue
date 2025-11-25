@@ -255,6 +255,10 @@ watch(
           newMessage.data.newMessage.senderId;
         targetCard.conversation.lastMessageSentAt =
           new Date(newMessage.data.newMessage.sentAt).getTime() / 1000;
+        if (newMessage.data.isSelf) {
+          targetCard.conversation.lastMessageSentAt = newMessage.data.newMessage.sentAt;
+          targetCard.hasMessageUnread = false;
+        }
         list.value = [targetCard, ...list.value];
         console.log({ listAfter: list.value });
       }

@@ -277,6 +277,18 @@ async function handleSendMessage() {
 
   messages.value.push(newMessage);
 
+  push("chatStream", {
+    topic: PUB_SUB_TOPIC.NEW_MESSAGE,
+    data: {
+      candidateId: props.candidateInfo.candidateId,
+      jobAdId: selectedJobAd.value.value,
+      newMessage: newMessage,
+      isSelf: true,
+      fullName: props.candidateInfo.fullName,
+      title: selectedJobAd.value.label,
+    },
+  });
+
   chatInput.value = "";
   nextTick(() => {
     scrollToBottom();
@@ -423,6 +435,9 @@ watch(
     }
 
     if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
+      if (newMessage.data.isSelf) {
+        return;
+      }
       if (
         newMessage.data.candidateId == props.candidateInfo.candidateId &&
         newMessage.data.jobAdId == selectedJobAd.value.value

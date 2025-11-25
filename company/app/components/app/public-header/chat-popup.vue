@@ -318,6 +318,95 @@ watch(
         card.hasMessageUnread = false;
       }
     }
+    if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
+      console.log("bat su kien tu nhan tin");
+      if (!props.isHr) {
+        const candidateId = newMessage.data.candidateId;
+        const jobAdId = newMessage.data.jobAdId;
+
+        console.log({ list: list.value, message: newMessage.data });
+
+        const idx = list.value.findIndex(
+          (item: any) =>
+            item.candidateInfo.candidateId == candidateId &&
+            item.jobAd.id == jobAdId,
+        );
+
+        console.log({ idx });
+
+        if (idx !== -1) {
+          const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
+          targetCard.hasMessageUnread = true;
+          targetCard.conversation.lastMessage = newMessage.data.newMessage.text;
+          targetCard.conversation.lastMessageSenderId =
+            newMessage.data.newMessage.senderId;
+          targetCard.conversation.lastMessageSentAt =
+            new Date(newMessage.data.newMessage.sentAt).getTime() / 1000;
+
+          if (newMessage.data.isSelf) {
+            targetCard.conversation.lastMessageSentAt =
+              newMessage.data.newMessage.sentAt;
+            targetCard.hasMessageUnread = false;
+          }
+          list.value = [targetCard, ...list.value];
+          console.log({ listAfter: list.value });
+        }
+      } else {
+        // otherwise, reconstruct
+        const candidateId = newMessage.data.candidateId;
+        const jobAdId = newMessage.data.jobAdId;
+
+        const idx = list.value.findIndex(
+          (item: any) =>
+            item.conversation.candidateId == candidateId &&
+            item.conversation.jobAdId == jobAdId,
+        );
+
+        console.log({ idx });
+        if (idx !== -1) {
+          const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
+
+          console.log({ targetCard, list: list.value });
+
+          targetCard.hasMessageUnread = true;
+          targetCard.conversation.lastMessage = newMessage.data.newMessage.text;
+          targetCard.conversation.lastMessageSenderId =
+            newMessage.data.newMessage.senderId;
+          targetCard.conversation.lastMessageSentAt =
+            new Date(newMessage.data.newMessage.sentAt).getTime() / 1000;
+          if (newMessage.data.isSelf) {
+            targetCard.conversation.lastMessageSentAt =
+              newMessage.data.newMessage.sentAt;
+            targetCard.hasMessageUnread = false;
+          }
+          nextPage.value = targetCard.conversation.lastMessageSentAt;
+          list.value = [targetCard, ...list.value];
+          console.log({ listAfter: list.value });
+        } else {
+          const newCard = {
+            conversation: {
+              candidateId: candidateId,
+              jobAdId: jobAdId,
+              lastMessage: newMessage.data.newMessage.text,
+              lastMessageSenderId: newMessage.data.newMessage.senderId,
+              lastMessageSentAt:
+                new Date(newMessage.data.newMessage.sentAt).getTime() / 1000,
+            },
+            candidateInfo: {
+              fullName: newMessage.data.fullName,
+            },
+            jobAd: {
+              title: newMessage.data.title,
+            },
+            hasMessageUnread: false,
+          };
+
+          nextPage.value = newCard.conversation.lastMessageSentAt;
+
+          list.value.unshift(newCard);
+        }
+      }
+    }
   },
 );
 
