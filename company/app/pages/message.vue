@@ -255,9 +255,22 @@ watch(
           newMessage.data.newMessage.senderId;
         targetCard.conversation.lastMessageSentAt =
           new Date(newMessage.data.newMessage.sentAt).getTime() / 1000;
-        list.value.unshift(targetCard); // moves to top
+        list.value = [targetCard, ...list.value];
         console.log({ listAfter: list.value });
       }
+    }
+
+    if (newMessage.topic == PUB_SUB_TOPIC.MESSAGE_READ) {
+      const candidateId = newMessage.data.candidateId;
+      const jobAdId = newMessage.data.jobAdId;
+
+      const card = list.value.find(
+        (item: any) =>
+          item.candidateInfo.candidateId == candidateId &&
+          item.jobAd.id == jobAdId,
+      );
+
+      card.hasMessageUnread = false;
     }
   },
 );

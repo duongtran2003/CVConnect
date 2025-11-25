@@ -188,6 +188,13 @@ async function handleFocusInput() {
     push("chatStream", {
       topic: PUB_SUB_TOPIC.CHECK_UNREAD,
     });
+    push("chatStream", {
+      topic: PUB_SUB_TOPIC.MESSAGE_READ,
+      data: {
+        jobAdId: props.detail.jobAd.id,
+        candidateId: props.detail.candidateInfo.candidateId,
+      },
+    });
   }
   isCallingReadAll.value = false;
 }

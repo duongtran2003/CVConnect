@@ -119,6 +119,34 @@ function connect() {
 
   connection.value.on(SOCKET_CHAT_EVENT.NEW_MESSAGE, (newMessage: any) => {
     console.log("event :", SOCKET_CHAT_EVENT.NEW_MESSAGE, newMessage);
+
+    if (!props.isHr) {
+      const candidateId = newMessage.candidateId;
+      const jobAdId = newMessage.jobAdId;
+
+      console.log({ list: list.value });
+
+      const idx = list.value.findIndex(
+        (item: any) =>
+          item.candidateInfo.candidateId == candidateId &&
+          item.jobAd.id == jobAdId,
+      );
+
+      console.log({ idx });
+
+      if (idx !== -1) {
+        const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
+        targetCard.hasMessageUnread = true;
+        targetCard.conversation.lastMessage = newMessage.newMessage.text;
+        targetCard.conversation.lastMessageSenderId =
+          newMessage.newMessage.senderId;
+        targetCard.conversation.lastMessageSentAt =
+          new Date(newMessage.newMessage.sentAt).getTime() / 1000;
+        list.value = [targetCard, ...list.value];
+        console.log({ listAfter: list.value });
+      }
+    }
+
     push("chatStream", {
       topic: PUB_SUB_TOPIC.NEW_MESSAGE,
       data: newMessage,
@@ -131,7 +159,7 @@ function connect() {
       topic: PUB_SUB_TOPIC.MESSAGE_READ,
       data: newMessage,
     });
-  })
+  });
 
   connection.value.on(SOCKET_CHAT_EVENT.NEW_CONVERSATION, (newMessage: any) => {
     console.log("event :", SOCKET_CHAT_EVENT.NEW_CONVERSATION, newMessage);
@@ -208,6 +236,23 @@ watch(
     if (newMessage.topic == PUB_SUB_TOPIC.CHECK_UNREAD) {
       checkUnread();
       return;
+    }
+
+    if (newMessage.topic == PUB_SUB_TOPIC.MESSAGE_READ) {
+      if (!props.isHr) {
+        const candidateId = newMessage.data.candidateId;
+        const jobAdId = newMessage.data.jobAdId;
+
+        const card = list.value.find(
+          (item: any) =>
+            item.candidateInfo.candidateId == candidateId &&
+            item.jobAd.id == jobAdId,
+        );
+
+        checkUnread();
+
+        card.hasMessageUnread = false;
+      }
     }
   },
 );
