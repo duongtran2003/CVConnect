@@ -242,6 +242,14 @@ async function handleFocusInput() {
     push("chatStream", {
       topic: PUB_SUB_TOPIC.CHECK_UNREAD,
     });
+
+    push("chatStream", {
+      topic: PUB_SUB_TOPIC.MESSAGE_READ,
+      data: {
+        jobAdId: selectedJobAd.value.value,
+        candidateId: props.candidateInfo.candidateId,
+      },
+    });
   }
   isCallingReadAll.value = false;
 }
@@ -419,6 +427,7 @@ watch(
         newMessage.data.candidateId == props.candidateInfo.candidateId &&
         newMessage.data.jobAdId == selectedJobAd.value.value
       ) {
+        console.log({ newMessage });
         messages.value.push(newMessage.data.newMessage);
         if (isInputFocused.value) {
           handleFocusInput();

@@ -145,6 +145,54 @@ function connect() {
         list.value = [targetCard, ...list.value];
         console.log({ listAfter: list.value });
       }
+    } else {
+      const candidateId = newMessage.candidateId;
+      const jobAdId = newMessage.jobAdId;
+
+      const idx = list.value.findIndex(
+        (item: any) =>
+          item.conversation.candidateId == candidateId &&
+          item.conversation.jobAdId == jobAdId,
+      );
+
+      console.log({ idx });
+      if (idx !== -1) {
+        const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
+
+        console.log({ targetCard, list: list.value });
+
+        targetCard.hasMessageUnread = true;
+        targetCard.conversation.lastMessage = newMessage.newMessage.text;
+        targetCard.conversation.lastMessageSenderId =
+          newMessage.newMessage.senderId;
+        targetCard.conversation.lastMessageSentAt =
+          new Date(newMessage.newMessage.sentAt).getTime() / 1000;
+        nextPage.value = targetCard.conversation.lastMessageSentAt;
+        list.value = [targetCard, ...list.value];
+        console.log({ listAfter: list.value });
+      } else {
+        const newCard = {
+          conversation: {
+            candidateId: candidateId,
+            jobAdId: jobAdId,
+            lastMessage: newMessage.newMessage.text,
+            lastMessageSenderId: newMessage.newMessage.senderId,
+            lastMessageSentAt:
+              new Date(newMessage.newMessage.sentAt).getTime() / 1000,
+          },
+          candidateInfo: {
+            fullName: newMessage.fullName,
+          },
+          jobAd: {
+            title: newMessage.title,
+          },
+          hasMessageUnread: true,
+        };
+
+        nextPage.value = newCard.conversation.lastMessageSentAt;
+
+        list.value.unshift(newCard);
+      }
     }
 
     push("chatStream", {
@@ -187,6 +235,7 @@ async function fetchData() {
   if (!res) {
     return;
   }
+  console.log({ res });
   list.value = [...list.value, ...res.data.data];
   nextPage.value =
     list.value[list.value.length - 1].conversation.lastMessageSentAt;
@@ -247,6 +296,21 @@ watch(
           (item: any) =>
             item.candidateInfo.candidateId == candidateId &&
             item.jobAd.id == jobAdId,
+        );
+
+        checkUnread();
+
+        card.hasMessageUnread = false;
+      } else {
+        const candidateId = newMessage.data.candidateId;
+        const jobAdId = newMessage.data.jobAdId;
+
+        console.log("look for card with ", candidateId, jobAdId);
+
+        const card = list.value.find(
+          (item: any) =>
+            item.conversation.candidateId == candidateId &&
+            item.conversation.jobAdId == jobAdId,
         );
 
         checkUnread();
