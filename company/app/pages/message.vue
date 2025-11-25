@@ -236,7 +236,28 @@ watch(
   () => subscribe.value("chatStream"),
   (newMessage) => {
     if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
-      console.log({ messages: list.value, pubSubMessage: newMessage });
+      const candidateId = newMessage.data.candidateId;
+      const jobAdId = newMessage.data.jobAdId;
+
+      console.log({ list: list.value });
+
+      const idx = list.value.findIndex(
+        (item: any) =>
+          item.candidateInfo.candidateId == candidateId &&
+          item.jobAd.id == jobAdId,
+      );
+
+      if (idx !== -1) {
+        const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
+        targetCard.hasMessageUnread = true;
+        targetCard.conversation.lastMessage = newMessage.data.newMessage.text;
+        targetCard.conversation.lastMessageSenderId =
+          newMessage.data.newMessage.senderId;
+        targetCard.conversation.lastMessageSentAt =
+          new Date(newMessage.data.newMessage.sentAt).getTime() / 1000;
+        list.value.unshift(targetCard); // moves to top
+        console.log({ listAfter: list.value });
+      }
     }
   },
 );
