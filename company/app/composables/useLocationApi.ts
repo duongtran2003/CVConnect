@@ -9,7 +9,7 @@ export const useLocationApi = () => {
 
     try {
       const res = await $axios.get(
-        `/_api/core/org-address/get-all`,
+        `/core/org-address/get-all`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },

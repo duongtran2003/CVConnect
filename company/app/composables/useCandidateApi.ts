@@ -11,7 +11,7 @@ export const useCandidateApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/job-ad-candidate/filter?${queryString}`,
+        `/core/job-ad-candidate/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -42,7 +42,7 @@ export const useCandidateApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/job-ad-candidate/list-onboard?${queryString}`,
+        `/core/job-ad-candidate/list-onboard?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -73,7 +73,7 @@ export const useCandidateApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/job-ad-candidate/job-ad-applied?${queryString}`,
+        `/core/job-ad-candidate/job-ad-applied?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -104,7 +104,7 @@ export const useCandidateApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/job-ad-candidate/conversation/view-candidate?${queryString}`,
+        `/core/job-ad-candidate/conversation/view-candidate?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -132,7 +132,7 @@ export const useCandidateApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/job-ad-candidate/conversation/view-organization?${queryString}`,
+        `/core/job-ad-candidate/conversation/view-organization?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -162,7 +162,7 @@ export const useCandidateApi = () => {
 
     try {
       const res = await $axios.get(
-        `/_api/core/candidate-info-apply/get-candidate-in-current-process/${processId}`,
+        `/core/candidate-info-apply/get-candidate-in-current-process/${processId}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -186,7 +186,7 @@ export const useCandidateApi = () => {
 
   const resendEmail = async (mailLogId: number | string) => {
     try {
-      const res = await $axios.post(`/_api/notify/email/resend/${mailLogId}`);
+      const res = await $axios.post(`/notify/email/resend/${mailLogId}`);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -207,7 +207,7 @@ export const useCandidateApi = () => {
   const getJobAdCandidateDetail = async (id: number) => {
     try {
       const res = await $axios.get(
-        `/_api/core/job-ad-candidate/candidate-detail/${id}`,
+        `/core/job-ad-candidate/candidate-detail/${id}`,
       );
       return res.data;
     } catch (err: any) {
@@ -225,7 +225,7 @@ export const useCandidateApi = () => {
   const saveSummary = async (payload: any) => {
     try {
       const res = await $axios.post(
-        `/_api/core/candidate-summary-org/save-summary`,
+        `/core/candidate-summary-org/save-summary`,
         payload,
       );
       toast.add({
@@ -248,7 +248,7 @@ export const useCandidateApi = () => {
   const eliminateCandidate = async (payload: any) => {
     try {
       const res = await $axios.put(
-        `/_api/core/job-ad-candidate/eliminate-candidate`,
+        `/core/job-ad-candidate/eliminate-candidate`,
         payload,
       );
       toast.add({
@@ -271,7 +271,7 @@ export const useCandidateApi = () => {
   const changeProcessCandidate = async (payload: any) => {
     try {
       const res = await $axios.put(
-        `/_api/core/job-ad-candidate/change-process`,
+        `/core/job-ad-candidate/change-process`,
         payload,
       );
       toast.add({
@@ -299,7 +299,7 @@ export const useCandidateApi = () => {
 
     try {
       const res = await $axios.put(
-        `/_api/core/job-ad-candidate/mark-onboard`,
+        `/core/job-ad-candidate/mark-onboard`,
         payload,
       );
       toast.add({
@@ -327,7 +327,7 @@ export const useCandidateApi = () => {
 
     try {
       const res = await $axios.put(
-        `/_api/core/job-ad-candidate/change-onboard-date`,
+        `/core/job-ad-candidate/change-onboard-date`,
         payload,
       );
       toast.add({
@@ -353,7 +353,7 @@ export const useCandidateApi = () => {
   ) => {
     try {
       const res = await $axios.get(
-        `/_api/notify/email-log/log-by-candidate-info/${candidateInfoId}/${jobAdId}`,
+        `/notify/email-log/log-by-candidate-info/${candidateInfoId}/${jobAdId}`,
       );
 
       return res.data;
@@ -372,7 +372,7 @@ export const useCandidateApi = () => {
   const sendEmail = async (payload: any) => {
     try {
       const res = await $axios.post(
-        `/_api/core/job-ad-candidate/send-email`,
+        `/core/job-ad-candidate/send-email`,
         payload,
       );
       toast.add({
@@ -397,7 +397,7 @@ export const useCandidateApi = () => {
     payload: any,
   ) => {
     try {
-      const res = await $axios.post(`/_api/core/candidate-evaluation/create`, {
+      const res = await $axios.post(`/core/candidate-evaluation/create`, {
         ...payload,
         jobAdCandidateId,
       });
@@ -425,7 +425,7 @@ export const useCandidateApi = () => {
   ) => {
     try {
       const res = await $axios.post(
-        `/_api/core/candidate-evaluation/update/${evaluationId}`,
+        `/core/candidate-evaluation/update/${evaluationId}`,
         {
           ...payload,
           jobAdCandidateId,
@@ -451,7 +451,7 @@ export const useCandidateApi = () => {
   const getEvaluations = async (jobAdCandidateId: string | number) => {
     try {
       const res = await $axios.get(
-        `/_api/core/candidate-evaluation/get-by-job-ad-candidate/${jobAdCandidateId}`,
+        `/core/candidate-evaluation/get-by-job-ad-candidate/${jobAdCandidateId}`,
       );
 
       return res.data;
@@ -471,7 +471,7 @@ export const useCandidateApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/calendar/filter-view-candidate?${queryString}`,
+        `/core/calendar/filter-view-candidate?${queryString}`,
       );
       return res.data;
     } catch (err: any) {
@@ -494,7 +494,7 @@ export const useCandidateApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/calendar/filter-view-candidate?${queryString}`,
+        `/core/calendar/filter-view-candidate?${queryString}`,
       );
       return res.data;
     } catch (err: any) {
@@ -515,7 +515,7 @@ export const useCandidateApi = () => {
 
   const createSchedule = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/core/calendar/create`, {
+      const res = await $axios.post(`/core/calendar/create`, {
         ...payload,
       });
       toast.add({
@@ -538,7 +538,7 @@ export const useCandidateApi = () => {
   const getScheduleDetail = async (id: any) => {
     try {
       const res = await $axios.get(
-        `/_api/core/calendar/detail-in-view-candidate/${id}`,
+        `/core/calendar/detail-in-view-candidate/${id}`,
       );
       return res.data;
     } catch (err: any) {

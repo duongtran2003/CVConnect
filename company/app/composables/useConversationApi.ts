@@ -10,7 +10,7 @@ export const useConversationApi = () => {
   ) => {
     const _abortController = controller;
     try {
-      let url = `/_api/notify/conversation/chat-messages?jobAdId=${jobAdId}&candidateId=${candidateId}&pageSize=20`;
+      let url = `/notify/conversation/chat-messages?jobAdId=${jobAdId}&candidateId=${candidateId}&pageSize=20`;
       if (pageIndex != null) {
         url += `&pageIndex=${pageIndex}`;
       }
@@ -37,7 +37,7 @@ export const useConversationApi = () => {
     const _abortController = controller;
     try {
       const res = await $axios.get(
-        `/_api/core/org/outside/org-by-job-ad/${orgId}`,
+        `/core/org/outside/org-by-job-ad/${orgId}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -52,7 +52,7 @@ export const useConversationApi = () => {
   const readAllMessages = async (jobAdId: any, candidateId: any) => {
     try {
       const res = await $axios.post(
-        `/_api/notify/conversation/read-all-messages`,
+        `/notify/conversation/read-all-messages`,
         {
           jobAdId,
           candidateId,
@@ -67,7 +67,7 @@ export const useConversationApi = () => {
 
   const sendMessage = async (jobAdId: any, candidateId: any, text: string) => {
     try {
-      const res = await $axios.post(`/_api/notify/conversation/new-message`, {
+      const res = await $axios.post(`/notify/conversation/new-message`, {
         jobAdId,
         candidateId,
         text,
@@ -86,7 +86,7 @@ export const useConversationApi = () => {
   ) => {
     try {
       const res = await $axios.get(
-        `/_api/notify/conversation/check-exists/${jobAdId}/${candidateId}`,
+        `/notify/conversation/check-exists/${jobAdId}/${candidateId}`,
         {
           signal: controller?.signal,
         },
@@ -101,7 +101,7 @@ export const useConversationApi = () => {
   const checkExistUnreadMessage = async (isCandidate: boolean) => {
     try {
       const res = await $axios.get(
-        `/_api/notify/conversation/check-exists-message-unread?isCandidate=${isCandidate}`,
+        `/notify/conversation/check-exists-message-unread?isCandidate=${isCandidate}`,
       );
       return res.data;
     } catch (err: any) {
@@ -112,7 +112,7 @@ export const useConversationApi = () => {
 
   const createConversation = async (jobAdId: any, candidateId: any) => {
     try {
-      const res = await $axios.post(`/_api/notify/conversation/create`, {
+      const res = await $axios.post(`/notify/conversation/create`, {
         jobAdId,
         candidateId,
       });

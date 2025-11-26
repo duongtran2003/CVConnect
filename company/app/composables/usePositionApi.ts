@@ -11,7 +11,7 @@ export const usePositionApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/position/filter?${queryString}`,
+        `/core/position/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -35,7 +35,7 @@ export const usePositionApi = () => {
 
   const getPositionDetail = async (id: number) => {
     try {
-      const res = await $axios.get(`/_api/core/position/detail/${id}`);
+      const res = await $axios.get(`/core/position/detail/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -51,7 +51,7 @@ export const usePositionApi = () => {
 
   const createPosition = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/core/position/create`, payload);
+      const res = await $axios.post(`/core/position/create`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -72,7 +72,7 @@ export const usePositionApi = () => {
   const changePositionStatus = async (payload: any) => {
     try {
       const res = await $axios.put(
-        `/_api/core/position/change-status-active`,
+        `/core/position/change-status-active`,
         payload,
       );
       toast.add({
@@ -94,7 +94,7 @@ export const usePositionApi = () => {
 
   const updatePosition = async (id: number, payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/position/update/${id}`, payload);
+      const res = await $axios.put(`/core/position/update/${id}`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -114,7 +114,7 @@ export const usePositionApi = () => {
 
   const deletePosition = async (payload: any) => {
     try {
-      const res = await $axios.delete(`/_api/core/position/delete`, {
+      const res = await $axios.delete(`/core/position/delete`, {
         data: payload.ids,
       });
       if (res.data.message) {

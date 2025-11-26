@@ -6,7 +6,7 @@ export const useEnumApi = () => {
     const _abortController = abortController;
 
     try {
-      const res = await $axios.get(`/_api/core/type/Job`, {
+      const res = await $axios.get(`/core/type/Job`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -30,7 +30,7 @@ export const useEnumApi = () => {
     const _abortController = abortController;
 
     try {
-      const res = await $axios.get(`/_api/core/type/salary`, {
+      const res = await $axios.get(`/core/type/salary`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -54,7 +54,7 @@ export const useEnumApi = () => {
     const _abortController = abortController;
 
     try {
-      const res = await $axios.get(`/_api/core/type/currency`, {
+      const res = await $axios.get(`/core/type/currency`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -78,7 +78,7 @@ export const useEnumApi = () => {
     const _abortController = abortController;
 
     try {
-      const res = await $axios.get(`/_api/core/type/eliminate-reason`, {
+      const res = await $axios.get(`/core/type/eliminate-reason`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -102,7 +102,7 @@ export const useEnumApi = () => {
     const _abortController = abortController;
 
     try {
-      const res = await $axios.get(`/_api/core/type/calendar-type`, {
+      const res = await $axios.get(`/core/type/calendar-type`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -126,7 +126,7 @@ export const useEnumApi = () => {
     const _abortController = abortController;
 
     try {
-      const res = await $axios.get(`/_api/core/type/job-ad-status`, {
+      const res = await $axios.get(`/core/type/job-ad-status`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;

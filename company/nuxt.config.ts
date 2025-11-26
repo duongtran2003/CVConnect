@@ -29,15 +29,15 @@ export default defineNuxtConfig({
   ssr: false,
   css: ["~/assets/main.css"],
   vite: {
-    server: {
-      proxy: {
-        "/_api": {
-          target: "http://26.9.175.39:8888",
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/_api/, "/api/v1"),
-        },
-      },
-    },
+    // server: {
+    //   proxy: {
+    //     "/_api": {
+    //       target: "http://26.9.175.39:8888",
+    //       changeOrigin: true,
+    //       rewrite: (path) => path.replace(/^\/_api/, "/api/v1"),
+    //     },
+    //   },
+    // },
     css: {
       preprocessorOptions: {
         scss: {

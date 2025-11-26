@@ -5,7 +5,7 @@ export const useOrgAddressApi = () => {
   const getOrgAddresses = async () => {
     try {
       const res = await $axios.get(
-        `/_api/core/org-address/get-all`,
+        `/core/org-address/get-all`,
       );
       return res.data;
     } catch (err: any) {
@@ -22,7 +22,7 @@ export const useOrgAddressApi = () => {
 
   const updateOrgAddresses = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/core/org-address/save`, payload);
+      const res = await $axios.post(`/core/org-address/save`, payload);
       toast.add({
         title: res.data.message,
         color: "success",

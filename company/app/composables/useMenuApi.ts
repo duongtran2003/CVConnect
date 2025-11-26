@@ -5,7 +5,7 @@ export const useMenuApi = () => {
   const getAllMenus = async (memberType: string) => {
     try {
       const res = await $axios.get(
-        `/_api/user/menu/all-menus?memberType=${memberType}`,
+        `/user/menu/all-menus?memberType=${memberType}`,
       );
       return res.data;
     } catch (err: any) {

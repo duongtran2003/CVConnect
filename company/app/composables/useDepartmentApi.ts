@@ -11,7 +11,7 @@ export const useDepartmentApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/department/filter?${queryString}`,
+        `/core/department/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -35,7 +35,7 @@ export const useDepartmentApi = () => {
 
   const getDepartmentDetail = async (id: number) => {
     try {
-      const res = await $axios.get(`/_api/core/department/detail/${id}`);
+      const res = await $axios.get(`/core/department/detail/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -51,7 +51,7 @@ export const useDepartmentApi = () => {
 
   const createDepartment = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/core/department/create`, payload);
+      const res = await $axios.post(`/core/department/create`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -72,7 +72,7 @@ export const useDepartmentApi = () => {
   const changeDepartmentStatus = async (payload: any) => {
     try {
       const res = await $axios.put(
-        `/_api/core/department/change-status-active`,
+        `/core/department/change-status-active`,
         payload,
       );
       toast.add({
@@ -94,7 +94,7 @@ export const useDepartmentApi = () => {
 
   const updateDepartment = async (id: number, payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/department/update/${id}`, payload);
+      const res = await $axios.put(`/core/department/update/${id}`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -114,7 +114,7 @@ export const useDepartmentApi = () => {
 
   const deleteDepartment = async (payload: any) => {
     try {
-      const res = await $axios.delete(`/_api/core/department/delete`, {
+      const res = await $axios.delete(`/core/department/delete`, {
         data: payload.ids,
       });
       if (res.data.message) {

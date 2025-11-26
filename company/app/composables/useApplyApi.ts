@@ -7,7 +7,7 @@ export const useApplyApi = () => {
 
     try {
       const res = await $axios.get(
-        `/_api/core/candidate-info-apply/filter`,
+        `/core/candidate-info-apply/filter`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -32,7 +32,7 @@ export const useApplyApi = () => {
   const applyJob = async (payload: any) => {
     try {
       const res = await $axios.post(
-        `/_api/core/job-ad-candidate/apply`,
+        `/core/job-ad-candidate/apply`,
         payload,
       );
       toast.add({

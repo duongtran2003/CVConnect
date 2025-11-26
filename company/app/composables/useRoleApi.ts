@@ -4,7 +4,7 @@ export const useRoleApi = () => {
 
   const getMyRoles = async () => {
     try {
-      const res = await $axios.get(`/_api/user/user/my-roles`);
+      const res = await $axios.get(`/user/user/my-roles`);
       return res.data;
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -27,7 +27,7 @@ export const useRoleApi = () => {
 
     try {
       const queryString = objectToQuery(params);
-      const res = await $axios.get(`/_api/user/role/filter?${queryString}`, {
+      const res = await $axios.get(`/user/role/filter?${queryString}`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -49,7 +49,7 @@ export const useRoleApi = () => {
 
   const getUserGroupDetail = async (id: number) => {
     try {
-      const res = await $axios.get(`/_api/user/role/detail/${id}`);
+      const res = await $axios.get(`/user/role/detail/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -65,7 +65,7 @@ export const useRoleApi = () => {
 
   const getMemberTypes = async () => {
     try {
-      const res = await $axios.get(`/_api/user/role/member-type`);
+      const res = await $axios.get(`/user/role/member-type`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data.message) {
@@ -86,7 +86,7 @@ export const useRoleApi = () => {
 
   const createUserGroup = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/user/role/create`, payload);
+      const res = await $axios.post(`/user/role/create`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -106,7 +106,7 @@ export const useRoleApi = () => {
 
   const updateUserGroup = async (id: number, payload: any) => {
     try {
-      const res = await $axios.put(`/_api/user/role/update/${id}`, payload);
+      const res = await $axios.put(`/user/role/update/${id}`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -126,7 +126,7 @@ export const useRoleApi = () => {
 
   const deleteUserGroup = async (payload: any) => {
     try {
-      const res = await $axios.delete(`/_api/user/role/delete`, {
+      const res = await $axios.delete(`/user/role/delete`, {
         data: payload.ids,
       });
       if (res.data.message) {

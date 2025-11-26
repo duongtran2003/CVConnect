@@ -10,7 +10,7 @@ export const useNotificationApi = () => {
     try {
 
       const queryString = objectToQuery(params);
-      const res = await $axios.get(`/_api/notify/notification/my-notifications?${queryString}`, {
+      const res = await $axios.get(`/notify/notification/my-notifications?${queryString}`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -28,7 +28,7 @@ export const useNotificationApi = () => {
 
   const getUnreadQuantity = async () => {
     try {
-      const res = await $axios.get(`/_api/notify/notification/quantity-unread`);
+      const res = await $axios.get(`/notify/notification/quantity-unread`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -44,7 +44,7 @@ export const useNotificationApi = () => {
 
   const markAllRead = async () => {
     try {
-      const res = await $axios.put(`/_api/notify/notification/mark-all-as-read`);
+      const res = await $axios.put(`/notify/notification/mark-all-as-read`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -60,7 +60,7 @@ export const useNotificationApi = () => {
 
   const markRead = async (id: string) => {
     try {
-      const res = await $axios.put(`/_api/notify/notification/mark-as-read/${id}`);
+      const res = await $axios.put(`/notify/notification/mark-as-read/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {

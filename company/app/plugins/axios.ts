@@ -1,6 +1,11 @@
 import axios from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
 
+const PRODUCTION_API_URL = "http://api.vclab.tech/api/v1";
+const DEV_API_URL = "/_api";
+
+export const API_URL = PRODUCTION_API_URL;
+
 export type TApiOption = {
   isSilent: boolean;
 };
@@ -8,6 +13,7 @@ export type TApiOption = {
 export default defineNuxtPlugin(() => {
   const axiosInstance = axios.create({
     withCredentials: true,
+    baseURL: API_URL,
   });
 
   const { setToken, clearToken, setRoles, setCurrentRole } = useAuthStore();
@@ -20,7 +26,7 @@ export default defineNuxtPlugin(() => {
 
   const refreshAuthLogic = (failedRequest: any) =>
     axios
-      .post(`/_api/user/auth/refresh`, {}, { withCredentials: true })
+      .post(`${API_URL}/user/auth/refresh`, {}, { withCredentials: true })
       .then((tokenRefreshResponse) => {
         setToken(tokenRefreshResponse.data.data.token);
         // setRoles(tokenRefreshResponse.data.data.roles);
