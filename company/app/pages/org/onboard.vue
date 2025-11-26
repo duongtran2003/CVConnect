@@ -46,7 +46,7 @@
         :columns="tableColumns"
         :allow-actions="allowActions as TPermission[]"
         :show-checkbox="false"
-        :show-actions="false"
+        :show-actions="true"
         :is-loading="isFetchingData"
         :selection-list="selectedRows"
         :select-options="filterSelectOption"
@@ -431,6 +431,7 @@ const fetchData = async () => {
       key: entry.candidateStatusDto.name,
       cellType: "candidateStatusChip",
     };
+    entry.id = entry.candidateInfo.id;
     entry.hrContact = entry.jobAd.hrContact.fullName;
     entry.level = entry.level.levelName;
 
@@ -464,17 +465,19 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
   //   handleDeleteClick([id]);
   // }
   if (action === "view") {
-    editViewId.value = id;
-    editViewInitialMode.value = "view";
-    editViewMode.value = "view";
-    isEditViewOpen.value = true;
+    // editViewId.value = id;
+    // editViewInitialMode.value = "view";
+    // editViewMode.value = "view";
+    // isEditViewOpen.value = true;
+    const link = router.resolve({ path: `/org/candidate/detail/${id}` });
+    window.open(link.href, "_blank");
   }
-  if (action === "edit") {
-    editViewId.value = id;
-    editViewInitialMode.value = "edit";
-    editViewMode.value = "edit";
-    isEditViewOpen.value = true;
-  }
+  // if (action === "edit") {
+  //   editViewId.value = id;
+  //   editViewInitialMode.value = "edit";
+  //   editViewMode.value = "edit";
+  //   isEditViewOpen.value = true;
+  // }
 };
 
 const tableData = ref([]);

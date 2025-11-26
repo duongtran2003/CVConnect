@@ -112,6 +112,7 @@
               variant="none"
               autocomplete="autocomplete"
               placeholder="Chọn giá trị"
+              :title="selectTooltip(col.accessorKey)"
               :search-input="{
                 placeholder: 'Tìm kiếm',
               }"
@@ -129,11 +130,14 @@
             />
             <Icon
               v-if="
-                col.filterType == 'select' && filter && filter[col.accessorKey]
+                col.filterType == 'select' &&
+                filter &&
+                filter[col.accessorKey] &&
+                filter[col.accessorKey].length
               "
               name="ic:outline-clear"
               class="clear-icon"
-              @click="handleFilterUpdate(col.accessorKey, undefined)"
+              @click="handleFilterUpdate(col.accessorKey, [])"
             />
           </div>
         </div>
@@ -157,7 +161,42 @@
           />
         </span>
         <span
-          v-if="
+          v-else-if="
+            row.original[col.accessorKey] &&
+            row.original[col.accessorKey].cellType == 'link'
+          "
+          class=""
+          :title="row.original[col.accessorKey].text"
+        >
+          <div
+            class="cursor-pointer"
+            @click="
+              () => {
+                openLink(row.original[col.accessorKey].text);
+              }
+            "
+          >
+            {{ row.original[col.accessorKey].text }}
+          </div>
+        </span>
+        <span
+          v-else-if="
+            row.original[col.accessorKey] &&
+            row.original[col.accessorKey].cellType == 'tagsList'
+          "
+          class="flex flex-row gap-1"
+        >
+          <div
+            v-for="(tag, index) of row.original[col.accessorKey].list"
+            :key="index"
+            :title="tag.tooltip"
+            class="industry-tag"
+          >
+            {{ tag.label }}
+          </div>
+        </span>
+        <span
+          v-else-if="
             row.original[col.accessorKey] &&
             row.original[col.accessorKey].cellType == 'candidateStatusChip'
           "
@@ -229,6 +268,17 @@ const havePermission = (permission: TPermission) => {
 };
 
 const columns = ref<any[]>(cloneDeep(props.columns));
+const selectTooltip = computed(() => {
+  return (accessorKey: string) => {
+    if (!props.filter) {
+      return "";
+    }
+    const tooltipString = props.filter[accessorKey]
+      ?.map((filter: any) => filter.label)
+      ?.join(", ");
+    return tooltipString;
+  };
+});
 const columnKey = computed(() => {
   return (column: any) => {
     return column.columnDef.accessorKey;
@@ -265,7 +315,7 @@ onBeforeMount(() => {
     columns.value.unshift(checkboxColumn);
   }
   if (props.showActions) {
-    columns.value.splice(1, 0, actionColumn);
+    columns.value.splice(2, 0, actionColumn);
   }
 });
 
@@ -286,6 +336,10 @@ const getCurrentSort = computed(() => {
     return undefined;
   };
 });
+
+function openLink(link: string) {
+  window.open(link, "_blank", "noopener,noreferrer");
+}
 
 const nextSortState = computed(() => {
   return (state: TSortType) => {
@@ -624,10 +678,10 @@ const handleActionClick = (row: any, action: TTableAction) => {
 
         th:nth-child(1),
         th:nth-child(2),
+        th:nth-child(3),
         td:nth-child(1),
         td:nth-child(2),
-        td:nth-child(3),
-        th:nth-child(3) {
+        td:nth-child(3) {
           position: sticky;
           top: 0px;
         }
@@ -638,25 +692,22 @@ const handleActionClick = (row: any, action: TTableAction) => {
         }
         th:nth-child(2),
         td:nth-child(2) {
-          left: 56px;
+          left: 50px;
         }
         th:nth-child(3),
         td:nth-child(3) {
-          left: 164px;
+          left: 106px;
           &::after {
             content: "";
             position: absolute;
             top: 0;
-            right: 1px;
+            right: -1px;
             width: 1px;
             height: 100%;
             background-color: $color-gray-300;
             display: block;
           }
         }
-        // th:nth-child(3),
-        // td:nth-child(3) {
-        // }
 
         td {
           background-color: white;
@@ -693,5 +744,16 @@ const handleActionClick = (row: any, action: TTableAction) => {
   font-weight: 500;
   width: fit-content;
   margin: auto;
+}
+
+.industry-tag {
+  border-radius: 4px;
+  padding: 4px;
+  border: 1px solid $color-gray-300;
+  font-size: 12px;
+  font-weight: 500;
+  width: fit-content;
+  min-width: 48px;
+  text-align: center;
 }
 </style>
