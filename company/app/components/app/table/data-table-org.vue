@@ -130,14 +130,20 @@
             />
             <Icon
               v-if="
-                col.filterType == 'select' &&
+                col.filterType === 'select' &&
                 filter &&
-                filter[col.accessorKey] &&
-                filter[col.accessorKey].length
+                ((Array.isArray(filter[col.accessorKey]) &&
+                  filter[col.accessorKey].length > 0) ||
+                  filter[col.accessorKey] !== undefined)
               "
               name="ic:outline-clear"
               class="clear-icon"
-              @click="handleFilterUpdate(col.accessorKey, [])"
+              @click="
+                handleFilterUpdate(
+                  col.accessorKey,
+                  col.isSingle ? undefined : [],
+                )
+              "
             />
           </div>
         </div>
@@ -270,13 +276,13 @@ const havePermission = (permission: TPermission) => {
 const columns = ref<any[]>(cloneDeep(props.columns));
 const selectTooltip = computed(() => {
   return (accessorKey: string) => {
-    if (!props.filter) {
+    const value = props.filter?.[accessorKey];
+
+    if (!value || !Array.isArray(value)) {
       return "";
     }
-    const tooltipString = props.filter[accessorKey]
-      ?.map((filter: any) => filter.label)
-      ?.join(", ");
-    return tooltipString;
+
+    return value.map((filter: any) => filter.label).join(", ");
   };
 });
 const columnKey = computed(() => {
@@ -355,6 +361,8 @@ const nextSortState = computed(() => {
 
 const handleFilterUpdate = (accessorKey: string, value: any) => {
   const trimValue = typeof value == "string" ? value.trim() : value;
+
+  console.log({ trimValue });
 
   if (props.filter) {
     const newFilter = {

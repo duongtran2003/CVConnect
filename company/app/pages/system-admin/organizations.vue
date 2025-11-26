@@ -90,6 +90,7 @@ import {
   organizationTableHeaders,
   pageSizeOptions,
 } from "~/const/views/system-admin/organizations";
+import axios from "axios";
 
 definePageMeta({
   layout: "system-admin",
@@ -120,6 +121,7 @@ const allowActions = computed(() => {
   return permissions;
 });
 const industryList = ref<any[]>([]);
+const provinceList = ref<any[]>([]);
 
 const canEdit = computed(() => {
   if (allowActions.value.includes("UPDATE")) {
@@ -204,6 +206,25 @@ const convertQuery = () => {
     console.log(restoredFilter.isActive);
   }
 
+  if (query.industryIds) {
+    const values = (query.industryIds as string).split(",");
+    console.log(values);
+    restoredFilter.industryList = values.map((val) =>
+      filterSelectOption.value.industryList.find((opt: any) => {
+        return opt.value == val;
+      }),
+    );
+  }
+
+  if (query.addresses) {
+    const addressLists = ( query.addresses as string ).split(",").map((a: any) => ({
+      label: a,
+      value: a,
+    }));
+
+    restoredFilter.addresses = addressLists;
+  }
+
   const updatedAt: (Date | null)[] = [];
   if (query.updatedAtStart) {
     const start = new Date(query.updatedAtStart as string);
@@ -230,11 +251,31 @@ const convertQuery = () => {
   delete restoredFilter.updatedAtStart;
   delete restoredFilter.updatedAtEnd;
 
+  const companySizePair = {
+    from: query.staffCountFrom,
+    to: query.staffCountTo,
+  };
+
+  const companySizeOpt = filterSelectOption.value.companySize.find(
+    (s: any) =>
+      s.value.from == companySizePair.from && s.value.to == companySizePair.to,
+  );
+  if (companySizeOpt) {
+    restoredFilter.companySize = companySizeOpt;
+  }
+
   return restoredFilter;
 };
 
 onBeforeMount(async () => {
+  setLoading(true);
+  await fetchIndustries();
+  const res = await axios.get(`https://provinces.open-api.vn/api/v2/?depth=1`);
+
+  provinceList.value = res.data.map((p: any) => p.name);
+
   filter.value = convertQuery();
+  setLoading(false);
 });
 
 const handleCreated = () => {
@@ -477,6 +518,10 @@ const filterSelectOption = computed(() => {
       label: i.name,
       value: i.id,
     })),
+    addresses: provinceList.value.map((p: any) => ({
+      label: p,
+      value: p,
+    })),
     companySize: [
       {
         label: "Từ 1 đến 50",
@@ -556,6 +601,33 @@ const normalizeFilter = (filter: any) => {
     delete normalizedFilter.updatedAt;
     if (startDate) normalizedFilter.updatedAtStart = toUtcDate(startDate);
     if (endDate) normalizedFilter.updatedAtEnd = toUtcDate(endDate);
+  }
+
+  if (normalizedFilter.companySize) {
+    const from = normalizedFilter.companySize.value.from;
+    const to = normalizedFilter.companySize.value.to;
+
+    if (from != undefined) {
+      normalizedFilter.staffCountFrom = from;
+    }
+    if (to != undefined) {
+      normalizedFilter.staffCountTo = to;
+    }
+
+    delete normalizedFilter.companySize;
+  }
+
+  if (normalizedFilter.industryList) {
+    normalizedFilter.industryIds = normalizedFilter.industryList.map(
+      (i: any) => i.value,
+    );
+    delete normalizedFilter.industryList;
+  }
+
+  if (normalizedFilter.addresses) {
+    normalizedFilter.addresses = normalizedFilter.addresses.map(
+      (i: any) => i.value,
+    );
   }
 
   const queryForUrl: Record<string, any> = {

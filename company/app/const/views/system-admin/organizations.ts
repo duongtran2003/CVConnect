@@ -40,6 +40,7 @@ export const organizationTableHeaders = [
     allowFilter: true,
     filterType: "select",
     isSortable: true,
+    isSingle: true,
     meta: {
       class: {
         th: "min-w-[200px] pl-[32px] max-w-[440px] truncate",
