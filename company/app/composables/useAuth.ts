@@ -27,7 +27,7 @@ export const useAuth = () => {
 
   const login = async (credentials: TLoginCredentials) => {
     try {
-      const res = await $axios.post("/_api/user/auth/login", credentials, {
+      const res = await $axios.post("/user/auth/login", credentials, {
         skipAuth: true,
         skipAuthRefresh: true,
       });
@@ -53,7 +53,7 @@ export const useAuth = () => {
   const register = async (credentials: TRegisterCredentials) => {
     try {
       const res = await $axios.post(
-        "/_api/user/auth/register-candidate",
+        "/user/auth/register-candidate",
         credentials,
         {
           skipAuth: true,
@@ -79,7 +79,7 @@ export const useAuth = () => {
   const registerOrgAdmin = async (credentials: FormData) => {
     try {
       const res = await $axios.post(
-        "/_api/user/auth/register-org-admin",
+        "/user/auth/register-org-admin",
         credentials,
         {
           skipAuth: true,
@@ -105,7 +105,7 @@ export const useAuth = () => {
   const requestResendVerifyEmail = async (identifier: string) => {
     try {
       const res = await $axios.get(
-        `/_api/user/auth/request-resend-verify-email?identifier=${identifier}`,
+        `/user/auth/request-resend-verify-email?identifier=${identifier}`,
         {
           skipAuth: true,
         },
@@ -130,7 +130,7 @@ export const useAuth = () => {
   const verifyEmail = async (token: string) => {
     try {
       const res = await $axios.put(
-        `/_api/user/auth/verify-email/${token}`,
+        `/user/auth/verify-email/${token}`,
         {},
         { skipAuth: true },
       );
@@ -143,7 +143,7 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      await $axios.post("/_api/user/auth/logout");
+      await $axios.post("/user/auth/logout");
     } catch (err) {
       console.error(err);
     } finally {
@@ -158,7 +158,7 @@ export const useAuth = () => {
   const requestResetPassword = async (identifier: string) => {
     try {
       const res = await $axios.get(
-        `/_api/user/auth/request-reset-password?identifier=${identifier}`,
+        `/user/auth/request-reset-password?identifier=${identifier}`,
         {
           skipAuth: true,
         },
@@ -183,7 +183,7 @@ export const useAuth = () => {
   const resetPassword = async (token: string, newPassword: string) => {
     try {
       const res = await $axios.put(
-        `/_api/user/auth/reset-password`,
+        `/user/auth/reset-password`,
         {
           token,
           newPassword,
@@ -205,10 +205,10 @@ export const useAuth = () => {
 
   const verifyToken = async () => {
     try {
-      // const res = await $axios.post(`/_api/user/auth/verify-token`, {
+      // const res = await $axios.post(`/user/auth/verify-token`, {
       //   token: token.value,
       // });
-      const res = await $axios.post(`/_api/user/auth/verify-token`);
+      const res = await $axios.post(`/user/auth/verify-token`);
       return res.data;
     } catch (err: any) {
       return null;
@@ -217,7 +217,7 @@ export const useAuth = () => {
 
   const getMe = async (role: TAccountRole, option?: TApiOption) => {
     try {
-      const res = await $axios.get(`/_api/user/user/my-info/${role.id}`);
+      const res = await $axios.get(`/user/user/my-info/${role.id}`);
       return res.data;
     } catch (err: any) {
       if (!option?.isSilent && err.response && err.response.data) {
@@ -232,7 +232,7 @@ export const useAuth = () => {
 
   const setDefaultRole = async (role: TAccountRole) => {
     try {
-      const res = await $axios.put(`/_api/user/user/role-default/${role.id}`);
+      const res = await $axios.put(`/user/user/role-default/${role.id}`);
       return res;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -248,7 +248,7 @@ export const useAuth = () => {
   const getMenus = async (role: TAccountRole) => {
     console.log("in get menu", role);
     try {
-      const res = await $axios.get(`/_api/user/menu/menu-by-role/${role.id}`);
+      const res = await $axios.get(`/user/menu/menu-by-role/${role.id}`);
       return res.data.data;
     } catch (err: any) {
       if (err.response && err.response.data) {

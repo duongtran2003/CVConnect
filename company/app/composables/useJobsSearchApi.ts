@@ -4,7 +4,7 @@ export const useJobsSearchApi = () => {
 
   const getFilter = async () => {
     try {
-      const res = await $axios.get(`/_api/core/job-ad/outside/data-filter`);
+      const res = await $axios.get(`/core/job-ad/outside/data-filter`);
       // toast.add({
       //   title: res.data.message,
       //   color: "success",
@@ -28,7 +28,7 @@ export const useJobsSearchApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/job-ad/outside/filter?${queryString}`,
+        `/core/job-ad/outside/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
           // skipAuth: true,
@@ -60,7 +60,7 @@ export const useJobsSearchApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/job-ad/outside/filter-featured?${queryString}`,
+        `/core/job-ad/outside/filter-featured?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
           skipAuth: true,
@@ -92,7 +92,7 @@ export const useJobsSearchApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/job-ad/outside/filter-suitable?${queryString}`,
+        `/core/job-ad/outside/filter-suitable?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
           // skipAuth: true,
@@ -124,7 +124,7 @@ export const useJobsSearchApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/org/outside/org-featured?${queryString}`,
+        `/core/org/outside/org-featured?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
           skipAuth: true,
@@ -155,7 +155,7 @@ export const useJobsSearchApi = () => {
     const _abortController = abortController;
 
     try {
-      let url = `/_api/core/job-ad/outside/detail/${id}`;
+      let url = `/core/job-ad/outside/detail/${id}`;
       if (keyCodeInternal) {
         url += `?keyCodeInternal=${keyCodeInternal}`;
       }
@@ -183,7 +183,7 @@ export const useJobsSearchApi = () => {
   const getRelevantJobAds = async (jobAdId: any) => {
     try {
       const res = await $axios.get(
-        `/_api/core/job-ad/outside/relate/${jobAdId}`,
+        `/core/job-ad/outside/relate/${jobAdId}`,
         {
           skipAuth: true,
         },

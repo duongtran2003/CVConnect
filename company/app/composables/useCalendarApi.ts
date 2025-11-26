@@ -6,7 +6,7 @@ export const useCalendarApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/calendar/filter-view-general?${queryString}`,
+        `/core/calendar/filter-view-general?${queryString}`,
       );
       return res.data;
     } catch (err: any) {
@@ -28,7 +28,7 @@ export const useCalendarApi = () => {
   const getScheduleDetail = async (id: any, candidateInfoId: any) => {
     try {
       const res = await $axios.post(
-        `/_api/core/calendar/detail-in-view-general`,
+        `/core/calendar/detail-in-view-general`,
         {
           calendarId: id,
           candidateInfoId: candidateInfoId,

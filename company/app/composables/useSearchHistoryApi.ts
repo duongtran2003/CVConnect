@@ -7,7 +7,7 @@ export const useSearchHistoryApi = () => {
 
     try {
       const res = await $axios.get(
-        `/_api/core/search-history-outside/my-search-history`,
+        `/core/search-history-outside/my-search-history`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -31,7 +31,7 @@ export const useSearchHistoryApi = () => {
 
   const deleteHistory = async (id: any) => {
     try {
-      const res = await $axios.delete(`/_api/core/search-history-outside/delete`, {
+      const res = await $axios.delete(`/core/search-history-outside/delete`, {
         data: [id]
       });
       return true;
@@ -43,7 +43,7 @@ export const useSearchHistoryApi = () => {
 
   const deleteAllHistory = async () => {
     try {
-      const res = await $axios.delete(`/_api/core/search-history-outside/delete-all`);
+      const res = await $axios.delete(`/core/search-history-outside/delete-all`);
       return true;
     } catch (err: any) {
       console.error(err);

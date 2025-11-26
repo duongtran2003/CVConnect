@@ -10,7 +10,7 @@ export const useIndustryApi = () => {
       const _abortController = abortController;
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/industry/public/filter?${queryString}`,
+        `/core/industry/public/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -37,7 +37,7 @@ export const useIndustryApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/industry-sub/filter?${queryString}`,
+        `/core/industry-sub/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -68,7 +68,7 @@ export const useIndustryApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/industry/filter?${queryString}`,
+        `/core/industry/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -92,7 +92,7 @@ export const useIndustryApi = () => {
 
   const getIndustryDetail = async (id: number) => {
     try {
-      const res = await $axios.get(`/_api/core/industry/detail/${id}`);
+      const res = await $axios.get(`/core/industry/detail/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -108,7 +108,7 @@ export const useIndustryApi = () => {
 
   const createIndustry = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/core/industry/create`, payload);
+      const res = await $axios.post(`/core/industry/create`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -128,7 +128,7 @@ export const useIndustryApi = () => {
 
   const updateIndustry = async (id: number, payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/industry/update/${id}`, payload);
+      const res = await $axios.put(`/core/industry/update/${id}`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -148,7 +148,7 @@ export const useIndustryApi = () => {
 
   const deleteIndustry = async (payload: any) => {
     try {
-      const res = await $axios.delete(`/_api/core/industry/delete`, {
+      const res = await $axios.delete(`/core/industry/delete`, {
         data: payload.ids,
       });
       if (res.data.message) {

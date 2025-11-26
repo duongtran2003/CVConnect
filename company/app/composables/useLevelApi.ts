@@ -7,7 +7,7 @@ export const useLevelApi = () => {
 
     try {
       const queryString = objectToQuery(params);
-      const res = await $axios.get(`/_api/core/level/filter?${queryString}`, {
+      const res = await $axios.get(`/core/level/filter?${queryString}`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -29,7 +29,7 @@ export const useLevelApi = () => {
 
   const getLevelDetail = async (id: number) => {
     try {
-      const res = await $axios.get(`/_api/core/level/detail/${id}`);
+      const res = await $axios.get(`/core/level/detail/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -45,7 +45,7 @@ export const useLevelApi = () => {
 
   const createLevel = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/core/level/create`, payload);
+      const res = await $axios.post(`/core/level/create`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -65,7 +65,7 @@ export const useLevelApi = () => {
 
   const updateLevel = async (id: number, payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/level/update/${id}`, payload);
+      const res = await $axios.put(`/core/level/update/${id}`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -85,7 +85,7 @@ export const useLevelApi = () => {
 
   const deleteLevel = async (payload: any) => {
     try {
-      const res = await $axios.delete(`/_api/core/level/delete`, {
+      const res = await $axios.delete(`/core/level/delete`, {
         data: payload.ids,
       });
       if (res.data.message) {

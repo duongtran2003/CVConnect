@@ -10,7 +10,7 @@ export const useCareerApi = () => {
       const _abortController = abortController;
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/career/public/filter?${queryString}`,
+        `/core/career/public/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -37,7 +37,7 @@ export const useCareerApi = () => {
   //   try {
   //     const queryString = objectToQuery(params);
   //     const res = await $axios.get(
-  //       `/_api/core/industry-sub/filter?${queryString}`,
+  //       `/core/industry-sub/filter?${queryString}`,
   //       {
   //         signal: _abortController ? _abortController.signal : undefined,
   //       },
@@ -64,7 +64,7 @@ export const useCareerApi = () => {
 
     try {
       const queryString = objectToQuery(params);
-      const res = await $axios.get(`/_api/core/career/filter?${queryString}`, {
+      const res = await $axios.get(`/core/career/filter?${queryString}`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -86,7 +86,7 @@ export const useCareerApi = () => {
 
   const getCareerDetail = async (id: number) => {
     try {
-      const res = await $axios.get(`/_api/core/career/detail/${id}`);
+      const res = await $axios.get(`/core/career/detail/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -102,7 +102,7 @@ export const useCareerApi = () => {
 
   const createCareer = async (payload: any) => {
     try {
-      const res = await $axios.post(`/_api/core/career/create`, payload);
+      const res = await $axios.post(`/core/career/create`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -122,7 +122,7 @@ export const useCareerApi = () => {
 
   const updateCareer = async (id: number, payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/career/update/${id}`, payload);
+      const res = await $axios.put(`/core/career/update/${id}`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -142,7 +142,7 @@ export const useCareerApi = () => {
 
   const deleteCareer = async (payload: any) => {
     try {
-      const res = await $axios.delete(`/_api/core/career/delete`, {
+      const res = await $axios.delete(`/core/career/delete`, {
         data: payload.ids,
       });
       if (res.data.message) {

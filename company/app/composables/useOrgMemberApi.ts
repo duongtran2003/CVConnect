@@ -27,7 +27,7 @@ export const useOrgMemberApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/user/org-member/filter?${queryString}`,
+        `/user/org-member/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -52,7 +52,7 @@ export const useOrgMemberApi = () => {
   const getRoleFilterOption = async () => {
     try {
       const res = await $axios.get(
-        `/_api/user/role/get-member-type-organization`,
+        `/user/role/get-member-type-organization`,
       );
       return res.data;
     } catch (err: any) {
@@ -74,7 +74,7 @@ export const useOrgMemberApi = () => {
   const getOrgMemberDetail = async (id: number) => {
     try {
       const res = await $axios.get(
-        `/_api/user/org-member/org-member-info/${id}`,
+        `/user/org-member/org-member-info/${id}`,
       );
       return res.data;
     } catch (err: any) {
@@ -92,7 +92,7 @@ export const useOrgMemberApi = () => {
   const inviteToOrg = async (payload: any) => {
     try {
       const res = await $axios.post(
-        `/_api/user/org-member/invite-join-org`,
+        `/user/org-member/invite-join-org`,
         payload,
       );
       toast.add({
@@ -115,7 +115,7 @@ export const useOrgMemberApi = () => {
   const changeOrgMemberStatus = async (payload: any) => {
     try {
       const res = await $axios.put(
-        `/_api/user/org-member/change-status-active`,
+        `/user/org-member/change-status-active`,
         payload,
       );
       toast.add({
@@ -138,7 +138,7 @@ export const useOrgMemberApi = () => {
   const assignRole = async (payload: any) => {
     try {
       const res = await $axios.put(
-        `/_api/user/org-member/assign-role`,
+        `/user/org-member/assign-role`,
         payload,
       );
       toast.add({
@@ -160,7 +160,7 @@ export const useOrgMemberApi = () => {
 
   const deleteDepartment = async (payload: any) => {
     try {
-      const res = await $axios.delete(`/_api/core/department/delete`, {
+      const res = await $axios.delete(`/core/department/delete`, {
         data: payload.ids,
       });
       if (res.data.message) {
@@ -191,7 +191,7 @@ export const useOrgMemberApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/user/user/find-not-org-member?${queryString}`,
+        `/user/user/find-not-org-member?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },

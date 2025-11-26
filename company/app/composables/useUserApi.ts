@@ -10,7 +10,7 @@ export const useUserApi = () => {
 
     try {
       const res = await $axios.get(
-        `/_api/user/user/get-by-role-code-org/${roleCode}`,
+        `/user/user/get-by-role-code-org/${roleCode}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },

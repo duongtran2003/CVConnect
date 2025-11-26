@@ -6,7 +6,7 @@ export const useOrgApi = () => {
   ) => {
     try {
 
-      const res = await $axios.get(`/_api/core/org/org-info`);
+      const res = await $axios.get(`/core/org/org-info`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -29,7 +29,7 @@ export const useOrgApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/core/org/filter?${queryString}`,
+        `/core/org/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -53,7 +53,7 @@ export const useOrgApi = () => {
 
   const getOrgInfoPublic = async (id: any) => {
     try {
-      const res = await $axios.get(`/_api/core/org/outside/org-info/${id}`);
+      const res = await $axios.get(`/core/org/outside/org-info/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -69,7 +69,7 @@ export const useOrgApi = () => {
 
   const updateLogo = async (payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/org/update-logo`, payload);
+      const res = await $axios.put(`/core/org/update-logo`, payload);
       // toast.add({
       //   title: res.data.message,
       //   color: "success",
@@ -89,7 +89,7 @@ export const useOrgApi = () => {
 
   const updateCover = async (payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/org/update-cover-photo`, payload);
+      const res = await $axios.put(`/core/org/update-cover-photo`, payload);
       // toast.add({
       //   title: res.data.message,
       //   color: "success",
@@ -109,7 +109,7 @@ export const useOrgApi = () => {
 
   const updateInfo = async (payload: any) => {
     try {
-      const res = await $axios.put(`/_api/core/org/update-info`, payload);
+      const res = await $axios.put(`/core/org/update-info`, payload);
       // toast.add({
       //   title: res.data.message,
       //   color: "success",

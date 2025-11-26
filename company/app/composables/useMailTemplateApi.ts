@@ -11,7 +11,7 @@ export const useMailTemplateApi = () => {
     try {
       const queryString = objectToQuery(params);
       const res = await $axios.get(
-        `/_api/notify/email-template/filter?${queryString}`,
+        `/notify/email-template/filter?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -42,7 +42,7 @@ export const useMailTemplateApi = () => {
 
     try {
       const res = await $axios.post(
-        `/_api/notify/email-template/preview-email/${id}`,
+        `/notify/email-template/preview-email/${id}`,
         {
           ...body,
         },
@@ -78,7 +78,7 @@ export const useMailTemplateApi = () => {
 
     try {
       const res = await $axios.post(
-        `/_api/notify/email-template/preview-email-without-template`,
+        `/notify/email-template/preview-email-without-template`,
         {
           subject,
           body,
@@ -113,7 +113,7 @@ export const useMailTemplateApi = () => {
     const _abortController = abortController;
 
     try {
-      const res = await $axios.get(`/_api/notify/email-template/detail/${id}`, {
+      const res = await $axios.get(`/notify/email-template/detail/${id}`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -137,7 +137,7 @@ export const useMailTemplateApi = () => {
     const _abortController = abortController;
 
     try {
-      const res = await $axios.get(`/_api/notify/email-config/get-by-org`, {
+      const res = await $axios.get(`/notify/email-config/get-by-org`, {
         signal: _abortController ? _abortController.signal : undefined,
       });
       return res.data;
@@ -160,7 +160,7 @@ export const useMailTemplateApi = () => {
   const changeMailTemplateStatus = async (payload: any) => {
     try {
       const res = await $axios.put(
-        `/_api/notify/email-template/change-status-active`,
+        `/notify/email-template/change-status-active`,
         payload,
       );
       toast.add({
@@ -182,7 +182,7 @@ export const useMailTemplateApi = () => {
 
   const deleteMailTemplate = async (payload: any) => {
     try {
-      const res = await $axios.delete(`/_api/notify/email-template/delete`, {
+      const res = await $axios.delete(`/notify/email-template/delete`, {
         data: payload.ids,
       });
       if (res.data.message) {
@@ -206,7 +206,7 @@ export const useMailTemplateApi = () => {
 
   const deleteMailTemplateConfig = async () => {
     try {
-      const res = await $axios.delete(`/_api/notify/email-config/delete`);
+      const res = await $axios.delete(`/notify/email-config/delete`);
       if (res.data.message) {
         toast.add({
           title: res.data.message,
@@ -228,7 +228,7 @@ export const useMailTemplateApi = () => {
 
   const getPlaceholders = async () => {
     try {
-      const res = await $axios.get(`/_api/notify/placeholder/filter`);
+      const res = await $axios.get(`/notify/placeholder/filter`);
       return res.data;
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -249,7 +249,7 @@ export const useMailTemplateApi = () => {
   const createMailTemplate = async (payload: any) => {
     try {
       const res = await $axios.post(
-        `/_api/notify/email-template/create`,
+        `/notify/email-template/create`,
         payload,
       );
       toast.add({
@@ -272,7 +272,7 @@ export const useMailTemplateApi = () => {
   const createMailTemplateWithId = async (payload: any) => {
     try {
       const res = await $axios.post(
-        `/_api/notify/email-template/create`,
+        `/notify/email-template/create`,
         payload,
       );
       toast.add({
@@ -295,7 +295,7 @@ export const useMailTemplateApi = () => {
   const createMailTemplateConfig = async (payload: any) => {
     try {
       const res = await $axios.post(
-        `/_api/notify/email-config/create`,
+        `/notify/email-config/create`,
         payload,
       );
       toast.add({
@@ -318,7 +318,7 @@ export const useMailTemplateApi = () => {
   const updateMailTemplate = async (id: number, payload: any) => {
     try {
       const res = await $axios.put(
-        `/_api/notify/email-template/update/${id}`,
+        `/notify/email-template/update/${id}`,
         payload,
       );
       toast.add({
@@ -340,7 +340,7 @@ export const useMailTemplateApi = () => {
 
   const updateMailTemplateConfig = async (payload: any) => {
     try {
-      const res = await $axios.put(`/_api/notify/email-config/update`, payload);
+      const res = await $axios.put(`/notify/email-config/update`, payload);
       toast.add({
         title: res.data.message,
         color: "success",

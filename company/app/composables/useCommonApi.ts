@@ -5,7 +5,7 @@ export const useCommonApi = () => {
   const getIndustry = async (pageSize: number = 10, pageIndex: number = 0) => {
     try {
       const res = await $axios.get(
-        `/_api/core/industry/public/filter?pageSize=${pageSize}&pageIndex=${pageIndex}`,
+        `/core/industry/public/filter?pageSize=${pageSize}&pageIndex=${pageIndex}`,
         { skipAuth: true },
       );
       return res.data;
