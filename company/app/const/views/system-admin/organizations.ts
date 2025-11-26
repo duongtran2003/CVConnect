@@ -9,7 +9,7 @@ export const organizationTableHeaders = [
     },
   },
   {
-    accessorKey: "name",
+    accessorKey: "orgName",
     header: "Tên",
     allowFilter: true,
     filterType: "text",

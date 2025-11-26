@@ -119,6 +119,7 @@ const allowActions = computed(() => {
   const permissions = Array.from(menuItem?.permissions || []);
   return permissions;
 });
+const industryList = ref<any[]>([]);
 
 const canEdit = computed(() => {
   if (allowActions.value.includes("UPDATE")) {
@@ -135,6 +136,15 @@ const { getDepartments, deleteDepartment, changeDepartmentStatus } =
   useDepartmentApi();
 
 const { getOrgs } = useOrgApi();
+const { getIndustries } = useIndustryApi();
+
+async function fetchIndustries() {
+  const res = await getIndustries({ pageSize: 999 });
+  if (!res) {
+    return null;
+  }
+  industryList.value = res.data.data;
+}
 
 // NOTE: From query string to filter
 const convertQuery = () => {
@@ -360,6 +370,7 @@ const fetchData = async () => {
     }
 
     entry.index = index + 1 + (pageIndex.value - 1) * pageSize.value;
+    entry.orgName = entry.name;
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
     entry.isActive = entry.isActive
@@ -460,6 +471,48 @@ const filterSelectOption = computed(() => {
       {
         label: "Đang hoạt động",
         value: true,
+      },
+    ],
+    industryList: industryList.value.map((i: any) => ({
+      label: i.name,
+      value: i.id,
+    })),
+    companySize: [
+      {
+        label: "Từ 1 đến 50",
+        value: {
+          from: 1,
+          to: 50,
+        },
+      },
+
+      {
+        label: "Từ 50 đến 100",
+        value: {
+          from: 50,
+          to: 100,
+        },
+      },
+      {
+        label: "Từ 100 đến 200",
+        value: {
+          from: 100,
+          to: 200,
+        },
+      },
+      {
+        label: "Từ 200 đến 500",
+        value: {
+          from: 200,
+          to: 500,
+        },
+      },
+      {
+        label: "Trên 500",
+        value: {
+          from: 500,
+          to: undefined,
+        },
       },
     ],
   };
