@@ -2,7 +2,7 @@ name: build-and-push.yml
 on:
   push:
     branches:
-      - main
+      - setup-deploy
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
