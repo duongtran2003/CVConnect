@@ -127,31 +127,47 @@ const handleLogout = async () => {
 };
 
 const isOrgMember = computed(() => {
-  console.log(userInfo.value);
-  const orgRole = userInfo.value?.userDetails?.find(
-    (detail: any) => detail.role.memberType == "ORGANIZATION",
-  );
-  return orgRole != undefined;
+  // console.log(userInfo.value);
+  // const orgRole = userInfo.value?.userDetails?.find(
+  //   (detail: any) => detail.role.memberType == "ORGANIZATION",
+  // );
+  // return orgRole != undefined;
+
+  return hasMemberType.value("ORGANIZATION");
+
 });
 
 const isCandidate = computed(() => {
-  const candidateRole = userInfo.value?.userDetails?.find(
-    (detail: any) => detail.role.memberType == "CANDIDATE",
-  );
-  return candidateRole != undefined;
+  // console.log({role: roles.value});
+  // const candidateRole = userInfo.value?.userDetails?.find(
+  //   (detail: any) => detail.role.memberType == "CANDIDATE",
+  // );
+  // return candidateRole != undefined;
+
+  return hasMemberType.value("CANDIDATE");
 });
 
 const isManagement = computed(() => {
-  const managementRole = roles.value.find(
-    (role) => role.memberType == "MANAGEMENT",
-  );
-  return managementRole != undefined;
+  // const managementRole = roles.value.find(
+  //   (role) => role.memberType == "MANAGEMENT",
+  // );
+  // return managementRole != undefined;
   //
   // const candidateRole = userInfo.value?.userDetails?.find(
   //   (detail: any) => detail.role.memberType == "MANAGEMENT",
   // );
   // return candidateRole != undefined;
+
+  return hasMemberType.value("MANAGEMENT");
 });
+
+const hasMemberType = computed(() => {
+  return (memberType: string) => {
+    const roleWithMemberType = roles.value.find((r: any) => r.memberType == memberType);
+
+    return roleWithMemberType;
+  }
+})
 
 const monogramText = computed(() => {
   const names = userInfo.value?.fullName?.split(/\s+/);
