@@ -217,10 +217,12 @@ const convertQuery = () => {
   }
 
   if (query.addresses) {
-    const addressLists = ( query.addresses as string ).split(",").map((a: any) => ({
-      label: a,
-      value: a,
-    }));
+    const addressLists = (query.addresses as string)
+      .split(",")
+      .map((a: any) => ({
+        label: a,
+        value: a,
+      }));
 
     restoredFilter.addresses = addressLists;
   }
@@ -488,10 +490,10 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
     handleDeleteClick([id]);
   }
   if (action === "view") {
-    editViewId.value = id;
-    editViewInitialMode.value = "view";
-    editViewMode.value = "view";
-    isEditViewOpen.value = true;
+    const link = router.resolve({
+      path: `/system-admin/organizations/detail/${id}`,
+    });
+    window.open(link.href, "_blank");
   }
   if (action === "edit") {
     editViewId.value = id;

@@ -2,10 +2,8 @@ export const useOrgApi = () => {
   const { $axios } = useNuxtApp();
   const toast = useToast();
 
-  const getOrgInfo = async (
-  ) => {
+  const getOrgInfo = async () => {
     try {
-
       const res = await $axios.get(`/core/org/org-info`);
       return res.data;
     } catch (err: any) {
@@ -20,20 +18,30 @@ export const useOrgApi = () => {
     }
   };
 
-  const getOrgs = async (
-    params: any,
-    abortController?: AbortController,
-  ) => {
+  const getOrgDetails = async (id: any) => {
+    try {
+      const res = await $axios.get(`/core/org/org-details/${id}`);
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err.response.data.message,
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getOrgs = async (params: any, abortController?: AbortController) => {
     const _abortController = abortController;
 
     try {
       const queryString = objectToQuery(params);
-      const res = await $axios.get(
-        `/core/org/filter?${queryString}`,
-        {
-          signal: _abortController ? _abortController.signal : undefined,
-        },
-      );
+      const res = await $axios.get(`/core/org/filter?${queryString}`, {
+        signal: _abortController ? _abortController.signal : undefined,
+      });
       return res.data;
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -65,7 +73,7 @@ export const useOrgApi = () => {
       console.error(err);
       return null;
     }
-  }
+  };
 
   const updateLogo = async (payload: any) => {
     try {
@@ -134,5 +142,6 @@ export const useOrgApi = () => {
     updateInfo,
     getOrgInfoPublic,
     getOrgs,
+    getOrgDetails,
   };
 };

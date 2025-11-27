@@ -33,6 +33,7 @@ export default defineNuxtConfig({
       proxy: {
         "/_api": {
           target: "http://26.9.175.39:8888",
+          // target: "http://api.vclab.tech",
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/_api/, "/api/v1"),
         },
