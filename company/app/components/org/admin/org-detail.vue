@@ -1,134 +1,140 @@
 <template>
-  <div class="wrapper">
-    <div class="org-info">
-      <div class="org-image-wrapper">
-        <div class="org-cover">
-          <img :src="orgInfo?.coverPhotoUrl ?? '/orgcover.jpg'" alt="" />
-        </div>
+  <div class="org-info">
+    <div class="org-image-wrapper">
+      <div class="org-cover">
+        <img :src="orgInfo?.coverPhotoUrl ?? '/orgcover.jpg'" alt="" />
       </div>
-      <div class="org-logo">
-        <div class="logo-wrapper">
-          <img :src="orgInfo?.logoUrl ?? '/blankuser.jpg'" alt="" />
-        </div>
-        <div class="company-info-misc">
-          <div class="name">
-            <div class="left">
-              {{ orgInfo?.name }}
-              <Icon
-                class="link-icon"
-                name="ci:external-link"
-                @click="handleGoPublicProfile"
-              />
-            </div>
-            <div class="right">
-              <UDropdownMenu
-                :items="jobAdStatusActions"
-                :ui="{
-                  item: 'cursor-pointer hover:bg-gray-100',
-                  content: 'w-[140px] font-normal',
+    </div>
+    <div class="org-logo">
+      <div class="logo-wrapper">
+        <img :src="orgInfo?.logoUrl ?? '/blankuser.jpg'" alt="" />
+      </div>
+      <div class="company-info-misc">
+        <div class="name">
+          <div class="left">
+            {{ orgInfo?.name }}
+            <Icon
+              class="link-icon"
+              name="ci:external-link"
+              @click="handleGoPublicProfile"
+            />
+          </div>
+          <div class="right">
+            <UDropdownMenu
+              :items="jobAdStatusActions"
+              :ui="{
+                item: 'cursor-pointer hover:bg-gray-100',
+                content: 'w-[240px] font-normal',
+              }"
+            >
+              <template #item="{ item }">
+                <div class="dropdown-select-item">
+                  <div>
+                    <div class="dropdown-select-title">{{ item.label }}</div>
+                    <div class="dropdown-select-description">
+                      {{ item.description }}
+                    </div>
+                  </div>
+                </div>
+              </template>
+              <div
+                class="chip-action"
+                :class="{
+                  active: orgInfo?.isActive,
+                  inactive: !orgInfo?.isActive,
                 }"
               >
-                <template #item="{ item }">
-                  <div class="dropdown-select-item">
-                    <div>
-                      <div class="dropdown-select-title">{{ item.label }}</div>
-                    </div>
-                  </div>
-                </template>
-                <div
-                  class="chip-action"
-                  :class="{
-                    active: orgInfo?.isActive,
-                    inactive: !orgInfo?.isActive,
-                  }"
-                >
-                  {{ orgInfo?.isActive ? "Hoạt động" : "Ngừng hoạt động" }}
-                  <Icon name="mdi:chevron-down" />
-                </div>
-              </UDropdownMenu>
-            </div>
-          </div>
-          <div class="info-row">
-            <div class="info-row-block">
-              <Icon name="mdi:web" />
-              <a :href="orgInfo?.website" target="_blank" class="value link">{{
-                orgInfo?.website
-              }}</a>
-            </div>
-            <div class="info-row-block">
-              <Icon name="streamline-plump:office-worker-remix" />
-              <div class="value">{{ employeeCount }}</div>
-            </div>
+                {{ orgInfo?.isActive ? "Hoạt động" : "Ngừng hoạt động" }}
+                <Icon name="mdi:chevron-down" />
+              </div>
+            </UDropdownMenu>
           </div>
         </div>
-      </div>
-
-      <div class="info-content">
-        <div class="info-block left">
-          <div class="title">Thông tin chung</div>
-          <div class="block-content">
-            <div class="line">
-              <div class="col">
-                <div class="row">
-                  <div class="label">
-                    <Icon name="iconoir:suitcase" />
-                    Lĩnh vực
-                  </div>
-                  <div class="value">
-                    <div class="industry-list">
-                      <div
-                        v-for="indus of orgInfo?.industryList ?? []"
-                        :key="indus.id"
-                        class="industry-item"
-                      >
-                        {{ indus.name }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="description-block">
-              <div class="label">
-                <Icon name="fluent:text-description-ltr-24-filled" />
-                Mô tả chung
-              </div>
-              <div class="content" v-html="orgInfo?.description"></div>
-            </div>
+        <div class="info-row">
+          <div class="info-row-block">
+            <Icon name="mdi:web" />
+            <a :href="orgInfo?.website" target="_blank" class="value link">{{
+              orgInfo?.website
+            }}</a>
           </div>
-        </div>
-        <div class="info-block right">
-          <div class="title">Địa chỉ</div>
-          <div class="block-content">
-            <div
-              v-for="(loc, index) of location"
-              :key="index"
-              class="address truncate"
-            >
-              <Icon
-                :name="
-                  loc.isHeadquarter
-                    ? 'material-symbols-light:home-work-rounded'
-                    : 'streamline:travel-map-location-pin-navigation-map-maps-pin-gps-location'
-                "
-              />
-              <span>
-                {{ loc.displayAddress }}
-              </span>
-            </div>
+          <div class="info-row-block">
+            <Icon name="streamline-plump:office-worker-remix" />
+            <div class="value">{{ employeeCount }}</div>
           </div>
         </div>
       </div>
     </div>
+
+    <div class="info-content">
+      <div class="info-block left">
+        <div class="title">Thông tin chung</div>
+        <div class="block-content">
+          <div class="line">
+            <div class="col">
+              <div class="row">
+                <div class="label">
+                  <Icon name="iconoir:suitcase" />
+                  Lĩnh vực
+                </div>
+                <div class="value">
+                  <div v-if="!orgInfo?.industryList?.length">Không có</div>
+                  <div class="industry-list">
+                    <div
+                      v-for="indus of orgInfo?.industryList ?? []"
+                      :key="indus.id"
+                      class="industry-item"
+                    >
+                      {{ indus.name }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="description-block">
+            <div class="label">
+              <Icon name="fluent:text-description-ltr-24-filled" />
+              Mô tả chung
+            </div>
+            <div class="content" v-html="orgInfo?.description"></div>
+          </div>
+        </div>
+      </div>
+      <div class="info-block right">
+        <div class="title">Địa chỉ</div>
+        <div class="block-content">
+          <AppNoData v-if="!location?.length" />
+          <div
+            v-for="(loc, index) of location"
+            :key="index"
+            class="address truncate"
+          >
+            <Icon
+              :name="
+                loc.isHeadquarter
+                  ? 'material-symbols-light:home-work-rounded'
+                  : 'streamline:travel-map-location-pin-navigation-map-maps-pin-gps-location'
+              "
+            />
+            <span>
+              {{ loc.displayAddress }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <OrgAdminEmployeeTable :org-id="props.orgId" />
   </div>
 </template>
 <script setup lang="ts">
-definePageMeta({
-  layout: "system-admin",
-});
+type TProps = {
+  orgId: any;
+};
+
+const props = defineProps<TProps>();
 
 const { setLoading } = useLoadingStore();
-const { getOrgDetails } = useOrgApi();
+const { getOrgDetails, updateStatus } = useOrgApi();
 // const { getOrgAddresses } = useOrgAddressApi();
 
 const orgInfo = ref<any>(null);
@@ -165,7 +171,7 @@ const employeeCount = computed(() => {
 
 async function fetchInfo() {
   setLoading(true);
-  const orgId = route.params.id;
+  const orgId = props.orgId;
   if (!orgId) {
     router.push({ path: "/404" });
     return;
@@ -179,17 +185,23 @@ const jobAdStatusActions = computed(() => {
   return [
     {
       label: "Ngừng hoạt động",
+      description:
+        "Ngừng hoạt động doanh nghiệp sẽ ngừng hoạt động tất cả các thành viên.",
       onSelect: () => handleChangeStatus(false),
     },
     {
       label: "Hoạt động",
+      description: "Đưa doanh nghiệp hoạt động trở lại.",
       onSelect: () => handleChangeStatus(true),
     },
   ];
 });
 
-function handleChangeStatus(status: boolean) {
-  console.log("change status", status);
+async function handleChangeStatus(status: boolean) {
+  const res = await updateStatus([props.orgId], status);
+  if (res) {
+    fetchInfo();
+  }
 }
 
 function handleGoPublicProfile() {
@@ -198,16 +210,6 @@ function handleGoPublicProfile() {
 }
 </script>
 <style lang="scss" scoped>
-.wrapper {
-  overflow: auto;
-  min-height: 0;
-  flex: 1;
-  border-radius: 8px;
-  margin-top: 8px;
-  background-color: white;
-  @include box-shadow;
-}
-
 .org-info {
   padding: 24px 0px 128px 0px;
   max-width: 85%;

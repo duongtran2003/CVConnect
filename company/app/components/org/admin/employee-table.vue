@@ -1,80 +1,44 @@
 <template>
-  <div class="wrapper">
-    <OrgAdminOrgMemberInviteMemberModal
-      v-model="isCreateModalOpen"
-      @submit="handleCreated"
+  <div class="department-content">
+    <div class="table-title">Thành viên doanh nghiệp</div>
+    <OrgAdminEmployeeBaseTable
+      :table-data="tableData"
+      :columns="tableColumns"
+      :allow-actions="allowActions"
+      :show-checkbox="false"
+      :show-actions="true"
+      :is-loading="isFetchingData"
+      :selection-list="selectedRows"
+      :select-options="filterSelectOption"
+      :sort="sort"
+      :filter="filter"
+      :is-table-empty="isNoData"
+      @selection-update="handleSelectionsUpdate"
+      @delete="handleTableActionClick($event, 'delete')"
+      @edit="handleTableActionClick($event, 'edit')"
+      @view="handleTableActionClick($event, 'view')"
+      @sort="handleSort"
+      @filter="handleFilter"
     />
-    <OrgAdminOrgMemberEditViewModal
-      v-model="isEditViewOpen"
-      :initial-mode="editViewInitialMode"
-      :target-id="editViewId || -1"
-      :allow-edit="canEdit"
-      @submit="handleUpdated"
-      @mode-change="handleSwitchEditViewMode($event)"
-    />
-    <div class="org-member-content">
-      <div class="title">Danh sách thành viên</div>
-      <div class="table-top">
-        <AppButton
-          :text="'Hoạt động'"
-          :is-disabled="selectedRows.length == 0"
-          class="active-btn active"
-          @click="handleActiveToggle(selectedRows, true)"
-        >
-        </AppButton>
-        <AppButton
-          :text="'Ngừng hoạt động'"
-          :is-disabled="selectedRows.length == 0"
-          class="active-btn deactive"
-          @click="handleActiveToggle(selectedRows, false)"
-        >
-        </AppButton>
-
-        <AppButton :text="'Mời'" class="add-button" @click="handleAddNew">
-          <template #icon>
-            <Icon name="material-symbols:add-2-rounded" />
-          </template>
-        </AppButton>
-      </div>
-      <OrgAdminDataTable
-        :table-data="tableData"
-        :columns="tableColumns"
-        :allow-actions="allowActions"
-        :show-checkbox="true"
-        :show-actions="true"
-        :is-loading="isFetchingData"
-        :selection-list="selectedRows"
-        :select-options="filterSelectOption"
-        :sort="sort"
-        :filter="filter"
-        :is-table-empty="isNoData"
-        @selection-update="handleSelectionsUpdate"
-        @delete="handleTableActionClick($event, 'delete')"
-        @edit="handleTableActionClick($event, 'edit')"
-        @view="handleTableActionClick($event, 'view')"
-        @sort="handleSort"
-        @filter="handleFilter"
+    <div class="top-section">
+      <div class="record-count">{{ `${totalItems} bản ghi` }}</div>
+      <UPagination
+        :show-edges="true"
+        :sibling-count="1"
+        :variant="'ghost'"
+        active-variant="subtle"
+        :items-per-page="pageSize"
+        :page="pageIndex"
+        :total="totalItems"
+        @update:page="handlePageIndexChange($event)"
       />
-      <div class="top-section">
-        <div class="record-count">{{ `${totalItems} bản ghi` }}</div>
-        <UPagination
-          :show-edges="true"
-          :sibling-count="1"
-          :variant="'ghost'"
-          active-variant="subtle"
-          :items-per-page="pageSize"
-          :page="pageIndex"
-          :total="totalItems"
-          @update:page="handlePageIndexChange($event)"
-        />
-        <USelect
-          variant="subtle"
-          :items="pageSizeOpts"
-          class="w-fit bg-white text-[#333333]"
-          :model-value="pageSize"
-          @update:model-value="handlePageSizeChange($event)"
-        />
-      </div>
+      <USelect
+        variant="subtle"
+        :items="pageSizeOpts"
+        class="w-fit bg-white text-[#333333]"
+        :model-value="pageSize"
+        @update:model-value="handlePageSizeChange($event)"
+      />
     </div>
   </div>
 </template>
@@ -84,16 +48,10 @@ import type { TSort } from "~/types/common";
 import { cloneDeep, debounce } from "lodash";
 import { CELL_TYPE, CHIP_TYPE } from "~/const/common";
 import {
-  orgMemberTableHeaders,
+  organizationEmployeeTableHeaders,
   pageSizeOptions,
-} from "~/const/views/org-admin/org-member";
-
-definePageMeta({
-  layout: "org-admin",
-});
-useHead({
-  title: "Thành viên tổ chức",
-});
+} from "~/const/views/system-admin/organizations";
+import axios from "axios";
 
 const route = useRoute();
 const router = useRouter();
@@ -104,31 +62,22 @@ const editViewId = ref<number | null>(null);
 const editViewInitialMode = ref<any>(null);
 const editViewMode = ref<any>(null);
 const isFetchingData = ref<boolean>(false);
-const fetchOrgMemberController = ref<AbortController | null>();
+const fetchEmployeeController = ref<AbortController | null>();
 const filter = ref<Record<string, any>>({});
 const totalItems = ref<number>(0);
 const isNoData = ref<boolean>(false);
 const isDeleting = ref<boolean>(false);
 const deleteList = ref<any[]>([]);
-const rolesFilterOptions = ref<any[]>([]);
 const allowActions = computed(() => {
   const url = route.path;
   const menuItem = getMenuItem(url);
   const permissions = Array.from(menuItem?.permissions || []);
   return permissions;
 });
-
-const canEdit = computed(() => {
-  if (allowActions.value.includes("UPDATE")) {
-    return true;
-  } else {
-    return false;
-  }
-});
-
-const userStore = useUserStore();
-const { userInfo } = storeToRefs(userStore);
-const { logout } = useAuth();
+const industryList = ref<any[]>([]);
+const provinceList = ref<any[]>([]);
+const rolesFilterOptions = ref<any[]>([]);
+const queryObj = ref<any>({});
 
 const { getMenuItem } = useSidebarStore();
 const { setLoading } = useLoadingStore();
@@ -137,141 +86,30 @@ const { getDepartments, deleteDepartment, changeDepartmentStatus } =
   useDepartmentApi();
 const { getOrgMembers, getRoleFilterOption, changeOrgMemberStatus } =
   useOrgMemberApi();
+const {getRoles} = useRoleApi();
 
-// NOTE: From query string to filter
-const convertQuery = () => {
-  const _query = route.query;
-  let restoredFilter: Record<string, any> = {};
+const { getOrgEmployees } = useOrgApi();
+const { getIndustries } = useIndustryApi();
 
-  const { mode, targetId, ...query } = _query;
+type TProps = {
+  orgId: any;
+}
 
-  restoredFilter = {
-    ...restoredFilter,
-    ...query,
-  };
-
-  // NOTE: Reopening modal
-  if (mode && targetId) {
-    restoredFilter = {
-      ...restoredFilter,
-      mode,
-      targetId,
-    };
-    isEditViewOpen.value = true;
-    editViewInitialMode.value = mode;
-    editViewMode.value = mode;
-    editViewId.value = +targetId;
-  }
-
-  const createdAt: (Date | null)[] = [];
-  if (query.createdAtStart) {
-    const start = new Date(query.createdAtStart as string);
-    if (!isNaN(start.getTime())) {
-      createdAt.push(start);
-    } else {
-      createdAt.push(null);
-    }
-  }
-  if (query.createdAtEnd) {
-    const end = new Date(query.createdAtEnd as string);
-    if (!isNaN(end.getTime())) {
-      createdAt.push(end);
-    } else {
-      createdAt.push(null);
-    }
-  }
-  if (createdAt.length) {
-    restoredFilter.createdAt = createdAt;
-  }
-
-  if (query.isActive) {
-    const values = (query.isActive as string).split(",");
-    console.log(values);
-    restoredFilter.isActive = values.map((val) =>
-      filterSelectOption.value.isActive.find((opt: any) => {
-        const booleanValue = val == "true";
-        return opt.value == booleanValue;
-      }),
-    );
-  }
-
-  if (query.isEmailVerified) {
-    const values = (query.isEmailVerified as string).split(",");
-    console.log(values);
-    restoredFilter.isEmailVerified = values.map((val) =>
-      filterSelectOption.value.isEmailVerified.find((opt: any) => {
-        const booleanValue = val == "true";
-        return opt.value == booleanValue;
-      }),
-    );
-  }
-
-  if (query.roleIds) {
-    const ids = (query.roleIds as string).split(",");
-    restoredFilter.roleIds = ids.map((val) =>
-      filterSelectOption.value.roleIds.find((opt: any) => opt.value == +val),
-    );
-  }
-
-  const updatedAt: (Date | null)[] = [];
-  if (query.updatedAtStart) {
-    const start = new Date(query.updatedAtStart as string);
-    if (!isNaN(start.getTime())) {
-      updatedAt.push(start);
-    } else {
-      updatedAt.push(null);
-    }
-  }
-  if (query.updatedAtEnd) {
-    const end = new Date(query.updatedAtEnd as string);
-    if (!isNaN(end.getTime())) {
-      updatedAt.push(end);
-    } else {
-      updatedAt.push(null);
-    }
-  }
-  if (updatedAt.length) {
-    restoredFilter.updatedAt = updatedAt;
-  }
-
-  delete restoredFilter.createdAtStart;
-  delete restoredFilter.createdAtEnd;
-  delete restoredFilter.updatedAtStart;
-  delete restoredFilter.updatedAtEnd;
-
-  return restoredFilter;
-};
+const props = defineProps<TProps>();
 
 onBeforeMount(async () => {
-  const rolesRes = await getRoleFilterOption();
-  rolesFilterOptions.value = rolesRes.data;
+  setLoading(true);
+  const rolesRes = await getRoles({ pageSize: 999 });
+  rolesFilterOptions.value = rolesRes.data.data;
 
-  filter.value = convertQuery();
+  await fetchData();
 
-  console.log(rolesRes.data);
+  setLoading(false);
 });
-
-const handleCreated = () => {
-  isCreateModalOpen.value = false;
-  fetchData();
-};
-
-const handleUpdated = () => {
-  isEditViewOpen.value = false;
-  fetchData();
-};
-
-const handleSwitchEditViewMode = (mode: any) => {
-  editViewMode.value = mode;
-};
 
 const handleDeleteClick = (items: any[]) => {
   deleteList.value = items;
   isDeleteModalOpen.value = true;
-};
-
-const clearDeleteList = () => {
-  deleteList.value = [];
 };
 
 const clearViewEditId = () => {
@@ -280,50 +118,6 @@ const clearViewEditId = () => {
   editViewMode.value = null;
 };
 
-const handleDeleteModalOpenUpdate = (event: boolean) => {
-  if (!event) {
-    isDeleteModalOpen.value = false;
-  }
-};
-
-const handleDelete = async () => {
-  isDeleting.value = true;
-  // TODO: REPLACE THIS API
-  const isSuccess = await deleteDepartment({ ids: deleteList.value });
-  selectedRows.value = selectedRows.value.filter(
-    (selected) => !deleteList.value.includes(selected),
-  );
-  isDeleting.value = false;
-  if (isSuccess) {
-    selectedRows.value = [];
-    handleDeleteModalOpenUpdate(false);
-    fetchData();
-  }
-};
-
-const handleAddNew = () => {
-  isCreateModalOpen.value = true;
-};
-
-const deleteListNames = computed(() => {
-  return tableData.value
-    .filter((data: any) => deleteList.value.includes(data.id))
-    .map((data: any) => data.name);
-});
-
-const isDeleteAllDisabled = computed(() => {
-  const selectedRowsId = selectedRows.value;
-  if (selectedRowsId.length == 0) {
-    return true;
-  }
-  const rowData: any[] = [];
-  for (const row of tableData.value) {
-    if (selectedRowsId.includes((row as any).id)) {
-      rowData.push(row);
-    }
-  }
-  return rowData.some((row) => !row.canDelete);
-});
 const sort = computed(() => {
   return {
     key: filter.value.sortBy,
@@ -351,14 +145,14 @@ const handleFilter = (e: any) => {
 };
 
 const fetchData = async () => {
-  if (fetchOrgMemberController.value) {
-    fetchOrgMemberController.value.abort();
+  if (fetchEmployeeController.value) {
+    fetchEmployeeController.value.abort();
   }
 
-  fetchOrgMemberController.value = new AbortController();
+  fetchEmployeeController.value = new AbortController();
   isFetchingData.value = true;
-  const query = route.query;
-  const res = await getOrgMembers(query, fetchOrgMemberController.value);
+  const query = queryObj.value;
+  const res = await getOrgEmployees(props.orgId, query, fetchEmployeeController.value);
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
@@ -376,17 +170,6 @@ const fetchData = async () => {
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
     entry.roleIds = entry.roles.map((role: any) => role.name).join(", ");
-    entry.isEmailVerified = entry.isEmailVerified
-      ? {
-          text: "Đã xác thực",
-          type: CHIP_TYPE.SUCCESS,
-          cellType: CELL_TYPE.TAG,
-        }
-      : {
-          text: "Chưa xác thực",
-          type: CHIP_TYPE.ERROR,
-          cellType: CELL_TYPE.TAG,
-        };
     entry.isActive = entry.isActive
       ? {
           text: "Đang hoạt động",
@@ -398,6 +181,17 @@ const fetchData = async () => {
           type: CHIP_TYPE.ERROR,
           cellType: CELL_TYPE.TAG,
         };
+    entry.isEmailVerified = entry.isEmailVerified
+      ? {
+          text: "Đã xác thực",
+          type: CHIP_TYPE.SUCCESS,
+          cellType: CELL_TYPE.TAG,
+        }
+      : {
+          text: "Chưa xác thực",
+          type: CHIP_TYPE.ERROR,
+          cellType: CELL_TYPE.TAG,
+        };
     entry.canDelete = false;
   }
   tableData.value = data;
@@ -405,7 +199,6 @@ const fetchData = async () => {
 const debouncedFetchData = debounce(fetchData, 500);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
-  console.log(selectionList);
   selectedRows.value = selectionList;
 };
 
@@ -424,33 +217,15 @@ const handlePageIndexChange = (e: any) => {
   };
 };
 
-const handleActiveToggle = async (ids: number[], state: boolean) => {
-  const payload = {
-    ids,
-    active: state,
-  };
-
-  setLoading(true);
-  const res = await changeOrgMemberStatus(payload);
-  if (res) {
-    selectedRows.value = [];
-    if (ids.includes(userInfo.value?.id)) {
-      await logout();
-    }
-    fetchData();
-  }
-  setLoading(false);
-};
-
 const handleTableActionClick = (id: number, action: TTableAction) => {
   if (action === "delete") {
     handleDeleteClick([id]);
   }
   if (action === "view") {
-    editViewId.value = id;
-    editViewInitialMode.value = "view";
-    editViewMode.value = "view";
-    isEditViewOpen.value = true;
+    const link = router.resolve({
+      path: `/system-admin/organizations/detail/${id}`,
+    });
+    window.open(link.href, "_blank");
   }
   if (action === "edit") {
     editViewId.value = id;
@@ -491,7 +266,7 @@ const filterSelectOption = computed(() => {
 });
 
 const tableColumns = computed(() => {
-  return orgMemberTableHeaders;
+  return organizationEmployeeTableHeaders;
 });
 const pageSizeOpts = computed(() => {
   return pageSizeOptions;
@@ -558,11 +333,8 @@ const normalizeFilter = (filter: any) => {
 watch(filter, (newVal) => {
   const queryForUrl = normalizeFilter(newVal);
 
-  router.replace({
-    query: {
-      ...truncateQueryObject(queryForUrl),
-    },
-  });
+  queryObj.value = truncateQueryObject(queryForUrl);
+
   debouncedFetchData();
 });
 
@@ -591,26 +363,20 @@ watch(isEditViewOpen, (newVal) => {
 });
 </script>
 <style lang="scss" scoped>
-.wrapper {
-  overflow: hidden;
-  min-height: 0;
-  flex: 1;
-  border-radius: 8px;
-  margin-top: 8px;
-  @include box-shadow;
-}
-.org-member-content {
+.department-content {
   background-color: white;
   min-height: calc(100% - 48px - 8px);
-  @include box-shadow;
   color: $text-light;
-  padding: 20px;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   overflow-x: hidden;
   @include custom-scrollbar;
   height: 100%;
+
+  .table-title {
+    margin-bottom: 12px;
+  }
 
   .table-top {
     display: flex;

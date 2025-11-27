@@ -1,17 +1,6 @@
 <template>
   <div class="wrapper">
-    <DepartmentCreateModal
-      v-model="isCreateModalOpen"
-      @submit="handleCreated"
-    />
-    <DepartmentEditViewModal
-      v-model="isEditViewOpen"
-      :initial-mode="editViewInitialMode"
-      :target-id="editViewId || -1"
-      :allow-edit="canEdit"
-      @submit="handleUpdated"
-      @mode-change="handleSwitchEditViewMode($event)"
-    />
+    <OrgAdminDetailOrgModal v-model="isViewModalOpen" :org-id="editViewId" />
     <div class="department-content">
       <div class="title">Danh sách doanh nghiệp</div>
       <div class="table-top">
@@ -30,12 +19,13 @@
         >
         </AppButton>
         <AppButton
+          v-if="allowActions.includes(`EXPORT`)"
           :text="'Xuất dữ liệu'"
           class="add-button"
-          @click="handleAddNew"
+          @click="handleExport"
         >
           <template #icon>
-            <Icon name="material-symbols:add-2-rounded" />
+            <Icon name="material-symbols:export-notes-rounded" />
           </template>
         </AppButton>
       </div>
@@ -123,6 +113,8 @@ const allowActions = computed(() => {
 const industryList = ref<any[]>([]);
 const provinceList = ref<any[]>([]);
 
+const isViewModalOpen = ref<any>(false);
+
 const canEdit = computed(() => {
   if (allowActions.value.includes("UPDATE")) {
     return true;
@@ -137,7 +129,7 @@ const { setLoading } = useLoadingStore();
 const { getDepartments, deleteDepartment, changeDepartmentStatus } =
   useDepartmentApi();
 
-const { getOrgs } = useOrgApi();
+const { getOrgs, getExport } = useOrgApi();
 const { getIndustries } = useIndustryApi();
 
 async function fetchIndustries() {
@@ -170,6 +162,11 @@ const convertQuery = () => {
     isEditViewOpen.value = true;
     editViewInitialMode.value = mode;
     editViewMode.value = mode;
+    editViewId.value = +targetId;
+  }
+
+  if (targetId) {
+    isViewModalOpen.value = true;
     editViewId.value = +targetId;
   }
 
@@ -379,6 +376,13 @@ const handleFilter = (e: any) => {
   filter.value = e;
 };
 
+async function handleExport() {
+  setLoading(true);
+  const query = route.query;
+  const res = await getExport(query);
+  setLoading(false);
+}
+
 const fetchData = async () => {
   if (fetchOrgsController.value) {
     fetchOrgsController.value.abort();
@@ -486,20 +490,14 @@ const handleActiveToggle = async (ids: number[], state: boolean) => {
 };
 
 const handleTableActionClick = (id: number, action: TTableAction) => {
-  if (action === "delete") {
-    handleDeleteClick([id]);
-  }
   if (action === "view") {
-    const link = router.resolve({
-      path: `/system-admin/organizations/detail/${id}`,
-    });
-    window.open(link.href, "_blank");
-  }
-  if (action === "edit") {
     editViewId.value = id;
-    editViewInitialMode.value = "edit";
-    editViewMode.value = "edit";
-    isEditViewOpen.value = true;
+    isViewModalOpen.value = true;
+
+    // const link = router.resolve({
+    //   path: `/system-admin/organizations/detail/${id}`,
+    // });
+    // window.open(link.href, "_blank");
   }
 };
 
@@ -671,6 +669,15 @@ watch([editViewMode, editViewId], ([newMode, newId]) => {
 watch(isEditViewOpen, (newVal) => {
   if (!newVal) {
     clearViewEditId();
+  }
+});
+
+watch(isViewModalOpen, (newVal) => {
+  if (!newVal) {
+    editViewId.value = null;
+    const query = { ...route.query };
+    delete query.targetId;
+    router.replace({ query });
   }
 });
 </script>
