@@ -1,6 +1,30 @@
 <template>
   <div class="wrapper">
-    <OrgAdminDetailOrgModal v-model="isViewModalOpen" :org-id="editViewId" />
+    <OrgAdminDetailOrgModal
+      v-model="isViewModalOpen"
+      :org-id="editViewId"
+      @refetch="fetchData"
+    />
+    <UModal
+      :open="isConfirmModalShow"
+      title="Ngừng hoạt động"
+      :ui="{ content: 'w-[840px] max-w-[840px]' }"
+      @update:open="handleDeleteModalOpenUpdate"
+      @after:leave="clearDeleteList"
+    >
+      <template #body>
+        <ModalsDeactiveOrgModal :delete-list="deleteListNames">
+          <template #footer>
+            <AppButton
+              :text="'Đồng ý'"
+              class="modal-delete-submit"
+              :is-loading="isDeleting"
+              @click="handleActiveToggle(selectedRows, false)"
+            />
+          </template>
+        </ModalsDeactiveOrgModal>
+      </template>
+    </UModal>
     <div class="department-content">
       <div class="title">Danh sách doanh nghiệp</div>
       <div class="table-top">
@@ -15,7 +39,7 @@
           :text="'Ngừng hoạt động'"
           :is-disabled="selectedRows.length == 0"
           class="active-btn deactive"
-          @click="handleActiveToggle(selectedRows, false)"
+          @click="() => (isConfirmModalShow = true)"
         >
         </AppButton>
         <AppButton
@@ -91,6 +115,9 @@ useHead({
 
 const route = useRoute();
 const router = useRouter();
+
+const isConfirmModalShow = ref<boolean>(false);
+
 const isCreateModalOpen = ref<boolean>(false);
 const isDeleteModalOpen = ref<boolean>(false);
 const isEditViewOpen = ref<boolean>(false);
@@ -129,7 +156,7 @@ const { setLoading } = useLoadingStore();
 const { getDepartments, deleteDepartment, changeDepartmentStatus } =
   useDepartmentApi();
 
-const { getOrgs, getExport } = useOrgApi();
+const { getOrgs, getExport, updateStatus } = useOrgApi();
 const { getIndustries } = useIndustryApi();
 
 async function fetchIndustries() {
@@ -308,7 +335,7 @@ const clearViewEditId = () => {
 
 const handleDeleteModalOpenUpdate = (event: boolean) => {
   if (!event) {
-    isDeleteModalOpen.value = false;
+    isConfirmModalShow.value = false;
   }
 };
 
@@ -332,8 +359,9 @@ const handleAddNew = () => {
 };
 
 const deleteListNames = computed(() => {
+  console.log({ deleteList: deleteList.value, tableData: tableData.value });
   return tableData.value
-    .filter((data: any) => deleteList.value.includes(data.id))
+    .filter((data: any) => selectedRows.value.includes(data.id))
     .map((data: any) => data.name);
 });
 
@@ -456,6 +484,7 @@ const fetchData = async () => {
 const debouncedFetchData = debounce(fetchData, 500);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
+  console.log({ selectionList });
   selectedRows.value = selectionList;
 };
 
@@ -481,9 +510,10 @@ const handleActiveToggle = async (ids: number[], state: boolean) => {
   };
 
   setLoading(true);
-  const res = await changeDepartmentStatus(payload);
+  const res = await updateStatus(payload.ids, payload.active);
   if (res) {
     selectedRows.value = [];
+    isConfirmModalShow.value = false;
     fetchData();
   }
   setLoading(false);

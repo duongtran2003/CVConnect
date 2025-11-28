@@ -75,19 +75,6 @@ export const organizationTableHeaders = [
     },
   },
   {
-    accessorKey: "isEmailVerified",
-    header: "Xác thực email",
-    allowFilter: true,
-    filterType: "select",
-    isSortable: true,
-    meta: {
-      class: {
-        th: "min-w-[150px] pl-[32px] max-w-[200px] truncate",
-        td: "pl-[32px] max-w-[200px] truncate",
-      },
-    },
-  },
-  {
     accessorKey: "isActive",
     header: "Hoạt động",
     allowFilter: true,

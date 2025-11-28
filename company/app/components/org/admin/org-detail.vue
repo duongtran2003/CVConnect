@@ -145,6 +145,10 @@ onBeforeMount(async () => {
   fetchInfo();
 });
 
+const emits = defineEmits<{
+  (e: "refetch"): void;
+}>();
+
 const location = computed(() => {
   return orgInfo.value?.addresses;
 });
@@ -187,12 +191,18 @@ const jobAdStatusActions = computed(() => {
       label: "Ngừng hoạt động",
       description:
         "Ngừng hoạt động doanh nghiệp sẽ ngừng hoạt động tất cả các thành viên.",
-      onSelect: () => handleChangeStatus(false),
+      onSelect: async () => {
+        await handleChangeStatus(false);
+        emits("refetch");
+      },
     },
     {
       label: "Hoạt động",
       description: "Đưa doanh nghiệp hoạt động trở lại.",
-      onSelect: () => handleChangeStatus(true),
+      onSelect: async () => {
+        await handleChangeStatus(true);
+        emits("refetch");
+      },
     },
   ];
 });

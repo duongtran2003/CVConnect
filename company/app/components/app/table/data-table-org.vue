@@ -397,6 +397,7 @@ const handleCheckAll = (e: any, table: any) => {
 
 const handleCheck = (e: any, row: any) => {
   const selections = cloneDeep(props.selectionList);
+  console.log({ row });
   if (e) {
     const rowId = row.original.id;
     const currentRow = selections.find((selection) => selection === rowId);

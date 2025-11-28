@@ -7,7 +7,7 @@
     >
       <template #body>
         <div class="body">
-          <OrgAdminOrgDetail :org-id="props.orgId" />
+          <OrgAdminOrgDetail :org-id="props.orgId" @refetch="handleRefetch" />
         </div>
       </template>
       <template #footer>
@@ -33,7 +33,7 @@ type TProps = {
 const props = defineProps<TProps>();
 const emits = defineEmits<{
   (e: "update:modelValue", value: boolean): void;
-  (e: "submit"): void;
+  (e: "submit" | "refetch"): void;
 }>();
 
 const { createIndustry } = useIndustryApi();
@@ -58,6 +58,10 @@ const handleCancelClick = (event: any) => {
 const handleSubmit = async () => {
   emits("submit");
 };
+
+function handleRefetch() {
+  emits("refetch");
+}
 
 function handleCloseModal() {
   emits("update:modelValue", false);
