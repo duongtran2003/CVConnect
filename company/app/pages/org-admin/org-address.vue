@@ -13,11 +13,15 @@
         @input="handleAddressInput(index, $event)"
         @remove="handleAddressRemove(index)"
       />
-      <div v-if="canEdit" class="add-address-button" @click="handleAddNewAddress">
+      <div
+        v-if="canEdit"
+        class="add-address-button"
+        @click="handleAddNewAddress"
+      >
         <span class="text"> Thêm mới địa chỉ </span>
       </div>
     </div>
-    <div v-if="!isNoData && canEdit" class="buttons">
+    <div v-if="(!isNoData || addressList.length) && canEdit" class="buttons">
       <AppButton
         class="reset-button"
         :text="'Hủy bỏ'"
@@ -65,8 +69,8 @@ const allowActions = computed(() => {
 });
 
 const canEdit = computed(() => {
-  return allowActions.value.includes('UPDATE');
-})
+  return allowActions.value.includes("UPDATE");
+});
 
 const isResetDisabled = computed(() => {
   return isEqual(addressList.value, snapshot.value);
