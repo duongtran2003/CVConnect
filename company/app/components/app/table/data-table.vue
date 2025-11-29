@@ -437,6 +437,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
     height: 132px;
     width: 100%;
   }
+
   .nodata {
     top: 98px;
     right: 50%;
@@ -462,17 +463,20 @@ const handleActionClick = (row: any, action: TTableAction) => {
   margin: auto;
 }
 
-:deep(.data-table) {
+// ⚠️ THIS IS THE CRITICAL FIX: Single :deep() after the scoped parent
+.data-table-wrapper :deep(.data-table) {
   flex: 1;
   max-width: 100%;
   min-height: 0;
   overflow: auto;
   @include custom-scrollbar;
 
-  :deep(table) {
+  // Now, all child selectors are correctly targeted without further :deep()
+  table {
     border-radius: 4px;
 
     .header-cell {
+      // ... (your header-cell styles)
       &.padding-cell:nth-of-type(1) {
         // background-color: red;
       }
@@ -480,6 +484,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
       display: flex;
       flex-direction: column;
       gap: 4px;
+
       .name {
         display: flex;
         flex-direction: row;
@@ -492,13 +497,16 @@ const handleActionClick = (row: any, action: TTableAction) => {
           cursor: pointer;
         }
       }
+
       .filter {
+        // ... (your filter styles including .text-input, .clear-icon, etc.)
         display: flex;
         flex-direction: row;
         align-items: center;
         width: fit-content;
         position: relative;
         gap: 4px;
+
         .text-input {
           input {
             &::placeholder {
@@ -506,7 +514,6 @@ const handleActionClick = (row: any, action: TTableAction) => {
               color: $color-gray-400;
               font-weight: 400;
             }
-
             border: 1px solid $color-primary-200 !important;
             border-radius: 10px !important;
             padding: 4px 10px !important;
@@ -626,11 +633,6 @@ const handleActionClick = (row: any, action: TTableAction) => {
           background-color: $color-gray-50;
         }
       }
-      // &.divide-y {
-      //   tr:not(:last-child) {
-      //     border-bottom: 1px solid $color-gray-300;
-      //   }
-      // }
     }
 
     tr {
