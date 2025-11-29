@@ -388,7 +388,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
   emit(action, rowId);
 };
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .data-table-wrapper {
   overflow-x: auto;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
@@ -424,7 +424,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
     overflow: auto;
     @include custom-scrollbar;
 
-    :deep(table) {
+    table {
       border-radius: 4px;
 
       .header-cell {
@@ -679,7 +679,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
   }
 
   &.hasNodata {
-    :deep(tbody) {
+    tbody {
       height: 132px;
     }
   }

@@ -386,8 +386,14 @@ const handleActionClick = (row: any, action: TTableAction) => {
   emit(action, rowId);
 };
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 :deep(.username-cell .asterisk) {
+  color: $color-danger;
+  font-weight: bold;
+  margin-left: 4px;
+}
+
+.username-cell .asterisk {
   color: $color-danger;
   font-weight: bold;
   margin-left: 4px;
@@ -427,7 +433,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
     overflow: auto;
     @include custom-scrollbar;
 
-    :deep(table) {
+    table {
       border-radius: 4px;
 
       .header-cell {
@@ -678,7 +684,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
   }
 
   &.hasNodata {
-    :deep(tbody) {
+    tbody {
       height: 132px;
     }
   }

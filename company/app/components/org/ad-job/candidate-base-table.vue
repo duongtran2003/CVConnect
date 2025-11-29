@@ -305,7 +305,7 @@ watch(
   },
 );
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .data-table-wrapper {
   overflow-x: auto;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
@@ -341,7 +341,7 @@ watch(
     overflow: auto;
     @include custom-scrollbar;
 
-    :deep(table) {
+    table {
       border-radius: 4px;
 
       .header-cell {
@@ -593,7 +593,7 @@ watch(
   }
 
   &.hasNodata {
-    :deep(tbody) {
+    tbody {
       height: 132px;
     }
   }
