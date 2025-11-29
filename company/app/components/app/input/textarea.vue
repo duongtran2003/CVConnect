@@ -85,6 +85,7 @@ const emit = defineEmits<{
 
 const onEnter = (e: KeyboardEvent) => {
   if (e.shiftKey) return;
+  e.preventDefault();
   emit("enter");
 };
 const onFocus = () => {

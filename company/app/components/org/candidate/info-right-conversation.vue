@@ -79,7 +79,7 @@
         />
         <div
           class="send-button"
-          :class="{ disabled: !chatInput.trim() }"
+          :class="{ disabled: !chatInput?.trim() }"
           @click="handleSendMessage"
         >
           <Icon name="material-symbols:send-rounded" />
@@ -261,14 +261,14 @@ async function handleSendMessage() {
 
   console.log("here!");
 
-  const res = await sendMessage(
-    selectedJobAd.value.value,
-    props.candidateInfo.candidateId,
-    chatInput.value.trim(),
-  );
+  // const res = await sendMessage(
+  //   selectedJobAd.value.value,
+  //   props.candidateInfo.candidateId,
+  //   chatInput.value.trim(),
+  // );
 
   const newMessage = {
-    id: res.data.id,
+    id: -1,
     senderId: userInfo.value?.id,
     seenBy: [userInfo.value?.id],
     text: chatInput.value,
@@ -289,8 +289,8 @@ async function handleSendMessage() {
     },
   });
 
-  chatInput.value = "";
   nextTick(() => {
+    chatInput.value = "";
     scrollToBottom();
   });
 }

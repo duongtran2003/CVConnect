@@ -320,6 +320,13 @@ watch(
     }
     if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
       console.log("bat su kien tu nhan tin");
+      if (newMessage.data.isSelf) {
+        connection.value.emit(SOCKET_CHAT_EVENT.RECEIVE_MESSAGE, {
+          jobAdId: newMessage.data.jobAdId,
+          candidateId: newMessage.data.candidateId,
+          text: newMessage.data.newMessage.text,
+        });
+      }
       if (!props.isHr) {
         const candidateId = newMessage.data.candidateId;
         const jobAdId = newMessage.data.jobAdId;

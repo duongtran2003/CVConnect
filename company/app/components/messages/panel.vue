@@ -72,6 +72,7 @@
 </template>
 <script setup lang="ts">
 import moment from "moment";
+import { connect } from "socket.io-client";
 
 type TProps = {
   detail: any;
@@ -323,14 +324,20 @@ async function handleSendMessage() {
 
   console.log("here!");
 
-  const res = await sendMessage(
-    props.detail.jobAd.id,
-    props.detail.candidateInfo.candidateId,
-    chatInput.value,
-  );
+  // const res = await sendMessage(
+  //   props.detail.jobAd.id,
+  //   props.detail.candidateInfo.candidateId,
+  //   chatInput.value,
+  // );
+
+  const messagePayload = {
+    jobAdId: props.detail.jobAd.id,
+    candidateId: props.detail.candidateInfo.candidateId,
+    text: chatInput.value,
+  };
 
   const newMessage = {
-    id: res.data.id,
+    id: -1,
     senderId: userInfo.value?.id,
     seenBy: [userInfo.value?.id],
     text: chatInput.value,
@@ -349,8 +356,8 @@ async function handleSendMessage() {
     },
   });
 
-  chatInput.value = "";
   nextTick(() => {
+    chatInput.value = "";
     scrollToBottom();
   });
 }
