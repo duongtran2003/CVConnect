@@ -1,5 +1,5 @@
 <template>
-  <div class="data-table-wrapper" :class="{ hasNodata: props.isTableEmpty }">
+  <div class="data-table-wrapper-employee-base" :class="{ hasNodata: props.isTableEmpty }">
     <AppNoData v-if="props.isTableEmpty" class="nodata" />
     <div v-if="props.isLoading" class="spinner">
       <AppSpinnerHalfCircle />
@@ -432,7 +432,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
 };
 </script>
 <style lang="scss">
-.data-table-wrapper {
+.data-table-wrapper-employee-base {
   overflow-x: auto;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   // border: 1px solid $color-gray-300;
