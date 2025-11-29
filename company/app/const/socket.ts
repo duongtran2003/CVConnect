@@ -1,8 +1,8 @@
 import { API_URL } from "~/plugins/axios";
 
 // export const SOCKET_ENDPOINT = API_URL;
-export const SOCKET_ENDPOINT = "http://26.9.175.39:8888";
-// export const SOCKET_ENDPOINT = "http://api.vclab.tech";
+// export const SOCKET_ENDPOINT = "http://26.9.175.39:8888";
+export const SOCKET_ENDPOINT = "https://api.vclab.tech";
 
 export const SOCKET_EVENT = {
   NOTIFY: "notify",
