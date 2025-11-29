@@ -274,10 +274,10 @@ const fetchDetail = async () => {
 onBeforeMount(async () => {
   setLoading(true);
   currentMode.value = route.query.mode ? (route.query.mode as string) : "view";
-  let deptRes = await getDepartments({ pageIndex: 0, pageSize: 1 });
-  deptRes = await getDepartments({
+  // let deptRes = await getDepartments({ pageIndex: 0, pageSize: 1 });
+  const deptRes = await getDepartments({
     pageIndex: 0,
-    pageSize: deptRes.data.pageInfo.totalElements,
+    pageSize: 999,
   });
   departmentList.value = deptRes.data.data;
   const res = await getAll();

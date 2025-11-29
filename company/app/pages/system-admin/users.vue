@@ -1,73 +1,62 @@
 <template>
   <div class="wrapper">
-    <DepartmentEditViewModal
-      v-model="isEditViewOpen"
-      :initial-mode="editViewInitialMode"
-      :target-id="editViewId || -1"
-      :allow-edit="canEdit"
-      @submit="handleUpdated"
-      @mode-change="handleSwitchEditViewMode($event)"
+    <AdminUserDetailModal
+      v-model="isViewModalOpen"
+      :user-id="editViewId"
     />
-    <div class="position-content">
-      <div class="title">Danh mục vị trí tuyển dụng</div>
+    <UModal
+      :open="isConfirmModalShow"
+      title="Ngừng hoạt động"
+      :ui="{ content: 'w-[840px] max-w-[840px]' }"
+      @update:open="handleDeleteModalOpenUpdate"
+      @after:leave="clearDeleteList"
+    >
+      <template #body>
+        <ModalsDeactiveOrgModal :delete-list="deleteListNames">
+          <template #footer>
+            <AppButton
+              :text="'Đồng ý'"
+              class="modal-delete-submit"
+              :is-loading="isDeleting"
+              @click="handleActiveToggle(selectedRows, false)"
+            />
+          </template>
+        </ModalsDeactiveOrgModal>
+      </template>
+    </UModal>
+    <div class="department-content">
+      <div class="title">Danh sách người dùng hệ thống</div>
       <div class="table-top">
+        <!-- <AppButton -->
+        <!--   :text="'Hoạt động'" -->
+        <!--   :is-disabled="selectedRows.length == 0" -->
+        <!--   class="active-btn active" -->
+        <!--   @click="handleActiveToggle(selectedRows, true)" -->
+        <!-- > -->
+        <!-- </AppButton> -->
+        <!-- <AppButton -->
+        <!--   :text="'Ngừng hoạt động'" -->
+        <!--   :is-disabled="selectedRows.length == 0" -->
+        <!--   class="active-btn deactive" -->
+        <!--   @click="() => (isConfirmModalShow = true)" -->
+        <!-- > -->
+        <!-- </AppButton> -->
         <AppButton
-          :text="'Hoạt động'"
-          :is-disabled="selectedRows.length == 0"
-          class="active-btn active"
-          @click="handleActiveToggle(selectedRows, true)"
-        >
-        </AppButton>
-        <AppButton
-          :text="'Ngừng hoạt động'"
-          :is-disabled="selectedRows.length == 0"
-          class="active-btn deactive"
-          @click="handleActiveToggle(selectedRows, false)"
-        >
-        </AppButton>
-        <AppButton
-          :text="'Xóa bỏ'"
-          :is-disabled="isDeleteAllDisabled"
-          class="delete-button"
-          @click="handleDeleteClick(selectedRows)"
+          v-if="allowActions.includes(`EXPORT`)"
+          :text="'Xuất dữ liệu'"
+          class="add-button"
+          @click="handleExport"
         >
           <template #icon>
-            <Icon name="material-symbols:delete-outline-rounded" />
-          </template>
-        </AppButton>
-
-        <UModal
-          :open="isDeleteModalOpen"
-          title="Xóa lĩnh vực"
-          :ui="{ content: 'w-[600px] max-w-[600px]' }"
-          @update:open="handleDeleteModalOpenUpdate"
-          @after:leave="clearDeleteList"
-        >
-          <template #body>
-            <ModalsDeleteConfirm :delete-list="deleteListNames">
-              <template #footer>
-                <AppButton
-                  :text="'Đồng ý'"
-                  class="modal-delete-submit"
-                  :is-loading="isDeleting"
-                  @click="handleDelete"
-                />
-              </template>
-            </ModalsDeleteConfirm>
-          </template>
-        </UModal>
-
-        <AppButton :text="'Thêm mới'" class="add-button" @click="handleAddNew">
-          <template #icon>
-            <Icon name="material-symbols:add-2-rounded" />
+            <Icon name="material-symbols:export-notes-rounded" />
           </template>
         </AppButton>
       </div>
-      <AppTableDataTable
+      <AppTableDataTableSystemUser
         :table-data="tableData"
         :columns="tableColumns"
         :allow-actions="allowActions"
-        :show-checkbox="true"
+        :show-checkbox="false"
         :show-actions="true"
         :is-loading="isFetchingData"
         :selection-list="selectedRows"
@@ -110,28 +99,33 @@ import type { TTableAction } from "~/components/app/table/data-table.vue";
 import type { TSort } from "~/types/common";
 import { cloneDeep, debounce } from "lodash";
 import { CELL_TYPE, CHIP_TYPE } from "~/const/common";
+import axios from "axios";
 import {
+  userTableHeaders,
   pageSizeOptions,
-  positionTableHeaders,
-} from "~/const/views/org-admin/position";
+} from "~/const/views/system-admin/users";
 
 definePageMeta({
-  layout: "org-admin",
+  layout: "system-admin",
 });
 useHead({
-  title: "Danh mục vị trí tuyển dụng",
+  title: "Người dùng hệ thống",
 });
 
 const route = useRoute();
 const router = useRouter();
-const departmentList = ref<any[]>([]);
+
+const isConfirmModalShow = ref<boolean>(false);
+
+const isCreateModalOpen = ref<boolean>(false);
 const isDeleteModalOpen = ref<boolean>(false);
 const isEditViewOpen = ref<boolean>(false);
 const editViewId = ref<number | null>(null);
 const editViewInitialMode = ref<any>(null);
 const editViewMode = ref<any>(null);
+const rolesFilterOptions = ref<any[]>([]);
 const isFetchingData = ref<boolean>(false);
-const fetchPositionController = ref<AbortController | null>();
+const controller = ref<AbortController | null>();
 const filter = ref<Record<string, any>>({});
 const totalItems = ref<number>(0);
 const isNoData = ref<boolean>(false);
@@ -143,6 +137,10 @@ const allowActions = computed(() => {
   const permissions = Array.from(menuItem?.permissions || []);
   return permissions;
 });
+const industryList = ref<any[]>([]);
+const provinceList = ref<any[]>([]);
+
+const isViewModalOpen = ref<any>(false);
 
 const canEdit = computed(() => {
   if (allowActions.value.includes("UPDATE")) {
@@ -155,8 +153,23 @@ const canEdit = computed(() => {
 const { getMenuItem } = useSidebarStore();
 const { setLoading } = useLoadingStore();
 // TODO: REPLACE THIS APIS
-const { getDepartments } = useDepartmentApi();
-const { getPositions, deletePosition, changePositionStatus } = usePositionApi();
+const { getDepartments, deleteDepartment, changeDepartmentStatus } =
+  useDepartmentApi();
+
+const { getRoles } = useRoleApi();
+
+const { getUsers, getExport } = useSystemUserApi();
+
+const { getOrgs, updateStatus } = useOrgApi();
+const { getIndustries } = useIndustryApi();
+
+async function fetchIndustries() {
+  const res = await getIndustries({ pageSize: 999 });
+  if (!res) {
+    return null;
+  }
+  industryList.value = res.data.data;
+}
 
 // NOTE: From query string to filter
 const convertQuery = () => {
@@ -183,6 +196,11 @@ const convertQuery = () => {
     editViewId.value = +targetId;
   }
 
+  if (targetId) {
+    isViewModalOpen.value = true;
+    editViewId.value = +targetId;
+  }
+
   const createdAt: (Date | null)[] = [];
   if (query.createdAtStart) {
     const start = new Date(query.createdAtStart as string);
@@ -206,6 +224,7 @@ const convertQuery = () => {
 
   if (query.isActive) {
     const values = (query.isActive as string).split(",");
+    console.log(values);
     restoredFilter.isActive = values.map((val) =>
       filterSelectOption.value.isActive.find((opt: any) => {
         const booleanValue = val == "true";
@@ -214,11 +233,29 @@ const convertQuery = () => {
     );
   }
 
-  if (query.departmentName) {
-    const values = (query.departmentName as string).split(",");
-    restoredFilter.departmentName = values
-      .map((val) => departmentList.value.find((opt: any) => opt.id === val))
-      .filter(Boolean);
+  if (query.isEmailVerified) {
+    const values = (query.isEmailVerified as string).split(",");
+    console.log(values);
+    restoredFilter.isEmailVerified = values.map((val) =>
+      filterSelectOption.value.isEmailVerified.find((opt: any) => {
+        const booleanValue = val == "true";
+        return opt.value == booleanValue;
+      }),
+    );
+  }
+
+  if (query.roleIds) {
+    const ids = (query.roleIds as string).split(",");
+    restoredFilter.roleIds = ids.map((val) =>
+      filterSelectOption.value.roleIds.find((opt: any) => opt.value == +val),
+    );
+  }
+
+  if (query.accessMethod) {
+    restoredFilter.accessMethod = {
+      label: query.accessMethod,
+      value: query.accessMethod,
+    };
   }
 
   const updatedAt: (Date | null)[] = [];
@@ -241,6 +278,26 @@ const convertQuery = () => {
   if (updatedAt.length) {
     restoredFilter.updatedAt = updatedAt;
   }
+  const dateOfBirth: (Date | null)[] = [];
+  if (query.dateOfBirthStart) {
+    const start = new Date(query.dateOfBirthStart as string);
+    if (!isNaN(start.getTime())) {
+      dateOfBirth.push(start);
+    } else {
+      dateOfBirth.push(null);
+    }
+  }
+  if (query.dateOfBirthEnd) {
+    const end = new Date(query.dateOfBirthEnd as string);
+    if (!isNaN(end.getTime())) {
+      dateOfBirth.push(end);
+    } else {
+      dateOfBirth.push(null);
+    }
+  }
+  if (dateOfBirth.length) {
+    restoredFilter.dateOfBirth = dateOfBirth;
+  }
 
   delete restoredFilter.createdAtStart;
   delete restoredFilter.createdAtEnd;
@@ -251,17 +308,19 @@ const convertQuery = () => {
 };
 
 onBeforeMount(async () => {
-  // let res = await getDepartments({ pageIndex: 0, pageSize: 1 });
-  // const totalElement = res.data.pageInfo.totalElements;
-  const res = await getDepartments({
-    pageIndex: 0,
-    pageSize: 999,
-  });
-  console.log(res);
-  departmentList.value = res.data.data;
+  setLoading(true);
+
+  const rolesRes = await getRoles({ pageSize: 999 });
+  rolesFilterOptions.value = rolesRes.data.data;
 
   filter.value = convertQuery();
+  setLoading(false);
 });
+
+const handleCreated = () => {
+  isCreateModalOpen.value = false;
+  fetchData();
+};
 
 const handleUpdated = () => {
   isEditViewOpen.value = false;
@@ -289,18 +348,14 @@ const clearViewEditId = () => {
 
 const handleDeleteModalOpenUpdate = (event: boolean) => {
   if (!event) {
-    isDeleteModalOpen.value = false;
+    isConfirmModalShow.value = false;
   }
-};
-
-const handleAddNew = () => {
-  router.push({ path: "/org-admin/position/create" });
 };
 
 const handleDelete = async () => {
   isDeleting.value = true;
   // TODO: REPLACE THIS API
-  const isSuccess = await deletePosition({ ids: deleteList.value });
+  const isSuccess = await deleteDepartment({ ids: deleteList.value });
   selectedRows.value = selectedRows.value.filter(
     (selected) => !deleteList.value.includes(selected),
   );
@@ -312,9 +367,14 @@ const handleDelete = async () => {
   }
 };
 
+const handleAddNew = () => {
+  isCreateModalOpen.value = true;
+};
+
 const deleteListNames = computed(() => {
+  console.log({ deleteList: deleteList.value, tableData: tableData.value });
   return tableData.value
-    .filter((data: any) => deleteList.value.includes(data.id))
+    .filter((data: any) => selectedRows.value.includes(data.id))
     .map((data: any) => data.name);
 });
 
@@ -357,15 +417,22 @@ const handleFilter = (e: any) => {
   filter.value = e;
 };
 
+async function handleExport() {
+  setLoading(true);
+  const query = route.query;
+  const res = await getExport(query);
+  setLoading(false);
+}
+
 const fetchData = async () => {
-  if (fetchPositionController.value) {
-    fetchPositionController.value.abort();
+  if (controller.value) {
+    controller.value.abort();
   }
 
-  fetchPositionController.value = new AbortController();
+  controller.value = new AbortController();
   isFetchingData.value = true;
   const query = route.query;
-  const res = await getPositions(query, fetchPositionController.value);
+  const res = await getUsers(query, controller.value);
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
@@ -382,9 +449,15 @@ const fetchData = async () => {
     entry.index = index + 1 + (pageIndex.value - 1) * pageSize.value;
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
-    // entry.listLevel = entry.listLevel
-    //   .map((level: any) => level.name)
-    //   ?.join(", ");
+    entry.roleIds = entry.roles.map((role: any) => role.name).join(", ");
+    entry.info = {
+      cellType: "avatar",
+      data: {
+        fullName: entry.fullName,
+        avatarUrl: entry.avatarUrl,
+        id: entry.id,
+      },
+    };
     entry.isActive = entry.isActive
       ? {
           text: "Đang hoạt động",
@@ -396,14 +469,34 @@ const fetchData = async () => {
           type: CHIP_TYPE.ERROR,
           cellType: CELL_TYPE.TAG,
         };
-    entry.canDelete = true;
+    entry.isEmailVerified = entry.isEmailVerified
+      ? {
+          text: "Đã xác thực",
+          type: CHIP_TYPE.SUCCESS,
+          cellType: CELL_TYPE.TAG,
+        }
+      : {
+          text: "Chưa xác thực",
+          type: CHIP_TYPE.ERROR,
+          cellType: CELL_TYPE.TAG,
+        };
+
+    if (entry.accessMethods) {
+      entry.accessMethod = {
+        cellType: "tagsList",
+        list: entry.accessMethods.map((i: any) => ({
+          label: i.label,
+          tooltip: i.label,
+        })),
+      };
+    }
   }
   tableData.value = data;
 };
 const debouncedFetchData = debounce(fetchData, 500);
 const selectedRows = ref<number[]>([]);
-
 const handleSelectionsUpdate = (selectionList: number[]) => {
+  console.log({ selectionList });
   selectedRows.value = selectionList;
 };
 
@@ -429,26 +522,24 @@ const handleActiveToggle = async (ids: number[], state: boolean) => {
   };
 
   setLoading(true);
-  const res = await changePositionStatus(payload);
+  const res = await updateStatus(payload.ids, payload.active);
   if (res) {
     selectedRows.value = [];
+    isConfirmModalShow.value = false;
     fetchData();
   }
   setLoading(false);
 };
 
 const handleTableActionClick = (id: number, action: TTableAction) => {
-  if (action === "delete") {
-    handleDeleteClick([id]);
-  }
   if (action === "view") {
-    router.push({ path: `/org-admin/position/detail/${id}` });
-  }
-  if (action === "edit") {
-    router.push({
-      path: `/org-admin/position/detail/${id}`,
-      query: { mode: "edit" },
-    });
+    editViewId.value = id;
+    isViewModalOpen.value = true;
+
+    // const link = router.resolve({
+    //   path: `/system-admin/organizations/detail/${id}`,
+    // });
+    // window.open(link.href, "_blank");
   }
 };
 
@@ -465,15 +556,35 @@ const filterSelectOption = computed(() => {
         value: true,
       },
     ],
-    departmentName: departmentList.value.map((dept) => ({
-      label: dept.name,
-      value: dept.id,
+    isEmailVerified: [
+      {
+        label: "Đã xác thực",
+        value: true,
+      },
+      {
+        label: "Chưa xác thực",
+        value: false,
+      },
+    ],
+    roleIds: rolesFilterOptions.value.map((role) => ({
+      label: role.name,
+      value: role.id,
     })),
+    accessMethod: [
+      {
+        label: "LOCAL",
+        value: "LOCAL",
+      },
+      {
+        label: "GOOGLE",
+        value: "GOOGLE",
+      },
+    ],
   };
 });
 
 const tableColumns = computed(() => {
-  return positionTableHeaders;
+  return userTableHeaders;
 });
 const pageSizeOpts = computed(() => {
   return pageSizeOptions;
@@ -493,6 +604,30 @@ const normalizeFilter = (filter: any) => {
       normalizedFilter.createdAtEnd = toUtcDate(endDate);
     }
   }
+
+  if (normalizedFilter.updatedAt) {
+    const startDate = normalizedFilter.updatedAt[0];
+    const endDate = normalizedFilter.updatedAt[1];
+    delete normalizedFilter.updatedAt;
+    if (startDate) {
+      normalizedFilter.updatedAtStart = toUtcDate(startDate);
+    }
+    if (endDate) {
+      normalizedFilter.updatedAtEnd = toUtcDate(endDate);
+    }
+  }
+
+  if (normalizedFilter.dateOfBirth) {
+    const startDate = normalizedFilter.dateOfBirth[0];
+    const endDate = normalizedFilter.dateOfBirth[1];
+    delete normalizedFilter.dateOfBirth;
+    if (startDate) {
+      normalizedFilter.dateOfBirthStart = toUtcDate(startDate);
+    }
+    if (endDate) {
+      normalizedFilter.dateOfBirthStart = toUtcDate(endDate);
+    }
+  }
   if (
     normalizedFilter.isActive &&
     normalizedFilter.isActive.length &&
@@ -504,23 +639,27 @@ const normalizeFilter = (filter: any) => {
   } else {
     delete normalizedFilter.isActive;
   }
-  if (normalizedFilter.updatedAt) {
-    const startDate = normalizedFilter.updatedAt[0];
-    const endDate = normalizedFilter.updatedAt[1];
-    delete normalizedFilter.updatedAt;
-    if (startDate) normalizedFilter.updatedAtStart = toUtcDate(startDate);
-    if (endDate) normalizedFilter.updatedAtEnd = toUtcDate(endDate);
-  }
-
   if (
-    normalizedFilter.departmentName &&
-    normalizedFilter.departmentName.length
+    normalizedFilter.isEmailVerified &&
+    normalizedFilter.isEmailVerified.length &&
+    normalizedFilter.isEmailVerified.length != 2
   ) {
-    normalizedFilter.departmentName = normalizedFilter.departmentName.map(
-      (memberType: any) => memberType.value,
+    normalizedFilter.isEmailVerified = normalizedFilter.isEmailVerified.map(
+      (activity: any) => activity.value,
     );
   } else {
-    delete normalizedFilter.departmentName;
+    delete normalizedFilter.isEmailVerified;
+  }
+  if (normalizedFilter.roleIds && normalizedFilter.roleIds.length) {
+    normalizedFilter.roleIds = normalizedFilter.roleIds.map(
+      (activity: any) => activity.value,
+    );
+  } else {
+    delete normalizedFilter.roleIds;
+  }
+
+  if (normalizedFilter.accessMethod) {
+    normalizedFilter.accessMethod = normalizedFilter.accessMethod.value;
   }
 
   const queryForUrl: Record<string, any> = {
@@ -564,6 +703,15 @@ watch(isEditViewOpen, (newVal) => {
     clearViewEditId();
   }
 });
+
+watch(isViewModalOpen, (newVal) => {
+  if (!newVal) {
+    editViewId.value = null;
+    const query = { ...route.query };
+    delete query.targetId;
+    router.replace({ query });
+  }
+});
 </script>
 <style lang="scss" scoped>
 .wrapper {
@@ -574,7 +722,7 @@ watch(isEditViewOpen, (newVal) => {
   margin-top: 8px;
   @include box-shadow;
 }
-.position-content {
+.department-content {
   background-color: white;
   min-height: calc(100% - 48px - 8px);
   @include box-shadow;

@@ -1,17 +1,30 @@
 <template>
   <div class="wrapper">
-    <DepartmentCreateModal
-      v-model="isCreateModalOpen"
-      @submit="handleCreated"
+    <OrgAdminDetailOrgModal
+      v-model="isViewModalOpen"
+      :org-id="editViewId"
+      @refetch="fetchData"
     />
-    <DepartmentEditViewModal
-      v-model="isEditViewOpen"
-      :initial-mode="editViewInitialMode"
-      :target-id="editViewId || -1"
-      :allow-edit="canEdit"
-      @submit="handleUpdated"
-      @mode-change="handleSwitchEditViewMode($event)"
-    />
+    <UModal
+      :open="isConfirmModalShow"
+      title="Ngừng hoạt động"
+      :ui="{ content: 'w-[840px] max-w-[840px]' }"
+      @update:open="handleDeleteModalOpenUpdate"
+      @after:leave="clearDeleteList"
+    >
+      <template #body>
+        <ModalsDeactiveOrgModal :delete-list="deleteListNames">
+          <template #footer>
+            <AppButton
+              :text="'Đồng ý'"
+              class="modal-delete-submit"
+              :is-loading="isDeleting"
+              @click="handleActiveToggle(selectedRows, false)"
+            />
+          </template>
+        </ModalsDeactiveOrgModal>
+      </template>
+    </UModal>
     <div class="department-content">
       <div class="title">Danh sách doanh nghiệp</div>
       <div class="table-top">
@@ -26,16 +39,17 @@
           :text="'Ngừng hoạt động'"
           :is-disabled="selectedRows.length == 0"
           class="active-btn deactive"
-          @click="handleActiveToggle(selectedRows, false)"
+          @click="() => (isConfirmModalShow = true)"
         >
         </AppButton>
         <AppButton
+          v-if="allowActions.includes(`EXPORT`)"
           :text="'Xuất dữ liệu'"
           class="add-button"
-          @click="handleAddNew"
+          @click="handleExport"
         >
           <template #icon>
-            <Icon name="material-symbols:add-2-rounded" />
+            <Icon name="material-symbols:export-notes-rounded" />
           </template>
         </AppButton>
       </div>
@@ -90,6 +104,7 @@ import {
   organizationTableHeaders,
   pageSizeOptions,
 } from "~/const/views/system-admin/organizations";
+import axios from "axios";
 
 definePageMeta({
   layout: "system-admin",
@@ -100,6 +115,9 @@ useHead({
 
 const route = useRoute();
 const router = useRouter();
+
+const isConfirmModalShow = ref<boolean>(false);
+
 const isCreateModalOpen = ref<boolean>(false);
 const isDeleteModalOpen = ref<boolean>(false);
 const isEditViewOpen = ref<boolean>(false);
@@ -120,6 +138,9 @@ const allowActions = computed(() => {
   return permissions;
 });
 const industryList = ref<any[]>([]);
+const provinceList = ref<any[]>([]);
+
+const isViewModalOpen = ref<any>(false);
 
 const canEdit = computed(() => {
   if (allowActions.value.includes("UPDATE")) {
@@ -135,7 +156,7 @@ const { setLoading } = useLoadingStore();
 const { getDepartments, deleteDepartment, changeDepartmentStatus } =
   useDepartmentApi();
 
-const { getOrgs } = useOrgApi();
+const { getOrgs, getExport, updateStatus } = useOrgApi();
 const { getIndustries } = useIndustryApi();
 
 async function fetchIndustries() {
@@ -168,6 +189,11 @@ const convertQuery = () => {
     isEditViewOpen.value = true;
     editViewInitialMode.value = mode;
     editViewMode.value = mode;
+    editViewId.value = +targetId;
+  }
+
+  if (targetId) {
+    isViewModalOpen.value = true;
     editViewId.value = +targetId;
   }
 
@@ -204,6 +230,27 @@ const convertQuery = () => {
     console.log(restoredFilter.isActive);
   }
 
+  if (query.industryIds) {
+    const values = (query.industryIds as string).split(",");
+    console.log(values);
+    restoredFilter.industryList = values.map((val) =>
+      filterSelectOption.value.industryList.find((opt: any) => {
+        return opt.value == val;
+      }),
+    );
+  }
+
+  if (query.addresses) {
+    const addressLists = (query.addresses as string)
+      .split(",")
+      .map((a: any) => ({
+        label: a,
+        value: a,
+      }));
+
+    restoredFilter.addresses = addressLists;
+  }
+
   const updatedAt: (Date | null)[] = [];
   if (query.updatedAtStart) {
     const start = new Date(query.updatedAtStart as string);
@@ -230,11 +277,31 @@ const convertQuery = () => {
   delete restoredFilter.updatedAtStart;
   delete restoredFilter.updatedAtEnd;
 
+  const companySizePair = {
+    from: query.staffCountFrom,
+    to: query.staffCountTo,
+  };
+
+  const companySizeOpt = filterSelectOption.value.companySize.find(
+    (s: any) =>
+      s.value.from == companySizePair.from && s.value.to == companySizePair.to,
+  );
+  if (companySizeOpt) {
+    restoredFilter.companySize = companySizeOpt;
+  }
+
   return restoredFilter;
 };
 
 onBeforeMount(async () => {
+  setLoading(true);
+  await fetchIndustries();
+  const res = await axios.get(`https://provinces.open-api.vn/api/v2/?depth=1`);
+
+  provinceList.value = res.data.map((p: any) => p.name);
+
   filter.value = convertQuery();
+  setLoading(false);
 });
 
 const handleCreated = () => {
@@ -268,7 +335,7 @@ const clearViewEditId = () => {
 
 const handleDeleteModalOpenUpdate = (event: boolean) => {
   if (!event) {
-    isDeleteModalOpen.value = false;
+    isConfirmModalShow.value = false;
   }
 };
 
@@ -292,8 +359,9 @@ const handleAddNew = () => {
 };
 
 const deleteListNames = computed(() => {
+  console.log({ deleteList: deleteList.value, tableData: tableData.value });
   return tableData.value
-    .filter((data: any) => deleteList.value.includes(data.id))
+    .filter((data: any) => selectedRows.value.includes(data.id))
     .map((data: any) => data.name);
 });
 
@@ -335,6 +403,13 @@ const handleSort = (e: TSort) => {
 const handleFilter = (e: any) => {
   filter.value = e;
 };
+
+async function handleExport() {
+  setLoading(true);
+  const query = route.query;
+  const res = await getExport(query);
+  setLoading(false);
+}
 
 const fetchData = async () => {
   if (fetchOrgsController.value) {
@@ -409,6 +484,7 @@ const fetchData = async () => {
 const debouncedFetchData = debounce(fetchData, 500);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
+  console.log({ selectionList });
   selectedRows.value = selectionList;
 };
 
@@ -434,29 +510,24 @@ const handleActiveToggle = async (ids: number[], state: boolean) => {
   };
 
   setLoading(true);
-  const res = await changeDepartmentStatus(payload);
+  const res = await updateStatus(payload.ids, payload.active);
   if (res) {
     selectedRows.value = [];
+    isConfirmModalShow.value = false;
     fetchData();
   }
   setLoading(false);
 };
 
 const handleTableActionClick = (id: number, action: TTableAction) => {
-  if (action === "delete") {
-    handleDeleteClick([id]);
-  }
   if (action === "view") {
     editViewId.value = id;
-    editViewInitialMode.value = "view";
-    editViewMode.value = "view";
-    isEditViewOpen.value = true;
-  }
-  if (action === "edit") {
-    editViewId.value = id;
-    editViewInitialMode.value = "edit";
-    editViewMode.value = "edit";
-    isEditViewOpen.value = true;
+    isViewModalOpen.value = true;
+
+    // const link = router.resolve({
+    //   path: `/system-admin/organizations/detail/${id}`,
+    // });
+    // window.open(link.href, "_blank");
   }
 };
 
@@ -476,6 +547,10 @@ const filterSelectOption = computed(() => {
     industryList: industryList.value.map((i: any) => ({
       label: i.name,
       value: i.id,
+    })),
+    addresses: provinceList.value.map((p: any) => ({
+      label: p,
+      value: p,
     })),
     companySize: [
       {
@@ -558,6 +633,33 @@ const normalizeFilter = (filter: any) => {
     if (endDate) normalizedFilter.updatedAtEnd = toUtcDate(endDate);
   }
 
+  if (normalizedFilter.companySize) {
+    const from = normalizedFilter.companySize.value.from;
+    const to = normalizedFilter.companySize.value.to;
+
+    if (from != undefined) {
+      normalizedFilter.staffCountFrom = from;
+    }
+    if (to != undefined) {
+      normalizedFilter.staffCountTo = to;
+    }
+
+    delete normalizedFilter.companySize;
+  }
+
+  if (normalizedFilter.industryList) {
+    normalizedFilter.industryIds = normalizedFilter.industryList.map(
+      (i: any) => i.value,
+    );
+    delete normalizedFilter.industryList;
+  }
+
+  if (normalizedFilter.addresses) {
+    normalizedFilter.addresses = normalizedFilter.addresses.map(
+      (i: any) => i.value,
+    );
+  }
+
   const queryForUrl: Record<string, any> = {
     ...normalizedFilter,
   };
@@ -597,6 +699,15 @@ watch([editViewMode, editViewId], ([newMode, newId]) => {
 watch(isEditViewOpen, (newVal) => {
   if (!newVal) {
     clearViewEditId();
+  }
+});
+
+watch(isViewModalOpen, (newVal) => {
+  if (!newVal) {
+    editViewId.value = null;
+    const query = { ...route.query };
+    delete query.targetId;
+    router.replace({ query });
   }
 });
 </script>

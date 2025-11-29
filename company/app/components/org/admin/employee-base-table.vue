@@ -287,22 +287,22 @@ onBeforeMount(() => {
       },
     },
   };
-  const checkboxColumn = {
-    accessorKey: "checkbox",
-    meta: {
-      class: {
-        th: "header-select",
-        td: "body-select",
-      },
-    },
-    enableSorting: true,
-  };
+  // const checkboxColumn = {
+  //   accessorKey: "checkbox",
+  //   meta: {
+  //     class: {
+  //       th: "header-select",
+  //       td: "body-select",
+  //     },
+  //   },
+  //   enableSorting: true,
+  // };
 
-  if (props.showCheckbox) {
-    columns.value.unshift(checkboxColumn);
-  }
+  // if (props.showCheckbox) {
+  //   columns.value.unshift(checkboxColumn);
+  // }
   if (props.showActions) {
-    columns.value.splice(2, 0, actionColumn);
+    columns.value.splice(1, 0, actionColumn);
   }
 });
 
@@ -397,7 +397,6 @@ const handleCheckAll = (e: any, table: any) => {
 
 const handleCheck = (e: any, row: any) => {
   const selections = cloneDeep(props.selectionList);
-  console.log({ row });
   if (e) {
     const rowId = row.original.id;
     const currentRow = selections.find((selection) => selection === rowId);
@@ -495,7 +494,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
           display: flex;
           flex-direction: row;
           align-items: center;
-          width: fit-content;
+          width: 100%;
           position: relative;
           gap: 4px;
           .text-input {
@@ -533,8 +532,8 @@ const handleActionClick = (row: any, action: TTableAction) => {
             font-size: 13px;
             line-height: 20px;
             background-color: $color-gray-100 !important;
-            min-width: 240px;
-            max-width: 240px;
+            width: 100%;
+            max-width: 100%;
 
             .text-dimmed {
               font-size: 13px;
@@ -682,16 +681,16 @@ const handleActionClick = (row: any, action: TTableAction) => {
         }
         th:nth-child(2),
         td:nth-child(2) {
-          left: 50px;
+          left: 56px;
         }
         th:nth-child(3),
         td:nth-child(3) {
-          left: 106px;
+          left: 164px;
           &::after {
             content: "";
             position: absolute;
             top: 0;
-            right: -1px;
+            right: 0px;
             width: 1px;
             height: 100%;
             background-color: $color-gray-300;

@@ -169,6 +169,19 @@
         <span
           v-else-if="
             row.original[col.accessorKey] &&
+            row.original[col.accessorKey].cellType == 'avatar'
+          "
+          class=""
+          :title="row.original[col.accessorKey].data.fullName"
+        >
+          <div class="flex flex-row items-center gap-2">
+            <AppAvatar :user-info="row.original[col.accessorKey].data" />
+            <span>{{ row.original[col.accessorKey].data.fullName }}</span>
+          </div>
+        </span>
+        <span
+          v-else-if="
+            row.original[col.accessorKey] &&
             row.original[col.accessorKey].cellType == 'tagsList'
           "
           class="flex flex-row gap-1"
@@ -302,7 +315,7 @@ onBeforeMount(() => {
     columns.value.unshift(checkboxColumn);
   }
   if (props.showActions) {
-    columns.value.splice(2, 0, actionColumn);
+    columns.value.splice(1, 0, actionColumn);
   }
 });
 
@@ -495,7 +508,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
           display: flex;
           flex-direction: row;
           align-items: center;
-          width: fit-content;
+          width: 100%;
           position: relative;
           gap: 4px;
           .text-input {
@@ -533,8 +546,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
             font-size: 13px;
             line-height: 20px;
             background-color: $color-gray-100 !important;
-            min-width: 240px;
-            max-width: 240px;
+            width: 100%;
 
             .text-dimmed {
               font-size: 13px;
@@ -682,16 +694,16 @@ const handleActionClick = (row: any, action: TTableAction) => {
         }
         th:nth-child(2),
         td:nth-child(2) {
-          left: 50px;
+          left: 56px;
         }
         th:nth-child(3),
         td:nth-child(3) {
-          left: 106px;
+          left:164px;
           &::after {
             content: "";
             position: absolute;
             top: 0;
-            right: -1px;
+            right: 0px;
             width: 1px;
             height: 100%;
             background-color: $color-gray-300;
