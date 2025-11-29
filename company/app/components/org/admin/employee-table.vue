@@ -86,14 +86,14 @@ const { getDepartments, deleteDepartment, changeDepartmentStatus } =
   useDepartmentApi();
 const { getOrgMembers, getRoleFilterOption, changeOrgMemberStatus } =
   useOrgMemberApi();
-const {getRoles} = useRoleApi();
+const { getRoles } = useRoleApi();
 
 const { getOrgEmployees } = useOrgApi();
 const { getIndustries } = useIndustryApi();
 
 type TProps = {
   orgId: any;
-}
+};
 
 const props = defineProps<TProps>();
 
@@ -152,7 +152,11 @@ const fetchData = async () => {
   fetchEmployeeController.value = new AbortController();
   isFetchingData.value = true;
   const query = queryObj.value;
-  const res = await getOrgEmployees(props.orgId, query, fetchEmployeeController.value);
+  const res = await getOrgEmployees(
+    props.orgId,
+    query,
+    fetchEmployeeController.value,
+  );
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
