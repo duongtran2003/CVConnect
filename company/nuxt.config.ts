@@ -26,22 +26,31 @@ export default defineNuxtConfig({
     classSuffix: "",
     storageKey: "nuxt-color-mode",
   },
-  ssr: false,
-  css: ["~/assets/main.css"],
-  vite: {
-    server: {
-      proxy: {
-        "/_api": {
-          target: "http://26.9.175.39:8888",
-          // target: "http://api.vclab.tech",
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/_api/, "/api/v1"),
-        },
-      },
+  icon: {
+    clientBundle: {
+      scan: true,
     },
+  },
+  ssr: false,
+  css: [
+    "~/assets/main.css",
+    "~/assets/global.scss", // This needs to be explicitly included
+  ],
+  vite: {
+    // server: {
+    //   proxy: {
+    //     "/_api": {
+    //       target: "http://26.9.175.39:8888",
+    //       changeOrigin: true,
+    //       rewrite: (path) => path.replace(/^\/_api/, "/api/v1"),
+    //     },
+    //   },
+    // },
     css: {
       preprocessorOptions: {
         scss: {
+          // 2. ONLY import variables and mixins here.
+          // This makes them available inside every <style lang="scss"> block in your components.
           additionalData:
             '@import "~/assets/colors.scss";@import "~/assets/_mixin.scss";',
         },

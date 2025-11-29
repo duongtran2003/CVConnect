@@ -1,10 +1,10 @@
 import axios from "axios";
 import createAuthRefreshInterceptor from "axios-auth-refresh";
 
-// const PRODUCTION_API_URL = "vclab.tech";
+const PRODUCTION_API_URL = "https://api.vclab.tech/api/v1";
 const DEV_API_URL = "/_api";
 
-export const API_URL = DEV_API_URL;
+export const API_URL = PRODUCTION_API_URL;
 
 export type TApiOption = {
   isSilent: boolean;
