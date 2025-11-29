@@ -464,7 +464,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
 }
 
 // ⚠️ THIS IS THE CRITICAL FIX: Single :deep() after the scoped parent
-.data-table-wrapper :deep(.data-table) {
+.data-table-wrapper .data-table {
   flex: 1;
   max-width: 100%;
   min-height: 0;
@@ -472,7 +472,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
   @include custom-scrollbar;
 
   // Now, all child selectors are correctly targeted without further :deep()
-  table {
+  :deep(table) {
     border-radius: 4px;
 
     .header-cell {
