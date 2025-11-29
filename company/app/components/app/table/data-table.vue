@@ -462,7 +462,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
   margin: auto;
 }
 
-.data-table {
+:deep(.data-table) {
   flex: 1;
   max-width: 100%;
   min-height: 0;
