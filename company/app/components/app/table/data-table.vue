@@ -161,7 +161,7 @@
           />
         </span>
         <span
-          v-if="
+          v-else-if="
             row.original[col.accessorKey] &&
             row.original[col.accessorKey].cellType == 'candidateStatusChip'
           "
