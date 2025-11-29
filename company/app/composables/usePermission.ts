@@ -11,6 +11,7 @@ export const usePermission = () => {
   const { sidebarData } = storeToRefs(sidebarStore);
   const { logout } = useAuth();
   const router = useRouter();
+  const route = useRoute();
 
   function handleSetRole() {
     if (roles.value.length == 0) {
@@ -31,7 +32,10 @@ export const usePermission = () => {
       setCurrentRole(roles.value[0]);
       return;
     }
-    router.push({ path: "/role-select" });
+    router.push({
+      path: "/role-select",
+      query: { redirectTo: route.fullPath },
+    });
   }
 
   async function getInitialRoute() {
