@@ -403,7 +403,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
   emit(action, rowId);
 };
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
 .data-table-wrapper {
   overflow-x: auto;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
@@ -432,12 +432,256 @@ const handleActionClick = (row: any, action: TTableAction) => {
     }
   }
 
+  .data-table {
+    flex: 1;
+    max-width: 100%;
+    min-height: 0;
+    overflow: auto;
+    @include custom-scrollbar;
+
+    table {
+      border-radius: 4px;
+
+      .header-cell {
+        &.padding-cell:nth-of-type(1) {
+          // background-color: red;
+        }
+
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        .name {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 8px;
+          .icon {
+            display: block;
+            font-size: 20px;
+            z-index: 0;
+            cursor: pointer;
+          }
+        }
+        .filter {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          width: fit-content;
+          position: relative;
+          gap: 4px;
+          .text-input {
+            input {
+              &::placeholder {
+                font-size: 13px;
+                color: $color-gray-400;
+                font-weight: 400;
+              }
+
+              border: 1px solid $color-primary-200 !important;
+              border-radius: 10px !important;
+              padding: 4px 10px !important;
+              font-weight: 500 !important;
+              color: $color-gray-600 !important;
+              font-size: 13px;
+              line-height: 20px;
+              background-color: $color-gray-100 !important;
+            }
+          }
+
+          .clear-icon {
+            cursor: pointer;
+            position: absolute;
+            right: 36px;
+          }
+
+          button.select-input {
+            border: 1px solid $color-primary-200 !important;
+            border-radius: 10px !important;
+            padding: 4px 48px 4px 10px !important;
+            font-weight: 500 !important;
+            color: $color-gray-600 !important;
+            height: 29px;
+            font-size: 13px;
+            line-height: 20px;
+            background-color: $color-gray-100 !important;
+            min-width: 240px;
+            max-width: 240px;
+
+            .text-dimmed {
+              font-size: 13px;
+              color: $color-gray-400;
+              font-weight: 400;
+            }
+          }
+
+          .date-input {
+            .dp__input_wrap {
+              width: 218px;
+              input::placeholder {
+                color: $color-gray-500;
+                font-weight: 400;
+                font-size: 14px;
+              }
+              .dp__input {
+                width: 218px;
+                border: 1px solid $color-primary-200 !important;
+                border-radius: 10px !important;
+                padding-top: 4px;
+                padding-bottom: 4px;
+                font-weight: 500 !important;
+                color: $color-gray-600 !important;
+                font-size: 13px;
+                line-height: 20px;
+                background-color: $color-gray-100 !important;
+              }
+            }
+          }
+        }
+      }
+
+      .header-select,
+      .body-select {
+        width: 50px;
+        min-width: 50px;
+      }
+
+      .header-action,
+      .body-action {
+        width: 108px;
+        min-width: 108px;
+        .action-wrapper {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          .icon {
+            cursor: pointer;
+            display: block;
+            font-size: 20px;
+            transition: color 200ms;
+
+            &.disabled {
+              opacity: 0.2;
+              cursor: default;
+            }
+
+            &:hover:not(.disabled) {
+              color: $color-primary-600;
+            }
+          }
+        }
+      }
+
+      // Header border
+      thead {
+        tr:last-child {
+          height: 0px;
+        }
+      }
+
+      tr {
+        .body-select,
+        .header-select {
+          button:hover {
+            cursor: pointer;
+          }
+        }
+      }
+
+      // Row border
+      tbody {
+        tr:hover {
+          td {
+            background-color: $color-gray-50;
+          }
+        }
+        // &.divide-y {
+        //   tr:not(:last-child) {
+        //     border-bottom: 1px solid $color-gray-300;
+        //   }
+        // }
+      }
+
+      tr {
+        background-color: $color-primary-50;
+        font-weight: 500;
+        th {
+          background-color: $color-primary-50;
+          color: $color-primary-400;
+          position: sticky;
+          top: 0px;
+          font-weight: 600;
+          &::before {
+            content: "";
+            position: absolute;
+            bottom: 0px;
+            left: 0px;
+            width: 100%;
+            height: 1px;
+            background-color: $color-gray-300;
+          }
+        }
+        td {
+          color: $text-light;
+        }
+
+        th:nth-child(1),
+        th:nth-child(2),
+        th:nth-child(3) {
+          z-index: 2;
+        }
+        td:nth-child(1),
+        td:nth-child(2),
+        td:nth-child(3) {
+          z-index: 1;
+        }
+
+        th:nth-child(1),
+        th:nth-child(2),
+        th:nth-child(3),
+        td:nth-child(1),
+        td:nth-child(2),
+        td:nth-child(3) {
+          position: sticky;
+          top: 0px;
+        }
+
+        th:nth-child(1),
+        td:nth-child(1) {
+          left: 0px;
+        }
+        th:nth-child(2),
+        td:nth-child(2) {
+          left: 50px;
+        }
+        th:nth-child(3),
+        td:nth-child(3) {
+          left: 106px;
+          &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: -1px;
+            width: 1px;
+            height: 100%;
+            background-color: $color-gray-300;
+            display: block;
+          }
+        }
+
+        td {
+          background-color: white;
+        }
+      }
+    }
+  }
+
   .blank {
     display: block;
     height: 132px;
     width: 100%;
   }
-
   .nodata {
     top: 98px;
     right: 50%;
@@ -447,7 +691,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
   }
 
   &.hasNodata {
-    :deep(tbody) {
+    tbody {
       height: 132px;
     }
   }
@@ -461,251 +705,5 @@ const handleActionClick = (row: any, action: TTableAction) => {
   font-weight: 500;
   width: fit-content;
   margin: auto;
-}
-
-// ⚠️ THIS IS THE CRITICAL FIX: Single :deep() after the scoped parent
-.data-table-wrapper .data-table {
-  flex: 1;
-  max-width: 100%;
-  min-height: 0;
-  overflow: auto;
-  @include custom-scrollbar;
-
-  // Now, all child selectors are correctly targeted without further :deep()
-  :deep(table) {
-    border-radius: 4px;
-
-    .header-cell {
-      // ... (your header-cell styles)
-      &.padding-cell:nth-of-type(1) {
-        // background-color: red;
-      }
-
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-
-      .name {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 8px;
-        .icon {
-          display: block;
-          font-size: 20px;
-          z-index: 0;
-          cursor: pointer;
-        }
-      }
-
-      .filter {
-        // ... (your filter styles including .text-input, .clear-icon, etc.)
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        width: fit-content;
-        position: relative;
-        gap: 4px;
-
-        .text-input {
-          input {
-            &::placeholder {
-              font-size: 13px;
-              color: $color-gray-400;
-              font-weight: 400;
-            }
-            border: 1px solid $color-primary-200 !important;
-            border-radius: 10px !important;
-            padding: 4px 10px !important;
-            font-weight: 500 !important;
-            color: $color-gray-600 !important;
-            font-size: 13px;
-            line-height: 20px;
-            background-color: $color-gray-100 !important;
-          }
-        }
-
-        .clear-icon {
-          cursor: pointer;
-          position: absolute;
-          right: 36px;
-        }
-
-        button.select-input {
-          border: 1px solid $color-primary-200 !important;
-          border-radius: 10px !important;
-          padding: 4px 48px 4px 10px !important;
-          font-weight: 500 !important;
-          color: $color-gray-600 !important;
-          height: 29px;
-          font-size: 13px;
-          line-height: 20px;
-          background-color: $color-gray-100 !important;
-          min-width: 240px;
-          max-width: 240px;
-
-          .text-dimmed {
-            font-size: 13px;
-            color: $color-gray-400;
-            font-weight: 400;
-          }
-        }
-
-        .date-input {
-          .dp__input_wrap {
-            width: 218px;
-            input::placeholder {
-              color: $color-gray-500;
-              font-weight: 400;
-              font-size: 14px;
-            }
-            .dp__input {
-              width: 218px;
-              border: 1px solid $color-primary-200 !important;
-              border-radius: 10px !important;
-              padding-top: 4px;
-              padding-bottom: 4px;
-              font-weight: 500 !important;
-              color: $color-gray-600 !important;
-              font-size: 13px;
-              line-height: 20px;
-              background-color: $color-gray-100 !important;
-            }
-          }
-        }
-      }
-    }
-
-    .header-select,
-    .body-select {
-      width: 50px;
-      min-width: 50px;
-    }
-
-    .header-action,
-    .body-action {
-      width: 108px;
-      min-width: 108px;
-      .action-wrapper {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        .icon {
-          cursor: pointer;
-          display: block;
-          font-size: 20px;
-          transition: color 200ms;
-
-          &.disabled {
-            opacity: 0.2;
-            cursor: default;
-          }
-
-          &:hover:not(.disabled) {
-            color: $color-primary-600;
-          }
-        }
-      }
-    }
-
-    // Header border
-    thead {
-      tr:last-child {
-        height: 0px;
-      }
-    }
-
-    tr {
-      .body-select,
-      .header-select {
-        button:hover {
-          cursor: pointer;
-        }
-      }
-    }
-
-    // Row border
-    tbody {
-      tr:hover {
-        td {
-          background-color: $color-gray-50;
-        }
-      }
-    }
-
-    tr {
-      background-color: $color-primary-50;
-      font-weight: 500;
-      th {
-        background-color: $color-primary-50;
-        color: $color-primary-400;
-        position: sticky;
-        top: 0px;
-        font-weight: 600;
-        &::before {
-          content: "";
-          position: absolute;
-          bottom: 0px;
-          left: 0px;
-          width: 100%;
-          height: 1px;
-          background-color: $color-gray-300;
-        }
-      }
-      td {
-        color: $text-light;
-      }
-
-      th:nth-child(1),
-      th:nth-child(2),
-      th:nth-child(3) {
-        z-index: 2;
-      }
-      td:nth-child(1),
-      td:nth-child(2),
-      td:nth-child(3) {
-        z-index: 1;
-      }
-
-      th:nth-child(1),
-      th:nth-child(2),
-      th:nth-child(3),
-      td:nth-child(1),
-      td:nth-child(2),
-      td:nth-child(3) {
-        position: sticky;
-        top: 0px;
-      }
-
-      th:nth-child(1),
-      td:nth-child(1) {
-        left: 0px;
-      }
-      th:nth-child(2),
-      td:nth-child(2) {
-        left: 50px;
-      }
-      th:nth-child(3),
-      td:nth-child(3) {
-        left: 106px;
-        &::after {
-          content: "";
-          position: absolute;
-          top: 0;
-          right: -1px;
-          width: 1px;
-          height: 100%;
-          background-color: $color-gray-300;
-          display: block;
-        }
-      }
-
-      td {
-        background-color: white;
-      }
-    }
-  }
 }
 </style>
