@@ -251,11 +251,11 @@ const convertQuery = () => {
 };
 
 onBeforeMount(async () => {
-  let res = await getDepartments({ pageIndex: 0, pageSize: 1 });
-  const totalElement = res.data.pageInfo.totalElements;
-  res = await getDepartments({
+  // let res = await getDepartments({ pageIndex: 0, pageSize: 1 });
+  // const totalElement = res.data.pageInfo.totalElements;
+  const res = await getDepartments({
     pageIndex: 0,
-    pageSize: totalElement,
+    pageSize: 999,
   });
   console.log(res);
   departmentList.value = res.data.data;

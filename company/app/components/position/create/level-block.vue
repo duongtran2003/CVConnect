@@ -88,10 +88,10 @@ const reseter = ref<
 const resetKey = ref<number>(0);
 
 onBeforeMount(async () => {
-  let levelRes = await getLevels({ pageIndex: 0, pageSize: 1 });
-  levelRes = await getLevels({
+  // let levelRes = await getLevels({ pageIndex: 0, pageSize: 1 });
+  const levelRes = await getLevels({
     pageIndex: 0,
-    pageSize: levelRes.data.pageInfo.totelElements,
+    pageSize: 999,
   });
   levelList.value = levelRes.data.data;
 });
