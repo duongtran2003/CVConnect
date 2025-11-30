@@ -24,13 +24,33 @@
                       Quản trị viên
                     </div>
                   </div>
-                  <div class="status">
-                    {{ detail.isActive ? `Đang hoạt động` : `Ngưng hoạt động` }}
+                  <div class="info-line">
+                    <Icon name="material-symbols:mail-outline-rounded" />
+                    <div class="email-text">{{ detail.email }}</div>
                   </div>
-                  <div class="verified">
-                    {{
-                      detail.isEmailVerified ? `Đã xác thực` : `Chưa xác thực`
-                    }}
+                  <div class="info-line">
+                    <div
+                      class="tag"
+                      :class="{
+                        active: detail.isEmailVerified,
+                        inactive: !detail.isEmailVerified,
+                      }"
+                    >
+                      {{
+                        detail.isEmailVerified ? `Đã xác thực` : `Chưa xác thực`
+                      }}
+                    </div>
+                    <div
+                      class="tag"
+                      :class="{
+                        active: detail.isActive,
+                        inactive: !detail.isActive,
+                      }"
+                    >
+                      {{
+                        detail.isActive ? `Đang hoạt động` : `Ngưng hoạt động`
+                      }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -39,7 +59,9 @@
                 class="revoke-btn"
                 :is-loading="isSubmiting"
                 :title="revokeBtnTooltip"
-                :is-disabled="!detail.isEmailVerified"
+                :is-disabled="
+                  !detail.isEmailVerified || currentUserInfo?.id == props.userId
+                "
                 @click="handleRevokeClick"
               />
             </div>
@@ -214,6 +236,10 @@ const revokeBtnTooltip = computed(() => {
     return "Người dùng cần xác thực email để được đặt làm quản trị hệ thống";
   }
 
+  if (currentUserInfo.value?.id == props.userId) {
+    return "Không thể tự tước quyền quản trị hệ thống của chính mình";
+  }
+
   return isAdmin.value
     ? "Tước quyền quản trị viên hệ thống của thành viên này"
     : "Đặt thành viên này làm quản trị viên hệ thống";
@@ -288,21 +314,23 @@ watch(
     font-size: 12px;
     font-weight: 600;
     padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid $color-gray-300;
-    background-color: white;
+    border-radius: 999px;
+    background-color: $color-gray-100;
     color: $text-light;
+    width: fit-content;
 
     &.active {
       border: 1px solid $color-success;
       background-color: rgba($color-success, 0.1);
       color: $color-success;
+      font-weight: 400;
     }
 
     &.inactive {
       border: 1px solid $color-danger;
       background-color: rgba($color-danger, 0.1);
       color: $color-danger;
+      font-weight: 400;
     }
   }
 
@@ -336,7 +364,8 @@ watch(
     display: flex;
     flex-direction: row;
     gap: 8px;
-    margin-bottom: 18px;
+    margin-bottom: 8px;
+    align-items: center;
 
     .avatar {
       height: 64px;
@@ -359,6 +388,17 @@ watch(
         font-size: 16px;
         color: $text-light;
         font-weight: 600;
+      }
+
+      .info-line {
+        display: flex;
+        flex-direction: row;
+        gap: 4px;
+        align-items: center;
+        font-size: 13px;
+        color: $color-gray-500;
+        font-weight: 400;
+        margin-bottom: 4px;
       }
 
       .verified,
