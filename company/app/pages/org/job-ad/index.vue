@@ -10,7 +10,7 @@
         </div>
         <div class="right">
           <AppButton
-            v-if="allowActions.includes('ADD')"
+            v-if="canCreateJob"
             :text="'Tạo mới'"
             class="submit-btn"
             @click="handleCreate"
@@ -132,6 +132,9 @@ const { getJobAdOrg } = useJobAdApi();
 const { getByRoleCode } = useUserApi();
 const { getDepartments } = useDepartmentApi();
 
+const authStore = useAuthStore();
+const { currentRole } = storeToRefs(authStore);
+
 const filter = ref<any>({
   keyword: "",
   jobAdStatus: undefined,
@@ -187,6 +190,13 @@ const isPublicOpts = computed(() => {
     },
   ];
 });
+
+const canCreateJob = computed(() => {
+  if (!currentRole.value) {
+    return false
+  }
+  return currentRole.value.code == "ORG_ADMIN";
+})
 
 const hrOptions = computed(() => {
   return hrList.value.map((hr) => ({

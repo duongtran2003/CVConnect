@@ -116,6 +116,8 @@ const { getMailTemplateConfig } = useMailTemplateApi();
 const { setLoading } = useLoadingStore();
 const { createJobAd } = useJobAdApi();
 
+const router = useRouter();
+
 const broadcastChannel = ref<BroadcastChannel | null>(null);
 const mailConfig = ref<Record<string, any> | null>(null);
 const paddedProcesses = ref<any[]>([]);
@@ -186,7 +188,7 @@ const isFormValid = computed(() => {
 
   if (
     form.salaryType == SALARY_TYPE.RANGE &&
-    (form.salaryFrom != null || form.salaryTo != null)
+    (form.salaryFrom == null || form.salaryTo == null)
   ) {
     return false;
   }
@@ -265,11 +267,8 @@ const handleSubmit = async (type: string = "") => {
   const levels = payload.levelIds;
   if (levels) {
     const isAll = levels.find((levelId: any) => levelId == 0);
-    console.log(levels)
     if (isAll != undefined) {
-      console.log('has is all')
       delete payload.levelIds;
-      console.log('after delete', payload)
       payload.isAllLevel = true;
     }
   }
@@ -281,6 +280,9 @@ const handleSubmit = async (type: string = "") => {
 
   setLoading(true);
   const res = await createJobAd(payload);
+  if (res) {
+    router.push({path: '/org/job-ad'})
+  }
   setLoading(false);
 };
 
@@ -296,9 +298,6 @@ const handleFormDataChange = <K extends keyof TFormData>(
   key: K,
   payload: TFormData[K],
 ) => {
-  if (key == "descriptionInfo") {
-    console.log(formData.value[key]);
-  }
   formData.value[key] = payload;
 };
 

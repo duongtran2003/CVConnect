@@ -94,7 +94,7 @@ const handleManageSystem = () => {
 
   if (requiredRole) {
     setCurrentRole(requiredRole);
-    router.push({ path: "/system-admin/report/candidate" });
+    router.push({ path: "/system-admin/dashboard" });
     isDropdownShow.value = false;
   }
 };

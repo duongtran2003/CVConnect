@@ -24,13 +24,47 @@
                       Quản trị viên
                     </div>
                   </div>
-                  <div class="status">
-                    {{ detail.isActive ? `Đang hoạt động` : `Ngưng hoạt động` }}
+                  <div class="info-line">
+                    <div v-if="detail.email" class="line-info-block">
+                      <Icon name="material-symbols:mail-outline-rounded" />
+                      <div class="email-text">{{ detail.email }}</div>
+                    </div>
+                    <div v-if="detail.phoneNumber" class="line-info-block">
+                      <Icon name="material-symbols:call-outline-rounded" />
+                      <div class="email-text">{{ detail.phoneNumber }}</div>
+                    </div>
                   </div>
-                  <div class="verified">
-                    {{
-                      detail.isEmailVerified ? `Đã xác thực` : `Chưa xác thực`
-                    }}
+                  <div v-if="detail.address" class="info-line">
+                    <div class="line-info-block">
+                      <Icon
+                        name="material-symbols:location-on-outline-rounded"
+                      />
+                      <div class="email-text">{{ detail.address }}</div>
+                    </div>
+                  </div>
+                  <div class="info-line mt-1">
+                    <div
+                      class="tag"
+                      :class="{
+                        active: detail.isEmailVerified,
+                        inactive: !detail.isEmailVerified,
+                      }"
+                    >
+                      {{
+                        detail.isEmailVerified ? `Đã xác thực` : `Chưa xác thực`
+                      }}
+                    </div>
+                    <div
+                      class="tag"
+                      :class="{
+                        active: detail.isActive,
+                        inactive: !detail.isActive,
+                      }"
+                    >
+                      {{
+                        detail.isActive ? `Đang hoạt động` : `Ngưng hoạt động`
+                      }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -39,7 +73,9 @@
                 class="revoke-btn"
                 :is-loading="isSubmiting"
                 :title="revokeBtnTooltip"
-                :is-disabled="!detail.isEmailVerified"
+                :is-disabled="
+                  !detail.isEmailVerified || currentUserInfo?.id == props.userId
+                "
                 @click="handleRevokeClick"
               />
             </div>
@@ -47,7 +83,15 @@
             <div class="info-block">
               <div class="info-row">
                 <div class="label">Phương thức truy cập</div>
-                <div class="tag">{{ detail.accessMethod }}</div>
+                <div class="tag-list">
+                  <div
+                    v-for="(method, index) of detail.accessMethods"
+                    :key="index"
+                    class="tag"
+                  >
+                    {{ method.label }}
+                  </div>
+                </div>
               </div>
               <div class="info-row">
                 <div class="label">Vai trò</div>
@@ -67,8 +111,20 @@
                   {{ formatDateTime(detail.createdAt, "DD/MM/YYYY HH:mm") }}
                 </div>
               </div>
+              <div v-if="detail.updatedAt" class="info-row">
+                <div class="label">Ngày chỉnh sửa</div>
+                <div class="value">
+                  {{ formatDateTime(detail.updatedAt, "DD/MM/YYYY HH:mm") }}
+                </div>
+              </div>
+              <div v-if="detail.updatedBy" class="info-row">
+                <div class="label">Người chỉnh sửa</div>
+                <div class="value">
+                  {{ detail.updatedBy }}
+                </div>
+              </div>
             </div>
-            <div class="divider"></div>
+            <div v-if="detail.orgMember" class="divider"></div>
             <div v-if="detail.orgMember" class="org-info-block">
               <!-- <div class="label">Thành viên của tổ chức</div> -->
               <div class="org-info-card">
@@ -214,6 +270,10 @@ const revokeBtnTooltip = computed(() => {
     return "Người dùng cần xác thực email để được đặt làm quản trị hệ thống";
   }
 
+  if (currentUserInfo.value?.id == props.userId) {
+    return "Không thể tự tước quyền quản trị hệ thống của chính mình";
+  }
+
   return isAdmin.value
     ? "Tước quyền quản trị viên hệ thống của thành viên này"
     : "Đặt thành viên này làm quản trị viên hệ thống";
@@ -257,11 +317,11 @@ async function handleRevokeClick() {
   isSubmiting.value = true;
   const res = await changeAdminStatus(props.userId, !isAdmin.value);
   isSubmiting.value = false;
-  if (isAdmin.value && currentUserInfo.value?.id == props.userId) {
-    await logout();
-    router.push({ path: "/auth/login" });
-    return;
-  }
+  // if (isAdmin.value && currentUserInfo.value?.id == props.userId) {
+  //   await logout();
+  //   router.push({ path: "/auth/login" });
+  //   return;
+  // }
   fetchDetails();
 }
 
@@ -288,21 +348,23 @@ watch(
     font-size: 12px;
     font-weight: 600;
     padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid $color-gray-300;
-    background-color: white;
+    border-radius: 999px;
+    background-color: $color-gray-100;
     color: $text-light;
+    width: fit-content;
 
     &.active {
       border: 1px solid $color-success;
       background-color: rgba($color-success, 0.1);
       color: $color-success;
+      font-weight: 400;
     }
 
     &.inactive {
       border: 1px solid $color-danger;
       background-color: rgba($color-danger, 0.1);
       color: $color-danger;
+      font-weight: 400;
     }
   }
 
@@ -336,7 +398,8 @@ watch(
     display: flex;
     flex-direction: row;
     gap: 8px;
-    margin-bottom: 18px;
+    margin-bottom: 8px;
+    align-items: center;
 
     .avatar {
       height: 64px;
@@ -359,6 +422,24 @@ watch(
         font-size: 16px;
         color: $text-light;
         font-weight: 600;
+      }
+
+      .info-line {
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+        align-items: center;
+        font-size: 13px;
+        color: $color-gray-500;
+        font-weight: 400;
+        // margin-bottom: 4px;
+
+        .line-info-block {
+          display: flex;
+          flex-direction: row;
+          gap: 4px;
+          align-items: center;
+        }
       }
 
       .verified,
@@ -398,6 +479,7 @@ watch(
         flex-direction: row;
         gap: 4px;
         flex-wrap: wrap;
+        justify-content: flex-end;
       }
     }
   }
