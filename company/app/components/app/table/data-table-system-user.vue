@@ -37,6 +37,20 @@
             name="mdi:eye-outline"
             @click="handleActionClick(row, 'view')"
           />
+          <Icon
+            class="icon"
+            name="material-symbols:person-remove-rounded"
+            :class="{'disabled': !row.original?.isRevokable}"
+            :title="'Tước quyền quản trị thống của thành viên này'"
+            @click="handleActionClick(row, 'revoke')"
+          />
+          <Icon
+            class="icon"
+            name="material-symbols:manage-accounts-rounded"
+            :class="{'disabled': !row.original?.isAssignable}"
+            :title="'Đặt thành viên này làm quản trị hệ thống'"
+            @click="handleActionClick(row, 'assign')"
+          />
         </div>
       </template>
       <template
@@ -319,7 +333,7 @@ onBeforeMount(() => {
   }
 });
 
-export type TTableAction = "edit" | "delete" | "view";
+export type TTableAction = "edit" | "delete" | "view" | "revoke" | "assign";
 const emit = defineEmits<{
   (e: "selectionUpdate", selectionList: number[]): void;
   (e: TTableAction, id: number): void;

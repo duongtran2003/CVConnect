@@ -317,11 +317,11 @@ async function handleRevokeClick() {
   isSubmiting.value = true;
   const res = await changeAdminStatus(props.userId, !isAdmin.value);
   isSubmiting.value = false;
-  if (isAdmin.value && currentUserInfo.value?.id == props.userId) {
-    await logout();
-    router.push({ path: "/auth/login" });
-    return;
-  }
+  // if (isAdmin.value && currentUserInfo.value?.id == props.userId) {
+  //   await logout();
+  //   router.push({ path: "/auth/login" });
+  //   return;
+  // }
   fetchDetails();
 }
 

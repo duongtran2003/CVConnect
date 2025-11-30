@@ -1,9 +1,6 @@
 <template>
   <div class="wrapper">
-    <AdminUserDetailModal
-      v-model="isViewModalOpen"
-      :user-id="editViewId"
-    />
+    <AdminUserDetailModal v-model="isViewModalOpen" :user-id="editViewId" />
     <UModal
       :open="isConfirmModalShow"
       title="Ngừng hoạt động"
@@ -66,8 +63,8 @@
         :is-table-empty="isNoData"
         @selection-update="handleSelectionsUpdate"
         @delete="handleTableActionClick($event, 'delete')"
-        @edit="handleTableActionClick($event, 'edit')"
-        @view="handleTableActionClick($event, 'view')"
+        @revoke="handleTableActionClick($event, 'revoke')"
+        @assign="handleTableActionClick($event, 'assign')"
         @sort="handleSort"
         @filter="handleFilter"
       />
@@ -95,7 +92,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import type { TTableAction } from "~/components/app/table/data-table.vue";
+import type { TTableAction } from "~/components/app/table/data-table-system-user.vue";
 import type { TSort } from "~/types/common";
 import { cloneDeep, debounce } from "lodash";
 import { CELL_TYPE, CHIP_TYPE } from "~/const/common";
@@ -155,6 +152,7 @@ const { setLoading } = useLoadingStore();
 // TODO: REPLACE THIS APIS
 const { getDepartments, deleteDepartment, changeDepartmentStatus } =
   useDepartmentApi();
+const { getUserDetailAdmin, changeAdminStatus } = useSystemUserApi();
 
 const { getRoles } = useRoleApi();
 
@@ -443,8 +441,14 @@ const fetchData = async () => {
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
     entry.roleIds = entry.roles.map((role: any) => role.name).join(", ");
-    entry.isAdmin = !!entry.roles.find((r: any) => r.code == "SYSTEM_ADMIN");
-    entry.isSelf = entry.id == currentUserInfo.value?.id;
+
+    const isAdmin = !!entry.roles.find((r: any) => r.code == "SYSTEM_ADMIN");
+    const isSelf = entry.id == currentUserInfo.value?.id;
+    const isEmailVerified = entry.isEmailVerified;
+
+    entry.isRevokable = isAdmin && !isSelf;
+    entry.isAssignable = !isAdmin && isEmailVerified;
+
     entry.info = {
       cellType: "avatar",
       data: {
@@ -526,7 +530,7 @@ const handleActiveToggle = async (ids: number[], state: boolean) => {
   setLoading(false);
 };
 
-const handleTableActionClick = (id: number, action: TTableAction) => {
+const handleTableActionClick = async (id: number, action: TTableAction) => {
   if (action === "view") {
     editViewId.value = id;
     isViewModalOpen.value = true;
@@ -535,6 +539,20 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
     //   path: `/system-admin/organizations/detail/${id}`,
     // });
     // window.open(link.href, "_blank");
+  } else if (action === "revoke") {
+    setLoading(true);
+    const res = await changeAdminStatus(id, false);
+    if (res) {
+      await fetchData();
+    }
+    setLoading(false);
+  } else if (action === "assign") {
+    setLoading(true);
+    const res = await changeAdminStatus(id, true);
+    if (res) {
+      await fetchData();
+    }
+    setLoading(false);
   }
 };
 
