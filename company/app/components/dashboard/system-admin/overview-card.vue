@@ -1,10 +1,12 @@
 <template>
   <div class="overview-card">
-    <div class="icon">
-      <Icon :name="props.icon" />
-    </div>
-    <div class="num">
-      {{ props.num }}
+    <div class="info">
+      <div class="num">
+        {{ props.num }}
+      </div>
+      <div class="icon">
+        <Icon :name="props.icon" />
+      </div>
     </div>
     <div class="text">
       {{ props.str }}
@@ -31,6 +33,7 @@ const props = defineProps<TProps>();
   flex-direction: column;
   gap: 12px;
   min-width: 180px;
+  min-height: 100px;
   width: calc((100% - 64px) * 0.2);
 
   .icon {
@@ -38,6 +41,7 @@ const props = defineProps<TProps>();
     padding: 8px;
     background-color: rgba($color-primary-400, 0.08);
     width: fit-content;
+    height: fit-content;
 
     .iconify {
       display: block;
@@ -49,13 +53,20 @@ const props = defineProps<TProps>();
     }
   }
 
+  .info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    flex: 1;
+  }
+
   .num {
     font-size: 28px;
     font-weight: 600;
   }
 
   .text {
-    margin-top: -12px;
     font-size: 16px;
     font-weight: 500;
   }

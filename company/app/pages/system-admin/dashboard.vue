@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-wrapper flex flex-col gap-4">
     <div class="block top-block">
-      <div class="title">Thống kê hệ thống</div>
+      <!-- <div class="title">Thống kê hệ thống</div> -->
       <div class="top">
         <AppInputMonthpicker
           :label="''"
@@ -24,11 +24,15 @@
         :icon="card.icon"
       />
     </div>
+    <div class="block">
+      <DashboardSystemAdminChartPassRate :data="passRate" />
+    </div>
     <div class="h-[9999px]">rest of the content</div>
   </div>
 </template>
 <script setup lang="ts">
 import moment from "moment";
+import type { TPassRateData } from "~/components/dashboard/system-admin/chart/pass-rate.vue";
 import { overviewMap } from "~/const/views/system-admin/dashboard";
 
 definePageMeta({
@@ -36,7 +40,7 @@ definePageMeta({
 });
 
 const { setLoading } = useLoadingStore();
-const { getOverview } = useDashboardApi();
+const { getOverview, getPassRate } = useDashboardApi();
 
 const route = useRoute();
 const router = useRouter();
@@ -44,6 +48,7 @@ const router = useRouter();
 const monthInput = ref<any>(undefined);
 
 const overview = ref<any>(undefined);
+const passRate = ref<TPassRateData[]>([]);
 
 onBeforeMount(() => {
   const qStart = route.query.start as string | undefined; // "2025-11"
@@ -63,11 +68,10 @@ onBeforeMount(() => {
     return;
   }
 
-  // fallback: current month
   const now = moment();
   monthInput.value = [
-    { month: now.month(), year: now.year() },
-    { month: now.month(), year: now.year() },
+    { month: 0, year: now.year() }, // January
+    { month: now.month(), year: now.year() }, // current month
   ];
 });
 
@@ -83,10 +87,15 @@ async function fetchOverview(payload: any) {
     arr.push({
       str: overviewMap[key as keyof typeof overviewMap].text,
       num: res.data[key],
-      icon: overviewMap[key as keyof typeof overviewMap].icon
+      icon: overviewMap[key as keyof typeof overviewMap].icon,
     });
   }
   overview.value = arr;
+}
+
+async function fetchPassRate(payload: any) {
+  const res = await getPassRate(payload);
+  passRate.value = res.data;
 }
 
 watch(
@@ -113,12 +122,12 @@ watch(
       .toDate();
 
     const payload = {
-      startTime: toUtcDateStart(startDate.toDateString()),
-      endTime: toUtcDateEnd(endDate.toDateString()),
+      startTime: toDateStart(startDate.toDateString()),
+      endTime: toDateEnd(endDate.toDateString()),
     };
 
     setLoading(true);
-    await fetchOverview(payload);
+    await Promise.allSettled([fetchOverview(payload), fetchPassRate(payload)]);
     setLoading(false);
   },
   { immediate: true },

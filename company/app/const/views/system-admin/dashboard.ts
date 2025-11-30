@@ -1,19 +1,19 @@
 export const overviewMap = {
   numberOfApplications: {
-    icon: "material-symbols:person-add-outline-rounded",
-    text: "Đơn ứng tuyển",
+    icon: "material-symbols:assignment-add-outline-rounded",
+    text: "Lượt ứng tuyển",
   },
   numberOfNewCandidates: {
-    icon: "material-symbols:assignment-add-rounded",
+    icon: "material-symbols:person-add-outline-rounded",
     text: "Ứng viên mới",
   },
   numberOfNewOrgs: {
     icon: "material-symbols:home-work-outline-rounded",
-    text: "Tổ chức mới",
+    text: "Doanh nghiệp mới",
   },
   numberOfOnboard: {
     icon: "material-symbols:article-person-outline-rounded",
-    text: "Onboard",
+    text: "Đã tuyển",
   },
   numberOfJobAds: {
     icon: "material-symbols:document-search-outline-rounded",
