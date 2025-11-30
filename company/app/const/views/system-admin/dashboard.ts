@@ -1,50 +1,22 @@
-export const MONTHS = [
-  {
-    label: "Tháng 1",
-    value: 1,
+export const overviewMap = {
+  numberOfApplications: {
+    icon: "material-symbols:assignment-add-outline-rounded",
+    text: "Lượt ứng tuyển",
   },
-  {
-    label: "Tháng 2",
-    value: 2,
+  numberOfNewCandidates: {
+    icon: "material-symbols:person-add-outline-rounded",
+    text: "Ứng viên mới",
   },
-  {
-    label: "Tháng 3",
-    value: 3,
+  numberOfNewOrgs: {
+    icon: "material-symbols:home-work-outline-rounded",
+    text: "Doanh nghiệp mới",
   },
-  {
-    label: "Tháng 4",
-    value: 4,
+  numberOfOnboard: {
+    icon: "material-symbols:article-person-outline-rounded",
+    text: "Đã tuyển",
   },
-  {
-    label: "Tháng 5",
-    value: 5,
+  numberOfJobAds: {
+    icon: "material-symbols:document-search-outline-rounded",
+    text: "Tin tuyển dụng",
   },
-  {
-    label: "Tháng 6",
-    value: 6,
-  },
-  {
-    label: "Tháng 7",
-    value: 7,
-  },
-  {
-    label: "Tháng 8",
-    value: 8,
-  },
-  {
-    label: "Tháng 9",
-    value: 9,
-  },
-  {
-    label: "Tháng 10",
-    value: 10,
-  },
-  {
-    label: "Tháng 11",
-    value: 11,
-  },
-  {
-    label: "Tháng 12",
-    value: 12,
-  },
-]
+};
