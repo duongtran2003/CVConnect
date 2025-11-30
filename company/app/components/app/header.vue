@@ -22,6 +22,7 @@ const isHr = computed(() => {
 .header {
   width: 100%;
   height: 48px;
+  min-height: 48px;
   display: flex;
   gap: 12px;
   flex-direction: row;

@@ -1,75 +1,166 @@
 <template>
-  <div class="dashboard-wrapper">
-    <div class="title">Thống kê hệ thống</div>
-    <div class="top">
-      <span>Từ</span>
-      <AppInputSearchSelect
-        :label="''"
-        :required="true"
-        :options="months"
-        :value="selectedMonth"
-        :error="''"
-        :placeholder="'Chọn tháng'"
-        :remote-filter="false"
-        :multiple="false"
-        :fetch-fn="null"
-        :allow-clear="false"
-        @input="($event) => (selectedMonth = $event)"
-      />
-      <span>Đến</span>
-      <AppInputSearchSelect
-        :label="''"
-        :required="true"
-        :options="months"
-        :value="selectedMonth"
-        :error="''"
-        :placeholder="'Chọn tháng'"
-        :remote-filter="false"
-        :multiple="false"
-        :fetch-fn="null"
-        :allow-clear="false"
-        @input="($event) => (selectedMonth = $event)"
+  <div class="dashboard-wrapper flex flex-col gap-4">
+    <div class="block top-block">
+      <div class="title">Thống kê hệ thống</div>
+      <div class="top">
+        <AppInputMonthpicker
+          :label="''"
+          :required="false"
+          :value="monthInput"
+          :error="''"
+          :slim-error="true"
+          :placeholder="'Chọn khoảng thời gian'"
+          :is-range="true"
+          @input="handleMonthInput($event)"
+        />
+      </div>
+    </div>
+    <div class="line">
+      <DashboardSystemAdminOverviewCard
+        v-for="(card, index) of overview"
+        :key="index"
+        :num="card.num"
+        :str="card.str"
+        :icon="card.icon"
       />
     </div>
+    <div class="h-[9999px]">rest of the content</div>
   </div>
 </template>
 <script setup lang="ts">
-import { MONTHS } from "~/const/views/system-admin/dashboard";
+import moment from "moment";
+import { overviewMap } from "~/const/views/system-admin/dashboard";
 
 definePageMeta({
   layout: "system-admin",
 });
 
-const selectedMonth = ref<any>(undefined);
-const months = computed(() => {
-  return MONTHS;
+const { setLoading } = useLoadingStore();
+const { getOverview } = useDashboardApi();
+
+const route = useRoute();
+const router = useRouter();
+
+const monthInput = ref<any>(undefined);
+
+const overview = ref<any>(undefined);
+
+onBeforeMount(() => {
+  const qStart = route.query.start as string | undefined; // "2025-11"
+  const qEnd = route.query.end as string | undefined;
+
+  const isValidYM = (m?: string) => m && moment(m, "YYYY-MM", true).isValid();
+
+  if (isValidYM(qStart) && isValidYM(qEnd)) {
+    const mStart = moment(qStart, "YYYY-MM");
+    const mEnd = moment(qEnd, "YYYY-MM");
+
+    monthInput.value = [
+      { month: mStart.month(), year: mStart.year() },
+      { month: mEnd.month(), year: mEnd.year() },
+    ];
+
+    return;
+  }
+
+  // fallback: current month
+  const now = moment();
+  monthInput.value = [
+    { month: now.month(), year: now.year() },
+    { month: now.month(), year: now.year() },
+  ];
 });
+
+function handleMonthInput(value: any) {
+  monthInput.value = value;
+}
+
+async function fetchOverview(payload: any) {
+  const res = await getOverview(payload);
+  const arr = [];
+  console.log({ res });
+  for (const key of Object.keys(res.data)) {
+    arr.push({
+      str: overviewMap[key as keyof typeof overviewMap].text,
+      num: res.data[key],
+      icon: overviewMap[key as keyof typeof overviewMap].icon
+    });
+  }
+  overview.value = arr;
+}
+
+watch(
+  monthInput,
+  async (newVal) => {
+    if (!newVal || !newVal[0] || !newVal[1]) return;
+
+    const s = newVal[0]; // {year, month}
+    const e = newVal[1];
+
+    router.replace({
+      query: {
+        ...route.query,
+        start: moment({ year: s.year, month: s.month }).format("YYYY-MM"),
+        end: moment({ year: e.year, month: e.month }).format("YYYY-MM"),
+      },
+    });
+
+    const startDate = moment({ year: s.year, month: s.month })
+      .startOf("month")
+      .toDate();
+    const endDate = moment({ year: e.year, month: e.month })
+      .endOf("month")
+      .toDate();
+
+    const payload = {
+      startTime: toUtcDateStart(startDate.toDateString()),
+      endTime: toUtcDateEnd(endDate.toDateString()),
+    };
+
+    setLoading(true);
+    await fetchOverview(payload);
+    setLoading(false);
+  },
+  { immediate: true },
+);
 </script>
 <style lang="scss" scoped>
-.dashboard-wrapper {
-  overflow: hidden;
-  min-height: 0;
-  flex: 1;
-  border-radius: 8px;
-  margin-top: 8px;
+.block {
   @include box-shadow;
   background-color: white;
-  padding: 20px;
+  padding: 12px;
+  border-radius: 8px;
 
-  .title {
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 20px;
-    margin-bottom: 12px;
+  &.top-block {
+    margin-top: 8px;
+    position: sticky;
+    top: 0px;
+    z-index: 1;
+    border: 1px solid $color-gray-300;
   }
+}
 
-  .top {
-    display: flex;
-    flex-direction: row;
+.title {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 20px;
+  margin-bottom: 6px;
+}
 
-    :deep(.search-select-input) {
-      max-width: 200px;
-    }
+.top {
+  display: flex;
+  flex-direction: row;
+
+  :deep(.monthpicker-input) {
+    max-width: 240px;
   }
+}
+
+.line {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 </style>
