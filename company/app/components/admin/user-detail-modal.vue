@@ -25,10 +25,24 @@
                     </div>
                   </div>
                   <div class="info-line">
-                    <Icon name="material-symbols:mail-outline-rounded" />
-                    <div class="email-text">{{ detail.email }}</div>
+                    <div v-if="detail.email" class="line-info-block">
+                      <Icon name="material-symbols:mail-outline-rounded" />
+                      <div class="email-text">{{ detail.email }}</div>
+                    </div>
+                    <div v-if="detail.phoneNumber" class="line-info-block">
+                      <Icon name="material-symbols:call-outline-rounded" />
+                      <div class="email-text">{{ detail.phoneNumber }}</div>
+                    </div>
                   </div>
-                  <div class="info-line">
+                  <div v-if="detail.address" class="info-line">
+                    <div class="line-info-block">
+                      <Icon
+                        name="material-symbols:location-on-outline-rounded"
+                      />
+                      <div class="email-text">{{ detail.address }}</div>
+                    </div>
+                  </div>
+                  <div class="info-line mt-1">
                     <div
                       class="tag"
                       :class="{
@@ -69,7 +83,15 @@
             <div class="info-block">
               <div class="info-row">
                 <div class="label">Phương thức truy cập</div>
-                <div class="tag">{{ detail.accessMethod }}</div>
+                <div class="tag-list">
+                  <div
+                    v-for="(method, index) of detail.accessMethods"
+                    :key="index"
+                    class="tag"
+                  >
+                    {{ method.label }}
+                  </div>
+                </div>
               </div>
               <div class="info-row">
                 <div class="label">Vai trò</div>
@@ -89,8 +111,20 @@
                   {{ formatDateTime(detail.createdAt, "DD/MM/YYYY HH:mm") }}
                 </div>
               </div>
+              <div v-if="detail.updatedAt" class="info-row">
+                <div class="label">Ngày chỉnh sửa</div>
+                <div class="value">
+                  {{ formatDateTime(detail.updatedAt, "DD/MM/YYYY HH:mm") }}
+                </div>
+              </div>
+              <div v-if="detail.updatedBy" class="info-row">
+                <div class="label">Người chỉnh sửa</div>
+                <div class="value">
+                  {{ detail.updatedBy }}
+                </div>
+              </div>
             </div>
-            <div class="divider"></div>
+            <div v-if="detail.orgMember" class="divider"></div>
             <div v-if="detail.orgMember" class="org-info-block">
               <!-- <div class="label">Thành viên của tổ chức</div> -->
               <div class="org-info-card">
@@ -393,12 +427,19 @@ watch(
       .info-line {
         display: flex;
         flex-direction: row;
-        gap: 4px;
+        gap: 16px;
         align-items: center;
         font-size: 13px;
         color: $color-gray-500;
         font-weight: 400;
-        margin-bottom: 4px;
+        // margin-bottom: 4px;
+
+        .line-info-block {
+          display: flex;
+          flex-direction: row;
+          gap: 4px;
+          align-items: center;
+        }
       }
 
       .verified,
@@ -438,6 +479,7 @@ watch(
         flex-direction: row;
         gap: 4px;
         flex-wrap: wrap;
+        justify-content: flex-end;
       }
     }
   }

@@ -160,16 +160,9 @@ const { getRoles } = useRoleApi();
 
 const { getUsers, getExport } = useSystemUserApi();
 
-const { getOrgs, updateStatus } = useOrgApi();
-const { getIndustries } = useIndustryApi();
-
-async function fetchIndustries() {
-  const res = await getIndustries({ pageSize: 999 });
-  if (!res) {
-    return null;
-  }
-  industryList.value = res.data.data;
-}
+const { updateStatus } = useOrgApi();
+const userStore = useUserStore();
+const { userInfo: currentUserInfo } = storeToRefs(userStore);
 
 // NOTE: From query string to filter
 const convertQuery = () => {
@@ -450,6 +443,8 @@ const fetchData = async () => {
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
     entry.roleIds = entry.roles.map((role: any) => role.name).join(", ");
+    entry.isAdmin = !!entry.roles.find((r: any) => r.code == "SYSTEM_ADMIN");
+    entry.isSelf = entry.id == currentUserInfo.value?.id;
     entry.info = {
       cellType: "avatar",
       data: {
