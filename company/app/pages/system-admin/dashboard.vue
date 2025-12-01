@@ -24,15 +24,53 @@
         :icon="card.icon"
       />
     </div>
-    <div class="block">
+    <div v-if="passRate" class="block">
       <DashboardSystemAdminChartPassRate :data="passRate" />
     </div>
-    <div class="h-[9999px]">rest of the content</div>
+    <div class="line line-3">
+      <div v-if="candidateMostApply" class="block left">
+        <DashboardSystemAdminChartCandidateTopApply
+          :data="candidateMostApply"
+        />
+      </div>
+      <div v-if="eliminatedReasons" class="block right">
+        <DashboardSystemAdminChartByEliminatedReason
+          :data="eliminatedReasons"
+        />
+      </div>
+    </div>
+    <div v-if="jobAdsByTime" class="block">
+      <DashboardSystemAdminChartJobAdByTime :data="jobAdsByTime" />
+    </div>
+    <div v-if="jobAdsByCareer" class="block">
+      <DashboardSystemAdminChartJobAdByCareer :data="jobAdsByCareer" />
+    </div>
+    <div class="line line-5">
+      <div v-if="jobAdsByLevel" class="block left">
+        <DashboardSystemAdminChartJobAdByLevel :data="jobAdsByLevel" />
+      </div>
+      <div v-if="jobAdsFeatured" class="block right">
+        <DashboardSystemAdminFeaturedJobAdsTable :data="jobAdsFeatured" />
+      </div>
+    </div>
+    <div v-if="newOrgByTime" class="block">
+      <DashboardSystemAdminChartNewOrgByTime :data="newOrgByTime" />
+    </div>
+    <div v-if="staffSize" class="block">
+      <DashboardSystemAdminChartStaffSize :data="staffSize" />
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import moment from "moment";
+import type { TByEliminatedReasonData } from "~/components/dashboard/system-admin/chart/by-eliminated-reason.vue";
+import type { TTopApplyData } from "~/components/dashboard/system-admin/chart/candidate-top-apply.vue";
+import type { TJobAdByCareerData } from "~/components/dashboard/system-admin/chart/job-ad-by-career.vue";
+import type { TJobAdByLevelData } from "~/components/dashboard/system-admin/chart/job-ad-by-level.vue";
+import type { TJobAdByTimeData } from "~/components/dashboard/system-admin/chart/job-ad-by-time.vue";
+import type { TNewOrgByTimeData } from "~/components/dashboard/system-admin/chart/new-org-by-time.vue";
 import type { TPassRateData } from "~/components/dashboard/system-admin/chart/pass-rate.vue";
+import type { TFeaturedJobData } from "~/components/dashboard/system-admin/featured-job-ads-table.vue";
 import { overviewMap } from "~/const/views/system-admin/dashboard";
 
 definePageMeta({
@@ -40,7 +78,18 @@ definePageMeta({
 });
 
 const { setLoading } = useLoadingStore();
-const { getOverview, getPassRate } = useDashboardApi();
+const {
+  getOverview,
+  getPassRate,
+  getCandidateTopApply,
+  getByEliminatedReason,
+  getJobAdsByTime,
+  getJobAdsByCareer,
+  getJobAdsByLevel,
+  getJobAdsFeatured,
+  getNewOrgByTime,
+  getStaffSize,
+} = useDashboardApi();
 
 const route = useRoute();
 const router = useRouter();
@@ -48,9 +97,20 @@ const router = useRouter();
 const monthInput = ref<any>(undefined);
 
 const overview = ref<any>(undefined);
-const passRate = ref<TPassRateData[]>([]);
+const passRate = ref<TPassRateData[] | null>(null);
+const candidateMostApply = ref<TTopApplyData[] | null>(null);
+const eliminatedReasons = ref<TByEliminatedReasonData[] | null>(null);
+const jobAdsByTime = ref<TJobAdByTimeData[] | null>(null);
+const jobAdsByCareer = ref<TJobAdByCareerData[] | null>(null);
+const jobAdsByLevel = ref<TJobAdByLevelData[] | null>(null);
+const jobAdsFeatured = ref<TFeaturedJobData[] | null>(null);
+const newOrgByTime = ref<TNewOrgByTimeData[] | null>(null);
+const staffSize = ref<any>(null);
 
-onBeforeMount(() => {
+onBeforeMount(async () => {
+  const res = await getStaffSize();
+  staffSize.value = res.data;
+
   const qStart = route.query.start as string | undefined; // "2025-11"
   const qEnd = route.query.end as string | undefined;
 
@@ -98,6 +158,41 @@ async function fetchPassRate(payload: any) {
   passRate.value = res.data;
 }
 
+async function fetchCandidateTopApply(payload: any) {
+  const res = await getCandidateTopApply(payload);
+  candidateMostApply.value = res.data;
+}
+
+async function fetchByEliminatedReasons(payload: any) {
+  const res = await getByEliminatedReason(payload);
+  eliminatedReasons.value = res.data;
+}
+
+async function fetchJobAdsByTime(payload: any) {
+  const res = await getJobAdsByTime(payload);
+  jobAdsByTime.value = res.data;
+}
+
+async function fetchJobAdsByCareer(payload: any) {
+  const res = await getJobAdsByCareer(payload);
+  jobAdsByCareer.value = res.data;
+}
+
+async function fetchJobAdsByLevel(payload: any) {
+  const res = await getJobAdsByLevel(payload);
+  jobAdsByLevel.value = res.data;
+}
+
+async function fetchJobAdsFeatured(payload: any) {
+  const res = await getJobAdsFeatured(payload);
+  jobAdsFeatured.value = res.data;
+}
+
+async function fetchNewOrgByTime(payload: any) {
+  const res = await getNewOrgByTime(payload);
+  newOrgByTime.value = res.data;
+}
+
 watch(
   monthInput,
   async (newVal) => {
@@ -127,7 +222,17 @@ watch(
     };
 
     setLoading(true);
-    await Promise.allSettled([fetchOverview(payload), fetchPassRate(payload)]);
+    await Promise.allSettled([
+      fetchOverview(payload),
+      fetchPassRate(payload),
+      fetchCandidateTopApply(payload),
+      fetchByEliminatedReasons(payload),
+      fetchJobAdsByTime(payload),
+      fetchJobAdsByCareer(payload),
+      fetchJobAdsByLevel(payload),
+      fetchJobAdsFeatured(payload),
+      fetchNewOrgByTime(payload),
+    ]);
     setLoading(false);
   },
   { immediate: true },
@@ -171,5 +276,41 @@ watch(
   gap: 16px;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+.line-3 {
+  .left {
+    width: calc((100% - 16px) * 0.6);
+  }
+  .right {
+    width: calc((100% - 16px) * 0.4);
+  }
+
+  @media (max-width: 1350px) {
+    flex-direction: column;
+
+    .left,
+    .right {
+      width: 100%;
+    }
+  }
+}
+
+.line-5 {
+  .left {
+    width: calc((100% - 16px) * 0.4);
+  }
+  .right {
+    width: calc((100% - 16px) * 0.6);
+  }
+
+  @media (max-width: 1350px) {
+    flex-direction: column;
+
+    .left,
+    .right {
+      width: 100%;
+    }
+  }
 }
 </style>

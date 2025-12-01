@@ -64,8 +64,262 @@ export const useDashboardApi = () => {
     }
   };
 
+  const getCandidateTopApply = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/system-admin/candidate-apply-most?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getByEliminatedReason = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/system-admin/eliminated-reason?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getJobAdsByTime = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/system-admin/job-ad-by-time?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getJobAdsByCareer = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/system-admin/job-ad-by-career?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getJobAdsByLevel = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/system-admin/job-ad-by-level?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getJobAdsFeatured = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/system-admin/job-ad-featured?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getNewOrgByTime = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/system-admin/new-org-by-time?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getStaffSize = async (
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const res = await $axios.get(
+        `/core/dashboard/system-admin/staff-size`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   return {
     getOverview,
     getPassRate,
+    getCandidateTopApply,
+    getByEliminatedReason,
+    getJobAdsByTime,
+    getJobAdsByCareer,
+    getJobAdsByLevel,
+    getJobAdsFeatured,
+    getNewOrgByTime,
+    getStaffSize,
   };
 };
