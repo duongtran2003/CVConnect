@@ -20,6 +20,7 @@ export function useLayoutPermission(
   const sidebarStore = useSidebarStore();
   const { setMenus } = sidebarStore;
   const { sidebarData } = storeToRefs(sidebarStore);
+  const route = useRoute();
 
   const init = async () => {
     setLoading(true);
@@ -29,7 +30,8 @@ export function useLayoutPermission(
       !verifyTokenRes.data.isValid &&
       verifyTokenRes.data.code != STATUS_CODE.TOKEN_EXPIRED
     ) {
-      await logout();
+      const encodedRoute = encodeURIComponent(route.fullPath);
+      await logout(encodedRoute);
       setLoading(false);
       return;
     }
