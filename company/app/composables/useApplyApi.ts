@@ -6,12 +6,9 @@ export const useApplyApi = () => {
     const _abortController = controller;
 
     try {
-      const res = await $axios.get(
-        `/core/candidate-info-apply/filter`,
-        {
-          signal: _abortController ? _abortController.signal : undefined,
-        },
-      );
+      const res = await $axios.get(`/core/candidate-info-apply/filter`, {
+        signal: _abortController ? _abortController.signal : undefined,
+      });
       // toast.add({
       //   title: res.data.message,
       //   color: "success",
@@ -20,7 +17,7 @@ export const useApplyApi = () => {
     } catch (err: any) {
       // if (err.response && err.response.data) {
       //   toast.add({
-      //     title: err.response.data.message || "Có lỗi xảy ra",
+      //     title: err?.response?.data?.message || "Có lỗi xảy ra" || "Có lỗi xảy ra",
       //     color: "error",
       //   });
       // }
@@ -31,10 +28,7 @@ export const useApplyApi = () => {
 
   const applyJob = async (payload: any) => {
     try {
-      const res = await $axios.post(
-        `/core/job-ad-candidate/apply`,
-        payload,
-      );
+      const res = await $axios.post(`/core/job-ad-candidate/apply`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
@@ -43,14 +37,14 @@ export const useApplyApi = () => {
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message || "Có lỗi xảy ra",
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
       console.error(err);
       return null;
     }
-  }
+  };
 
   return {
     getCandidateInfoApply,

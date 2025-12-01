@@ -13,7 +13,7 @@ export const useRoleApi = () => {
 
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message,
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
@@ -38,7 +38,7 @@ export const useRoleApi = () => {
 
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message,
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
@@ -54,7 +54,7 @@ export const useRoleApi = () => {
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message,
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
@@ -68,9 +68,9 @@ export const useRoleApi = () => {
       const res = await $axios.get(`/user/role/member-type`);
       return res.data;
     } catch (err: any) {
-      if (err.response && err.response.data.message) {
+      if (err.response && err?.response?.data?.message) {
         toast.add({
-          title: err.response.data.message,
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       } else {
@@ -95,7 +95,7 @@ export const useRoleApi = () => {
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message || "Có lỗi xảy ra",
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
@@ -115,7 +115,7 @@ export const useRoleApi = () => {
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message || "Có lỗi xảy ra",
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
@@ -139,7 +139,7 @@ export const useRoleApi = () => {
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message || "Có lỗi xảy ra",
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
