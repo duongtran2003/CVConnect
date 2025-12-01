@@ -5,6 +5,11 @@
     </div>
     <template v-else>
       <div class="job-card">
+        <ModalsApply
+      v-model="isApplyModalOpen"
+      :job-ad="info"
+      @submit="handleApplyModalSubmit"
+    />
         <div class="top">
           <div class="title">
             <span class="title-span">
@@ -131,6 +136,7 @@ const { getJobAdPreview } = useJobsSearchApi();
 const controller = ref<AbortController | null>(null);
 const isLoading = ref<boolean>(false);
 const info = ref<any>({});
+const isApplyModalOpen = ref<boolean>(false);
 
 const tags = computed(() => {
   return info.value.tags?.slice(0, 4) || [];
@@ -186,6 +192,10 @@ function handleViewDetail() {
     path: `/job-ad/detail/${selectedJob.value.id}`,
   });
   window.open(link.href, "_blank");
+}
+
+function handleApplyModalSubmit() {
+  isApplyModalOpen.value = false;
 }
 
 watch(

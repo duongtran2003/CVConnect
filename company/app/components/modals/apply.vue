@@ -263,6 +263,10 @@ function handleSelectExistingProfile(jobAdCan: any) {
 
 watch(isOpen, async (val) => {
   if (val) {
+    if (!userInfo.value) {
+      return;
+    }
+
     const res = await getCandidateInfoApply();
     jobAdCandidateIdList.value = res.data.data;
     console.log({ res });
