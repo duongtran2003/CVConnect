@@ -192,13 +192,14 @@ const handleLoginClick = async () => {
     const isSuccess = await login(loginCredentials);
     isLoading.value.loginButton = false;
     if (isSuccess) {
-      const redirectTo = route.query.redirect;
-      if (redirectTo) {
-        router.push({ path: redirectTo as string });
-      } else {
-        handleRouting();
-      }
-    }
+  const redirectTo = route.query.redirect;
+
+  if (redirectTo) {
+    router.push(decodeURIComponent(redirectTo as string));
+  } else {
+    handleRouting();
+  }
+}
   }
 };
 

@@ -183,7 +183,9 @@ const isFormDisabled = computed(() => {
 });
 
 const loginRedirectLink = computed(() => {
-  const redirectLink = `/auth/login?redirect=${route.fullPath}`;
+  const encodedRoute = encodeURIComponent(route.fullPath);
+
+  const redirectLink = `/auth/login?redirect=${encodedRoute}`;
   return redirectLink;
 });
 
