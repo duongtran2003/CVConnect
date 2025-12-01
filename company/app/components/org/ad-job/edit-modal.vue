@@ -84,10 +84,20 @@
                 <span class="text">Từ khóa</span>
                 <!-- ><span class="required">Bắt buộc</span> -->
               </div>
-              <AppInputBasicTextEditor
-                :value="formInput.keyword"
-                @input="handleInput('keyword', $event)"
+              <AppInputTextarea
+                :label="''"
+                :required="false"
+                :slim-error="true"
+                :error="''"
+                :desc="`Bổ sung các từ khóa để giúp ứng viên dễ dàng tìm tin tuyển dụng. Từ khóa cách nhau bởi dấu ';'`"
+                :placeholder="'Thêm từ khóa'"
+                :model-value="formInput.keyword"
+                @input="handleInput('keyword', $event.target.value)"
               />
+              <!-- <AppInputBasicTextEditor -->
+              <!--   :value="formInput.keyword" -->
+              <!--   @input="handleInput('keyword', $event)" -->
+              <!-- /> -->
             </div>
           </div>
           <UCheckbox
