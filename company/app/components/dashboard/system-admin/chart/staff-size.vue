@@ -62,7 +62,7 @@ const complexChart = computed(() => {
 
           if (!customLabel) {
             customLabel = chart.options.chart.custom.label = chart.renderer
-              .label(`Tổng<br/><strong>${total}</strong>`)
+              .label(`Tổng<br/><strong>${total}</strong><br/>doanh nghiệp`)
               .css({
                 color: CENTER_TEXT_COLOR,
                 textAnchor: "middle",
@@ -72,7 +72,7 @@ const complexChart = computed(() => {
 
           const x = series.center[0] + chart.plotLeft;
           const y =
-            series.center[1] + chart.plotTop - customLabel.attr("height") / 2;
+            series.center[1] + chart.plotTop - customLabel.attr("height") / 2 - 24;
 
           customLabel.attr({ x, y });
 
@@ -84,7 +84,7 @@ const complexChart = computed(() => {
     },
 
     title: {
-      text: "Quy mô doanh nghiệp",
+      text: "Quy mô nhân sự",
       align: "center",
       style: {
         color: "#111827",

@@ -1,6 +1,6 @@
 <template>
   <div class="featured-job-table">
-    <div class="title">Tin tuyển dụng hoạt động gần đây</div>
+    <div class="title">Tin phổ biến nhất</div>
     <table>
       <thead>
         <tr>
