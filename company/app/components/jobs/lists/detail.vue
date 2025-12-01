@@ -83,11 +83,14 @@
         </div>
         <div class="row w-full">
           <AppButton
-            v-if="info.dueDateStr != 'Đã hết hạn'"
-            :text="'Ứng tuyển'"
-            class="apply-btn"
-            @click.stop="handleApply"
-          />
+          :text="applyButtonText"
+          :is-disabled="
+            info.dueDateStr == 'Đã hết hạn' ||
+            info.jobAdStatus != 'OPEN'
+          "
+          class="apply-btn"
+          @click.stop="handleApply"
+        />
         </div>
         <div class="divider"></div>
         <div class="content">
@@ -142,6 +145,16 @@ const tags = computed(() => {
   return info.value.tags?.slice(0, 4) || [];
 });
 
+const applyButtonText = computed(() => {
+  if (info.value.dueDateStr == "Đã hết hạn") {
+    return "Đã hết hạn";
+  }
+  if (info.value.jobAdStatus != "OPEN") {
+    return "Ngừng tuyển";
+  }
+  return "Ứng tuyển";
+});
+
 const levelTags = computed(() => {
   const levelTagsArr = [];
   if (info.value.isAllLevel) {
@@ -180,6 +193,7 @@ const locationTooltip = computed(() => {
 
 function handleApply() {
   console.log("apply");
+  isApplyModalOpen.value = true;
 }
 
 function handleViewOrg() {
@@ -287,6 +301,12 @@ watch(
       padding: 4px 0px;
       align-self: flex-end;
       width: 100%;
+
+      &.disabled {
+      background-color: $color-gray-400;
+      border: 1px solid $color-gray-400;
+      cursor: default;
+    }
     }
 
     .top {

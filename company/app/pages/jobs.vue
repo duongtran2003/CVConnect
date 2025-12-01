@@ -306,7 +306,7 @@ watch(
     margin-top: 8px;
     max-width: min(75%, 1080px);
     width: min(75%, 1080px);
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
       max-width: 100%;
       width: 100%;
     }
@@ -346,7 +346,7 @@ watch(
 
     max-width: min(75%, 1080px);
     width: min(75%, 1080px);
-    @media (max-width: 768px) {
+    @media (max-width: 1024px) {
       max-width: 100%;
       width: 100%;
     }

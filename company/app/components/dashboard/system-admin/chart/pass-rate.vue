@@ -30,11 +30,12 @@ const complexChart = computed(() => {
     categories.push(data.label);
   }
 
+  const AXIS_PADDING = 5;
   const yMin = Math.min(...numsOfApplications, ...numsOfPassedApplications);
-  const yMax = Math.max(...numsOfApplications, ...numsOfPassedApplications);
+  const yMax = Math.max(...numsOfApplications, ...numsOfPassedApplications) + AXIS_PADDING;
 
-  return {
-    title: {
+  const config = {
+title: {
       text: "Tỉ lệ trúng tuyển",
     },
     xAxis: {
@@ -117,7 +118,9 @@ const complexChart = computed(() => {
     accessibility: {
       enabled: true,
     }
-  };
+  }
+
+  return config;
 });
 </script>
 <style lang="scss" scoped></style>

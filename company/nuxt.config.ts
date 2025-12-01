@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     "@vueuse/nuxt",
     "pinia-plugin-persistedstate/nuxt",
     "@nuxtjs/color-mode",
+    "nuxt-highcharts",
   ],
   devServer: {
     host: "0.0.0.0",
