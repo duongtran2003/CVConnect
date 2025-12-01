@@ -141,7 +141,7 @@ export const useAuth = () => {
     }
   };
 
-  const logout = async () => {
+  const logout = async (redirect?: string) => {
     try {
       await $axios.post("/user/auth/logout");
     } catch (err) {
@@ -151,7 +151,11 @@ export const useAuth = () => {
       clearUser();
       clearAuthStore();
       clearSidebarStore();
-      router.push({ path: "/auth/login" });
+      if (redirect) {
+        router.push({ path: "/auth/login", query: { redirect } });
+      } else {
+        router.push({ path: "/auth/login" });
+      }
     }
   };
 

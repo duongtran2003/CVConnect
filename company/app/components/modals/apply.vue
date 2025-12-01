@@ -13,7 +13,7 @@
           </div>
         </div>
         <div v-else class="apply-form">
-          <div class="label">Chọn hồ sơ đã gửi trước đó</div>
+          <div v-if="jobAdCandidateIdList.length" class="label">Chọn hồ sơ đã gửi trước đó</div>
           <div v-if="jobAdCandidateIdList.length" class="cv-list">
             <div
               v-for="jobAdCan of jobAdCandidateIdList.slice(0, 3)"

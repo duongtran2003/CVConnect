@@ -1,5 +1,8 @@
 <template>
-  <div class="data-table-wrapper-system-user" :class="{ hasNodata: props.isTableEmpty }">
+  <div
+    class="data-table-wrapper-system-user"
+    :class="{ hasNodata: props.isTableEmpty }"
+  >
     <AppNoData v-if="props.isTableEmpty" class="nodata" />
     <div v-if="props.isLoading" class="spinner">
       <AppSpinnerHalfCircle />
@@ -40,14 +43,14 @@
           <Icon
             class="icon"
             name="material-symbols:person-remove-rounded"
-            :class="{'disabled': !row.original?.isRevokable}"
+            :class="{ disabled: !row.original?.isRevokable }"
             :title="'Tước quyền quản trị thống của thành viên này'"
             @click="handleActionClick(row, 'revoke')"
           />
           <Icon
             class="icon"
             name="material-symbols:manage-accounts-rounded"
-            :class="{'disabled': !row.original?.isAssignable}"
+            :class="{ disabled: !row.original?.isAssignable }"
             :title="'Đặt thành viên này làm quản trị hệ thống'"
             @click="handleActionClick(row, 'assign')"
           />
@@ -712,7 +715,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
         }
         th:nth-child(3),
         td:nth-child(3) {
-          left:164px;
+          left: 164px;
           &::after {
             content: "";
             position: absolute;
@@ -750,26 +753,26 @@ const handleActionClick = (row: any, action: TTableAction) => {
       height: 132px;
     }
   }
-}
 
-.chip {
-  border-radius: 4px;
-  padding: 4px;
-  border: 1px solid $color-gray-300;
-  font-size: 12px;
-  font-weight: 500;
-  width: fit-content;
-  margin: auto;
-}
+  .chip {
+    border-radius: 4px;
+    padding: 4px;
+    border: 1px solid $color-gray-300;
+    font-size: 12px;
+    font-weight: 500;
+    width: fit-content;
+    margin: auto;
+  }
 
-.industry-tag {
-  border-radius: 4px;
-  padding: 4px;
-  border: 1px solid $color-gray-300;
-  font-size: 12px;
-  font-weight: 500;
-  width: fit-content;
-  min-width: 48px;
-  text-align: center;
+  .industry-tag {
+    border-radius: 4px;
+    padding: 4px;
+    border: 1px solid $color-gray-300;
+    font-size: 12px;
+    font-weight: 500;
+    width: fit-content;
+    min-width: 48px;
+    text-align: center;
+  }
 }
 </style>
