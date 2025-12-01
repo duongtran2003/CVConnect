@@ -1,5 +1,8 @@
 <template>
-  <div class="data-table-wrapper-org" :class="{ hasNodata: props.isTableEmpty }">
+  <div
+    class="data-table-wrapper-org"
+    :class="{ hasNodata: props.isTableEmpty }"
+  >
     <AppNoData v-if="props.isTableEmpty" class="nodata" />
     <div v-if="props.isLoading" class="spinner">
       <AppSpinnerHalfCircle />
@@ -724,26 +727,26 @@ const handleActionClick = (row: any, action: TTableAction) => {
       height: 132px;
     }
   }
-}
 
-.chip {
-  border-radius: 4px;
-  padding: 4px;
-  border: 1px solid $color-gray-300;
-  font-size: 12px;
-  font-weight: 500;
-  width: fit-content;
-  margin: auto;
-}
+  .chip {
+    border-radius: 4px;
+    padding: 4px;
+    border: 1px solid $color-gray-300;
+    font-size: 12px;
+    font-weight: 500;
+    width: fit-content;
+    margin: auto;
+  }
 
-.industry-tag {
-  border-radius: 4px;
-  padding: 4px;
-  border: 1px solid $color-gray-300;
-  font-size: 12px;
-  font-weight: 500;
-  width: fit-content;
-  min-width: 48px;
-  text-align: center;
+  .industry-tag {
+    border-radius: 4px;
+    padding: 4px;
+    border: 1px solid $color-gray-300;
+    font-size: 12px;
+    font-weight: 500;
+    width: fit-content;
+    min-width: 48px;
+    text-align: center;
+  }
 }
 </style>

@@ -1,5 +1,8 @@
 <template>
-  <div class="data-table-wrapper-candidate-base" :class="{ hasNodata: props.isTableEmpty }">
+  <div
+    class="data-table-wrapper-candidate-base"
+    :class="{ hasNodata: props.isTableEmpty }"
+  >
     <AppNoData v-if="props.isTableEmpty" class="nodata" />
     <div v-if="props.isLoading" class="spinner">
       <AppSpinnerHalfCircle />
@@ -125,7 +128,8 @@
           <span
             class="chip"
             :style="{
-              borderColor: CANDIDATE_STATUS[row.original[col.accessorKey].key].color,
+              borderColor:
+                CANDIDATE_STATUS[row.original[col.accessorKey].key].color,
               color: CANDIDATE_STATUS[row.original[col.accessorKey].key].color,
               backgroundColor:
                 CANDIDATE_STATUS[row.original[col.accessorKey].key].background,
@@ -597,15 +601,15 @@ watch(
       height: 132px;
     }
   }
-}
 
-.chip {
-  display: inline-block;
-  padding: 4px 6px;
-  border: 1px solid;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.2;
+  .chip {
+    display: inline-block;
+    padding: 4px 6px;
+    border: 1px solid;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+  }
 }
 </style>
