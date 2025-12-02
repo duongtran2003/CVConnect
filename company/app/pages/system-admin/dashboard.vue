@@ -49,8 +49,8 @@
       <div v-if="jobAdsByLevel" class="block left">
         <DashboardSystemAdminChartJobAdByLevel :data="jobAdsByLevel" />
       </div>
-      <div v-if="jobAdsFeatured" class="block right">
-        <DashboardSystemAdminFeaturedJobAdsTable :data="jobAdsFeatured" />
+      <div v-if="monthInput" class="block right">
+        <DashboardSystemAdminFeaturedJobAdsTable :time-frame="monthInput" />
       </div>
     </div>
     <div v-if="newOrgByTime" class="block">
@@ -70,7 +70,6 @@ import type { TJobAdByLevelData } from "~/components/dashboard/system-admin/char
 import type { TJobAdByTimeData } from "~/components/dashboard/system-admin/chart/job-ad-by-time.vue";
 import type { TNewOrgByTimeData } from "~/components/dashboard/system-admin/chart/new-org-by-time.vue";
 import type { TPassRateData } from "~/components/dashboard/system-admin/chart/pass-rate.vue";
-import type { TFeaturedJobData } from "~/components/dashboard/system-admin/featured-job-ads-table.vue";
 import { overviewMap } from "~/const/views/system-admin/dashboard";
 
 definePageMeta({
@@ -86,7 +85,6 @@ const {
   getJobAdsByTime,
   getJobAdsByCareer,
   getJobAdsByLevel,
-  getJobAdsFeatured,
   getNewOrgByTime,
   getStaffSize,
 } = useDashboardApi();
@@ -103,7 +101,6 @@ const eliminatedReasons = ref<TByEliminatedReasonData[] | null>(null);
 const jobAdsByTime = ref<TJobAdByTimeData[] | null>(null);
 const jobAdsByCareer = ref<TJobAdByCareerData[] | null>(null);
 const jobAdsByLevel = ref<TJobAdByLevelData[] | null>(null);
-const jobAdsFeatured = ref<TFeaturedJobData[] | null>(null);
 const newOrgByTime = ref<TNewOrgByTimeData[] | null>(null);
 const staffSize = ref<any>(null);
 
@@ -183,11 +180,6 @@ async function fetchJobAdsByLevel(payload: any) {
   jobAdsByLevel.value = res.data;
 }
 
-async function fetchJobAdsFeatured(payload: any) {
-  const res = await getJobAdsFeatured(payload);
-  jobAdsFeatured.value = res.data;
-}
-
 async function fetchNewOrgByTime(payload: any) {
   const res = await getNewOrgByTime(payload);
   newOrgByTime.value = res.data;
@@ -230,7 +222,6 @@ watch(
       fetchJobAdsByTime(payload),
       fetchJobAdsByCareer(payload),
       fetchJobAdsByLevel(payload),
-      fetchJobAdsFeatured(payload),
       fetchNewOrgByTime(payload),
     ]);
     setLoading(false);
