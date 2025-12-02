@@ -1,7 +1,7 @@
 <template>
   <div class="featured-job-table">
-    <div class="title">Tin phổ biến nhất</div>
     <div class="filter">
+      <div class="title">Tin phổ biến nhất</div>
       <AppInputSearchSelect
         :label="''"
         :required="false"
@@ -133,6 +133,7 @@ const sortIcon = computed(() => {
 
 async function fetchOrgs(params: any, controller?: AbortController) {
   const newParams = {
+    ...params,
     orgName: params.name,
   };
   const res = await getOrgs(newParams, controller);
@@ -211,16 +212,23 @@ watch(
 
 <style scoped lang="scss">
 .featured-job-table {
-  .title {
-    font-size: 19px;
-    font-weight: 600;
-    color: #333333;
-  }
-
   .filter {
-    max-width: 240px;
-    margin-left: auto;
     margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .title {
+      font-size: 19px;
+      font-weight: 600;
+      color: #333333;
+    }
+
+    .search-select-input {
+      max-width: 360px;
+    }
   }
 
   table {
