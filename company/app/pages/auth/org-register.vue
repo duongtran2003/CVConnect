@@ -109,7 +109,14 @@ const formData = ref<Record<string, any>>({
   companySize: "",
   companyType: [],
   description: "",
-  addresses: [],
+  addresses: [
+    {
+      province: "",
+      ward: "",
+      detailAddress: "",
+      headquarter: false,
+    },
+  ],
   coverPhoto: null,
   logo: null,
   fullName: "",
