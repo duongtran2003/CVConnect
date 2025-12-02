@@ -96,7 +96,7 @@
               <Icon name="fluent:text-description-ltr-24-filled" />
               Mô tả chung
             </div>
-            <div class="content" v-html="orgInfo?.description"></div>
+            <div class="content" v-html="orgInfo?.description || 'Không có'"></div>
           </div>
         </div>
       </div>
@@ -107,7 +107,7 @@
           <div
             v-for="(loc, index) of location"
             :key="index"
-            class="address truncate"
+            class="address"
           >
             <Icon
               :name="

@@ -213,16 +213,16 @@ const convertQuery = () => {
     restoredFilter.createdAt = createdAt;
   }
 
-  if (query.isActive) {
-    const values = (query.isActive as string).split(",");
-    console.log(values);
-    restoredFilter.isActive = values.map((val) =>
-      filterSelectOption.value.isActive.find((opt: any) => {
-        const booleanValue = val == "true";
-        return opt.value == booleanValue;
-      }),
-    );
-  }
+  // if (query.isActive) {
+  //   const values = (query.isActive as string).split(",");
+  //   console.log(values);
+  //   restoredFilter.isActive = values.map((val) =>
+  //     filterSelectOption.value.isActive.find((opt: any) => {
+  //       const booleanValue = val == "true";
+  //       return opt.value == booleanValue;
+  //     }),
+  //   );
+  // }
 
   if (query.isEmailVerified) {
     const values = (query.isEmailVerified as string).split(",");
@@ -457,17 +457,17 @@ const fetchData = async () => {
         id: entry.id,
       },
     };
-    entry.isActive = entry.isActive
-      ? {
-          text: "Đang hoạt động",
-          type: CHIP_TYPE.SUCCESS,
-          cellType: CELL_TYPE.TAG,
-        }
-      : {
-          text: "Ngừng hoạt động",
-          type: CHIP_TYPE.ERROR,
-          cellType: CELL_TYPE.TAG,
-        };
+    // entry.isActive = entry.isActive
+    //   ? {
+    //       text: "Đang hoạt động",
+    //       type: CHIP_TYPE.SUCCESS,
+    //       cellType: CELL_TYPE.TAG,
+    //     }
+    //   : {
+    //       text: "Ngừng hoạt động",
+    //       type: CHIP_TYPE.ERROR,
+    //       cellType: CELL_TYPE.TAG,
+    //     };
     entry.isEmailVerified = entry.isEmailVerified
       ? {
           text: "Đã xác thực",
@@ -559,16 +559,16 @@ const handleTableActionClick = async (id: number, action: TTableAction) => {
 const tableData = ref([]);
 const filterSelectOption = computed(() => {
   return {
-    isActive: [
-      {
-        label: "Ngừng hoạt động",
-        value: false,
-      },
-      {
-        label: "Đang hoạt động",
-        value: true,
-      },
-    ],
+    // isActive: [
+    //   {
+    //     label: "Ngừng hoạt động",
+    //     value: false,
+    //   },
+    //   {
+    //     label: "Đang hoạt động",
+    //     value: true,
+    //   },
+    // ],
     isEmailVerified: [
       {
         label: "Đã xác thực",
