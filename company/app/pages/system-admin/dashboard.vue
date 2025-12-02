@@ -56,8 +56,13 @@
     <div v-if="newOrgByTime" class="block">
       <DashboardSystemAdminChartNewOrgByTime :data="newOrgByTime" />
     </div>
-    <div v-if="staffSize" class="block">
-      <DashboardSystemAdminChartStaffSize :data="staffSize" />
+    <div class="line line-5">
+      <div v-if="staffSize" class="block left">
+        <DashboardSystemAdminChartStaffSize :data="staffSize" />
+      </div>
+      <div v-if="monthInput" class="block right">
+        <DashboardSystemAdminNewOrgTable :time-frame="monthInput" />
+      </div>
     </div>
   </div>
 </template>
@@ -127,8 +132,8 @@ onBeforeMount(async () => {
 
   const now = moment();
   monthInput.value = [
-    { month: 0, year: now.year() }, // January
-    { month: now.month(), year: now.year() }, // current month
+    { month: 0, year: now.year() },
+    { month: now.month(), year: now.year() },
   ];
 });
 
@@ -190,7 +195,7 @@ watch(
   async (newVal) => {
     if (!newVal || !newVal[0] || !newVal[1]) return;
 
-    const s = newVal[0]; // {year, month}
+    const s = newVal[0];
     const e = newVal[1];
 
     router.replace({
