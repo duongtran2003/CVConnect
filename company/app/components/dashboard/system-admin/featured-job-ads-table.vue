@@ -3,7 +3,7 @@
     <div class="title">Tin phổ biến nhất</div>
     <div class="filter">
       <AppInputSearchSelect
-        :label="'Lọc theo doanh nghiệp'"
+        :label="''"
         :required="false"
         :options="orgsList"
         :value="selectedOrg"
