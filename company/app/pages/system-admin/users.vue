@@ -62,7 +62,7 @@
         :filter="filter"
         :is-table-empty="isNoData"
         @selection-update="handleSelectionsUpdate"
-        @delete="handleTableActionClick($event, 'delete')"
+        @view="handleTableActionClick($event, 'view')"
         @revoke="handleTableActionClick($event, 'revoke')"
         @assign="handleTableActionClick($event, 'assign')"
         @sort="handleSort"

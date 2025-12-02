@@ -45,14 +45,22 @@
             name="material-symbols:person-remove-rounded"
             :class="{ disabled: !row.original?.isRevokable }"
             :title="'Tước quyền quản trị thống của thành viên này'"
-            @click="handleActionClick(row, 'revoke')"
+            @click="
+              row.original?.isRevokable
+                ? handleActionClick(row, 'revoke')
+                : () => {}
+            "
           />
           <Icon
             class="icon"
             name="material-symbols:manage-accounts-rounded"
             :class="{ disabled: !row.original?.isAssignable }"
             :title="'Đặt thành viên này làm quản trị hệ thống'"
-            @click="handleActionClick(row, 'assign')"
+            @click="
+              row.original?.isAssignable
+                ? handleActionClick(row, 'assign')
+                : () => {}
+            "
           />
         </div>
       </template>
@@ -194,6 +202,7 @@
           <div class="flex flex-row items-center gap-2">
             <AppAvatar :user-info="row.original[col.accessorKey].data" />
             <span>{{ row.original[col.accessorKey].data.fullName }}</span>
+            <span v-if="row.original[col.accessorKey].data.id == currentUserInfo?.id" class="text-red-500 font-bold">*</span>
           </div>
         </span>
         <span
@@ -278,6 +287,9 @@ const props = withDefaults(defineProps<TDataTableProps>(), {
   isTableEmpty: false,
   deleteConditionKey: "canDelete",
 });
+
+const userStore = useUserStore();
+const { userInfo: currentUserInfo } = storeToRefs(userStore);
 
 const havePermission = (permission: TPermission) => {
   const perm = props.allowActions.find((action) => action === permission);

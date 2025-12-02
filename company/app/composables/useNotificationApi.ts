@@ -17,7 +17,7 @@ export const useNotificationApi = () => {
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message,
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
@@ -33,7 +33,7 @@ export const useNotificationApi = () => {
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message,
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
@@ -49,7 +49,7 @@ export const useNotificationApi = () => {
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message,
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }
@@ -65,7 +65,7 @@ export const useNotificationApi = () => {
     } catch (err: any) {
       if (err.response && err.response.data) {
         toast.add({
-          title: err.response.data.message,
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
           color: "error",
         });
       }

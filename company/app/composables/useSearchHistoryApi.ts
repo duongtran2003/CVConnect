@@ -20,7 +20,7 @@ export const useSearchHistoryApi = () => {
     } catch (err: any) {
       // if (err.response && err.response.data) {
       //   toast.add({
-      //     title: err.response.data.message || "Có lỗi xảy ra",
+      //     title: err?.response?.data?.message || "Có lỗi xảy ra" || "Có lỗi xảy ra",
       //     color: "error",
       //   });
       // }
