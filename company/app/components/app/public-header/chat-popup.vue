@@ -137,11 +137,20 @@ function connect() {
       if (idx !== -1) {
         const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
         targetCard.hasMessageUnread = true;
-        targetCard.conversation.lastMessage = newMessage.newMessage.text;
-        targetCard.conversation.lastMessageSenderId =
-          newMessage.newMessage.senderId;
-        targetCard.conversation.lastMessageSentAt =
-          new Date(newMessage.newMessage.sentAt).getTime() / 1000;
+        if (targetCard.conversation) {
+          targetCard.conversation.lastMessage = newMessage.newMessage.text;
+          targetCard.conversation.lastMessageSenderId =
+            newMessage.newMessage.senderId;
+          targetCard.conversation.lastMessageSentAt =
+            new Date(newMessage.newMessage.sentAt).getTime() / 1000;
+        } else {
+          targetCard.conversation = {
+            lastMessage: newMessage.newMessage.text,
+            lastMessageSenderId: newMessage.newMessage.senderId,
+            lastMessageSentAt:
+              new Date(newMessage.newMessage.sentAt).getTime() / 1000,
+          };
+        }
         list.value = [targetCard, ...list.value];
         console.log({ listAfter: list.value });
       }
@@ -162,11 +171,20 @@ function connect() {
         console.log({ targetCard, list: list.value });
 
         targetCard.hasMessageUnread = true;
-        targetCard.conversation.lastMessage = newMessage.newMessage.text;
-        targetCard.conversation.lastMessageSenderId =
-          newMessage.newMessage.senderId;
-        targetCard.conversation.lastMessageSentAt =
-          new Date(newMessage.newMessage.sentAt).getTime() / 1000;
+        if (targetCard.conversation) {
+          targetCard.conversation.lastMessage = newMessage.newMessage.text;
+          targetCard.conversation.lastMessageSenderId =
+            newMessage.newMessage.senderId;
+          targetCard.conversation.lastMessageSentAt =
+            new Date(newMessage.newMessage.sentAt).getTime() / 1000;
+        } else {
+          targetCard.conversation = {
+            lastMessage: newMessage.newMessage.text,
+            lastMessageSenderId: newMessage.newMessage.senderId,
+            lastMessageSentAt:
+              new Date(newMessage.newMessage.sentAt).getTime() / 1000,
+          };
+        }
         nextPage.value = targetCard.conversation.lastMessageSentAt;
         list.value = [targetCard, ...list.value];
         console.log({ listAfter: list.value });

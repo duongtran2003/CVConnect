@@ -98,7 +98,7 @@ definePageMeta({
   layout: "public",
 });
 
-const permittedRole: string = "CANDIDATE";
+const permittedRole: string = "ANY";
 const permissionType: TPermissionCheckType = PERMISSION_CHECK_TYPE.MEMBER_TYPE;
 useLayoutPermission(permissionType, permittedRole);
 

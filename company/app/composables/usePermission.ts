@@ -56,6 +56,9 @@ export const usePermission = () => {
   }
 
   async function checkPermission(type: TPermissionCheckType, value: string) {
+    if (value == "ANY") {
+      return;
+    }
     if (type == PERMISSION_CHECK_TYPE.MEMBER_TYPE) {
       console.log(userInfo.value);
       const matchedDetail = userInfo.value?.userDetails.find(
