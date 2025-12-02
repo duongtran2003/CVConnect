@@ -1,34 +1,87 @@
 <template>
   <div class="featured-job-table">
     <div class="title">Tin phổ biến nhất</div>
+    <div class="filter">
+      <AppInputSearchSelect
+        :label="''"
+        :required="false"
+        :options="orgsList"
+        :value="selectedOrg"
+        :error="''"
+        :slim-error="true"
+        :placeholder="'Tìm kiếm'"
+        :search-placeholder="'Tên doanh nghiệp'"
+        :remote-filter="true"
+        :multiple="false"
+        :fetch-fn="fetchOrgs"
+        @input="($event) => (selectedOrg = $event)"
+        @clear-value="() => (selectedOrg = undefined)"
+        @search-filter="
+          () => {
+            orgsList = [];
+          }
+        "
+      />
+    </div>
     <table>
       <thead>
         <tr>
           <th>Tiêu đề</th>
           <th>Doanh nghiệp</th>
-          <th>Lượt ứng tuyển</th>
-          <th>Lượt xem</th>
+          <th>
+            Lượt ứng tuyển
+            <Icon
+              class="sort-icon"
+              :name="sortIcon('numberOfApplications')"
+              @click="handleSort('numberOfApplications')"
+            />
+          </th>
+          <th>
+            Lượt xem
+            <Icon
+              class="sort-icon"
+              :name="sortIcon('numberOfViews')"
+              @click="handleSort('numberOfViews')"
+            />
+          </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="job in props.data" :key="job.id">
-          <td class="cell-overflow" :title="job.title">{{ job.title }}</td>
-          <td class="cell-overflow" :title="job.org.name">
-            {{ job.org.name }}
-          </td>
-          <td class="cell-overflow" :title="String(job.numberOfApplications)">
-            {{ job.numberOfApplications }}
-          </td>
-          <td class="cell-overflow" :title="String(job.numberOfViews)">
-            {{ job.numberOfViews }}
+        <tr
+          v-if="featuredJobs?.length == 0 && !isLoading"
+          class="no-data-wrapper"
+        >
+          <td colspan="4">
+            <AppNoData />
           </td>
         </tr>
+        <tr v-if="isLoading" class="spinner-wrapper">
+          <td colspan="4">
+            <AppSpinnerHalfCircle class="m-auto flex justify-center" />
+          </td>
+        </tr>
+        <template v-if="!isLoading && featuredJobs?.length != 0">
+          <tr v-for="job in featuredJobs" :key="job.id">
+            <td class="cell-overflow" :title="job.title">{{ job.title }}</td>
+            <td class="cell-overflow" :title="job.org.name">
+              {{ job.org.name }}
+            </td>
+            <td class="cell-overflow" :title="String(job.numberOfApplications)">
+              {{ job.numberOfApplications }}
+            </td>
+            <td class="cell-overflow" :title="String(job.numberOfViews)">
+              {{ job.numberOfViews }}
+            </td>
+          </tr>
+        </template>
       </tbody>
     </table>
   </div>
 </template>
 
 <script setup lang="ts">
+import moment from "moment";
+
 export type TFeaturedJobData = {
   id: number;
   title: string;
@@ -39,10 +92,121 @@ export type TFeaturedJobData = {
 };
 
 export type TProps = {
-  data: TFeaturedJobData[];
+  timeFrame: any;
 };
-
 const props = defineProps<TProps>();
+
+const { getJobAdsFeatured } = useDashboardApi();
+const { getOrgs } = useOrgApi();
+
+const fetchJobAdsController = ref<AbortController | null>(null);
+const featuredJobs = ref<TFeaturedJobData[]>([]);
+const isLoading = ref<boolean>(false);
+const selectedOrg = ref<any>(undefined);
+const orgsList = ref<any>([]);
+const sort = ref<any>(undefined);
+
+const params = computed(() => {
+  return {
+    startTime: props.timeFrame[0],
+    endTime: props.timeFrame[1],
+    orgId: selectedOrg.value?.value,
+    sortBy: sort.value?.sortBy,
+    sortDirection: sort.value?.sortDirection,
+  };
+});
+
+const sortIcon = computed(() => {
+  return (colKey: string) => {
+    if (colKey != sort.value?.sortBy) {
+      return "mdi:sort";
+    }
+    if (sort.value?.sortDirection == "ASC") {
+      return "mdi:sort-ascending";
+    } else if (sort.value?.sortDirection == "DESC") {
+      return "mdi:sort-descending";
+    } else {
+      return "mdi:sort";
+    }
+  };
+});
+
+async function fetchOrgs(params: any, controller?: AbortController) {
+  const newParams = {
+    orgName: params.name,
+  };
+  const res = await getOrgs(newParams, controller);
+  if (!res) {
+    return null;
+  }
+  const nextPage = res.data.data.map((org: any) => ({
+    label: org.name,
+    value: org.id,
+  }));
+  orgsList.value = [...orgsList.value, ...nextPage];
+  return res.data.data;
+}
+
+function handleSort(colKey: string) {
+  if (!sort.value || sort.value?.sortBy != colKey) {
+    sort.value = {
+      sortDirection: "ASC",
+      sortBy: colKey,
+    };
+    return;
+  }
+
+  if (sort.value.sortDirection == "ASC") {
+    sort.value.sortDirection = "DESC";
+    return;
+  }
+
+  if (sort.value.sortDirection == "DESC") {
+    sort.value = undefined;
+  }
+
+  return;
+}
+
+async function fetchJobAds(params: any) {
+  isLoading.value = true;
+
+  if (!props.timeFrame || !props.timeFrame[0] || !props.timeFrame[1]) return;
+
+  const s = props.timeFrame[0];
+  const e = props.timeFrame[1];
+
+  const startDate = moment({ year: s.year, month: s.month })
+    .startOf("month")
+    .toDate();
+  const endDate = moment({ year: e.year, month: e.month })
+    .endOf("month")
+    .toDate();
+
+  if (fetchJobAdsController.value) {
+    fetchJobAdsController.value.abort();
+  }
+  fetchJobAdsController.value = new AbortController();
+
+  params = {
+    ...params,
+    startTime: toDateStart(startDate.toDateString()),
+    endTime: toDateEnd(endDate.toDateString()),
+  };
+
+  const res = await getJobAdsFeatured(params, fetchJobAdsController.value);
+  featuredJobs.value = [...res.data];
+
+  isLoading.value = false;
+}
+
+watch(
+  params,
+  async (newParams) => {
+    await fetchJobAds(newParams);
+  },
+  { deep: true, immediate: true },
+);
 </script>
 
 <style scoped lang="scss">
@@ -52,6 +216,13 @@ const props = defineProps<TProps>();
     font-weight: 600;
     color: #333333;
   }
+
+  .filter {
+    max-width: 240px;
+    margin-left: auto;
+    margin-bottom: 12px;
+  }
+
   table {
     width: 100%;
     border-collapse: separate;
@@ -91,8 +262,6 @@ const props = defineProps<TProps>();
       font-weight: 600;
       color: #374151;
       font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     tbody tr {
@@ -115,6 +284,23 @@ const props = defineProps<TProps>();
       text-overflow: ellipsis;
       max-width: 0; /* Forces ellipsis in table cells with fixed width */
     }
+  }
+
+  .no-data-wrapper,
+  .spinner-wrapper {
+    width: 100%;
+  }
+
+  .spinner-wrapper {
+    height: 64px;
+  }
+
+  .sort-icon {
+    font-size: 20px;
+    margin-left: 2px;
+    vertical-align: middle;
+    cursor: pointer;
+    color: $color-primary-500;
   }
 }
 </style>
