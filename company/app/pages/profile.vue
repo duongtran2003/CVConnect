@@ -5,11 +5,15 @@
       v-model="isUpdatePasswordShow"
       @submit="isUpdatePasswordShow = false"
     />
+    <ModalsChangeAvatar
+      v-model="isUpdateAvatarShow"
+      @submit="handleUpdateAvatar"
+    />
     <div v-if="detail" class="body">
       <div class="left">
         <div class="avatar-wrapper">
           <AppAvatar :user-info="userInfo" />
-          <div class="update-avatar-btn">
+          <div class="update-avatar-btn" @click="isUpdateAvatarShow = true">
             <Icon name="material-symbols:android-camera" />
           </div>
         </div>
@@ -95,16 +99,10 @@ const { setLoading } = useLoadingStore();
 
 const detail = ref<any>(undefined);
 const isUpdatePasswordShow = ref<boolean>(false);
+const isUpdateAvatarShow = ref<boolean>(false);
 
 onBeforeMount(async () => {
-  setLoading(true);
-
-  const res = await getMyProfile();
-  if (res) {
-    detail.value = res.data;
-  }
-
-  setLoading(false);
+  await fetchDetail();
 });
 
 const userInfo = computed(() => {
@@ -114,6 +112,22 @@ const userInfo = computed(() => {
     avatarUrl: detail.value.avatarUrl,
   };
 });
+
+async function fetchDetail() {
+  setLoading(true);
+
+  const res = await getMyProfile();
+  if (res) {
+    detail.value = res.data;
+  }
+
+  setLoading(false);
+}
+
+async function handleUpdateAvatar() {
+  isUpdateAvatarShow.value = false;
+  await fetchDetail();
+}
 </script>
 <style lang="scss" scoped>
 .profile-page-wrapper {
@@ -146,7 +160,6 @@ const userInfo = computed(() => {
     display: flex;
     flex-direction: row;
     gap: 12px;
-
   }
 
   .left {
