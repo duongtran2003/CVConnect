@@ -122,7 +122,7 @@ const userInfo = computed(() => {
   display: flex;
   flex-direction: column;
 
-  width: min(90%, 968px);
+  width: min(100%, 968px);
   margin-left: auto;
   margin-right: auto;
 
@@ -136,7 +136,7 @@ const userInfo = computed(() => {
   }
 
   .top {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 600;
     color: $text-light;
     margin-bottom: 16px;
@@ -146,6 +146,7 @@ const userInfo = computed(() => {
     display: flex;
     flex-direction: row;
     gap: 12px;
+
   }
 
   .left {
@@ -269,7 +270,6 @@ const userInfo = computed(() => {
       display: flex;
       flex-direction: row;
       gap: 8px;
-      flex-wrap: wrap;
       font-size: 14px;
 
       .label {
@@ -280,6 +280,7 @@ const userInfo = computed(() => {
         flex: 1;
         color: $text-light;
         font-weight: 500;
+        word-break: break-word;
 
         &.blank {
           color: $color-gray-400;

@@ -1,6 +1,5 @@
 <template>
-  <div v-if="!currentRole" class="spinner">
-  </div>
+  <div v-if="!currentRole" class="spinner"></div>
   <div v-else-if="currentRole.code != 'CANDIDATE'" class="authenticated-layout">
     <AppSidebar />
     <div class="main-content">
@@ -30,6 +29,22 @@ useLayoutPermission(permissionType, permittedRole);
 
 const authStore = useAuthStore();
 const { currentRole } = storeToRefs(authStore);
+
+const breadcrumbStore = useBreadcrumbStore();
+const { overrideItems, clearOverrideItems } = breadcrumbStore;
+
+onBeforeMount(() => {
+  const baseBreadcrumb = {
+    name: "Hồ sơ cá nhân",
+    icon: "i-mdi:clipboard-account",
+    url: "/profile",
+  };
+  overrideItems([baseBreadcrumb]);
+});
+
+onBeforeUnmount(() => {
+  clearOverrideItems();
+});
 </script>
 <style lang="scss" scoped>
 .spinner {
@@ -54,6 +69,22 @@ const { currentRole } = storeToRefs(authStore);
     padding: 16px 16px 16px 8px;
     flex: 1;
   }
+
+  @media (max-width: 968px) {
+    :deep(.body) {
+      flex-direction: column;
+      gap: 8px;
+
+      .left,
+      .right {
+        width: 100%;
+      }
+
+      .btn {
+        width: 360px !important;
+      }
+    }
+  }
 }
 
 .public-layout {
@@ -64,6 +95,22 @@ const { currentRole } = storeToRefs(authStore);
   background-color: $color-gray-100;
   width: 100%;
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    :deep(.body) {
+      flex-direction: column;
+      gap: 8px;
+
+      .left,
+      .right {
+        width: 100%;
+      }
+
+      .btn {
+        width: 360px !important;
+      }
+    }
+  }
 
   :deep(.main-content) {
     width: 100%;
