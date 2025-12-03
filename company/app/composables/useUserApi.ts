@@ -54,8 +54,26 @@ export const useUserApi = () => {
     }
   };
 
+  const getMyProfile = async () => {
+    try {
+      const res = await $axios.get("/user/user/my-profiles");
+
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  }
+
   return {
     getByRoleCode,
     updatePassword,
+    getMyProfile,
   };
 };

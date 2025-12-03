@@ -1,6 +1,5 @@
 <template>
   <div v-if="!currentRole" class="spinner">
-    <AppSpinnerHalfCircle />
   </div>
   <div v-else-if="currentRole.code != 'CANDIDATE'" class="authenticated-layout">
     <AppSidebar />
@@ -73,7 +72,7 @@ const { currentRole } = storeToRefs(authStore);
     flex-direction: column;
 
     .slot-wrapper {
-      padding: 0px 8px 8px 8px;
+      padding: 48px 16px 16px 16px;
       flex: 1;
       min-height: 0;
       max-height: calc(100vh - 62px);
