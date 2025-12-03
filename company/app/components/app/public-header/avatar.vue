@@ -24,7 +24,7 @@
         @click="handleOpenChangePassword"
       >
         <Icon name="material-symbols:key-rounded" class="icon" />
-        <div class="text">Cập nhật mật khẩu</div>
+        <div class="text">Đổi mật khẩu</div>
       </div>
       <div
         v-if="isCandidate || isManagement || isOrgMember"

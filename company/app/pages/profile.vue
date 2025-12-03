@@ -11,6 +11,7 @@
     />
     <ModalsUpdateProfile
       v-model="isUpdateProfileShow"
+      :user-info="detail"
       @submit="handleUpdateProfile"
     />
     <div v-if="detail" class="body">
@@ -105,12 +106,21 @@
   </div>
 </template>
 <script setup lang="ts">
+import moment from "moment";
+
 definePageMeta({
   layout: "profile-layout",
 });
 
 const { getMyProfile } = useUserApi();
 const { setLoading } = useLoadingStore();
+
+const { getMe } = useAuth();
+const authStore = useAuthStore();
+const { currentRole } = storeToRefs(authStore);
+
+const userStore = useUserStore();
+const { setUser } = userStore;
 
 const detail = ref<any>(undefined);
 const isUpdatePasswordShow = ref<boolean>(false);
@@ -129,12 +139,27 @@ const userInfo = computed(() => {
   };
 });
 
+async function syncProfile() {
+  console.log("syncing");
+  const infoRes = await getMe(currentRole.value!);
+  console.log({ infoRes });
+  if (infoRes) {
+    setUser(infoRes.data);
+  }
+}
+
 async function fetchDetail() {
   setLoading(true);
 
   const res = await getMyProfile();
   if (res) {
     detail.value = res.data;
+    if (detail.value.dateOfBirth) {
+      const arr = detail.value.dateOfBirth;
+      detail.value.dateOfBirth = moment([arr[0], arr[1] - 1, arr[2]]).format(
+        "DD/MM/YYYY",
+      );
+    }
   }
 
   setLoading(false);
@@ -143,11 +168,13 @@ async function fetchDetail() {
 async function handleUpdateAvatar() {
   isUpdateAvatarShow.value = false;
   await fetchDetail();
+  await syncProfile();
 }
 
 async function handleUpdateProfile() {
   isUpdateProfileShow.value = false;
   await fetchDetail();
+  await syncProfile();
 }
 </script>
 <style lang="scss" scoped>

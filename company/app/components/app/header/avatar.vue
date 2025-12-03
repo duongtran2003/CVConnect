@@ -21,7 +21,7 @@
       </div>
       <div class="dropdown__item" @click="handleOpenChangePassword">
         <Icon name="material-symbols:key-rounded" class="icon" />
-        <div class="text">Cập nhật mật khẩu</div>
+        <div class="text">Đổi mật khẩu</div>
       </div>
       <div class="divider"></div>
       <div class="dropdown__item" @click="handleLogout">

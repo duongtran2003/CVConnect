@@ -30,15 +30,16 @@
           :label="'SĐT'"
           :required="false"
           :error="formError.phoneNumber"
-          @input="handleInput('email', $event)"
+          @input="handleInput('phoneNumber', $event)"
           @blur="validateKey('phoneNumber')"
         />
         <AppInputDatepicker
           :label="'Ngày sinh'"
           :required="false"
           :value="formInput.dateOfBirth"
-          :error="formError.dateOfBirth"
+          :error="''"
           :slim-error="false"
+          :is-teleport="'html'"
           :placeholder="''"
           :is-range="false"
           @input="handleInput('dateOfBirth', $event)"
@@ -47,8 +48,8 @@
           :value="formInput.address"
           :label="'Địa chỉ'"
           :required="false"
-          :error="formError.address"
-          @input="handleInput('email', $event)"
+          :error="''"
+          @input="handleInput('address', $event)"
         />
       </div>
     </template>
@@ -60,10 +61,9 @@
           @click="handleCancel"
         />
         <AppButton
-          v-if="userInfo != null"
           class="submit-btn btn"
           :text="'Cập nhật'"
-          :is-disabled="isSubmitDisabled"
+          :is-disabled="!isFormValid"
           :is-loading="isLoading"
           @click="handleSubmit"
         />
@@ -72,10 +72,13 @@
   </UModal>
 </template>
 <script setup lang="ts">
+import { cloneDeep, isEqual } from "lodash";
+import moment from "moment";
 import { EMAIL_REGEX } from "~/const/auth";
 
 type TProps = {
   modelValue: boolean;
+  userInfo: any;
 };
 
 const props = defineProps<TProps>();
@@ -85,15 +88,22 @@ const emits = defineEmits<{
   (e: "submit"): void;
 }>();
 
-const userStore = useUserStore();
-const { userInfo } = storeToRefs(userStore);
-const { updatePassword } = useUserApi();
+const { updateProfile } = useUserApi();
 const route = useRoute();
 
-const formInput = ref<any>({});
+const formInput = ref<any>({
+  fullName: "",
+  email: "",
+  phoneNumber: "",
+  address: "",
+  dateOfBirth: "",
+});
+const formSnapshot = ref<any>({});
 
 const formError = ref<any>({
-  newPasswordConf: "",
+  fullName: "",
+  email: "",
+  phoneNumber: "",
 });
 
 const modalTitle = computed(() => {
@@ -143,12 +153,11 @@ const formRules = {
         return true;
       }
 
-      const vnStrictPhoneRegex =
-        /^(03[2-9]|086|096|097|098|070|071|072|073|074|075|076|077|078|079|081|082|083|084|085|088|091|094|056|058|059)\d{7}$/;
+      const vnStrictPhoneRegex = /^0\d{9}$/;
 
       if (!vnStrictPhoneRegex.test(trimmed)) {
         formError.value.phoneNumber =
-          "Số điện thoại không hợp lệ (10 chữ số, đúng đầu số nhà mạng VN)";
+          "Số điện thoại không hợp lệ";
         return false;
       }
 
@@ -158,12 +167,16 @@ const formRules = {
   ],
 };
 
-function resetForm() {
+function initForm() {
   formInput.value = {
-    oldPassword: "",
-    newPassword: "",
-    newPasswordConf: "",
+    fullName: props.userInfo.fullName || "",
+    email: props.userInfo.email || "",
+    phoneNumber: props.userInfo.phoneNumber || "",
+    address: props.userInfo.address || "",
+    dateOfBirth: props.userInfo.dateOfBirth || "",
+    // dateOfBirth: "",
   };
+  formSnapshot.value = cloneDeep(formInput.value);
 }
 
 function handleInput(key: string, value: any) {
@@ -181,6 +194,9 @@ const validateForm = () => {
 const validateKey = (key: keyof typeof formInput.value) => {
   const input = formInput.value[key];
   const rules = formRules[key as keyof typeof formRules];
+  if (!rules) {
+    return;
+  }
   for (const rule of rules) {
     const ok = rule(input);
     if (!ok) {
@@ -191,52 +207,52 @@ const validateKey = (key: keyof typeof formInput.value) => {
 
 function handleCancel() {
   // Reset form
-  resetForm();
+  initForm();
   emits("update:modelValue", false);
 }
 
-const isSubmitDisabled = computed(() => {
-  const form = formInput.value;
-
-  if (!form.oldPassword || !form.newPassword || !form.newPasswordConf) {
-    return true;
+const isFormValid = computed(() => {
+  if (isEqual(formInput.value, formSnapshot.value)) {
+    return false;
   }
 
-  if (formError.value.newPasswordConf) {
-    return true;
+  for (const key of Object.keys(
+    formError.value,
+  ) as (keyof typeof formError.value)[]) {
+    if (formError.value[key]) {
+      return false;
+    }
   }
-
-  return false;
+  return true;
 });
 
 async function handleSubmit() {
-  if (isSubmitDisabled.value) {
+  validateForm();
+
+  if (!isFormValid.value) {
     return;
   }
 
   const payload = {
-    currentPassword: formInput.value.oldPassword,
-    newPassword: formInput.value.newPassword,
+    ...formInput.value,
   };
 
+  if (payload.dateOfBirth) {
+    payload.dateOfBirth = moment(payload.dateOfBirth).format("YYYY-MM-DD");
+  }
+
   isLoading.value = true;
-  const success = await updatePassword(payload);
+  const success = await updateProfile(payload);
   isLoading.value = false;
 
   if (success) {
-    resetForm();
     emits("submit");
   }
 }
 
 watch(isOpen, async (val) => {
   if (val) {
-    if (!userInfo.value) {
-      return;
-    }
-
-    // clear form
-    resetForm();
+    initForm();
   }
 });
 </script>
@@ -244,7 +260,7 @@ watch(isOpen, async (val) => {
 .body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
 
   .divider {
     width: 100%;
