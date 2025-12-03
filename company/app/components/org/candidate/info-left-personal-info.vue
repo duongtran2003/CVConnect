@@ -11,7 +11,7 @@
         <span>{{ props.info.phone }}</span>
       </div>
     </div>
-    <div class="row">
+    <div v-if="props.info.coverLetter" class="row">
       <div class="cover-letter">{{ props.info.coverLetter }}</div>
     </div>
     <div class="row">
@@ -176,6 +176,7 @@ watch(
   }
 
   .cover-letter {
+    width: 100%;
     background-color: $color-gray-100;
     padding: 6px;
     border-radius: 6px;

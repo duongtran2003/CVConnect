@@ -9,6 +9,11 @@
       v-model="isUpdateAvatarShow"
       @submit="handleUpdateAvatar"
     />
+    <ModalsUpdateProfile
+      v-model="isUpdateProfileShow"
+      :user-info="detail"
+      @submit="handleUpdateProfile"
+    />
     <div v-if="detail" class="body">
       <div class="left">
         <div class="avatar-wrapper">
@@ -29,7 +34,11 @@
         <div v-if="detail.email" class="username">
           {{ `@${detail.username}` }}
         </div>
-        <AppButton :text="'Cập nhật'" class="btn" />
+        <AppButton
+          :text="'Cập nhật'"
+          class="btn"
+          @click="isUpdateProfileShow = true"
+        />
         <AppButton
           :text="'Đổi mật khẩu'"
           class="btn ghost"
@@ -63,6 +72,13 @@
           <div v-else class="value blank">Không có</div>
         </div>
         <div class="row">
+          <div class="label">Địa chỉ</div>
+          <div v-if="detail.address" class="value">
+            {{ detail.address }}
+          </div>
+          <div v-else class="value blank">Không có</div>
+        </div>
+        <div class="row">
           <div class="label">Vai trò</div>
           <div v-if="detail.roles.length" class="tag-list">
             <div v-for="role of detail.roles" :key="role.id" class="tag">
@@ -90,6 +106,8 @@
   </div>
 </template>
 <script setup lang="ts">
+import moment from "moment";
+
 definePageMeta({
   layout: "profile-layout",
 });
@@ -97,9 +115,17 @@ definePageMeta({
 const { getMyProfile } = useUserApi();
 const { setLoading } = useLoadingStore();
 
+const { getMe } = useAuth();
+const authStore = useAuthStore();
+const { currentRole } = storeToRefs(authStore);
+
+const userStore = useUserStore();
+const { setUser } = userStore;
+
 const detail = ref<any>(undefined);
 const isUpdatePasswordShow = ref<boolean>(false);
 const isUpdateAvatarShow = ref<boolean>(false);
+const isUpdateProfileShow = ref<boolean>(false);
 
 onBeforeMount(async () => {
   await fetchDetail();
@@ -113,12 +139,27 @@ const userInfo = computed(() => {
   };
 });
 
+async function syncProfile() {
+  console.log("syncing");
+  const infoRes = await getMe(currentRole.value!);
+  console.log({ infoRes });
+  if (infoRes) {
+    setUser(infoRes.data);
+  }
+}
+
 async function fetchDetail() {
   setLoading(true);
 
   const res = await getMyProfile();
   if (res) {
     detail.value = res.data;
+    if (detail.value.dateOfBirth) {
+      const arr = detail.value.dateOfBirth;
+      detail.value.dateOfBirth = moment([arr[0], arr[1] - 1, arr[2]]).format(
+        "DD/MM/YYYY",
+      );
+    }
   }
 
   setLoading(false);
@@ -127,6 +168,13 @@ async function fetchDetail() {
 async function handleUpdateAvatar() {
   isUpdateAvatarShow.value = false;
   await fetchDetail();
+  await syncProfile();
+}
+
+async function handleUpdateProfile() {
+  isUpdateProfileShow.value = false;
+  await fetchDetail();
+  await syncProfile();
 }
 </script>
 <style lang="scss" scoped>

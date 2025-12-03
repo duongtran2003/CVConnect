@@ -74,6 +74,26 @@ export const useUserApi = () => {
     }
   };
 
+  const updateProfile = async (payload: any) => {
+    try {
+      const res = await $axios.put(`/user/user/update-info`, payload);
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  }
+
   const getMyProfile = async () => {
     try {
       const res = await $axios.get("/user/user/my-profiles");
@@ -96,5 +116,6 @@ export const useUserApi = () => {
     updatePassword,
     getMyProfile,
     updateAvatar,
+    updateProfile,
   };
 };

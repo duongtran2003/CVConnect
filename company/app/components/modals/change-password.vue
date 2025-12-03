@@ -137,7 +137,7 @@ const formError = ref<any>({
 const validationError = ref<any>("Mật khẩu không trùng khớp");
 
 const modalTitle = computed(() => {
-  return `Cập nhật mật khẩu`;
+  return `Đổi mật khẩu`;
 });
 
 const isOpen = computed({
