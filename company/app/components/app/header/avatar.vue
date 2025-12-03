@@ -1,5 +1,9 @@
 <template>
   <div v-on-click-outside="closeDropdown" class="user-avatar">
+    <ModalsChangePassword
+      v-model="isUpdatePasswordShow"
+      @submit="isUpdatePasswordShow = false"
+    />
     <div v-if="userInfo" class="avatar" @click="handleClickAvatar">
       <img v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl" />
       <div
@@ -15,7 +19,11 @@
         <Icon name="mdi:clipboard-account" class="icon" />
         <div class="text">{{ userInfo?.fullName || "Hồ sơ cá nhân" }}</div>
       </div>
-      <!-- <div class="divider"></div> -->
+      <div class="dropdown__item" @click="handleOpenChangePassword">
+        <Icon name="material-symbols:key-rounded" class="icon" />
+        <div class="text">Cập nhật mật khẩu</div>
+      </div>
+      <div class="divider"></div>
       <div class="dropdown__item" @click="handleLogout">
         <Icon name="mdi:logout" class="icon" />
         <div class="text">Đăng xuất</div>
@@ -35,9 +43,11 @@ const { clearToken } = useAuthStore();
 
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
-const isDropdownShow = ref<boolean>(false);
 const { setLoading } = useLoadingStore();
 const toast = useToast();
+
+const isDropdownShow = ref<boolean>(false);
+const isUpdatePasswordShow = ref<boolean>(false);
 
 const closeDropdown = () => {
   isDropdownShow.value = false;
@@ -46,6 +56,11 @@ const closeDropdown = () => {
 const handleClickAvatar = () => {
   isDropdownShow.value = !isDropdownShow.value;
 };
+
+function handleOpenChangePassword() {
+  isDropdownShow.value = false;
+  isUpdatePasswordShow.value = true;
+}
 
 const handleLogout = async () => {
   try {
