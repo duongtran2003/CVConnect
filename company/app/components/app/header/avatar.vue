@@ -15,7 +15,7 @@
       </div>
     </div>
     <div v-show="isDropdownShow" class="dropdown">
-      <div class="dropdown__item">
+      <div class="dropdown__item" @click="handleProfileClick">
         <Icon name="mdi:clipboard-account" class="icon" />
         <div class="text">{{ userInfo?.fullName || "Hồ sơ cá nhân" }}</div>
       </div>
@@ -37,6 +37,8 @@ import {
   DEFAULT_MONOGRAM_BACKGROUND_COLOR,
   DEFAULT_MONOGRAM_TEXT,
 } from "~/const/user";
+
+const router = useRouter();
 
 const { logout } = useAuth();
 const { clearToken } = useAuthStore();
@@ -76,6 +78,10 @@ const handleLogout = async () => {
     clearToken();
   }
 };
+
+function handleProfileClick() {
+  router.push({ path: "/profile" });
+}
 
 const monogramText = computed(() => {
   const names = userInfo.value?.fullName?.split(/\s+/);

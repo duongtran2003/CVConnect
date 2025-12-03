@@ -15,7 +15,7 @@
       </div>
     </div>
     <div v-show="isDropdownShow" class="dropdown">
-      <div class="dropdown__item">
+      <div class="dropdown__item" @click="handleProfileClick">
         <Icon name="mdi:clipboard-account" class="icon" />
         <div class="text">{{ userInfo?.fullName || "Hồ sơ cá nhân" }}</div>
       </div>
@@ -132,6 +132,10 @@ const handleViewApplied = () => {
     isDropdownShow.value = false;
   }
 };
+
+function handleProfileClick() {
+  router.push({ path: "/profile" });
+}
 
 const handleLogout = async () => {
   try {

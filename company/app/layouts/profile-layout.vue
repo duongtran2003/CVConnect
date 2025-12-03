@@ -1,5 +1,8 @@
 <template>
-  <div v-if="currentRole?.code != 'CANDIDATE'" class="authenticated-layout">
+  <div v-if="!currentRole" class="spinner">
+    <AppSpinnerHalfCircle />
+  </div>
+  <div v-else-if="currentRole.code != 'CANDIDATE'" class="authenticated-layout">
     <AppSidebar />
     <div class="main-content">
       <AppHeader />
@@ -10,7 +13,9 @@
     <div class="public-layout">
       <div class="main-content">
         <AppPublicHeader />
-        <slot />
+        <div class="slot-wrapper">
+          <slot />
+        </div>
       </div>
     </div>
   </div>
@@ -28,6 +33,14 @@ const authStore = useAuthStore();
 const { currentRole } = storeToRefs(authStore);
 </script>
 <style lang="scss" scoped>
+.spinner {
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  justify-content: center;
+}
+
 .authenticated-layout {
   display: flex;
   min-height: 100vh;
@@ -58,6 +71,14 @@ const { currentRole } = storeToRefs(authStore);
     max-height: 100%;
     display: flex;
     flex-direction: column;
+
+    .slot-wrapper {
+      padding: 0px 8px 8px 8px;
+      flex: 1;
+      min-height: 0;
+      max-height: calc(100vh - 62px);
+      overflow: hidden;
+    }
   }
 }
 </style>
