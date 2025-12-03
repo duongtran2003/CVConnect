@@ -63,6 +63,13 @@
           <div v-else class="value blank">Không có</div>
         </div>
         <div class="row">
+          <div class="label">Địa chỉ</div>
+          <div v-if="detail.address" class="value">
+            {{ detail.address }}
+          </div>
+          <div v-else class="value blank">Không có</div>
+        </div>
+        <div class="row">
           <div class="label">Vai trò</div>
           <div v-if="detail.roles.length" class="tag-list">
             <div v-for="role of detail.roles" :key="role.id" class="tag">
