@@ -8,11 +8,7 @@
       <div v-if="isLoading" class="spinner">
         <AppSpinnerHalfCircle />
       </div>
-      <HomeOrgCard
-        v-for="org of orgs"
-        :key="org.id"
-        :data="org"
-      />
+      <HomeOrgCard v-for="org of orgs" :key="org.id" :data="org" />
     </div>
     <!-- <div class="paginator"> -->
     <!--   <UPagination -->
@@ -112,6 +108,9 @@ function handlePageIndexChange(page: any) {
     @media (max-width: 768px) {
       max-width: 100%;
       width: 100%;
+
+      padding-left: 16px;
+      padding-right: 16px;
     }
 
     :deep(.job-card) {

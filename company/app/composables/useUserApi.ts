@@ -54,8 +54,47 @@ export const useUserApi = () => {
     }
   };
 
+  const updateAvatar = async (payload: any) => {
+    try {
+      const res = await $axios.put(`/user/user/update-avatar`, payload);
+      toast.add({
+        title: res.data.message,
+        color: "success",
+      });
+      return true;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return false;
+    }
+  };
+
+  const getMyProfile = async () => {
+    try {
+      const res = await $axios.get("/user/user/my-profiles");
+
+      return res.data;
+    } catch (err: any) {
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   return {
     getByRoleCode,
     updatePassword,
+    getMyProfile,
+    updateAvatar,
   };
 };
