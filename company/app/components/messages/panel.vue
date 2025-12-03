@@ -71,6 +71,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import { cloneDeep } from "lodash";
 import moment from "moment";
 import { connect } from "socket.io-client";
 
@@ -121,24 +122,26 @@ const messagesList = computed(() => {
   let currentGroup: any = null;
 
   list.forEach((msg: any) => {
-    if (
-      !currentGroup ||
-      currentGroup.senderInfo.id !== getInfo.value(msg.senderId).id
-    ) {
+    const sender = getInfo.value(msg.senderId);
+
+    console.log({ currentGroup, sender });
+
+    if (!currentGroup || currentGroup.senderInfo.id !== sender.id) {
+      if (currentGroup) result.push(currentGroup);
+
       currentGroup = {
-        senderInfo: getInfo.value(msg.senderId),
+        senderInfo: sender,
         messages: [],
       };
-      result.push(currentGroup);
     }
 
     const { senderId, ...rest } = msg;
     currentGroup.messages.push(rest);
   });
 
-  console.log({ result });
+  if (currentGroup) result.push(currentGroup);
+
   return result.reverse();
-  // return result;
 });
 
 const getInfo = computed(() => {
@@ -149,7 +152,7 @@ const getInfo = computed(() => {
       };
     } else {
       const info = {
-        id: orgInfo.value.id,
+        id: -1,
         logo: orgInfo.value.logoUrl,
       };
       return info;
