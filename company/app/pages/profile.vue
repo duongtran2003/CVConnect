@@ -9,6 +9,10 @@
       v-model="isUpdateAvatarShow"
       @submit="handleUpdateAvatar"
     />
+    <ModalsUpdateProfile
+      v-model="isUpdateProfileShow"
+      @submit="handleUpdateProfile"
+    />
     <div v-if="detail" class="body">
       <div class="left">
         <div class="avatar-wrapper">
@@ -29,7 +33,11 @@
         <div v-if="detail.email" class="username">
           {{ `@${detail.username}` }}
         </div>
-        <AppButton :text="'Cập nhật'" class="btn" />
+        <AppButton
+          :text="'Cập nhật'"
+          class="btn"
+          @click="isUpdateProfileShow = true"
+        />
         <AppButton
           :text="'Đổi mật khẩu'"
           class="btn ghost"
@@ -107,6 +115,7 @@ const { setLoading } = useLoadingStore();
 const detail = ref<any>(undefined);
 const isUpdatePasswordShow = ref<boolean>(false);
 const isUpdateAvatarShow = ref<boolean>(false);
+const isUpdateProfileShow = ref<boolean>(false);
 
 onBeforeMount(async () => {
   await fetchDetail();
@@ -133,6 +142,11 @@ async function fetchDetail() {
 
 async function handleUpdateAvatar() {
   isUpdateAvatarShow.value = false;
+  await fetchDetail();
+}
+
+async function handleUpdateProfile() {
+  isUpdateProfileShow.value = false;
   await fetchDetail();
 }
 </script>
