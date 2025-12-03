@@ -22,7 +22,9 @@
         />
       </div>
       <div class="address-wrapper">
-        <div class="label">Địa chỉ doanh nghiệp</div>
+        <div class="label">
+          Địa chỉ doanh nghiệp <span class="required">Bắt buộc</span>
+        </div>
         <!-- <div class="description">Hãy nhập đầy đủ thành phố/tỉnh thành và địa chỉ chi tiết</div> -->
         <div class="address-picker-list">
           <OrgRegisterAddressPicker
@@ -31,6 +33,7 @@
             :city-info="cityInfo ?? []"
             :value="address"
             :address-index="index + 1"
+            :allow-remove="allowRemove"
             @input="handleAddressInput(index, $event)"
             @remove="handleAddressRemove(index)"
           />
@@ -66,6 +69,10 @@ onBeforeMount(async () => {
   cityInfo.value = res.data;
 });
 
+const allowRemove = computed(() => {
+  return props.data.addresses.length > 1;
+});
+
 const handleAddNewAddress = () => {
   emits("input", {
     key: "addresses",
@@ -96,6 +103,7 @@ const handleAddressInput = (index: number, value: any) => {
     key: "addresses",
     value: newValue,
   });
+  console.log({ newValue });
 };
 const handlePhotoInput = (key: string, value: unknown) => {
   emits("input", {
@@ -129,14 +137,6 @@ const handleAddressRemove = (index: number) => {
       :deep(div[role="button"]),
       :deep(.iconify) {
         cursor: pointer;
-      }
-
-      .required {
-        font-size: 12px;
-        line-height: 21px;
-        font-style: italic;
-        color: $color-danger;
-        margin-left: 4px;
       }
     }
 
@@ -189,6 +189,14 @@ const handleAddressRemove = (index: number) => {
         color: $color-danger;
       }
     }
+  }
+
+  .required {
+    font-size: 12px;
+    line-height: 21px;
+    font-style: italic;
+    color: $color-danger !important;
+    margin-left: 4px;
   }
 }
 </style>

@@ -41,7 +41,7 @@
               <div class="name">
                 {{ orgInfo?.name }}
               </div>
-              <div v-if="displayingAddresses" class="address truncate">
+              <div v-if="displayingAddresses" class="address">
                 <Icon
                   name="streamline:travel-map-location-pin-navigation-map-maps-pin-gps-location"
                 />
@@ -49,9 +49,15 @@
                   {{ displayingAddresses.mainAddress }}
                   <span
                     v-if="displayingAddresses.others"
+                    @click="routeToAddresses"
+                  >
+                    {{ `và ` }}
+                  </span>
+                  <span
+                    v-if="displayingAddresses.others"
                     class="link"
                     @click="routeToAddresses"
-                    >{{ `và ${displayingAddresses.others} địa chỉ khác` }}</span
+                    >{{ `${displayingAddresses.others} địa chỉ khác` }}</span
                   >
                 </span>
               </div>
@@ -138,7 +144,7 @@
               <Icon name="fluent:text-description-ltr-24-filled" />
               Mô tả chung
             </div>
-            <div class="content" v-html="orgInfo?.description"></div>
+            <div class="content" v-html="orgInfo?.description || 'Không có'"></div>
           </div>
         </div>
         <AppButton

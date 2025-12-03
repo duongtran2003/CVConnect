@@ -100,19 +100,19 @@ export const userTableHeaders = [
       },
     },
   },
-  {
-    accessorKey: "isActive",
-    header: "Hoạt động",
-    allowFilter: true,
-    filterType: "select",
-    isSortable: true,
-    meta: {
-      class: {
-        th: "min-w-[240px] pl-[32px] max-w-[280px] truncate",
-        td: "pl-[32px] max-w-[280px] truncate",
-      },
-    },
-  },
+  // {
+  //   accessorKey: "isActive",
+  //   header: "Hoạt động",
+  //   allowFilter: true,
+  //   filterType: "select",
+  //   isSortable: true,
+  //   meta: {
+  //     class: {
+  //       th: "min-w-[240px] pl-[32px] max-w-[280px] truncate",
+  //       td: "pl-[32px] max-w-[280px] truncate",
+  //     },
+  //   },
+  // },
   {
     accessorKey: "roleIds",
     header: "Vai trò",

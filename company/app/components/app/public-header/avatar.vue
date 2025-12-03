@@ -1,5 +1,9 @@
 <template>
   <div v-on-click-outside="closeDropdown" class="user-avatar">
+    <ModalsChangePassword
+      v-model="isUpdatePasswordShow"
+      @submit="isUpdatePasswordShow = false"
+    />
     <div v-if="userInfo" class="avatar" @click="handleClickAvatar">
       <img v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl" />
       <div
@@ -15,6 +19,17 @@
         <Icon name="mdi:clipboard-account" class="icon" />
         <div class="text">{{ userInfo?.fullName || "Hồ sơ cá nhân" }}</div>
       </div>
+      <div
+        class="dropdown__item"
+        @click="handleOpenChangePassword"
+      >
+        <Icon name="material-symbols:key-rounded" class="icon" />
+        <div class="text">Cập nhật mật khẩu</div>
+      </div>
+      <div
+        v-if="isCandidate || isManagement || isOrgMember"
+        class="divider"
+      ></div>
       <div v-if="isCandidate" class="dropdown__item" @click="handleViewApplied">
         <Icon name="material-symbols:newsstand-rounded" class="icon" />
         <div class="text">Tin đã ứng tuyển</div>
@@ -63,9 +78,11 @@ const router = useRouter();
 
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
-const isDropdownShow = ref<boolean>(false);
 const { setLoading } = useLoadingStore();
 const toast = useToast();
+
+const isDropdownShow = ref<boolean>(false);
+const isUpdatePasswordShow = ref<boolean>(false);
 
 const closeDropdown = () => {
   isDropdownShow.value = false;
@@ -86,6 +103,11 @@ const handleManageHiring = () => {
     isDropdownShow.value = false;
   }
 };
+
+function handleOpenChangePassword() {
+  isDropdownShow.value = false;
+  isUpdatePasswordShow.value = true;
+}
 
 const handleManageSystem = () => {
   const requiredRole = roles.value.find(
@@ -134,7 +156,6 @@ const isOrgMember = computed(() => {
   // return orgRole != undefined;
 
   return hasMemberType.value("ORGANIZATION");
-
 });
 
 const isCandidate = computed(() => {
@@ -163,11 +184,13 @@ const isManagement = computed(() => {
 
 const hasMemberType = computed(() => {
   return (memberType: string) => {
-    const roleWithMemberType = roles.value.find((r: any) => r.memberType == memberType);
+    const roleWithMemberType = roles.value.find(
+      (r: any) => r.memberType == memberType,
+    );
 
     return roleWithMemberType;
-  }
-})
+  };
+});
 
 const monogramText = computed(() => {
   const names = userInfo.value?.fullName?.split(/\s+/);

@@ -109,7 +109,14 @@ const formData = ref<Record<string, any>>({
   companySize: "",
   companyType: [],
   description: "",
-  addresses: [],
+  addresses: [
+    {
+      province: "",
+      ward: "",
+      detailAddress: "",
+      headquarter: false,
+    },
+  ],
   coverPhoto: null,
   logo: null,
   fullName: "",
@@ -260,13 +267,15 @@ const handleGoNext = async () => {
 
     isNextButtonLoading.value = true;
     const res = await registerOrgAdmin(formDataReq);
-    if (res && res.data.needVerifyEmail) {
-      duration.value = res.data.duration / 60 / 60;
-      mode.value = "confirming";
-    } else {
-      const username = res.data.username || "";
-      isNextButtonLoading.value = false;
-      router.push({ path: "/auth/login", query: { username } });
+    if (res) {
+      if (res.data.needVerifyEmail) {
+        duration.value = res.data.duration / 60 / 60;
+        mode.value = "confirming";
+      } else {
+        const username = res.data.username || "";
+        isNextButtonLoading.value = false;
+        router.push({ path: "/auth/login", query: { username } });
+      }
     }
     isNextButtonLoading.value = false;
   }

@@ -1,6 +1,13 @@
 <template>
   <div class="general-info">
     <div class="title">Thông tin chung</div>
+    <div class="desc">
+      Doanh nghiệp của bạn cần thiết lập
+      <a class="link" href="/org-admin/department" target="_blank">phòng ban</a
+      >, <a class="link" href="/org-admin/position" target="_blank">vị trí tuyển dụng</a> và
+      <a class="link" href="/org-admin/org-member" target="_blank">nhân viên tuyển dụng</a> trước khi tạo tin tuyển
+      dụng mới
+    </div>
     <div v-if="isLoading" class="loading">
       <AppSpinnerHalfCircle />
     </div>
@@ -448,8 +455,11 @@ function handleInput(key: string, value: any) {
     if (value.length && value[value.length - 1].value == 0) {
       formError.value[key] = "";
       formInput.value[key] = [value[value.length - 1]];
-    } 
-    else if (value.length && value[value.length - 1].value != 0 && value.find((val: any) => val.value == 0) != undefined) {
+    } else if (
+      value.length &&
+      value[value.length - 1].value != 0 &&
+      value.find((val: any) => val.value == 0) != undefined
+    ) {
       const index = value.findIndex((val: any) => val.value == 0);
       const newValue = value;
       newValue.splice(index, 1);
@@ -492,6 +502,18 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  .desc {
+    font-size: 13px;
+    color: $color-gray-500;
+    font-style: italic;
+
+    .link {
+      color: $color-primary-500;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
 
   .row {
     display: flex;

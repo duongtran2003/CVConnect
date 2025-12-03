@@ -1,35 +1,34 @@
 <template>
-  <div class="featured-job-table">
+  <div class="new-org-table">
     <div class="filter">
-      <div class="title">Tin phổ biến nhất</div>
-      <AppInputSearchSelect
+      <div class="title">Doanh nghiệp hoạt động tích cực</div>
+      <AppInputText
         :label="''"
         :required="false"
-        :options="orgsList"
-        :value="selectedOrg"
         :error="''"
+        :placeholder="'Tìm theo tên'"
+        :value="searchString"
+        :is-disabled="false"
         :slim-error="true"
-        :placeholder="'Tìm kiếm'"
-        :search-placeholder="'Tên doanh nghiệp'"
-        :remote-filter="true"
-        :multiple="false"
-        :fetch-fn="fetchOrgs"
-        @input="($event) => (selectedOrg = $event)"
-        @clear-value="() => (selectedOrg = undefined)"
-        @search-filter="
-          () => {
-            orgsList = [];
-          }
-        "
+        :title="''"
+        class="text-input"
+        @input="($event) => debounceInput($event)"
       />
     </div>
     <table>
       <thead>
         <tr>
-          <th>Tiêu đề</th>
           <th>Doanh nghiệp</th>
           <th>
-            Lượt ứng tuyển
+            Số lượng tin
+            <Icon
+              class="sort-icon"
+              :name="sortIcon('numberOfJobAds')"
+              @click="handleSort('numberOfJobAds')"
+            />
+          </th>
+          <th>
+            Số lượng ứng viên
             <Icon
               class="sort-icon"
               :name="sortIcon('numberOfApplications')"
@@ -37,20 +36,17 @@
             />
           </th>
           <th>
-            Lượt xem
+            Số lượng onboard
             <Icon
               class="sort-icon"
-              :name="sortIcon('numberOfViews')"
-              @click="handleSort('numberOfViews')"
+              :name="sortIcon('numberOfOnboarded')"
+              @click="handleSort('numberOfOnboarded')"
             />
           </th>
         </tr>
       </thead>
       <tbody>
-        <tr
-          v-if="featuredJobs?.length == 0 && !isLoading"
-          class="no-data-wrapper"
-        >
+        <tr v-if="tableData?.length == 0 && !isLoading" class="no-data-wrapper">
           <td colspan="4">
             <AppNoData />
           </td>
@@ -60,35 +56,54 @@
             <AppSpinnerHalfCircle class="m-auto flex justify-center" />
           </td>
         </tr>
-        <template v-if="!isLoading && featuredJobs?.length != 0">
-          <tr v-for="job in featuredJobs" :key="job.id">
-            <td class="cell-overflow" :title="job.title">{{ job.title }}</td>
-            <td class="cell-overflow" :title="job.org.name">
-              {{ job.org.name }}
+        <template v-if="!isLoading && tableData?.length != 0">
+          <tr v-for="org in tableData" :key="org.orgId">
+            <td class="cell-overflow" :title="org.orgName">
+              <!-- <div class="logo"> -->
+              <!--   <img :src="org?.orgLogo ?? '/blankuser.jpg'" alt="" /> -->
+              <!-- </div> -->
+              {{ org.orgName }}
             </td>
-            <td class="cell-overflow" :title="String(job.numberOfApplications)">
-              {{ job.numberOfApplications }}
+            <td class="cell-overflow" :title="String(org.numberOfJobAds)">
+              {{ org.numberOfJobAds }}
             </td>
-            <td class="cell-overflow" :title="String(job.numberOfViews)">
-              {{ job.numberOfViews }}
+            <td class="cell-overflow" :title="String(org.numberOfApplications)">
+              {{ org.numberOfApplications }}
+            </td>
+            <td class="cell-overflow" :title="String(org.numberOfOnboarded)">
+              {{ org.numberOfOnboarded }}
             </td>
           </tr>
         </template>
       </tbody>
     </table>
+    <div class="pagination">
+      <div class="record-count">{{ `${totalItems} bản ghi` }}</div>
+      <UPagination
+        :show-edges="true"
+        :sibling-count="1"
+        :variant="'ghost'"
+        active-variant="subtle"
+        :items-per-page="10"
+        :page="pageIndex"
+        :total="totalItems"
+        @update:page="($event) => (pageIndex = $event)"
+      />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import debounce from "lodash/debounce";
 import moment from "moment";
 
-export type TFeaturedJobData = {
-  id: number;
-  title: string;
+export type TFeaturedOrg = {
   orgId: number;
-  org: { id: number; name: string };
+  orgName: string;
+  orgLogo: string;
+  numberOfJobAds: number;
   numberOfApplications: number;
-  numberOfViews: number;
+  numberOfOnboarded: number;
 };
 
 export type TProps = {
@@ -96,23 +111,26 @@ export type TProps = {
 };
 const props = defineProps<TProps>();
 
-const { getJobAdsFeatured } = useDashboardApi();
+const { getOrgFeatured } = useDashboardApi();
 const { getOrgs } = useOrgApi();
 
-const fetchJobAdsController = ref<AbortController | null>(null);
-const featuredJobs = ref<TFeaturedJobData[]>([]);
+const fetchController = ref<AbortController | null>(null);
+const tableData = ref<TFeaturedOrg[]>([]);
 const isLoading = ref<boolean>(false);
-const selectedOrg = ref<any>(undefined);
-const orgsList = ref<any>([]);
+const searchString = ref<string>("");
 const sort = ref<any>(undefined);
+const totalItems = ref<any>(0);
+const pageIndex = ref<number>(1);
 
 const params = computed(() => {
   return {
     startTime: props.timeFrame[0],
     endTime: props.timeFrame[1],
-    orgId: selectedOrg.value?.value,
+    orgName: searchString.value.trim(),
     sortBy: sort.value?.sortBy,
     sortDirection: sort.value?.sortDirection,
+    pageSize: 10,
+    pageIndex: pageIndex.value - 1,
   };
 });
 
@@ -131,24 +149,8 @@ const sortIcon = computed(() => {
   };
 });
 
-async function fetchOrgs(params: any, controller?: AbortController) {
-  const newParams = {
-    ...params,
-    orgName: params.name,
-  };
-  const res = await getOrgs(newParams, controller);
-  if (!res) {
-    return null;
-  }
-  const nextPage = res.data.data.map((org: any) => ({
-    label: org.name,
-    value: org.id,
-  }));
-  orgsList.value = [...orgsList.value, ...nextPage];
-  return res.data.data;
-}
-
 function handleSort(colKey: string) {
+  pageIndex.value = 1;
   if (!sort.value || sort.value?.sortBy != colKey) {
     sort.value = {
       sortDirection: "ASC",
@@ -169,7 +171,7 @@ function handleSort(colKey: string) {
   return;
 }
 
-async function fetchJobAds(params: any) {
+async function fetchTableData(params: any) {
   isLoading.value = true;
 
   if (!props.timeFrame || !props.timeFrame[0] || !props.timeFrame[1]) return;
@@ -184,10 +186,10 @@ async function fetchJobAds(params: any) {
     .endOf("month")
     .toDate();
 
-  if (fetchJobAdsController.value) {
-    fetchJobAdsController.value.abort();
+  if (fetchController.value) {
+    fetchController.value.abort();
   }
-  fetchJobAdsController.value = new AbortController();
+  fetchController.value = new AbortController();
 
   params = {
     ...params,
@@ -195,23 +197,35 @@ async function fetchJobAds(params: any) {
     endTime: toDateEnd(endDate.toDateString()),
   };
 
-  const res = await getJobAdsFeatured(params, fetchJobAdsController.value);
-  featuredJobs.value = [...res.data];
+  const res = await getOrgFeatured(params, fetchController.value);
+  if (res) {
+    tableData.value = [...res.data.data];
+    totalItems.value = res.data.pageInfo.totalElements;
+  }
 
   isLoading.value = false;
 }
 
+function onSearch(value: string) {
+  pageIndex.value = 1;
+  searchString.value = value;
+}
+
+const debounceInput = debounce((value: string) => {
+  onSearch(value);
+}, 300);
+
 watch(
   params,
   async (newParams) => {
-    await fetchJobAds(newParams);
+    await fetchTableData(newParams);
   },
   { deep: true, immediate: true },
 );
 </script>
 
 <style scoped lang="scss">
-.featured-job-table {
+.new-org-table {
   .filter {
     margin-bottom: 12px;
     display: flex;
@@ -226,8 +240,16 @@ watch(
       color: #333333;
     }
 
-    .search-select-input {
+    .text-input {
       max-width: 360px;
+      width: 360px;
+      :deep(.input) {
+        padding: 4px 6px;
+
+        input {
+          font-size: 14px;
+        }
+      }
     }
   }
 
@@ -250,15 +272,15 @@ watch(
     /* Column widths */
     th:nth-child(1),
     td:nth-child(1) {
-      width: 30%;
+      width: 40%;
     }
     th:nth-child(2),
     td:nth-child(2) {
-      width: 25%;
+      width: 20%;
     }
     th:nth-child(3),
     td:nth-child(3) {
-      width: 25%;
+      width: 20%;
     }
     th:nth-child(4),
     td:nth-child(4) {
@@ -309,6 +331,37 @@ watch(
     vertical-align: middle;
     cursor: pointer;
     color: $color-primary-500;
+  }
+
+  .pagination {
+    margin-top: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+
+    .record-count {
+      font-size: 14px;
+    }
+  }
+
+  .logo {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+
+    display: inline-block;
+
+    img {
+      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      min-width: 100%;
+    }
   }
 }
 </style>

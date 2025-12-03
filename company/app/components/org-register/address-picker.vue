@@ -69,7 +69,7 @@
         :slim-error="true"
         @input="handleInput('detailAddress', $event)"
       />
-      <div v-if="!props.isViewOnly" class="remove-button" @click="handleRemove">
+      <div v-if="!props.isViewOnly && props.allowRemove" class="remove-button" @click="handleRemove">
         <Icon name="material-symbols:close-rounded" />
       </div>
     </div>
@@ -87,11 +87,13 @@ type TProps = {
   value: TAddressValue;
   addressIndex: number;
   isViewOnly?: boolean;
+  allowRemove?: boolean;
 };
 const props = withDefaults(
 defineProps<TProps>(),
   {
     isViewOnly: false,
+    allowRemove: true,
   }
 )
 
