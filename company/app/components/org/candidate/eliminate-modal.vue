@@ -43,12 +43,28 @@
           :slim-error="true"
           :show-error="false"
         />
-        <UCheckbox
-          class="checkbox"
-          :model-value="formInput.sendEmail"
-          :label="'Gửi email'"
-          @update:model-value="handleInput('sendEmail', $event)"
-        />
+
+        <template v-if="!isFetchingConfig">
+          <template v-if="!hasConfigMail">
+            <div v-if="isOrgAdmin" class="mail-config-alert">
+              Doanh nghiệp của bạn chưa thiết lập mail tự động. Thiết lập ngay
+              <a href="/org-admin/email-template" target="_blank">tại đây</a>
+            </div>
+            <div v-else class="mail-config-alert">
+              Doanh nghiệp của bạn chưa thiết lập mail tự động, vui lòng liên hệ
+              với nhân viên quản trị của doanh nghiệp.
+            </div>
+          </template>
+          <template v-else>
+            <UCheckbox
+              class="checkbox"
+              :model-value="formInput.sendEmail"
+              :label="'Gửi email'"
+              @update:model-value="handleInput('sendEmail', $event)"
+            />
+          </template>
+        </template>
+
         <template v-if="formInput.sendEmail">
           <div class="line">
             <UCheckbox
@@ -205,6 +221,8 @@
   </UModal>
 </template>
 <script setup lang="ts">
+import { BROADCAST_CHANNEL, BROADCAST_MESSAGE_TYPE } from '~/const/views/org-admin/email-template';
+
 type TProps = {
   modelValue: boolean;
   rejectingTarget: Record<string, any> | null;
@@ -230,6 +248,30 @@ const emits = defineEmits<{
 }>();
 
 onBeforeMount(async () => {
+  broadcastChannel.value = new BroadcastChannel(BROADCAST_CHANNEL.MAIL_CONFIG);
+  broadcastChannel.value.onmessage = async (event) => {
+    if (event.data?.type === BROADCAST_MESSAGE_TYPE.MAIL_CONFIG_UPDATE) {
+      isFetchingConfig.value = true;
+      hasConfigMail.value = false;
+      const res = await getMailTemplateConfig();
+      if (res && res.data) {
+        hasConfigMail.value = true;
+      } else {
+        hasConfigMail.value = false;
+      }
+      isFetchingConfig.value = false;
+    }
+  };
+
+  isFetchingConfig.value = true;
+  const configRes = await getMailTemplateConfig();
+  if (configRes && configRes.data) {
+    hasConfigMail.value = true;
+  } else {
+    hasConfigMail.value = false;
+  }
+  isFetchingConfig.value = false;
+
   isFetchingPlaceholder.value = true;
   const res = await getPlaceholders();
   placeholderList.value = res.data.map((placeholder: any) => {
@@ -248,7 +290,15 @@ const isOpen = computed({
   set: (value: boolean) => emits("update:modelValue", value),
 });
 
+const authStore = useAuthStore();
+const { currentRole } = storeToRefs(authStore);
+const { getMailTemplateConfig } = useMailTemplateApi();
+
 const reasons = ref<Record<string, any>[]>([]);
+
+const hasConfigMail = ref<boolean>(false);
+const broadcastChannel = ref<BroadcastChannel | null>(null);
+const isFetchingConfig = ref<any>(false);
 
 const isPreviewModalOpen = ref<boolean>(false);
 const editorRef = ref<any>(null);
@@ -406,6 +456,10 @@ const isSubmitDisabled = computed(() => {
   }
 
   return false;
+});
+
+const isOrgAdmin = computed(() => {
+  return currentRole.value?.code == "ORG_ADMIN";
 });
 
 async function handleSubmit() {
