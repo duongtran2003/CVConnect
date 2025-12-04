@@ -139,16 +139,28 @@
           :show-error="false"
         />
       </div>
-      <div class="row">
-        <UCheckbox
-          class="checkbox"
-          :model-value="formInput.sendEmail"
-          :label="'Gửi email thông báo cho ứng viên'"
-          @update:model-value="
-            ($event) => (formInput.sendEmail = $event as boolean)
-          "
-        />
-      </div>
+      <template v-if="!isFetchingConfig">
+        <template v-if="!hasConfigMail">
+          <div v-if="isOrgAdmin" class="mail-config-alert">
+            Doanh nghiệp của bạn chưa thiết lập mail tự động. Thiết lập ngay
+            <a href="/org-admin/email-template" target="_blank">tại đây</a>
+          </div>
+          <div v-else class="mail-config-alert">
+            Doanh nghiệp của bạn chưa thiết lập mail tự động, vui lòng liên hệ
+            với nhân viên quản trị của doanh nghiệp.
+          </div>
+        </template>
+        <div v-else class="row">
+          <UCheckbox
+            class="checkbox"
+            :model-value="formInput.sendEmail"
+            :label="'Gửi email thông báo cho ứng viên'"
+            @update:model-value="
+              ($event) => (formInput.sendEmail = $event as boolean)
+            "
+          />
+        </div>
+      </template>
       <div v-if="formInput.sendEmail" class="row">
         <UCheckbox
           class="checkbox"
@@ -285,6 +297,11 @@
   </div>
 </template>
 <script setup lang="ts">
+import {
+  BROADCAST_CHANNEL,
+  BROADCAST_MESSAGE_TYPE,
+} from "~/const/views/org-admin/email-template";
+
 const defaultFormInput = {
   startTime: undefined,
   duration: undefined,
@@ -324,6 +341,13 @@ const emits = defineEmits<{
   (e: "formInput", value: any): void;
 }>();
 
+const { getMailTemplateConfig } = useMailTemplateApi();
+
+const authStore = useAuthStore();
+const { currentRole } = storeToRefs(authStore);
+
+const isFetchingConfig = ref<any>(false);
+
 const editorRef = ref<any>(null);
 const formInput = ref<any>(defaultFormInput);
 const locationList = ref<Record<string, any>[]>([]);
@@ -334,7 +358,34 @@ const isPreviewModalOpen = ref<boolean>(false);
 const isFetchingPlaceholder = ref<boolean>(false);
 const placeholderList = ref<any[]>([]);
 
+const hasConfigMail = ref<boolean>(false);
+const broadcastChannel = ref<BroadcastChannel | null>(null);
+
 onBeforeMount(async () => {
+  broadcastChannel.value = new BroadcastChannel(BROADCAST_CHANNEL.MAIL_CONFIG);
+  broadcastChannel.value.onmessage = async (event) => {
+    if (event.data?.type === BROADCAST_MESSAGE_TYPE.MAIL_CONFIG_UPDATE) {
+      isFetchingConfig.value = true;
+      hasConfigMail.value = false;
+      const res = await getMailTemplateConfig();
+      if (res && res.data) {
+        hasConfigMail.value = true;
+      } else {
+        hasConfigMail.value = false;
+      }
+      isFetchingConfig.value = false;
+    }
+  };
+
+  isFetchingConfig.value = true;
+  const configRes = await getMailTemplateConfig();
+  if (configRes && configRes.data) {
+    hasConfigMail.value = true;
+  } else {
+    hasConfigMail.value = false;
+  }
+  isFetchingConfig.value = false;
+
   isFetchingPlaceholder.value = true;
   const res = await getPlaceholders();
   placeholderList.value = res.data.map((placeholder: any) => {
@@ -346,6 +397,10 @@ onBeforeMount(async () => {
     return parsed;
   });
   isFetchingPlaceholder.value = false;
+});
+
+const isOrgAdmin = computed(() => {
+  return currentRole.value?.code == "ORG_ADMIN";
 });
 
 const currentJobAd = computed(() => {
@@ -491,7 +546,11 @@ function getUsedPlaceholdersId() {
 
   return placeholderCodes;
 }
-defineExpose({ getUsedPlaceholdersCode, getUsedPlaceholdersId, currentScheduleType });
+defineExpose({
+  getUsedPlaceholdersCode,
+  getUsedPlaceholdersId,
+  currentScheduleType,
+});
 
 function handleInput(key: string, value: any) {
   formInput.value[key] = value;
@@ -577,6 +636,17 @@ watch(
     gap: 8px;
     overflow: auto;
     min-height: 0;
+
+    .mail-config-alert {
+      color: $text-light;
+      font-size: 14px;
+
+      a {
+        color: $color-primary-500;
+        text-decoration: underline;
+        font-weight: 500;
+      }
+    }
 
     .row {
       display: flex;
