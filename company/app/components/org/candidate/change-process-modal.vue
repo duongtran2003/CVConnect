@@ -300,7 +300,6 @@ onBeforeMount(async () => {
   };
 
   isFetchingConfig.value = true;
-  console.log('fetching mail config')
   const configRes = await getMailTemplateConfig();
   if (configRes && configRes.data) {
     hasConfigMail.value = true;
