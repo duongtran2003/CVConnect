@@ -157,6 +157,37 @@ export const useDashboardApi = () => {
     }
   };
 
+  const getEliminatedByReasonOrg = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/org-admin/eliminated-reason?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   const getCandidateTopApply = async (
     payload: any,
     abortController?: AbortController,
@@ -509,5 +540,6 @@ export const useDashboardApi = () => {
     getJobAdsByHr,
     getJobAdsByDept,
     getPassedByLevelOrg,
+    getEliminatedByReasonOrg,
   };
 };

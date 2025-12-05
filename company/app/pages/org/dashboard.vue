@@ -40,6 +40,9 @@
       <div v-if="passedByLevel" class="block left">
         <DashboardOrgChartPassedByLevel :data="passedByLevel" />
       </div>
+      <div v-if="eliminatedByReason" class="block middle">
+        <DashboardOrgChartEliminatedByReason :data="eliminatedByReason" />
+      </div>
     </div>
 
     <!-- <div v-if="jobAdsByTime" class="block"> -->
@@ -74,6 +77,7 @@ import { overviewMap } from "~/const/views/org/dashboard";
 import type { TJobAdByHrData } from "~/components/dashboard/org/chart/job-ad-by-hr.vue";
 import type { TJobAdByDeptData } from "~/components/dashboard/org/chart/job-ad-by-dept.vue";
 import type { TPassedByLevel } from "~/components/dashboard/org/chart/passed-by-level.vue";
+import type { TByEliminatedReasonData } from "~/components/dashboard/org/chart/eliminated-by-reason.vue";
 
 definePageMeta({
   layout: "org",
@@ -86,6 +90,7 @@ const {
   getJobAdsByHr,
   getJobAdsByDept,
   getPassedByLevelOrg,
+  getEliminatedByReasonOrg,
 } = useDashboardApi();
 
 const route = useRoute();
@@ -98,6 +103,7 @@ const passRate = ref<TPassRateData[] | null>(null);
 const jobAdsByHr = ref<TJobAdByHrData[] | null>(null);
 const jobAdsByDept = ref<TJobAdByDeptData[] | null>(null);
 const passedByLevel = ref<TPassedByLevel[] | null>(null);
+const eliminatedByReason = ref<TByEliminatedReasonData[] | null>(null);
 
 onBeforeMount(async () => {
   const qStart = route.query.start as string | undefined; // "2025-11"
@@ -176,6 +182,11 @@ async function fetchPassedByLevel(payload: any) {
   passedByLevel.value = res.data;
 }
 
+async function fetchEliminatedByReason(payload: any) {
+  const res = await getEliminatedByReasonOrg(payload);
+  eliminatedByReason.value = res.data;
+}
+
 watch(
   monthInput,
   async (newVal) => {
@@ -211,6 +222,7 @@ watch(
       fetchJobAdsByHr(payload),
       fetchJobAdsByDept(payload),
       fetchPassedByLevel(payload),
+      fetchEliminatedByReason(payload),
     ]);
     setLoading(false);
   },
