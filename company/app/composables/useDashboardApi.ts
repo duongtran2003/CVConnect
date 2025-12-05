@@ -33,6 +33,37 @@ export const useDashboardApi = () => {
     }
   };
 
+  const getOverviewOrg = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/org-admin/overview?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   const getPassRate = async (
     payload: any,
     abortController?: AbortController,
@@ -43,6 +74,99 @@ export const useDashboardApi = () => {
       const queryString = objectToQuery(payload);
       const res = await $axios.get(
         `/core/dashboard/system-admin/percent-passed?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getPassRateOrg = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/org-admin/percent-passed?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getPassedByLevelOrg = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/org-admin/pass-by-level?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getEliminatedByReasonOrg = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/org-admin/eliminated-reason?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -157,6 +281,68 @@ export const useDashboardApi = () => {
     }
   };
 
+  const getJobAdsByHr = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/org-admin/job-ad-by-hr?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getJobAdsByDept = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/org-admin/job-ad-by-department?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
   const getJobAdsByCareer = async (
     payload: any,
     abortController?: AbortController,
@@ -229,6 +415,37 @@ export const useDashboardApi = () => {
       const queryString = objectToQuery(payload);
       const res = await $axios.get(
         `/core/dashboard/system-admin/job-ad-featured?${queryString}`,
+        {
+          signal: _abortController ? _abortController.signal : undefined,
+        },
+      );
+      return res.data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
+
+      if (err.response && err.response.data) {
+        toast.add({
+          title: err?.response?.data?.message || "Có lỗi xảy ra",
+          color: "error",
+        });
+      }
+      console.error(err);
+      return null;
+    }
+  };
+
+  const getJobAdsFeaturedOrg = async (
+    payload: any,
+    abortController?: AbortController,
+  ) => {
+    const _abortController = abortController;
+
+    try {
+      const queryString = objectToQuery(payload);
+      const res = await $axios.get(
+        `/core/dashboard/org-admin/job-ad-featured?${queryString}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },
@@ -348,5 +565,13 @@ export const useDashboardApi = () => {
     getNewOrgByTime,
     getStaffSize,
     getOrgFeatured,
+
+    getOverviewOrg,
+    getPassRateOrg,
+    getJobAdsByHr,
+    getJobAdsByDept,
+    getPassedByLevelOrg,
+    getEliminatedByReasonOrg,
+    getJobAdsFeaturedOrg,
   };
 };
