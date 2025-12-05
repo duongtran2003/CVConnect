@@ -47,29 +47,6 @@
         <DashboardOrgFeaturedJobAdsTable :time-frame="monthInput" />
       </div>
     </div>
-
-    <!-- <div v-if="jobAdsByTime" class="block"> -->
-    <!--   <DashboardSystemAdminChartJobAdByTime :data="jobAdsByTime" /> -->
-    <!-- </div> -->
-    <!-- <div v-if="jobAdsByCareer" class="block"> -->
-    <!--   <DashboardSystemAdminChartJobAdByCareer :data="jobAdsByCareer" /> -->
-    <!-- </div> -->
-    <!-- <div class="line line-5"> -->
-    <!--   <div v-if="jobAdsByLevel" class="block left"> -->
-    <!--     <DashboardSystemAdminChartJobAdByLevel :data="jobAdsByLevel" /> -->
-    <!--   </div> -->
-    <!--   <div v-if="monthInput" class="block right"> -->
-    <!--     <DashboardSystemAdminFeaturedJobAdsTable :time-frame="monthInput" /> -->
-    <!--   </div> -->
-    <!-- </div> -->
-    <!-- <div class="line line-5"> -->
-    <!--   <div v-if="staffSize" class="block left"> -->
-    <!--     <DashboardSystemAdminChartStaffSize :data="staffSize" /> -->
-    <!--   </div> -->
-    <!--   <div v-if="monthInput" class="block right"> -->
-    <!--     <DashboardSystemAdminNewOrgTable :time-frame="monthInput" /> -->
-    <!--   </div> -->
-    <!-- </div> -->
   </div>
 </template>
 <script setup lang="ts">
@@ -128,7 +105,7 @@ onBeforeMount(async () => {
 
   const now = moment();
   monthInput.value = [
-    { month: 0, year: now.year() },
+    { month: now.month(), year: now.year() },
     { month: now.month(), year: now.year() },
   ];
 });
