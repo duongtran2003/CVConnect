@@ -43,6 +43,9 @@
       <div v-if="eliminatedByReason" class="block middle">
         <DashboardOrgChartEliminatedByReason :data="eliminatedByReason" />
       </div>
+      <div v-if="eliminatedByReason" class="block right">
+        <DashboardOrgFeaturedJobAdsTable :time-frame="monthInput" />
+      </div>
     </div>
 
     <!-- <div v-if="jobAdsByTime" class="block"> -->
@@ -289,10 +292,10 @@ watch(
 
 .line-4 {
   .left {
-    width: calc((100% - 16px) * 0.25);
+    width: calc(((100% - 16px) * 0.5 - 16px) * 0.5);
   }
   .middle {
-    width: calc((100% - 16px) * 0.25);
+    width: calc(((100% - 16px) * 0.5 - 16px) * 0.5);
   }
   .right {
     width: calc((100% - 16px) * 0.5);
