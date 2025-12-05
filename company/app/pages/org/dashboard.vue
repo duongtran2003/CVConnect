@@ -36,6 +36,12 @@
         <DashboardOrgChartJobAdByDept :data="jobAdsByDept" />
       </div>
     </div>
+    <div class="line line-4">
+      <div v-if="passedByLevel" class="block left">
+        <DashboardOrgChartPassedByLevel :data="passedByLevel" />
+      </div>
+    </div>
+
     <!-- <div v-if="jobAdsByTime" class="block"> -->
     <!--   <DashboardSystemAdminChartJobAdByTime :data="jobAdsByTime" /> -->
     <!-- </div> -->
@@ -63,22 +69,24 @@
 <script setup lang="ts">
 import { toUpper } from "lodash";
 import moment from "moment";
-import type { TByEliminatedReasonData } from "~/components/dashboard/system-admin/chart/by-eliminated-reason.vue";
-import type { TTopApplyData } from "~/components/dashboard/system-admin/chart/candidate-top-apply.vue";
-import type { TJobAdByCareerData } from "~/components/dashboard/system-admin/chart/job-ad-by-career.vue";
-import type { TJobAdByLevelData } from "~/components/dashboard/system-admin/chart/job-ad-by-level.vue";
-import type { TNewOrgByTimeData } from "~/components/dashboard/system-admin/chart/new-org-by-time.vue";
 import type { TPassRateData } from "~/components/dashboard/org/chart/pass-rate.vue";
 import { overviewMap } from "~/const/views/org/dashboard";
 import type { TJobAdByHrData } from "~/components/dashboard/org/chart/job-ad-by-hr.vue";
 import type { TJobAdByDeptData } from "~/components/dashboard/org/chart/job-ad-by-dept.vue";
+import type { TPassedByLevel } from "~/components/dashboard/org/chart/passed-by-level.vue";
 
 definePageMeta({
   layout: "org",
 });
 
 const { setLoading } = useLoadingStore();
-const { getOverviewOrg, getPassRateOrg, getJobAdsByHr, getJobAdsByDept } = useDashboardApi();
+const {
+  getOverviewOrg,
+  getPassRateOrg,
+  getJobAdsByHr,
+  getJobAdsByDept,
+  getPassedByLevelOrg,
+} = useDashboardApi();
 
 const route = useRoute();
 const router = useRouter();
@@ -87,19 +95,11 @@ const monthInput = ref<any>(undefined);
 
 const overview = ref<any>(undefined);
 const passRate = ref<TPassRateData[] | null>(null);
-const candidateMostApply = ref<TTopApplyData[] | null>(null);
-const eliminatedReasons = ref<TByEliminatedReasonData[] | null>(null);
 const jobAdsByHr = ref<TJobAdByHrData[] | null>(null);
 const jobAdsByDept = ref<TJobAdByDeptData[] | null>(null);
-const jobAdsByCareer = ref<TJobAdByCareerData[] | null>(null);
-const jobAdsByLevel = ref<TJobAdByLevelData[] | null>(null);
-const newOrgByTime = ref<TNewOrgByTimeData[] | null>(null);
-const staffSize = ref<any>(null);
+const passedByLevel = ref<TPassedByLevel[] | null>(null);
 
 onBeforeMount(async () => {
-  // const res = await getStaffSize();
-  // staffSize.value = res.data;
-
   const qStart = route.query.start as string | undefined; // "2025-11"
   const qEnd = route.query.end as string | undefined;
 
@@ -161,16 +161,6 @@ async function fetchPassRate(payload: any) {
   passRate.value = res.data;
 }
 
-// async function fetchCandidateTopApply(payload: any) {
-//   const res = await getCandidateTopApply(payload);
-//   candidateMostApply.value = res.data;
-// }
-
-// async function fetchByEliminatedReasons(payload: any) {
-//   const res = await getByEliminatedReason(payload);
-//   eliminatedReasons.value = res.data;
-// }
-
 async function fetchJobAdsByHr(payload: any) {
   const res = await getJobAdsByHr(payload);
   jobAdsByHr.value = res.data;
@@ -181,20 +171,10 @@ async function fetchJobAdsByDept(payload: any) {
   jobAdsByDept.value = res.data;
 }
 
-// async function fetchJobAdsByCareer(payload: any) {
-//   const res = await getJobAdsByCareer(payload);
-//   jobAdsByCareer.value = res.data;
-// }
-
-// async function fetchJobAdsByLevel(payload: any) {
-//   const res = await getJobAdsByLevel(payload);
-//   jobAdsByLevel.value = res.data;
-// }
-
-// async function fetchNewOrgByTime(payload: any) {
-//   const res = await getNewOrgByTime(payload);
-//   newOrgByTime.value = res.data;
-// }
+async function fetchPassedByLevel(payload: any) {
+  const res = await getPassedByLevelOrg(payload);
+  passedByLevel.value = res.data;
+}
 
 watch(
   monthInput,
@@ -228,13 +208,9 @@ watch(
     await Promise.allSettled([
       fetchOverview(payload),
       fetchPassRate(payload),
-      //   fetchCandidateTopApply(payload),
-      //   fetchByEliminatedReasons(payload),
       fetchJobAdsByHr(payload),
       fetchJobAdsByDept(payload),
-      //   fetchJobAdsByCareer(payload),
-      //   fetchJobAdsByLevel(payload),
-      //   fetchNewOrgByTime(payload),
+      fetchPassedByLevel(payload),
     ]);
     setLoading(false);
   },
@@ -299,19 +275,23 @@ watch(
   }
 }
 
-.line-5 {
+.line-4 {
   .left {
-    width: calc((100% - 16px) * 0.4);
+    width: calc((100% - 16px) * 0.25);
+  }
+  .middle {
+    width: calc((100% - 16px) * 0.25);
   }
   .right {
-    width: calc((100% - 16px) * 0.6);
+    width: calc((100% - 16px) * 0.5);
   }
 
   @media (max-width: 1350px) {
     flex-direction: column;
 
     .left,
-    .right {
+    .right,
+    .middle {
       width: 100%;
     }
   }
