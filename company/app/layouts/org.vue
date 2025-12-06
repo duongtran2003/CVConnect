@@ -4,6 +4,7 @@
     <div class="main-content">
       <AppHeader />
       <slot />
+      <ModalsUpdateProfileReminder v-model="isReminderOpen" />
     </div>
   </div>
 </template>
@@ -15,6 +16,21 @@ const permittedRole: string = "ORGANIZATION";
 const permissionType: TPermissionCheckType = PERMISSION_CHECK_TYPE.MEMBER_TYPE;
 
 useLayoutPermission(permissionType, permittedRole);
+
+const userStore = useUserStore();
+const { userInfo } = storeToRefs(userStore);
+const isReminderOpen = ref<boolean>(false);
+
+watch(
+  () => userInfo.value,
+  (val) => {
+    if (val) {
+      if (!val.phoneNumber && !checkDontAskAgain(val.id)) {
+        isReminderOpen.value = true;
+      }
+    }
+  },
+);
 </script>
 <style lang="scss" scoped>
 .org-layout {

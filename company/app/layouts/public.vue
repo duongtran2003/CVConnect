@@ -3,6 +3,7 @@
     <div class="main-content">
       <AppPublicHeader />
       <slot />
+      <ModalsUpdateProfileReminder v-model="isReminderOpen" />
     </div>
   </div>
 </template>
@@ -16,6 +17,8 @@ const authStore = useAuthStore();
 const { currentRole, roles } = storeToRefs(authStore);
 const { setRoles } = authStore;
 
+const isReminderOpen = ref<boolean>(false);
+
 onBeforeMount(async () => {
   setLoading(true);
   const res = await verifyToken();
@@ -24,7 +27,12 @@ onBeforeMount(async () => {
     if (rolesRes) {
       setRoles(rolesRes.data);
       const myInfoRes = await getMe(rolesRes.data[0]);
-      setUser(myInfoRes.data);
+      if (myInfoRes) {
+        setUser(myInfoRes.data);
+        if (!myInfoRes.data.phoneNumber && !checkDontAskAgain(myInfoRes.data.id)) {
+          isReminderOpen.value = true;
+        }
+      }
     }
   }
   setLoading(false);

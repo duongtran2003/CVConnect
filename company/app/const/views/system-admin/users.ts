@@ -48,7 +48,7 @@ export const userTableHeaders = [
     },
   },
   {
-    accessorKey: "phone",
+    accessorKey: "phoneNumber",
     header: "SĐT",
     allowFilter: true,
     filterType: "text",
