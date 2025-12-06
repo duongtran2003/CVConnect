@@ -96,12 +96,11 @@ const handleButtonClick = async () => {
   }
 
   const redirectTo = route.query.redirect as string;
-  const defaultRoute = getDefaultRoute(selectedRole.value);
   if (redirectTo) {
     router.push(redirectTo);
   } else {
     router.push({
-      path: defaultRoute,
+      path: '/',
     });
   }
 };

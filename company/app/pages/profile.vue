@@ -115,6 +115,9 @@ definePageMeta({
 const { getMyProfile } = useUserApi();
 const { setLoading } = useLoadingStore();
 
+const router = useRouter();
+const route = useRoute();
+
 const { getMe } = useAuth();
 const authStore = useAuthStore();
 const { currentRole } = storeToRefs(authStore);
@@ -129,6 +132,12 @@ const isUpdateProfileShow = ref<boolean>(false);
 
 onBeforeMount(async () => {
   await fetchDetail();
+
+  const isEdit = route.query.isEdit;
+  if (isEdit) {
+    isUpdateProfileShow.value = true;
+    router.replace({ query: {} });
+  }
 });
 
 const userInfo = computed(() => {
