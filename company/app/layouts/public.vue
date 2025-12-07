@@ -19,6 +19,7 @@ const { handleSetRole } = usePermission();
 const { setRoles } = authStore;
 
 const route = useRoute();
+const router = useRouter();
 
 const isReminderOpen = ref<boolean>(false);
 
@@ -44,6 +45,7 @@ onBeforeMount(async () => {
         }
       }
     }
+    router.replace({ query: {} });
   } else {
     // Check for logged account
     const res = await verifyToken();

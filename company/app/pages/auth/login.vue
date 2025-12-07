@@ -97,9 +97,20 @@ const router = useRouter();
 const route = useRoute();
 const { setLoading } = useLoadingStore();
 const { setMenus } = useSidebarStore();
+const toast = useToast();
 
 onBeforeMount(async () => {
+  const isError = route.query.error;
+  if (isError) {
+    toast.add({
+      title: "Có lỗi xảy ra trong quá trình đăng nhập",
+      color: "error",
+    });
+
+    return;
+  }
   setLoading(true);
+
   const res = await verifyToken();
   if (res?.data?.isValid) {
     const rolesRes = await getMyRoles();
@@ -179,7 +190,9 @@ const validateKey = (key: keyof typeof formInput.value) => {
 
 const loginWithGoogle = () => {
   try {
-    window.open("https://api.vclab.tech/api/v1/user/oauth2/authorization/google")
+    window.open(
+      "https://api.vclab.tech/api/v1/user/oauth2/authorization/google",
+    );
   } catch (err) {
     console.error(err);
   }
