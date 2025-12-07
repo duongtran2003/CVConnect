@@ -17,22 +17,50 @@ const authStore = useAuthStore();
 const { currentRole, roles } = storeToRefs(authStore);
 const { setRoles } = authStore;
 
+const route = useRoute();
+
 const isReminderOpen = ref<boolean>(false);
 
 onBeforeMount(async () => {
   setLoading(true);
-  const res = await verifyToken();
-  if (res?.data?.isValid) {
+
+  // Handle google login
+  // method=google
+  const method = route.query.method;
+  if (method == "google") {
     const rolesRes = await getMyRoles();
     if (rolesRes) {
       setRoles(rolesRes.data);
       const myInfoRes = await getMe(rolesRes.data[0]);
       if (myInfoRes) {
         setUser(myInfoRes.data);
-        if (!myInfoRes.data.phoneNumber && !checkDontAskAgain(myInfoRes.data.id)) {
+        if (
+          !myInfoRes.data.phoneNumber &&
+          !checkDontAskAgain(myInfoRes.data.id)
+        ) {
           isReminderOpen.value = true;
         }
       }
+    }
+  } else {
+    // Check for logged account
+    const res = await verifyToken();
+    if (res?.data?.isValid) {
+      const rolesRes = await getMyRoles();
+      if (rolesRes) {
+        setRoles(rolesRes.data);
+        const myInfoRes = await getMe(rolesRes.data[0]);
+        if (myInfoRes) {
+          setUser(myInfoRes.data);
+          if (
+            !myInfoRes.data.phoneNumber &&
+            !checkDontAskAgain(myInfoRes.data.id)
+          ) {
+            isReminderOpen.value = true;
+          }
+        }
+      }
+      return;
     }
   }
   setLoading(false);

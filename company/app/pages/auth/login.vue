@@ -177,8 +177,16 @@ const validateKey = (key: keyof typeof formInput.value) => {
   }
 };
 
-const handleLoginWithGoogleClick = () => {
-  console.log("login with google");
+const loginWithGoogle = () => {
+  try {
+    window.open("https://api.vclab.tech/api/v1/user/oauth2/authorization/google")
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const handleLoginWithGoogleClick = async () => {
+  loginWithGoogle();
 };
 const handleLoginClick = async () => {
   // if able, validate before calling api
@@ -192,14 +200,14 @@ const handleLoginClick = async () => {
     const isSuccess = await login(loginCredentials);
     isLoading.value.loginButton = false;
     if (isSuccess) {
-  const redirectTo = route.query.redirect;
+      const redirectTo = route.query.redirect;
 
-  if (redirectTo) {
-    router.push(decodeURIComponent(redirectTo as string));
-  } else {
-    handleRouting();
-  }
-}
+      if (redirectTo) {
+        router.push(decodeURIComponent(redirectTo as string));
+      } else {
+        handleRouting();
+      }
+    }
   }
 };
 
