@@ -15,6 +15,7 @@ const userStore = useUserStore();
 const { setUser } = userStore;
 const authStore = useAuthStore();
 const { currentRole, roles } = storeToRefs(authStore);
+const { handleSetRole } = usePermission();
 const { setRoles } = authStore;
 
 const route = useRoute();
@@ -31,6 +32,7 @@ onBeforeMount(async () => {
     const rolesRes = await getMyRoles();
     if (rolesRes) {
       setRoles(rolesRes.data);
+      handleSetRole();
       const myInfoRes = await getMe(rolesRes.data[0]);
       if (myInfoRes) {
         setUser(myInfoRes.data);
@@ -49,6 +51,7 @@ onBeforeMount(async () => {
       const rolesRes = await getMyRoles();
       if (rolesRes) {
         setRoles(rolesRes.data);
+        handleSetRole();
         const myInfoRes = await getMe(rolesRes.data[0]);
         if (myInfoRes) {
           setUser(myInfoRes.data);
@@ -60,9 +63,9 @@ onBeforeMount(async () => {
           }
         }
       }
-      return;
     }
   }
+
   setLoading(false);
 });
 </script>
