@@ -60,9 +60,9 @@ onBeforeMount(async () => {
           }
         }
       }
-      return;
     }
   }
+
   setLoading(false);
 });
 </script>
