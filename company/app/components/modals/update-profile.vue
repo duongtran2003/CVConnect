@@ -241,6 +241,10 @@ async function handleSubmit() {
     payload.dateOfBirth = moment(payload.dateOfBirth).format("YYYY-MM-DD");
   }
 
+  if (!payload.phoneNumber?.trim()) {
+    delete payload.phoneNumber;
+  }
+
   isLoading.value = true;
   const success = await updateProfile(payload);
   isLoading.value = false;
