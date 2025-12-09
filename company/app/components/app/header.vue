@@ -1,7 +1,7 @@
 <template>
   <div class="header">
     <AppBreadcrumb class="breadcrumb" />
-    <AppHeaderSearch />
+    <!-- <AppHeaderSearch /> -->
     <AppPublicHeaderChatPopup v-if="isHr" class="chat-btn" :is-hr="true" />
     <AppHeaderNotificationBell />
     <AppHeaderAvatar />
