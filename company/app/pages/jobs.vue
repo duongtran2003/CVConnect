@@ -261,7 +261,7 @@ function handleSearch(payload: any) {
     ...filter.value,
     keyword: payload.keyword,
     searchOrg: payload.searchOrg,
-  }
+  };
 
   setFilter(newFilter);
   syncToQuery();
@@ -282,10 +282,10 @@ watch(
   [() => filter.value, () => sort.value],
   async () => {
     // if (scroller.value) {
-      // console.log({ scroller: scroller.value });
-      // scroller.value.scrollTo({
-      //   top: 219,
-      // });
+    // console.log({ scroller: scroller.value });
+    // scroller.value.scrollTo({
+    //   top: 219,
+    // });
     // }
 
     currentPage.value = 0;

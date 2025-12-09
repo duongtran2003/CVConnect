@@ -12,6 +12,7 @@
           :id="editViewId || -1"
           :initial-mode="editViewInitialMode"
           :allow-edit="canEdit"
+          :can-delete="canDeleteGroup"
           @close-modal="closeEditViewModal"
           @submit="handleModalSubmit"
           @mode-switch="handleSwitchEditViewMode"
@@ -328,6 +329,15 @@ const closeModal = () => {
 const closeEditViewModal = () => {
   isEditViewOpen.value = false;
 };
+
+const canDeleteGroup = computed(() => {
+  const editingGroup = tableData.value.find((data: any) => data.id == editViewId.value) as any;
+
+  if (editingGroup) {
+    return editingGroup.canDelete;
+  }
+  return true;
+})
 
 const deleteListNames = computed(() => {
   return tableData.value
