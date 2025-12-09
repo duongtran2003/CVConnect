@@ -281,12 +281,12 @@ async function handleFetchMore() {
 watch(
   [() => filter.value, () => sort.value],
   async () => {
-    if (scroller.value) {
-      console.log({ scroller: scroller.value });
-      scroller.value.scrollTo({
-        top: 219,
-      });
-    }
+    // if (scroller.value) {
+      // console.log({ scroller: scroller.value });
+      // scroller.value.scrollTo({
+      //   top: 219,
+      // });
+    // }
 
     currentPage.value = 0;
     setJobsList([]);

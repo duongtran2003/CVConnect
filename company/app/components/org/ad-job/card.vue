@@ -327,7 +327,12 @@ function handleCopyLink() {
 
   // TODO: Should link to public page, update me
   const link = router.resolve({
-    path: `/org/job-ad/detail/${props.data.id}`,
+    path: `/job-ad/detail/${props.data.id}`, 
+    query: {
+      keyCodeInternal: props.data.isPublic
+        ? undefined
+        : props.data.keyCodeInternal,
+    },
   });
 
   navigator.clipboard.writeText(window.location.origin + link.href);
