@@ -643,10 +643,10 @@ const normalizeFilter = (filter: any) => {
     const endDate = normalizedFilter.dateOfBirth[1];
     delete normalizedFilter.dateOfBirth;
     if (startDate) {
-      normalizedFilter.dateOfBirthStart = toUtcDate(startDate);
+      normalizedFilter.dateOfBirthStart = toUtcDate(startDate, "yyyy-MM-DD");
     }
     if (endDate) {
-      normalizedFilter.dateOfBirthEnd = toUtcDate(endDate);
+      normalizedFilter.dateOfBirthEnd = toUtcDate(endDate, "yyyy-MM-DD");
     }
   }
   if (
