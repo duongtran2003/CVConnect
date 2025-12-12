@@ -51,6 +51,9 @@ const scroller = useTemplateRef("scroller");
 
 onBeforeMount(async () => {
   const res = await getFilter();
+  if (!res) {
+    return;
+  }
   res.data.careers = res.data.careers.map((career: any) => ({
     label: career.name,
     value: career.id,
@@ -95,6 +98,10 @@ async function fetchJobs() {
   };
 
   const jobAdsRes = await getJobAds(queryObj, controller.value);
+  if (!jobAdsRes) {
+    setIsFetchingJobs(false);
+    return;
+  }
   setJobsList([...jobsList.value, ...jobAdsRes.data.data.data]);
 
   if (jobAdsRes.data.data.data.length == 0) {

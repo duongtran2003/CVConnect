@@ -380,6 +380,10 @@ const fetchData = async () => {
   isFetchingData.value = true;
   const query = route.query;
   const res = await getOrgMembers(query, fetchOrgMemberController.value);
+  if (!res) {
+    isFetchingData.value = false;
+    return;
+  }
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
