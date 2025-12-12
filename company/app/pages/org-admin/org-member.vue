@@ -234,6 +234,27 @@ const convertQuery = () => {
     restoredFilter.updatedAt = updatedAt;
   }
 
+  const dateOfBirth: (Date | null)[] = [];
+  if (query.dateOfBirthStart) {
+    const start = new Date(query.dateOfBirthStart as string);
+    if (!isNaN(start.getTime())) {
+      dateOfBirth.push(start);
+    } else {
+      dateOfBirth.push(null);
+    }
+  }
+  if (query.dateOfBirthEnd) {
+    const end = new Date(query.dateOfBirthEnd as string);
+    if (!isNaN(end.getTime())) {
+      dateOfBirth.push(end);
+    } else {
+      dateOfBirth.push(null);
+    }
+  }
+  if (dateOfBirth.length) {
+    restoredFilter.dateOfBirth = dateOfBirth;
+  }
+
   delete restoredFilter.createdAtStart;
   delete restoredFilter.createdAtEnd;
   delete restoredFilter.updatedAtStart;
@@ -359,6 +380,10 @@ const fetchData = async () => {
   isFetchingData.value = true;
   const query = route.query;
   const res = await getOrgMembers(query, fetchOrgMemberController.value);
+  if (!res) {
+    isFetchingData.value = false;
+    return;
+  }
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
@@ -546,6 +571,18 @@ const normalizeFilter = (filter: any) => {
     delete normalizedFilter.updatedAt;
     if (startDate) normalizedFilter.updatedAtStart = toUtcDate(startDate);
     if (endDate) normalizedFilter.updatedAtEnd = toUtcDate(endDate);
+  }
+
+  if (normalizedFilter.dateOfBirth) {
+    const startDate = normalizedFilter.dateOfBirth[0];
+    const endDate = normalizedFilter.dateOfBirth[1];
+    delete normalizedFilter.dateOfBirth;
+    if (startDate) {
+      normalizedFilter.dateOfBirthStart = toUtcDate(startDate, "yyyy-MM-DD");
+    }
+    if (endDate) {
+      normalizedFilter.dateOfBirthEnd = toUtcDate(endDate, "yyyy-MM-DD");
+    }
   }
 
   const queryForUrl: Record<string, any> = {

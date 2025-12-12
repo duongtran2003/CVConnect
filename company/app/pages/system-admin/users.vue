@@ -101,6 +101,7 @@ import {
   userTableHeaders,
   pageSizeOptions,
 } from "~/const/views/system-admin/users";
+import moment from "moment";
 
 definePageMeta({
   layout: "system-admin",
@@ -424,6 +425,10 @@ const fetchData = async () => {
   isFetchingData.value = true;
   const query = route.query;
   const res = await getUsers(query, controller.value);
+  if (!res) {
+    isFetchingData.value = false;
+    return;
+  }
   if (res.data.data.length == 0) {
     isNoData.value = true;
   } else {
@@ -448,6 +453,13 @@ const fetchData = async () => {
 
     entry.isRevokable = isAdmin && !isSelf;
     entry.isAssignable = !isAdmin && isEmailVerified;
+
+    if (entry.dateOfBirth) {
+      const arr = entry.dateOfBirth;
+      entry.dateOfBirth = moment([arr[0], arr[1] - 1, arr[2]]).format(
+        "DD/MM/YYYY",
+      );
+    }
 
     entry.info = {
       cellType: "avatar",
@@ -635,10 +647,10 @@ const normalizeFilter = (filter: any) => {
     const endDate = normalizedFilter.dateOfBirth[1];
     delete normalizedFilter.dateOfBirth;
     if (startDate) {
-      normalizedFilter.dateOfBirthStart = toUtcDate(startDate);
+      normalizedFilter.dateOfBirthStart = toUtcDate(startDate, "yyyy-MM-DD");
     }
     if (endDate) {
-      normalizedFilter.dateOfBirthStart = toUtcDate(endDate);
+      normalizedFilter.dateOfBirthEnd = toUtcDate(endDate, "yyyy-MM-DD");
     }
   }
   if (

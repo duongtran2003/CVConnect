@@ -1,5 +1,6 @@
 <template>
   <div class="department-content">
+    <AdminUserDetailModal v-model="isViewModalOpen" :user-id="userDetailId" />
     <div class="table-title">Thành viên doanh nghiệp</div>
     <OrgAdminEmployeeBaseTable
       :table-data="tableData"
@@ -68,6 +69,8 @@ const totalItems = ref<number>(0);
 const isNoData = ref<boolean>(false);
 const isDeleting = ref<boolean>(false);
 const deleteList = ref<any[]>([]);
+const isViewModalOpen = ref<boolean>(false);
+const userDetailId = ref<number>(-1);
 const allowActions = computed(() => {
   const url = route.path;
   const menuItem = getMenuItem(url);
@@ -174,6 +177,7 @@ const fetchData = async () => {
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
     entry.roleIds = entry.roles.map((role: any) => role.name).join(", ");
+    entry.id = entry.userId;
     entry.isActive = entry.isActive
       ? {
           text: "Đang hoạt động",
@@ -226,10 +230,8 @@ const handleTableActionClick = (id: number, action: TTableAction) => {
     handleDeleteClick([id]);
   }
   if (action === "view") {
-    const link = router.resolve({
-      path: `/system-admin/organizations/detail/${id}`,
-    });
-    window.open(link.href, "_blank");
+    userDetailId.value = id;
+    isViewModalOpen.value = true;
   }
   if (action === "edit") {
     editViewId.value = id;

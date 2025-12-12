@@ -420,6 +420,11 @@ function handleCopyLink() {
 
   const link = router.resolve({
     path: `/job-ad/detail/${detail.value.id}`,
+    query: {
+      keyCodeInternal: detail.value.isPublic
+        ? undefined
+        : detail.value.keyCodeInternal,
+    },
   });
 
   navigator.clipboard.writeText(window.location.origin + link.href);

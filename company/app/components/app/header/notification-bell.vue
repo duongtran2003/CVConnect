@@ -58,7 +58,9 @@
       </div>
 
       <div class="footer">
-        <div class="view-all" @click="handleViewAll">Xem tất cả</div>
+        <div v-if="props.showViewAll" class="view-all" @click="handleViewAll">
+          Xem tất cả
+        </div>
         <div
           v-if="!isFetching && notifications.length && isShowMoreShow"
           class="fetch-more"
@@ -85,6 +87,14 @@ const { token } = storeToRefs(authStore);
 const { getMyNotification, getUnreadQuantity, markAllRead, markRead } =
   useNotificationApi();
 const router = useRouter();
+
+type TProps = {
+  showViewAll?: boolean;
+};
+
+const props = withDefaults(defineProps<TProps>(), {
+  showViewAll: true,
+});
 
 const connection = ref<any>(null);
 const filterTab = ref<TNotificationFilterTab>(FILTER_TAB.ALL);

@@ -13,7 +13,7 @@
           :value="
             currentMode == 'view' ? userGroupDetail?.code || '' : formInput.code
           "
-          :is-disabled="currentMode == 'view'"
+          :is-disabled="currentMode == 'view' || !props.canDelete"
           class="text-input"
           @input="handleInput('code', $event)"
           @blur="validateKey('code')"
@@ -119,11 +119,13 @@ type TProps = {
   initialMode?: TMode;
   id: number;
   allowEdit?: boolean;
+  canDelete?: boolean;
 };
 
 const props = withDefaults(defineProps<TProps>(), {
   initialMode: "view",
   allowEdit: false,
+  canDelete: true,
 });
 
 const currentMode = ref<TMode>("view");

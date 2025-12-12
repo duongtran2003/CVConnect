@@ -4,13 +4,10 @@ export const useOrgMemberApi = () => {
 
   const replyInvitation = async (token: string, action: string) => {
     try {
-      const res = await $axios.post(
-        "_api/user/org-member/reply-invite-join-org",
-        {
-          token,
-          status: action == "a" ? "ACCEPTED" : "REJECTED",
-        },
-      );
+      const res = await $axios.post("/user/org-member/reply-invite-join-org", {
+        token,
+        status: action == "a" ? "ACCEPTED" : "REJECTED",
+      });
       return res;
     } catch (err) {
       console.error(err);
@@ -26,12 +23,9 @@ export const useOrgMemberApi = () => {
 
     try {
       const queryString = objectToQuery(params);
-      const res = await $axios.get(
-        `/user/org-member/filter?${queryString}`,
-        {
-          signal: _abortController ? _abortController.signal : undefined,
-        },
-      );
+      const res = await $axios.get(`/user/org-member/filter?${queryString}`, {
+        signal: _abortController ? _abortController.signal : undefined,
+      });
       return res.data;
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -51,9 +45,7 @@ export const useOrgMemberApi = () => {
 
   const getRoleFilterOption = async () => {
     try {
-      const res = await $axios.get(
-        `/user/role/get-member-type-organization`,
-      );
+      const res = await $axios.get(`/user/role/get-member-type-organization`);
       return res.data;
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -73,9 +65,7 @@ export const useOrgMemberApi = () => {
 
   const getOrgMemberDetail = async (id: number) => {
     try {
-      const res = await $axios.get(
-        `/user/org-member/org-member-info/${id}`,
-      );
+      const res = await $axios.get(`/user/org-member/org-member-info/${id}`);
       return res.data;
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -137,10 +127,7 @@ export const useOrgMemberApi = () => {
 
   const assignRole = async (payload: any) => {
     try {
-      const res = await $axios.put(
-        `/user/org-member/assign-role`,
-        payload,
-      );
+      const res = await $axios.put(`/user/org-member/assign-role`, payload);
       toast.add({
         title: res.data.message,
         color: "success",
