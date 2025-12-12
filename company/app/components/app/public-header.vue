@@ -13,6 +13,7 @@
     </div>
     <div class="right">
       <template v-if="avatarInfo">
+        <AppHeaderNotificationBell :show-view-all="false" />
         <AppPublicHeaderChatPopup :is-hr="false" />
         <AppPublicHeaderAvatar />
       </template>
@@ -103,7 +104,7 @@ const isHR = computed(() => {
     (detail: any) => detail.role.memberType == "ORGANIZATION",
   );
   return orgRole != undefined;
-})
+});
 
 function handleClickLogo() {
   router.push({ path: "/" });
@@ -187,6 +188,11 @@ function handleClickLogo() {
     flex-direction: row;
     gap: 8px;
     align-items: center;
+
+    :deep(.bell) {
+      box-shadow: none;
+      background-color: $color-gray-200;
+    }
 
     .link {
       font-size: 13px;
