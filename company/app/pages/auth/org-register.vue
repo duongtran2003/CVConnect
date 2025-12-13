@@ -236,14 +236,14 @@ const handleGoNext = async () => {
     });
 
     if (addresses && addresses.length) {
-      payload.addresses = addresses;
+      payload.organization.addresses = addresses;
     }
 
     const industryIds = formData.value.companyType.map(
       (type: any) => type.value,
     );
     if (industryIds && industryIds.length) {
-      payload.industryIds = industryIds;
+      payload.organization.industryIds = industryIds;
     }
 
     const formDataReq = new FormData();
