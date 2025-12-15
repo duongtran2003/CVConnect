@@ -9,5 +9,6 @@ export type TNotification = {
   message: string;
   redirectUrl: string;
   isRead: boolean;
+  receiverType: string;
   createdAt: number;
 };
