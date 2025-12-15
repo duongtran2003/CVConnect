@@ -83,7 +83,9 @@ import type {
   TNotificationFilterTab,
 } from "~/types/notification";
 const authStore = useAuthStore();
-const { token } = storeToRefs(authStore);
+const { token, currentRole, roles } = storeToRefs(authStore);
+const { setCurrentRole } = authStore;
+
 const { getMyNotification, getUnreadQuantity, markAllRead, markRead } =
   useNotificationApi();
 const router = useRouter();
@@ -224,12 +226,21 @@ function handleClickOutside() {
 }
 
 async function handleClickNoti(notification: TNotification) {
-  const resolved = router.resolve({ path: notification.redirectUrl });
-  window.open(resolved.href, "_blank");
-  const res = await markRead(notification.id);
-  if (res) {
-    // Do something here?
+  const requiredRole = roles.value.find(
+    (role: any) => role.memberType == notification.type,
+  );
+
+  if (requiredRole) {
+    markRead(notification.id);
+    setCurrentRole(requiredRole);
+    router.push({ path: notification.redirectUrl });
   }
+
+  // const resolved = router.resolve({ path: notification.redirectUrl });
+  // window.open(resolved.href, "_blank");
+  // if (res) {
+  //   // Do something here?
+  // }
 }
 
 function handleFilterChange(status: TNotificationFilterTab) {
