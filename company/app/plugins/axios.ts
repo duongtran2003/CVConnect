@@ -40,7 +40,9 @@ export default defineNuxtPlugin(() => {
       .catch((err) => {
         console.error(err);
         console.log("refresh fail, logout!");
-        logout();
+        const encodedRoute = encodeURIComponent(route.fullPath);
+        console.log({ encodedRoute });
+        logout(encodedRoute);
       });
 
   createAuthRefreshInterceptor(axiosInstance, refreshAuthLogic, {
