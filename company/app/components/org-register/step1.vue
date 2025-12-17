@@ -20,7 +20,11 @@
         <div class="company-type-wrapper">
           <div class="label">Lĩnh vực</div>
           <div class="select-input" :title="selectedCompanyType">
-            <div v-if="selectedCompanyType" class="clear-button" @click="handleInput('companyType', [])">
+            <div
+              v-if="selectedCompanyType"
+              class="clear-button"
+              @click="handleInput('companyType', [])"
+            >
               <Icon name="material-symbols:close-rounded" />
             </div>
             <USelectMenu
@@ -269,7 +273,6 @@ watch(companySize, (newVal) => {
             font-weight: 500 !important;
             color: $color-gray-600 !important;
             height: 32px;
-            background-color: $color-gray-100 !important;
             width: 100%;
             max-width: 100%;
 
