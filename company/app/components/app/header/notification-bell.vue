@@ -234,7 +234,8 @@ async function handleClickNoti(notification: TNotification) {
   if (requiredRole) {
     setCurrentRole(requiredRole);
   }
-  router.push({ path: notification.redirectUrl });
+  const url = router.resolve(notification.redirectUrl);
+  window.open(url.href, "_blank");
 
   // const resolved = router.resolve({ path: notification.redirectUrl });
   // window.open(resolved.href, "_blank");

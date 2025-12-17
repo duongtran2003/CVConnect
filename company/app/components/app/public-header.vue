@@ -95,6 +95,10 @@ const registerRedirectLink = computed(() => {
 });
 
 const loginRedirectLink = computed(() => {
+  const currentRoute = route.fullPath;
+  if (currentRoute == "/") {
+    return "/auth/login";
+  }
   const encodedRoute = encodeURIComponent(route.fullPath);
   return `/auth/login?redirect=${encodedRoute}`;
 });
