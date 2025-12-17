@@ -4,7 +4,7 @@
       <div class="login-form">
         <div class="form-header">
           <div class="logo">
-            <img src="/logo-horizontal.svg" />
+            <img src="/logo-horizontal.svg" @click="handleClickLogo" />
           </div>
           <div class="welcome-message">Đăng nhập</div>
           <div class="welcome-desc">
@@ -224,6 +224,10 @@ const handleLoginClick = async () => {
   }
 };
 
+const handleClickLogo = () => {
+  router.push({ path: "/" });
+};
+
 const handleInput = (key: string, value: string) => {
   formInput.value[key as keyof typeof formInput.value] = value;
   formError.value[key as keyof typeof formError.value] = "";
@@ -296,6 +300,7 @@ const isLoading = ref({
           margin-bottom: 12px;
           img {
             height: 72px;
+            cursor: pointer;
           }
         }
       }

@@ -3,7 +3,7 @@
     <div class="content">
       <div class="header">
         <div class="logo">
-          <img src="/logo-horizontal.svg" />
+          <img src="/logo-horizontal.svg" @click="handleClickLogo" />
         </div>
         <div class="title">Đăng ký tài khoản doanh nghiệp</div>
       </div>
@@ -173,6 +173,10 @@ const handleInputForm = (e: Record<string, any>) => {
   formData.value[e.key] = e.value;
 };
 
+const handleClickLogo = () => {
+  router.push({ path: "/" });
+};
+
 const handleGoBack = () => {
   if (activeTab.value == 0) {
     router.push({ path: "/auth/login" });
@@ -295,6 +299,7 @@ const description = [
 <style lang="scss" scoped>
 .org-register {
   padding-top: 36px;
+  background-color: white;
 
   .footer-wrapper {
     margin-top: 96px;
@@ -340,7 +345,7 @@ const description = [
       gap: 8px;
       align-items: center;
       justify-content: flex-end;
-      width: 100%;
+      width: min(750px, 100%);
 
       .btn {
         font-size: 14px;
@@ -379,6 +384,7 @@ const description = [
         margin-bottom: 12px;
         img {
           height: 58px;
+          cursor: pointer;
         }
       }
 
@@ -439,6 +445,18 @@ const description = [
       text-decoration: underline;
       font-style: italic;
       margin-top: 12px;
+    }
+  }
+
+  :deep(.address-picker) {
+    .picker-wrapper {
+      .line {
+        .select-input {
+          button.selector {
+            background-color: white !important;
+          }
+        }
+      }
     }
   }
 }
