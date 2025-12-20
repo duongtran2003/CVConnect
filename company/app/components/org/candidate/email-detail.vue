@@ -4,7 +4,7 @@
       <div class="subject">{{ props.emailInfo.subject }}</div>
       <div class="right">
         <AppButton
-          v-if="mailStatus === 'FAILURE'"
+          v-if="mailStatus === 'FAILURE' && isSender"
           :text="'Gửi lại'"
           class="resend-button"
           :is-loading="isSubmitting"
@@ -53,6 +53,8 @@ type TProps = {
 };
 
 const { resendEmail } = useCandidateApi();
+const userStore = useUserStore();
+const { userInfo } = storeToRefs(userStore);
 
 const props = defineProps<TProps>();
 
@@ -66,6 +68,10 @@ const mailStatus = computed(() => {
   }
 
   return props.emailInfo.status;
+});
+
+const isSender = computed(() => {
+  return userInfo.value?.email === props.emailInfo.sender;
 });
 
 async function resendMail() {
