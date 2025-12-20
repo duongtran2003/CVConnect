@@ -78,15 +78,11 @@ const tabs = computed(() => {
   let _tabs = CANDIDATE_DETAIL_RIGHT_TABS;
 
   if (!isHr.value) {
-    _tabs = CANDIDATE_DETAIL_RIGHT_TABS.filter(
-      (TAB: any) => TAB.paramKey != "discussion",
-    );
+    _tabs = _tabs.filter((TAB: any) => TAB.paramKey != "discussion");
   }
 
   if (!isEmailLogShow.value) {
-    _tabs = CANDIDATE_DETAIL_RIGHT_TABS.filter(
-      (TAB: any) => TAB.paramKey != "emails",
-    );
+    _tabs = _tabs.filter((TAB: any) => TAB.paramKey != "emails");
   }
 
   return _tabs;
