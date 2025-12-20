@@ -37,7 +37,7 @@ definePageMeta({
 const permittedRole: string = "ANY";
 const permissionType: TPermissionCheckType = PERMISSION_CHECK_TYPE.ROLE;
 
-useLayoutPermission(permissionType, permittedRole);
+await useLayoutPermission(permissionType, permittedRole);
 const sidebarStore = useSidebarStore();
 const { sidebarData } = storeToRefs(sidebarStore);
 

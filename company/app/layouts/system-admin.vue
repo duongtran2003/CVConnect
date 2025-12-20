@@ -15,7 +15,7 @@ import type { TPermissionCheckType } from "~/types/permision";
 const permittedRole: TRole = "SYSTEM_ADMIN";
 const permissionType: TPermissionCheckType = PERMISSION_CHECK_TYPE.ROLE;
 
-useLayoutPermission(permissionType, permittedRole);
+await useLayoutPermission(permissionType, permittedRole);
 
 const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);

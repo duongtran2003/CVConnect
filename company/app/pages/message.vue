@@ -100,7 +100,7 @@ definePageMeta({
 
 const permittedRole: string = "ANY";
 const permissionType: TPermissionCheckType = PERMISSION_CHECK_TYPE.MEMBER_TYPE;
-useLayoutPermission(permissionType, permittedRole);
+await useLayoutPermission(permissionType, permittedRole);
 
 const router = useRouter();
 const route = useRoute();
@@ -256,7 +256,8 @@ watch(
         targetCard.conversation.lastMessageSentAt =
           new Date(newMessage.data.newMessage.sentAt).getTime() / 1000;
         if (newMessage.data.isSelf) {
-          targetCard.conversation.lastMessageSentAt = newMessage.data.newMessage.sentAt;
+          targetCard.conversation.lastMessageSentAt =
+            newMessage.data.newMessage.sentAt;
           targetCard.hasMessageUnread = false;
         }
         list.value = [targetCard, ...list.value];

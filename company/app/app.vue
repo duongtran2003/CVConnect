@@ -2,12 +2,18 @@
   <div v-if="isLoading" class="loading-overlay">
     <AppSpinnerHalfCircle class="spinner" />
   </div>
-  <NuxtLayout>
-    <NuxtLoadingIndicator color="#38b2ac" />
-    <UApp :toaster="toasterConfig">
-      <NuxtPage />
-    </UApp>
-  </NuxtLayout>
+  <Suspense>
+    <template #default>
+      <NuxtLayout>
+        <NuxtLoadingIndicator color="#c90a1f" />
+        <UApp :toaster="toasterConfig">
+          <NuxtPage />
+        </UApp>
+      </NuxtLayout>
+    </template>
+
+    <template #fallback> </template>
+  </Suspense>
 </template>
 <script setup lang="ts">
 import { UApp } from "#components";

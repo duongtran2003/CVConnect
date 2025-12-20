@@ -3,7 +3,7 @@ import { storeToRefs } from "pinia";
 import type { TPermissionCheckType } from "~/types/permision";
 import { STATUS_CODE } from "~/const/api";
 
-export function useLayoutPermission(
+export async function useLayoutPermission(
   permissionType: TPermissionCheckType,
   permittedRole: TRole | string,
 ) {
@@ -65,5 +65,5 @@ export function useLayoutPermission(
     setLoading(false);
   };
 
-  onBeforeMount(init);
+  await init();
 }
