@@ -20,16 +20,20 @@
         :job-ads="props.detail.jobAdCandidates"
         :candidate-info="props.detail.candidateInfo"
       />
-      <OrgCandidateInfoRightConversation
-        v-show="currentTabIndex == 4"
-        :job-ads="props.detail.jobAdCandidates"
-        :candidate-info="props.detail.candidateInfo"
-      />
-      <OrgCandidateInfoRightEmailLog
-        v-show="currentTabIndex == 5"
-        :job-ads="props.detail.jobAdCandidates"
-        :candidate-info="props.detail.candidateInfo"
-      />
+      <template v-if="isHr">
+        <OrgCandidateInfoRightConversation
+          v-show="currentTabIndex == 4"
+          :job-ads="props.detail.jobAdCandidates"
+          :candidate-info="props.detail.candidateInfo"
+        />
+      </template>
+      <template v-if="isEmailLogShow">
+        <OrgCandidateInfoRightEmailLog
+          v-show="currentTabIndex == 5"
+          :job-ads="props.detail.jobAdCandidates"
+          :candidate-info="props.detail.candidateInfo"
+        />
+      </template>
     </div>
   </div>
 </template>
