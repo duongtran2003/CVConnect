@@ -50,7 +50,7 @@
         @update:model-value="handleInput('skill', $event)"
       />
     </div>
-    <div class="buttons">
+    <div v-if="canEditCandidate" class="buttons">
       <AppButton
         :text="'Hủy'"
         class="button cancel-btn"
@@ -82,6 +82,18 @@ const formInputSnapshot = ref<Record<string, any>>({});
 const formInput = ref<Record<string, any>>({
   level: undefined,
   skill: "",
+});
+
+const sidebarStore = useSidebarStore();
+const { sidebarData } = storeToRefs(sidebarStore);
+
+const canEditCandidate = computed(() => {
+  console.log({ sidebar: sidebarData.value });
+
+  const calendarMenu = sidebarData.value.find(
+    (s) => s.menuCode == "ORG_CANDIDATE",
+  );
+  return !!calendarMenu?.permissions?.includes("UPDATE");
 });
 
 const levelOptions = computed(() => {

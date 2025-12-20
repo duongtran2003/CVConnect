@@ -63,6 +63,7 @@
           </template>
         </AppButton>
         <AppButton
+          v-if="canCreateSchedule"
           :text="'Tạo lịch hẹn'"
           class="create-schedule-btn"
           :title="
@@ -108,6 +109,9 @@ const detailId = ref<any>(-1);
 
 const props = defineProps<TProps>();
 
+const sidebarStore = useSidebarStore();
+const { sidebarData } = storeToRefs(sidebarStore);
+
 onBeforeMount(async () => {
   if (props.jobAds.length) {
     const ad = props.jobAds[0];
@@ -139,6 +143,15 @@ const jobAdOpts = computed(() => {
     label: ad.jobAd.title,
     value: ad.jobAd.id,
   }));
+});
+
+const canCreateSchedule = computed(() => {
+  console.log({ sidebar: sidebarData.value });
+
+  const calendarMenu = sidebarData.value.find(
+    (s) => s.menuCode == "ORG_CALENDAR",
+  );
+  return !!calendarMenu?.permissions?.includes("ADD");
 });
 
 const selectedJobAdInfo = computed(() => {

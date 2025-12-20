@@ -48,11 +48,20 @@ const props = defineProps<TProps>();
 const currentTabIndex = ref<number>(1);
 
 const authStore = useAuthStore();
-const { currentRole } = storeToRefs(authStore);
+const { currentRole, roles } = storeToRefs(authStore);
 
 const isHr = computed(() => {
   console.log({ role: currentRole.value });
   return currentRole.value?.code == "HR";
+});
+
+const isEmailLogShow = computed(() => {
+  const rolesCode = roles.value.map((r) => r.code);
+  console.log({ rolesCode });
+  if (!rolesCode.includes("HR") && !rolesCode.includes("ORG_ADMIN")) {
+    return false;
+  }
+  return true;
 });
 
 onMounted(() => {
@@ -66,12 +75,21 @@ onMounted(() => {
 });
 
 const tabs = computed(() => {
+  let _tabs = CANDIDATE_DETAIL_RIGHT_TABS;
+
   if (!isHr.value) {
-    return CANDIDATE_DETAIL_RIGHT_TABS.filter(
+    _tabs = CANDIDATE_DETAIL_RIGHT_TABS.filter(
       (TAB: any) => TAB.paramKey != "discussion",
     );
   }
-  return CANDIDATE_DETAIL_RIGHT_TABS;
+
+  if (!isEmailLogShow.value) {
+    _tabs = CANDIDATE_DETAIL_RIGHT_TABS.filter(
+      (TAB: any) => TAB.paramKey != "emails",
+    );
+  }
+
+  return _tabs;
 });
 
 async function handleTabSwitch(index: number) {

@@ -86,7 +86,7 @@
                 </div>
               </div>
             </div>
-            <div class="actions">
+            <div v-if="canEditCandidate" class="actions">
               <template v-if="displayJobAd.candidateStatus != 'REJECTED'">
                 <template v-if="!isOnboardStep(displayJobAd)">
                   <div
@@ -223,6 +223,18 @@ const isChangeOnboardDateModalOpen = ref<boolean>(false);
 const rejectingTarget = ref<any>(null);
 const changeProcessTarget = ref<any>(null);
 const changeDateTarget = ref<any>(null);
+
+const sidebarStore = useSidebarStore();
+const { sidebarData } = storeToRefs(sidebarStore);
+
+const canEditCandidate = computed(() => {
+  console.log({ sidebar: sidebarData.value });
+
+  const calendarMenu = sidebarData.value.find(
+    (s) => s.menuCode == "ORG_CANDIDATE",
+  );
+  return !!calendarMenu?.permissions?.includes("UPDATE");
+});
 
 const processTooltip = computed(() => {
   return (process: any) => {
