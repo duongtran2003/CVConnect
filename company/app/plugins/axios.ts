@@ -68,18 +68,18 @@ export default defineNuxtPlugin(() => {
     (response) => {
       return response;
     },
-    (error) => {
-      const status = error.response?.status;
-
-      if (status === 403) {
-        if (router.currentRoute.value.path !== "/403") {
-          router.push({ path: "/403" });
-        }
-      }
-      console.error("axios response error", status, error.message);
-
-      return Promise.reject(error);
-    },
+    // (error) => {
+    //   const status = error.response?.status;
+    //
+    //   if (status === 403) {
+    //     if (router.currentRoute.value.path !== "/403") {
+    //       router.push({ path: "/403" });
+    //     }
+    //   }
+    //   console.error("axios response error", status, error.message);
+    //
+    //   return Promise.reject(error);
+    // },
   );
 
   return {
