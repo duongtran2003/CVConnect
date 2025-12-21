@@ -148,7 +148,7 @@ async function handleSubmit() {
     payload.score = formInput.value.score;
   }
 
-  console.log(props.jobAdCandidateId)
+  // console.log(props.jobAdCandidateId)
   const res = await createEvaluation(props.jobAdCandidateId, payload);
   isLoading.value = false;
   if (res) {

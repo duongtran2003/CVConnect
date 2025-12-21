@@ -98,7 +98,7 @@ const debouncedSearch = debounce(async () => {
 }, 500);
 
 watch(searchKeyword, (val) => {
-  console.log("changed");
+  // console.log("changed");
   debouncedSearch();
 });
 </script>

@@ -128,7 +128,7 @@ const levelTags = computed(() => {
 });
 
 const jobAdInfo = computed(() => {
-  console.log({ data: props.data });
+  // console.log({ data: props.data });
   return {
     ...props.data,
     id: route.params.id,

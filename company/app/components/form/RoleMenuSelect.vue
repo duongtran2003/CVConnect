@@ -177,7 +177,7 @@ const emit = defineEmits<{
 const permValue = ref<any>({});
 
 onBeforeMount(() => {
-  console.log("perm map", props.initialPermMap);
+  // console.log("perm map", props.initialPermMap);
 });
 
 const getCheckboxValue = computed(() => {
@@ -235,7 +235,7 @@ const handleCheckbox = (
   if (perm === "ALL") {
     const perms: TPermission[] = ["VIEW", "ADD", "UPDATE", "DELETE", "EXPORT"];
     for (const p of perms) {
-      console.log(item);
+      // console.log(item);
       handleCheckbox(item, p, value);
     }
     return;
@@ -268,7 +268,7 @@ const handleCheckboxChange = (
   }
 
   permValue.value[id][perm] = value;
-  console.log(permValue.value);
+  // console.log(permValue.value);
   emit("permChange", permValue.value);
 };
 
@@ -280,7 +280,7 @@ watch(
     } else {
       permValue.value = newVal;
     }
-    console.log("watcher", newVal);
+    // console.log("watcher", newVal);
   },
   { immediate: true },
 );

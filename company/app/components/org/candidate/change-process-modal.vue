@@ -400,7 +400,7 @@ const previewData = computed(() => {
     data.examStartTime = toUtcDateStart(formInput.value.onboardDate);
   }
 
-  console.log({ data });
+  // console.log({ data });
 
   const jobProcess = props.changeProcessTarget?.jobAdProcessCandidates.find(
     (process: any) => process.id == formInput.value.process?.value,
@@ -540,7 +540,7 @@ const isSubmitDisabled = computed(() => {
 });
 
 async function handlePreviewClick() {
-  console.log("clicked");
+  // console.log("clicked");
   if (!isPreviewable.value) {
     return;
   }
@@ -684,7 +684,7 @@ watch(
   async (newValue) => {
     if (newValue && newValue.value != undefined) {
       const res = await getMailTemplateDetail(newValue.value);
-      console.log(res);
+      // console.log(res);
       templateDetail.value = res.data;
     }
   },

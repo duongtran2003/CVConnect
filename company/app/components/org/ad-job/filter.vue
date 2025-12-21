@@ -136,7 +136,7 @@ const dateRangeValue = computed(() => {
 });
 
 function handleDateRangeInput(key: string, range: any) {
-  console.log({ range });
+  // console.log({ range });
   if (!range?.length) {
     filter.value[`${key}Start`] = undefined;
     filter.value[`${key}End`] = undefined;

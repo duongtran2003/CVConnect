@@ -117,7 +117,7 @@ watch(selectedJobAd, async (newVal) => {
     return;
   }
 
-  console.log(selectedJobAd);
+  // console.log(selectedJobAd);
 
   fetchGrades();
 });

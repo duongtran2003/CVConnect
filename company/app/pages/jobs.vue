@@ -125,7 +125,7 @@ async function fetchJobs() {
 
 function convertFilter() {
   const f = cloneDeep(filter.value);
-  console.log({ f });
+  // console.log({ f });
   const payload: any = {
     pageIndex: currentPage.value,
     pageSize: 20,
@@ -172,7 +172,7 @@ function convertFilter() {
     payload.jobType = f.jobTypes;
   }
 
-  console.log({ payload });
+  // console.log({ payload });
 
   return payload;
 }
@@ -276,7 +276,7 @@ function handleSearch(payload: any) {
 
 function handleFilter(newValue: any) {
   setFilter({ ...filter.value, ...newValue });
-  console.log({ newValue, filter: filter.value });
+  // console.log({ newValue, filter: filter.value });
   syncToQuery();
 }
 
@@ -289,7 +289,7 @@ watch(
   [() => filter.value, () => sort.value],
   async () => {
     // if (scroller.value) {
-    // console.log({ scroller: scroller.value });
+    // // console.log({ scroller: scroller.value });
     // scroller.value.scrollTo({
     //   top: 219,
     // });

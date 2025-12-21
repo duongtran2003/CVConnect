@@ -201,7 +201,7 @@ const handleSubmit = async () => {
     return;
   }
 
-  console.log(formInput.value);
+  // console.log(formInput.value);
   const payload: Record<string, any> = {
     code: formInput.value.code,
     name: formInput.value.name,
@@ -216,7 +216,7 @@ const handleSubmit = async () => {
     placeholderSet.add(+placeholder.id);
   }
   payload.placeholderIds = [...placeholderSet];
-  console.log(formInput.value.body);
+  // console.log(formInput.value.body);
 
   isSubmiting.value = true;
   const res = await createMailTemplate(payload);

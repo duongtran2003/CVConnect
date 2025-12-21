@@ -134,18 +134,18 @@ const isFormValid = computed(() => {
   }
 
   if (isEqual(formInput.value, formInputSnapshot.value)) {
-    console.log("equal, returning false");
+    // console.log("equal, returning false");
     return false;
   }
 
   if (
     !formInput.value.name.trim()
   ) {
-    console.log("failed here");
+    // console.log("failed here");
     return false;
   }
 
-  console.log("somehow it got here?");
+  // console.log("somehow it got here?");
   return true;
 });
 
@@ -180,7 +180,7 @@ async function handleSubmit() {
 
 function handleInput(key: string, value: any) {
   if (key == "industryList") {
-    console.log(value.length);
+    // console.log(value.length);
     if (value.length > 5) {
       return;
     }

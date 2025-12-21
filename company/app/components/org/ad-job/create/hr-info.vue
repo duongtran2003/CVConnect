@@ -104,7 +104,7 @@ const hrOptions = computed(() => {
 });
 
 function handleInput(key: string, value: any) {
-  console.log(key, value);
+  // console.log(key, value);
   formInput.value[key] = value;
 }
 

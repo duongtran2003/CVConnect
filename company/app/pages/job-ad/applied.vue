@@ -115,7 +115,7 @@ async function fetchData() {
     payload.candidateStatus = filter.value.candidateStatus.value;
   }
   const res = await getAppliedJobAds(payload);
-  console.log({ res });
+  // console.log({ res });
   if (!res) {
     isLoading.value = false;
     return;

@@ -255,7 +255,7 @@ const formRule: Record<string, any> = {
     {
       error: "Mời chọn phòng ban",
       validator: (input: any[]) => {
-        console.log(input);
+        // console.log(input);
         return !!input;
       },
     },
@@ -451,7 +451,7 @@ const levelOptions = computed(() => {
 
 function handleInput(key: string, value: any) {
   if (key == "level") {
-    console.log("input level ne", value);
+    // console.log("input level ne", value);
     if (value.length && value[value.length - 1].value == 0) {
       formError.value[key] = "";
       formInput.value[key] = [value[value.length - 1]];

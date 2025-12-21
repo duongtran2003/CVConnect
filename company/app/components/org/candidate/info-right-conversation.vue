@@ -135,7 +135,7 @@ const isLoading = ref<boolean>(false);
 const props = defineProps<TProps>();
 
 onBeforeMount(() => {
-  console.log({ props });
+  // console.log({ props });
   if (props.jobAds.length) {
     const jobAdId = route.query.jobAdId;
     let ad: any = undefined;
@@ -194,7 +194,7 @@ const messagesList = computed(() => {
     currentGroup.messages.push(rest);
   });
 
-  console.log({ result });
+  // console.log({ result });
   return result.reverse();
   // return result;
 });
@@ -207,7 +207,7 @@ const jobAdOpts = computed(() => {
 });
 
 const selectedJobAdInfo = computed(() => {
-  console.log(props.jobAds, selectedJobAd.value);
+  // console.log(props.jobAds, selectedJobAd.value);
   return props.jobAds.find((ad) => ad.jobAd.id === selectedJobAd.value?.value);
 });
 
@@ -259,7 +259,7 @@ async function handleSendMessage() {
     return;
   }
 
-  console.log("here!");
+  // console.log("here!");
 
   // const res = await sendMessage(
   //   selectedJobAd.value.value,
@@ -371,7 +371,7 @@ async function getMessages() {
     currentPage.value = toUtcDateWithTimeFromNumber(
       messages.value[0].sentAt * 1000,
     );
-    console.log({
+    // console.log({
       messages: messages.value,
       sentAt: messages.value[0].sentAt,
       utcTime: toUtcDateWithTimeFromNumber(messages.value[0].sentAt * 1000),
@@ -442,7 +442,7 @@ watch(
         newMessage.data.candidateId == props.candidateInfo.candidateId &&
         newMessage.data.jobAdId == selectedJobAd.value.value
       ) {
-        console.log({ newMessage });
+        // console.log({ newMessage });
         messages.value.push(newMessage.data.newMessage);
         if (isInputFocused.value) {
           handleFocusInput();
@@ -459,7 +459,7 @@ watch(
 );
 
 watch(isInputFocused, (val) => {
-  console.log({ isInputFocused: val });
+  // console.log({ isInputFocused: val });
 });
 </script>
 <style lang="scss" scoped>

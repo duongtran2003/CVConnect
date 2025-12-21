@@ -186,7 +186,7 @@ function notifyUser() {
 }
 
 function handleInput(key: string, value: any) {
-  console.log(key, value);
+  // console.log(key, value);
   dateFilter.value[key] = value;
 }
 
@@ -201,14 +201,14 @@ function connect() {
     query: { token: token.value },
   });
   connection.value.on(SOCKET_EVENT.NOTIFY, (data: TNotification) => {
-    console.log("on notify", data);
+    // console.log("on notify", data);
     notifications.value = [data, ...notifications.value];
     unread.value += 1;
     totalNotifications.value += 1;
     notifyUser();
   });
   connection.value.on(SOCKET_EVENT.UNREAD_NOTIFY, (data: any) => {
-    console.log("on unread", data);
+    // console.log("on unread", data);
     unread.value = data.quantityUnread;
     if (data.quantityUnread == 0) {
       notifications.value = notifications.value.map((notification) => {
@@ -230,7 +230,7 @@ function connect() {
     }
   });
   connection.value.on("connect", () => {
-    console.log("✅ Socket connected:", connection.value.id);
+    // console.log("✅ Socket connected:", connection.value.id);
   });
 }
 
@@ -254,7 +254,7 @@ async function fetchNotifications() {
     params.value.pageIndex += 1;
     totalNotifications.value = res.data.pageInfo.totalElements;
   }
-  console.log(res);
+  // console.log(res);
   isFetching.value = false;
 }
 
@@ -274,7 +274,7 @@ function handleSubmitDateFilter() {
   params.value.pageIndex = 0;
   fetchNotifications();
   isDateFilterDropdownShow.value = false;
-  console.log(dateFilter.value)
+  // console.log(dateFilter.value)
 }
 
 async function handleClickNoti(notification: TNotification) {
@@ -306,7 +306,7 @@ async function handleMarkAllRead() {
 onBeforeUnmount(() => {
   if (connection.value) {
     connection.value.disconnect();
-    console.log("Socket cleaned up");
+    // console.log("Socket cleaned up");
   }
 });
 
@@ -316,7 +316,7 @@ watch(token, (newToken, oldToken) => {
   }
 });
 watch(isDateFilterDropdownShow, (newVal) => {
-  console.log(newVal);
+  // console.log(newVal);
 });
 </script>
 <style lang="scss" scoped>

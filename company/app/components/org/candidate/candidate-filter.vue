@@ -327,7 +327,7 @@ function handleInput(key: keyof TCandidateFilter, value: any) {
 }
 
 function handleSetFilter() {
-  console.log("clicked", filter.value);
+  // console.log("clicked", filter.value);
   emits("filterChange", filter.value);
 }
 

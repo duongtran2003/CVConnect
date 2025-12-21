@@ -102,7 +102,7 @@ const handleSubmit = async () => {
     code: formInput.value.code,
     name: formInput.value.name,
   };
-  console.log(payload);
+  // console.log(payload);
 
   isSubmiting.value = true;
   const res = await createLevel(payload);

@@ -138,7 +138,7 @@ const isOpen = computed({
 });
 
 const isFormValid = computed(() => {
-  console.log(formInput.value);
+  // console.log(formInput.value);
   if (!formInput.value.member || !formInput.value.role) {
     return false;
   }
@@ -150,7 +150,7 @@ async function fetchNotOrgMembers(params: any, controller?: AbortController) {
   const newParams = {
     email: params.name,
   };
-  console.log(newParams);
+  // console.log(newParams);
   const res = await findNotOrgMembers(newParams, controller);
   if (!res) {
     return null;
@@ -170,7 +170,7 @@ async function fetchRoles(params: any, controller?: AbortController) {
   if (!res) {
     return null;
   }
-  console.log(res.data);
+  // console.log(res.data);
   const nextPage = res.data.map((role: any) => ({
     label: role.name,
     value: role.id,

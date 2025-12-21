@@ -60,7 +60,7 @@ export const usePermission = () => {
       return;
     }
     if (type == PERMISSION_CHECK_TYPE.MEMBER_TYPE) {
-      console.log(userInfo.value);
+      // console.log(userInfo.value);
       const matchedDetail = userInfo.value?.userDetails.find(
         (detail: any) => detail.role.id == currentRole.value?.id,
       );

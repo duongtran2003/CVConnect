@@ -54,7 +54,7 @@ export async function useLayoutPermission(
     }
 
     if (!sidebarData.value.length) {
-      console.log("no sidebar data, calling menu api", currentRole.value);
+      // console.log("no sidebar data, calling menu api", currentRole.value);
       const menuRes = await getMenus(currentRole.value!);
       if (menuRes) {
         setMenus(menuRes);

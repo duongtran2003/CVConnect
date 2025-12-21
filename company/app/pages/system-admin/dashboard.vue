@@ -144,7 +144,7 @@ function handleMonthInput(value: any) {
 async function fetchOverview(payload: any) {
   const res = await getOverview(payload);
   const arr = [];
-  console.log({ res });
+  // console.log({ res });
   for (const key of Object.keys(res.data)) {
     arr.push({
       str: overviewMap[key as keyof typeof overviewMap].text,

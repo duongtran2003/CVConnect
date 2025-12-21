@@ -135,7 +135,7 @@ onBeforeMount(async () => {
       },
     ];
   }
-  console.log(formInput.value.candidates);
+  // console.log(formInput.value.candidates);
 });
 
 const stripCandidateEmail = computed(() => {

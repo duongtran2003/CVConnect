@@ -163,7 +163,7 @@ const canEdit = computed(() => {
 });
 
 const editViewModalTitle = computed(() => {
-  console.log("computed editviewmodal", editViewMode.value);
+  // console.log("computed editviewmodal", editViewMode.value);
   if (editViewMode.value == "view") {
     return "Thông tin nhóm người dùng";
   }
@@ -203,7 +203,7 @@ const convertQuery = () => {
     editViewId.value = +targetId;
   }
 
-  console.log("query in conver query", query);
+  // console.log("query in conver query", query);
 
   const createdAt: (Date | null)[] = [];
   if (query.createdAtStart) {

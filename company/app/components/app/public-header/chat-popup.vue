@@ -114,17 +114,17 @@ function connect() {
     query: { token: token.value },
   });
   connection.value.on("connect", () => {
-    console.log("Chat socket connected:", connection.value.id);
+    // console.log("Chat socket connected:", connection.value.id);
   });
 
   connection.value.on(SOCKET_CHAT_EVENT.NEW_MESSAGE, (newMessage: any) => {
-    console.log("event :", SOCKET_CHAT_EVENT.NEW_MESSAGE, newMessage);
+    // console.log("event :", SOCKET_CHAT_EVENT.NEW_MESSAGE, newMessage);
 
     if (!props.isHr) {
       const candidateId = newMessage.candidateId;
       const jobAdId = newMessage.jobAdId;
 
-      console.log({ list: list.value });
+      // console.log({ list: list.value });
 
       const idx = list.value.findIndex(
         (item: any) =>
@@ -132,7 +132,7 @@ function connect() {
           item.jobAd.id == jobAdId,
       );
 
-      console.log({ idx });
+      // console.log({ idx });
 
       if (idx !== -1) {
         const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
@@ -152,7 +152,7 @@ function connect() {
           };
         }
         list.value = [targetCard, ...list.value];
-        console.log({ listAfter: list.value });
+        // console.log({ listAfter: list.value });
       }
     } else {
       const candidateId = newMessage.candidateId;
@@ -164,11 +164,11 @@ function connect() {
           item.conversation.jobAdId == jobAdId,
       );
 
-      console.log({ idx });
+      // console.log({ idx });
       if (idx !== -1) {
         const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
 
-        console.log({ targetCard, list: list.value });
+        // console.log({ targetCard, list: list.value });
 
         targetCard.hasMessageUnread = true;
         if (targetCard.conversation) {
@@ -187,7 +187,7 @@ function connect() {
         }
         nextPage.value = targetCard.conversation.lastMessageSentAt;
         list.value = [targetCard, ...list.value];
-        console.log({ listAfter: list.value });
+        // console.log({ listAfter: list.value });
       } else {
         const newCard = {
           conversation: {
@@ -220,7 +220,7 @@ function connect() {
   });
 
   connection.value.on(SOCKET_CHAT_EVENT.READ_ALL_MESSAGE, (newMessage: any) => {
-    console.log("event :", SOCKET_CHAT_EVENT.READ_ALL_MESSAGE, newMessage);
+    // console.log("event :", SOCKET_CHAT_EVENT.READ_ALL_MESSAGE, newMessage);
     push("chatStream", {
       topic: PUB_SUB_TOPIC.MESSAGE_READ,
       data: newMessage,
@@ -228,7 +228,7 @@ function connect() {
   });
 
   connection.value.on(SOCKET_CHAT_EVENT.NEW_CONVERSATION, (newMessage: any) => {
-    console.log("event :", SOCKET_CHAT_EVENT.NEW_CONVERSATION, newMessage);
+    // console.log("event :", SOCKET_CHAT_EVENT.NEW_CONVERSATION, newMessage);
     push("chatStream", {
       topic: PUB_SUB_TOPIC.NEW_CONVERSATION,
       data: newMessage,
@@ -253,11 +253,11 @@ async function fetchData() {
   if (!res) {
     return;
   }
-  console.log({ res });
+  // console.log({ res });
   list.value = [...list.value, ...res.data.data];
   nextPage.value =
     list.value[list.value.length - 1].conversation.lastMessageSentAt;
-  console.log({ page: nextPage.value });
+  // console.log({ page: nextPage.value });
 
   if (res.data.data.length) {
     isEmpty.value = false;
@@ -282,7 +282,7 @@ function handleClickOutside() {
 function handleClickConversation(conversation: any) {
   isPopupOpen.value = false;
   if (props.isHr) {
-    console.log({ conversation });
+    // console.log({ conversation });
     router.push({
       path: `/org/candidate/detail/${conversation.candidateInfo.id}`,
       query: { tab: "discussion", jobAdId: conversation.jobAd.id },
@@ -323,7 +323,7 @@ watch(
         const candidateId = newMessage.data.candidateId;
         const jobAdId = newMessage.data.jobAdId;
 
-        console.log("look for card with ", candidateId, jobAdId);
+        // console.log("look for card with ", candidateId, jobAdId);
 
         const card = list.value.find(
           (item: any) =>
@@ -337,7 +337,7 @@ watch(
       }
     }
     if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
-      console.log("bat su kien tu nhan tin");
+      // console.log("bat su kien tu nhan tin");
       if (newMessage.data.isSelf) {
         connection.value.emit(SOCKET_CHAT_EVENT.RECEIVE_MESSAGE, {
           jobAdId: newMessage.data.jobAdId,
@@ -349,7 +349,7 @@ watch(
         const candidateId = newMessage.data.candidateId;
         const jobAdId = newMessage.data.jobAdId;
 
-        console.log({ list: list.value, message: newMessage.data });
+        // console.log({ list: list.value, message: newMessage.data });
 
         const idx = list.value.findIndex(
           (item: any) =>
@@ -357,7 +357,7 @@ watch(
             item.jobAd.id == jobAdId,
         );
 
-        console.log({ idx });
+        // console.log({ idx });
 
         if (idx !== -1) {
           const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
@@ -374,7 +374,7 @@ watch(
             targetCard.hasMessageUnread = false;
           }
           list.value = [targetCard, ...list.value];
-          console.log({ listAfter: list.value });
+          // console.log({ listAfter: list.value });
         }
       } else {
         // otherwise, reconstruct
@@ -387,11 +387,11 @@ watch(
             item.conversation.jobAdId == jobAdId,
         );
 
-        console.log({ idx });
+        // console.log({ idx });
         if (idx !== -1) {
           const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
 
-          console.log({ targetCard, list: list.value });
+          // console.log({ targetCard, list: list.value });
 
           targetCard.hasMessageUnread = true;
           targetCard.conversation.lastMessage = newMessage.data.newMessage.text;
@@ -406,7 +406,7 @@ watch(
           }
           nextPage.value = targetCard.conversation.lastMessageSentAt;
           list.value = [targetCard, ...list.value];
-          console.log({ listAfter: list.value });
+          // console.log({ listAfter: list.value });
         } else {
           const newCard = {
             conversation: {
@@ -455,7 +455,7 @@ watch(token, (newToken, oldToken) => {
 onBeforeUnmount(() => {
   if (connection.value) {
     connection.value.disconnect();
-    console.log("Socket cleaned up");
+    // console.log("Socket cleaned up");
   }
 });
 </script>

@@ -51,7 +51,7 @@ async function fetchData() {
     controller.value,
   );
 
-  console.log({ res });
+  // console.log({ res });
 
   orgs.value = res.data;
   pageInfo.value = res.data.pageInfo;

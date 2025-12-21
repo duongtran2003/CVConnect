@@ -138,7 +138,7 @@ const handleInput = (index: number, subIndex: number, value: string) => {
 };
 
 const handleAddNew = (newItem: any) => {
-  console.log(newItem);
+  // console.log(newItem);
   const list = cloneDeep(props.list);
   reseter.value = undefined;
   resetKey.value += 1;

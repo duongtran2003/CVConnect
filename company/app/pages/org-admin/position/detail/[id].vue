@@ -324,11 +324,11 @@ const isFormValid = computed(() => {
   if (!input.name.trim() || !input.code.trim() || !input.department) {
     return false;
   }
-  // console.log(input.level);
+  // // console.log(input.level);
   // for (const level of input.level) {
-  //   console.log(level);
+  //   // console.log(level);
   //   for (const sub of level.sub) {
-  //     console.log(sub);
+  //     // console.log(sub);
   //     if (!sub.name.trim()) {
   //       return false;
   //     }
@@ -394,7 +394,7 @@ const validateForm = () => {
 
 const validateKey = (key: keyof typeof formInput.value) => {
   const input = formInput.value[key];
-  console.log(input);
+  // console.log(input);
   const rules = formRules[key as keyof typeof formRules];
   if (rules) {
     for (const rule of rules) {
@@ -408,7 +408,7 @@ const validateKey = (key: keyof typeof formInput.value) => {
 
 const handleSubmitUpdate = async () => {
   validateForm();
-  console.log(formInput.value);
+  // console.log(formInput.value);
   if (!isFormValid.value) {
     return;
   }

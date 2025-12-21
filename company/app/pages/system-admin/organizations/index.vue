@@ -220,19 +220,19 @@ const convertQuery = () => {
 
   if (query.isActive) {
     const values = (query.isActive as string).split(",");
-    console.log(values);
+    // console.log(values);
     restoredFilter.isActive = values.map((val) =>
       filterSelectOption.value.isActive.find((opt: any) => {
         const booleanValue = val == "true";
         return opt.value == booleanValue;
       }),
     );
-    console.log(restoredFilter.isActive);
+    // console.log(restoredFilter.isActive);
   }
 
   if (query.industryIds) {
     const values = (query.industryIds as string).split(",");
-    console.log(values);
+    // console.log(values);
     restoredFilter.industryList = values.map((val) =>
       filterSelectOption.value.industryList.find((opt: any) => {
         return opt.value == val;
@@ -359,7 +359,7 @@ const handleAddNew = () => {
 };
 
 const deleteListNames = computed(() => {
-  console.log({ deleteList: deleteList.value, tableData: tableData.value });
+  // console.log({ deleteList: deleteList.value, tableData: tableData.value });
   return tableData.value
     .filter((data: any) => selectedRows.value.includes(data.id))
     .map((data: any) => data.name);
@@ -488,7 +488,7 @@ const fetchData = async () => {
 const debouncedFetchData = debounce(fetchData, 500);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
-  console.log({ selectionList });
+  // console.log({ selectionList });
   selectedRows.value = selectionList;
 };
 

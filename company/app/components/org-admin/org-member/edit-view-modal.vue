@@ -298,9 +298,9 @@ function handleClearRole() {
 }
 
 function handleRoleOpenUpdate(value: boolean) {
-  console.log(value);
+  // console.log(value);
   if (!value) {
-    console.log("hehe");
+    // console.log("hehe");
     validateKey("role");
   }
 }
@@ -358,7 +358,7 @@ const handleSubmit = async () => {
 const fetchDetail = async (id: number) => {
   isLoading.value = true;
   const res = await getOrgMemberDetail(id);
-  console.log(res);
+  // console.log(res);
   detail.value = res.data;
   formInput.value = {
     role: detail.value.roles.map((role: any) => ({

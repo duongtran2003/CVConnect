@@ -189,7 +189,7 @@ const jobAdStatusActions = computed(() => {
 });
 
 function handleChangeStatus(status: boolean) {
-  console.log("change status", status);
+  // console.log("change status", status);
 }
 
 function handleGoPublicProfile() {

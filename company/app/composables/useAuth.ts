@@ -250,7 +250,7 @@ export const useAuth = () => {
   };
 
   const getMenus = async (role: TAccountRole) => {
-    console.log("in get menu", role);
+    // console.log("in get menu", role);
     try {
       const res = await $axios.get(`/user/menu/menu-by-role/${role.id}`);
       return res.data.data;

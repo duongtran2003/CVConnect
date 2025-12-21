@@ -153,7 +153,7 @@ const handleLogout = async () => {
 };
 
 const isOrgMember = computed(() => {
-  // console.log(userInfo.value);
+  // // console.log(userInfo.value);
   // const orgRole = userInfo.value?.userDetails?.find(
   //   (detail: any) => detail.role.memberType == "ORGANIZATION",
   // );
@@ -163,7 +163,7 @@ const isOrgMember = computed(() => {
 });
 
 const isCandidate = computed(() => {
-  // console.log({role: roles.value});
+  // // console.log({role: roles.value});
   // const candidateRole = userInfo.value?.userDetails?.find(
   //   (detail: any) => detail.role.memberType == "CANDIDATE",
   // );

@@ -53,7 +53,7 @@ onMounted(async () => {
   const res = await replyInvitation(token as string, action as string);
   stage.value += 1;
 
-  console.log('response?', res)
+  // console.log('response?', res)
 
   if (res) {
     tempStatus.value = "success";

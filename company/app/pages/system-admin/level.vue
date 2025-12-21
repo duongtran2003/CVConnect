@@ -160,7 +160,7 @@ const canEdit = computed(() => {
 });
 
 const editViewModalTitle = computed(() => {
-  console.log("computed editviewmodal", editViewMode.value);
+  // console.log("computed editviewmodal", editViewMode.value);
   if (editViewMode.value == "view") {
     return "Thông tin cấp bậc";
   }

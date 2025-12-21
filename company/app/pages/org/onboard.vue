@@ -359,7 +359,7 @@ const filterSelectOption = computed(() => {
     value: level.id,
   }));
 
-  console.log({ levelOptions });
+  // console.log({ levelOptions });
 
   return {
     status: statusOptions,
@@ -523,7 +523,7 @@ const normalizeFilter = (filter: any) => {
     delete normalizedFilter.level;
   }
 
-  console.log({ filter });
+  // console.log({ filter });
 
   const queryForUrl: Record<string, any> = {
     ...normalizedFilter,

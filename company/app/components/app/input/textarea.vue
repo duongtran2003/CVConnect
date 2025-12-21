@@ -89,11 +89,11 @@ const onEnter = (e: KeyboardEvent) => {
   emit("enter");
 };
 const onFocus = () => {
-  console.log("emit focus");
+  // console.log("emit focus");
   emit("focus");
 };
 const onBlur = () => {
-  console.log("emit blur");
+  // console.log("emit blur");
   emit("blur");
 };
 

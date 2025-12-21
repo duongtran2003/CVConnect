@@ -285,7 +285,7 @@ const previewData = computed(() => {
   data.candidateName = props.candidateInfo?.fullName;
   data.candidateInfoApplyId = props.candidateInfo?.id;
 
-  console.log({ data });
+  // console.log({ data });
 
   let placeholderCodes: string[] = [];
   if (isUseBlankTemplate.value) {
@@ -358,7 +358,7 @@ function onDragStart(e: DragEvent, placeholder: any) {
 }
 
 async function handlePreviewClick() {
-  console.log("clicked");
+  // console.log("clicked");
   if (!isPreviewable.value) {
     return;
   }
@@ -490,7 +490,7 @@ watch(
   async (newValue) => {
     if (newValue && newValue.value != undefined) {
       const res = await getMailTemplateDetail(newValue.value);
-      console.log(res);
+      // console.log(res);
       templateDetail.value = res.data;
     }
   },

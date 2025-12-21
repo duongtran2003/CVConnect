@@ -42,7 +42,7 @@ onBeforeMount(() => {
     "<p>Đây là ${CODE_1}đài tiế${CODE_2}ng lói Vi${CODE_3}ệt Nam.</p>",
     placeholders,
   );
-  console.log(parsed);
+  // console.log(parsed);
   // textEditorValue.value = parsed;
 });
 
@@ -62,11 +62,11 @@ function onDragStart(e: DragEvent, placeholder: any) {
 
 function showUsedTags() {
   const used = editorRef.value?.getUsedPlaceholders?.() || [];
-  console.log("tags:", used);
+  // console.log("tags:", used);
 }
 
 function getHTML() {
-  console.log(textEditorValue.value);
+  // console.log(textEditorValue.value);
 }
 </script>
 

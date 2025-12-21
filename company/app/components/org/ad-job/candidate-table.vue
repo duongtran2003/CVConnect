@@ -268,7 +268,7 @@ const handleTableActionClick = (id: number, action: any) => {
   if (action === "view") {
     const link = router.resolve({path: `/org/candidate/detail/${id}`});
     window.open(link.href, "_blank");
-    console.log(id);
+    // console.log(id);
     // Route to different page
   }
 };

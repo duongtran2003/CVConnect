@@ -146,7 +146,7 @@ const jobAdOpts = computed(() => {
 });
 
 const canCreateSchedule = computed(() => {
-  console.log({ sidebar: sidebarData.value });
+  // console.log({ sidebar: sidebarData.value });
 
   const calendarMenu = sidebarData.value.find(
     (s) => s.menuCode == "ORG_CALENDAR",
@@ -165,7 +165,7 @@ function handleScheduleClick(schedule: any) {
 
 async function fetchSchedules() {
   setLoading(true);
-  console.log(selectedJobAdInfo.value);
+  // console.log(selectedJobAdInfo.value);
   const params: any = {
     jobAdCandidateId: selectedJobAdInfo.value.id,
   };
@@ -174,7 +174,7 @@ async function fetchSchedules() {
     params.participationType = participationType.value.value;
   }
 
-  console.log(params);
+  // console.log(params);
 
   const res = await getSchedules(params);
   scheduleList.value = res.data;

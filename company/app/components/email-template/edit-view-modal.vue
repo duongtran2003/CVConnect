@@ -336,7 +336,7 @@ const handleSubmit = async () => {
     placeholderSet.add(+placeholder.id);
   }
   payload.placeholderIds = [...placeholderSet];
-  console.log(payload);
+  // console.log(payload);
 
   isSubmiting.value = true;
   const res = await updateMailTemplate(templateDetail.value.id, payload);
@@ -373,7 +373,7 @@ const fetchDetail = async (id: number) => {
     subject: res.data.subject,
     body: parseMergeTagsToHtml(sanitizedBody, strippedPlaceholders),
   };
-  console.log(formInput.value);
+  // console.log(formInput.value);
   templateDetailSnapshot.value = cloneDeep(formInput.value);
   isLoading.value = false;
 };

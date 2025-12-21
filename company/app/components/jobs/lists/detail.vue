@@ -192,7 +192,7 @@ const locationTooltip = computed(() => {
 });
 
 function handleApply() {
-  console.log("apply");
+  // console.log("apply");
   isApplyModalOpen.value = true;
 }
 

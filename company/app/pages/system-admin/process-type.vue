@@ -131,7 +131,7 @@ const handleReset = () => {
 };
 
 const handleSubmit = async () => {
-  console.log("submit");
+  // console.log("submit");
   if (!typeLists.value.length) {
     return;
   }
@@ -194,7 +194,7 @@ const handleIsEditing = (event: boolean, index: number) => {
   if (target) {
     draggableTypeList.value[index] = target;
   }
-  console.log(draggableTypeList.value[index]);
+  // console.log(draggableTypeList.value[index]);
 };
 </script>
 <style lang="scss" scoped>

@@ -44,7 +44,7 @@ const userStore = useUserStore();
 const { userInfo } = storeToRefs(userStore);
 
 onBeforeMount(() => {
-  console.log({ props });
+  // console.log({ props });
 });
 
 const isSelf = computed(() => {

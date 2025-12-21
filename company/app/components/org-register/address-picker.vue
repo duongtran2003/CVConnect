@@ -125,7 +125,7 @@ const wards = computed(() => {
 });
 
 const handleInput = (key: string, value: string | boolean) => {
-  console.log(key, value);
+  // console.log(key, value);
   if (key == "province") {
     emits("input", {
       ...props.value,

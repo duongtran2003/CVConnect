@@ -346,7 +346,7 @@ const nextSortState = computed(() => {
 const handleFilterUpdate = (accessorKey: string, value: any) => {
   const trimValue = typeof value == "string" ? value.trim() : value;
 
-  console.log({ trimValue });
+  // console.log({ trimValue });
 
   if (props.filter) {
     const newFilter = {
@@ -400,7 +400,7 @@ const handleCheckAll = (e: any, table: any) => {
 
 const handleCheck = (e: any, row: any) => {
   const selections = cloneDeep(props.selectionList);
-  console.log({ row });
+  // console.log({ row });
   if (e) {
     const rowId = row.original.id;
     const currentRow = selections.find((selection) => selection === rowId);

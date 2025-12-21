@@ -292,7 +292,7 @@ const isOnboard = computed(() => {
   const process = detail.value.jobAdProcess.find(
     (process: any) => process.id == currentProcessId.value,
   );
-  console.log({ process });
+  // console.log({ process });
   if (process && process.name == "Onboard") {
     return true;
   }
@@ -393,7 +393,7 @@ const dotsActions = computed(() => {
 });
 
 function handleViewDetail() {
-  console.log({ detail: detail.value });
+  // console.log({ detail: detail.value });
 
   // TODO: Should link to public page, update me
   const link = router.resolve({
@@ -405,18 +405,18 @@ function handleViewDetail() {
     },
   });
 
-  console.log({ link });
+  // console.log({ link });
 
   window.open(link.href, "_blank");
 }
 
 function handleEditJobAd() {
   isEditModalOpen.value = true;
-  console.log("open modal");
+  // console.log("open modal");
 }
 
 function handleCopyLink() {
-  console.log("copy link");
+  // console.log("copy link");
 
   const link = router.resolve({
     path: `/job-ad/detail/${detail.value.id}`,

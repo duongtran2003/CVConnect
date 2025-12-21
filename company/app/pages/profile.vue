@@ -149,9 +149,9 @@ const userInfo = computed(() => {
 });
 
 async function syncProfile() {
-  console.log("syncing");
+  // console.log("syncing");
   const infoRes = await getMe(currentRole.value!);
-  console.log({ infoRes });
+  // console.log({ infoRes });
   if (infoRes) {
     setUser(infoRes.data);
   }

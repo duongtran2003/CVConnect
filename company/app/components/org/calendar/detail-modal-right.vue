@@ -58,7 +58,7 @@ const props = defineProps<TProps>();
 const router = useRouter();
 
 function handleToDetail(user: any) {
-  console.log(user);
+  // console.log(user);
   const url = router.resolve(`/org/candidate/detail/${user.id}`).href;
   window.open(url, "_blank");
 }

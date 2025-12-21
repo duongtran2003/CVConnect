@@ -33,7 +33,7 @@ onBeforeMount(async () => {
   isLoading.value = true;
   const res = await getRelevantJobAds(props.sourceId);
   jobs.value = res.data;
-  console.log({ res });
+  // console.log({ res });
   isLoading.value = false;
 });
 

@@ -495,15 +495,15 @@ watch(
     if (newVal.pageIndex == oldVal.pageIndex) {
       // other filter changed, not paging
 
-      console.log("filter change");
+      // console.log("filter change");
       if (filter.value.pageIndex != 0) {
         filter.value.pageIndex = 0;
         jobAdList.value = [];
-        console.log("cleared", jobAdList.value);
+        // console.log("cleared", jobAdList.value);
         return;
       } else {
         jobAdList.value = [];
-        console.log("cleared", jobAdList.value);
+        // console.log("cleared", jobAdList.value);
       }
     }
 

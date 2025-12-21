@@ -55,13 +55,13 @@ const authStore = useAuthStore();
 const { currentRole, roles } = storeToRefs(authStore);
 
 const isHr = computed(() => {
-  console.log({ role: currentRole.value });
+  // console.log({ role: currentRole.value });
   return currentRole.value?.code == "HR";
 });
 
 const isEmailLogShow = computed(() => {
   const rolesCode = roles.value.map((r) => r.code);
-  console.log({ rolesCode });
+  // console.log({ rolesCode });
   if (!rolesCode.includes("HR") && !rolesCode.includes("ORG_ADMIN")) {
     return false;
   }

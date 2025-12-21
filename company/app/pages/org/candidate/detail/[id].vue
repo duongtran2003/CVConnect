@@ -57,7 +57,7 @@ async function fetchData() {
   const res = await getJobAdCandidateDetail(+candidateId);
   detail.value = res.data;
   document.title = `${detail.value?.candidateInfo.fullName} - CVConnect`;
-  console.log(res);
+  // console.log(res);
   setLoading(false);
 }
 

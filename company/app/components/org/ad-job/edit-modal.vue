@@ -285,7 +285,7 @@ async function handleSubmit() {
   }
 
   if (form.isAutoSendEmail) {
-    console.log({ selectedTemplate: selectedTemplate.value });
+    // console.log({ selectedTemplate: selectedTemplate.value });
     payload.emailTemplateId = selectedTemplate.value?.id;
   }
 
@@ -320,11 +320,11 @@ async function fetchMailTemplate(params: any, controller?: AbortController) {
 
 async function syncMailTemplate() {
   await fetchMailTemplate({ pageSize: 999 });
-  console.log(mailTemplateOption.value);
+  // console.log(mailTemplateOption.value);
   const template = mailTemplateOption.value.find(
     (template: any) => template.value == formInput.value.emailTemplateId,
   );
-  console.log({ template });
+  // console.log({ template });
   formInput.value.mailTemplate = template;
 }
 

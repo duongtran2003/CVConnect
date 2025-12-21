@@ -323,7 +323,7 @@ function handleEditJobAd() {
 }
 
 function handleCopyLink() {
-  console.log("copy link");
+  // console.log("copy link");
 
   // TODO: Should link to public page, update me
   const link = router.resolve({

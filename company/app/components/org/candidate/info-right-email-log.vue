@@ -140,7 +140,7 @@ const jobAdOpts = computed(() => {
 });
 
 const selectedJobAdInfo = computed(() => {
-  console.log(props.jobAds, selectedJobAd.value);
+  // console.log(props.jobAds, selectedJobAd.value);
   return props.jobAds.find((ad) => ad.jobAd.id === selectedJobAd.value?.value);
 });
 

@@ -88,7 +88,7 @@ const sidebarStore = useSidebarStore();
 const { sidebarData } = storeToRefs(sidebarStore);
 
 const canEditCandidate = computed(() => {
-  console.log({ sidebar: sidebarData.value });
+  // console.log({ sidebar: sidebarData.value });
 
   const calendarMenu = sidebarData.value.find(
     (s) => s.menuCode == "ORG_CANDIDATE",
@@ -131,7 +131,7 @@ function handleCancel() {
 }
 
 async function handleUpdate() {
-  console.log(formInput.value);
+  // console.log(formInput.value);
   const payload = {
     skill: formInput.value.skill,
     levelId: formInput.value.level?.value,

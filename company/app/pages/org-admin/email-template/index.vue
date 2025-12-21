@@ -28,7 +28,7 @@ const lastUrl = ref<string>("");
 
 onBeforeMount(() => {
   const query = route.query;
-  console.log(query);
+  // console.log(query);
   const isConfig = query.isConfig as string;
   if (isConfig && isConfig == "1") {
     currentTabIndex.value = 2;

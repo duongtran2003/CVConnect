@@ -124,7 +124,7 @@ const messagesList = computed(() => {
   list.forEach((msg: any) => {
     const sender = getInfo.value(msg.senderId);
 
-    console.log({ currentGroup, sender });
+    // console.log({ currentGroup, sender });
 
     if (!currentGroup || currentGroup.senderInfo.id !== sender.id) {
       if (currentGroup) result.push(currentGroup);
@@ -162,7 +162,7 @@ const getInfo = computed(() => {
 
 async function handleFocusInput() {
   isInputFocused.value = true;
-  console.log("focus");
+  // console.log("focus");
   if (isCallingReadAll.value) {
     return;
   }
@@ -266,7 +266,7 @@ async function getMessages() {
     currentPage.value = toUtcDateWithTimeFromNumber(
       messages.value[0].sentAt * 1000,
     );
-    console.log({
+    // console.log({
       messages: messages.value,
       sentAt: messages.value[0].sentAt,
       utcTime: toUtcDateWithTimeFromNumber(messages.value[0].sentAt * 1000),
@@ -325,7 +325,7 @@ async function handleSendMessage() {
     return;
   }
 
-  console.log("here!");
+  // console.log("here!");
 
   // const res = await sendMessage(
   //   props.detail.jobAd.id,
@@ -407,7 +407,7 @@ watch(
     }
 
     if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
-      console.log({ messageFromStream: newMessage.data });
+      // console.log({ messageFromStream: newMessage.data });
       if (newMessage.data.isSelf) {
         return;
       }
@@ -431,7 +431,7 @@ watch(
 );
 
 watch(isInputFocused, (val) => {
-  console.log({ isInputFocused: val });
+  // console.log({ isInputFocused: val });
 });
 </script>
 <style lang="scss" scoped>

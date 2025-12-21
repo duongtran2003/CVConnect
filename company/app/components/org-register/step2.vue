@@ -103,7 +103,7 @@ const handleAddressInput = (index: number, value: any) => {
     key: "addresses",
     value: newValue,
   });
-  console.log({ newValue });
+  // console.log({ newValue });
 };
 const handlePhotoInput = (key: string, value: unknown) => {
   emits("input", {

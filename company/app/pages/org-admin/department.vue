@@ -211,14 +211,14 @@ const convertQuery = () => {
 
   if (query.isActive) {
     const values = (query.isActive as string).split(",");
-    console.log(values);
+    // console.log(values);
     restoredFilter.isActive = values.map((val) =>
       filterSelectOption.value.isActive.find((opt: any) => {
         const booleanValue = val == "true";
         return opt.value == booleanValue;
       }),
     );
-    console.log(restoredFilter.isActive);
+    // console.log(restoredFilter.isActive);
   }
 
   const updatedAt: (Date | null)[] = [];

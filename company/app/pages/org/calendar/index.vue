@@ -174,7 +174,7 @@ async function fetchData() {
   }
 
   const res = await getSchedulesGeneral(payload);
-  console.log({ res });
+  // console.log({ res });
   calendarGroups.value = res.data;
   if (calendarGroups.value.length == 0) {
     isNoData.value = true;
@@ -189,10 +189,10 @@ function handleScheduleClick(schedule: any) {
     calendarId: schedule.calendarId,
     candidateInfoId: schedule.candidateInfos[0].id,
   };
-  console.log({detailId: detailId.value})
+  // console.log({detailId: detailId.value})
   isDetailModalShow.value = true;
 
-  console.log({ schedule });
+  // console.log({ schedule });
 }
 
 watch(

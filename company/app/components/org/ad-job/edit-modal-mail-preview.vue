@@ -148,7 +148,7 @@ watch(
 watch(
   () => props.data,
   async (newVal) => {
-    console.log({ newVal });
+    // console.log({ newVal });
     if (newVal && newVal.mailTemplate && newVal.mailTemplate.value) {
       setLoading(true);
       const payload = {

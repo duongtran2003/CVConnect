@@ -346,7 +346,7 @@ const nextSortState = computed(() => {
 const handleFilterUpdate = (accessorKey: string, value: any) => {
   const trimValue = typeof value == "string" ? value.trim() : value;
 
-  console.log({ trimValue });
+  // console.log({ trimValue });
 
   if (props.filter) {
     const newFilter = {

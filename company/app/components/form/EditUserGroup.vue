@@ -341,7 +341,7 @@ const handleSubmit = async () => {
     memberType: formInput.value.memberType,
     roleMenus: roleMenus,
   };
-  console.log(payload);
+  // console.log(payload);
 
   isSubmiting.value = true;
   const res = await updateUserGroup(props.id, payload);
@@ -409,7 +409,7 @@ const isFormValid = computed(() => {
 watch(
   () => formInput.value.memberType,
   async (newVal, oldVal) => {
-    console.log(newVal, oldVal);
+    // console.log(newVal, oldVal);
     if (newVal && newVal != oldVal) {
       const menusRes = await getAllMenus(newVal);
       menus.value = menusRes.data;

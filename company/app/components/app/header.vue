@@ -11,10 +11,10 @@
 const authStore = useAuthStore();
 const { currentRole } = storeToRefs(authStore);
 
-console.log({ currentRole: currentRole.value });
+// console.log({ currentRole: currentRole.value });
 
 const isHr = computed(() => {
-  console.log({ role: currentRole.value });
+  // console.log({ role: currentRole.value });
   return currentRole.value?.code == "HR";
 });
 </script>

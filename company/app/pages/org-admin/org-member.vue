@@ -186,7 +186,7 @@ const convertQuery = () => {
 
   if (query.isActive) {
     const values = (query.isActive as string).split(",");
-    console.log(values);
+    // console.log(values);
     restoredFilter.isActive = values.map((val) =>
       filterSelectOption.value.isActive.find((opt: any) => {
         const booleanValue = val == "true";
@@ -197,7 +197,7 @@ const convertQuery = () => {
 
   if (query.isEmailVerified) {
     const values = (query.isEmailVerified as string).split(",");
-    console.log(values);
+    // console.log(values);
     restoredFilter.isEmailVerified = values.map((val) =>
       filterSelectOption.value.isEmailVerified.find((opt: any) => {
         const booleanValue = val == "true";
@@ -269,7 +269,7 @@ onBeforeMount(async () => {
 
   filter.value = convertQuery();
 
-  console.log(rolesRes.data);
+  // console.log(rolesRes.data);
 });
 
 const handleCreated = () => {
@@ -430,7 +430,7 @@ const fetchData = async () => {
 const debouncedFetchData = debounce(fetchData, 500);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
-  console.log(selectionList);
+  // console.log(selectionList);
   selectedRows.value = selectionList;
 };
 

@@ -72,7 +72,7 @@ function handleViewDetail() {
 }
 
 function handleViewMessage() {
-  console.log(props.data.id);
+  // console.log(props.data.id);
   router.push({ path: "/message", query: { id: props.data.id } });
 }
 </script>

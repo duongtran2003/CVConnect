@@ -117,7 +117,7 @@ const handleReset = () => {
 };
 
 const handleSubmit = async () => {
-  console.log("submit");
+  // console.log("submit");
   if (!addressList.value.length) {
     return;
   }

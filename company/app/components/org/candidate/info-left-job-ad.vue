@@ -228,7 +228,7 @@ const sidebarStore = useSidebarStore();
 const { sidebarData } = storeToRefs(sidebarStore);
 
 const canEditCandidate = computed(() => {
-  console.log({ sidebar: sidebarData.value });
+  // console.log({ sidebar: sidebarData.value });
 
   const calendarMenu = sidebarData.value.find(
     (s) => s.menuCode == "ORG_CANDIDATE",
@@ -303,7 +303,7 @@ function handleRejectClick(jobAd: any) {
 }
 
 function handleChangeProcessClick(jobAd: any) {
-  console.log("change process of ", jobAd);
+  // console.log("change process of ", jobAd);
   isChangeProcessModalOpen.value = true;
   changeProcessTarget.value = jobAd;
 }

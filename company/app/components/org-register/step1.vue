@@ -147,7 +147,7 @@ const selectedCompanyType = computed(() => {
       companyTypes.push(found.label);
     }
   }
-  console.log(props.data.companyType);
+  // console.log(props.data.companyType);
   return companyTypes.join(", ");
 });
 

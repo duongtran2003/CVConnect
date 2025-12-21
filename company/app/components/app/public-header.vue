@@ -77,7 +77,7 @@ const items = ref<any>([
 ]);
 
 const avatarInfo = computed(() => {
-  console.log(roles.value);
+  // console.log(roles.value);
   if (!userInfo.value) {
     return null;
   }

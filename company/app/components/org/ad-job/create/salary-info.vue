@@ -234,7 +234,7 @@ async function fetchCurrency(params: any, controller?: AbortController) {
 }
 
 function handleInput(key: string, value: any) {
-  console.log(key, value);
+  // console.log(key, value);
   formError.value[key] = "";
   formInput.value[key] = value;
 }

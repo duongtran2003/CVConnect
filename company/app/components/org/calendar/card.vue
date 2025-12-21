@@ -64,7 +64,7 @@ const emits = defineEmits<{
 }>();
 
 onBeforeMount(() => {
-  console.log(props.list);
+  // console.log(props.list);
 });
 
 const candidates = computed(() => {

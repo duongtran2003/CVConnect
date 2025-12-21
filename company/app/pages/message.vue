@@ -172,7 +172,7 @@ async function fetchData() {
     payload.candidateStatus = filter.value.candidateStatus.value;
   }
   const res = await getAppliedJobAdsUnpaged(payload);
-  console.log({ res });
+  // console.log({ res });
   if (!res) {
     isLoading.value = false;
     return;
@@ -239,7 +239,7 @@ watch(
       const candidateId = newMessage.data.candidateId;
       const jobAdId = newMessage.data.jobAdId;
 
-      console.log({ list: list.value });
+      // console.log({ list: list.value });
 
       const idx = list.value.findIndex(
         (item: any) =>
@@ -261,7 +261,7 @@ watch(
           targetCard.hasMessageUnread = false;
         }
         list.value = [targetCard, ...list.value];
-        console.log({ listAfter: list.value });
+        // console.log({ listAfter: list.value });
       }
     }
 

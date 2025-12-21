@@ -162,7 +162,7 @@ onMounted(() => {
       draggedTagData = null;
     });
   } catch (err) {
-    console.log("loi nay", err);
+    // console.log("loi nay", err);
   }
 });
 

@@ -271,7 +271,7 @@ watch(isOpen, async (val) => {
 
     const res = await getCandidateInfoApply();
     jobAdCandidateIdList.value = res.data.data;
-    console.log({ res });
+    // console.log({ res });
   }
 });
 </script>

@@ -255,7 +255,7 @@ const handleGoNext = async () => {
     const { logo, coverPhoto, ...rest } = payload;
 
     const cleanedPayload = removeUndefined(rest);
-    console.log("clean payload", cleanedPayload);
+    // console.log("clean payload", cleanedPayload);
 
     formDataReq.append(
       "request",
@@ -293,7 +293,7 @@ const description = [
 ];
 //
 // watch(formData.value, (value) => {
-//   console.log("form data change: ", value);
+//   // console.log("form data change: ", value);
 // });
 </script>
 <style lang="scss" scoped>

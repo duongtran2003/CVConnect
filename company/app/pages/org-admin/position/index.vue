@@ -257,7 +257,7 @@ onBeforeMount(async () => {
     pageIndex: 0,
     pageSize: 999,
   });
-  console.log(res);
+  // console.log(res);
   departmentList.value = res.data.data;
 
   filter.value = convertQuery();

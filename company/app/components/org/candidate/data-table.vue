@@ -212,7 +212,7 @@ const props = withDefaults(defineProps<TDataTableProps>(), {
 });
 
 onBeforeMount(() => {
-  console.log(props.tableData);
+  // console.log(props.tableData);
 });
 
 const userStore = useUserStore();

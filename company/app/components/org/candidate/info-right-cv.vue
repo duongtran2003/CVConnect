@@ -14,6 +14,6 @@ type TProps = {
 
 const props = defineProps<TProps>();
 onBeforeMount(() => {
-  console.log("cv link", props.cvLink);
+  // console.log("cv link", props.cvLink);
 });
 </script>

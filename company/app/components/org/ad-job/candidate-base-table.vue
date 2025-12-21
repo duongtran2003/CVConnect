@@ -305,7 +305,7 @@ const handleActionClick = (row: any, action: TTableAction) => {
 watch(
   () => props.tableData,
   (data) => {
-    console.log({ data });
+    // console.log({ data });
   },
 );
 </script>

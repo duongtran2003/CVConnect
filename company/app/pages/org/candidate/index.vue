@@ -235,7 +235,7 @@ onBeforeMount(async () => {
 
   filter.value = convertQuery();
 
-  console.log(rolesRes.data);
+  // console.log(rolesRes.data);
 });
 
 const handleCreated = () => {
@@ -293,7 +293,7 @@ const handleAddNew = () => {
 };
 
 const isHr = computed(() => {
-  console.log({ role: currentRole.value });
+  // console.log({ role: currentRole.value });
   return currentRole.value?.code == "HR";
 });
 
@@ -340,15 +340,15 @@ const handleSort = (e: TSort) => {
     sortBy: e.type ? e.key : undefined,
     sortDirection: e.type ? e.type : undefined,
   };
-  console.log("changed sort", filter.value);
+  // console.log("changed sort", filter.value);
 };
 const handleFilter = (e: any) => {
-  console.log("filter change emited");
+  // console.log("filter change emited");
   filter.value = e;
 };
 
 const fetchData = async () => {
-  console.log("wtf why does it fetch");
+  // console.log("wtf why does it fetch");
   if (fetchJobAdCandidateController.value) {
     fetchJobAdCandidateController.value.abort();
   }
@@ -379,7 +379,7 @@ const fetchData = async () => {
 const debouncedFetchData = debounce(fetchData, 0);
 const selectedRows = ref<number[]>([]);
 const handleSelectionsUpdate = (selectionList: number[]) => {
-  console.log(selectionList);
+  // console.log(selectionList);
   selectedRows.value = selectionList;
 };
 
@@ -476,11 +476,11 @@ const normalizeFilter = (filter: TCandidateFilter) => {
   const normalizedFilter = cloneDeep(filter);
 
   if (filter.levels?.length) {
-    console.log(filter.levels);
+    // console.log(filter.levels);
     normalizedFilter.levelIds = filter.levels
       .map((id) => id.value as number)
       .join(",");
-    console.log(normalizedFilter.levelIds);
+    // console.log(normalizedFilter.levelIds);
     delete normalizedFilter.levels;
   }
 
@@ -529,7 +529,7 @@ const normalizeFilter = (filter: TCandidateFilter) => {
 watch(
   filter,
   async (newVal) => {
-    console.log("new filter", newVal);
+    // console.log("new filter", newVal);
 
     const queryForUrl = normalizeFilter(newVal);
 
@@ -538,7 +538,7 @@ watch(
         ...truncateQueryObject(queryForUrl),
       },
     });
-    console.log("about to fetch with ", queryForUrl);
+    // console.log("about to fetch with ", queryForUrl);
     debouncedFetchData();
   },
   { deep: true },

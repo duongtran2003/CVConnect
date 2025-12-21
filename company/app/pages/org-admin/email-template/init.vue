@@ -25,7 +25,7 @@ onBeforeMount(() => {
 });
 
 function handleUpdateMailConfig() {
-  console.log('send message')
+  // console.log('send message')
   broadcastChannel.value?.postMessage({
     type: BROADCAST_MESSAGE_TYPE.MAIL_CONFIG_UPDATE,
   });

@@ -488,9 +488,9 @@ const previewData = computed(() => {
   data.locationName = formInput.value.location?.label;
   data.examDuration = formInput.value.duration;
 
-  console.log("props job ad info", props.jobAdInfo.jobAdProcessCandidates);
+  // console.log("props job ad info", props.jobAdInfo.jobAdProcessCandidates);
 
-  console.log({ data });
+  // console.log({ data });
 
   let placeholderCodes: string[] = [];
   if (formInput.value.useBlankTemplate) {
@@ -587,7 +587,7 @@ async function fetchTemplate(params: any, controller?: AbortController) {
 }
 
 async function handlePreviewClick() {
-  console.log("clicked");
+  // console.log("clicked");
   if (!isPreviewable.value) {
     return;
   }
