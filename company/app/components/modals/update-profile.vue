@@ -156,8 +156,7 @@ const formRules = {
       const vnStrictPhoneRegex = /^0\d{9}$/;
 
       if (!vnStrictPhoneRegex.test(trimmed)) {
-        formError.value.phoneNumber =
-          "Số điện thoại không hợp lệ";
+        formError.value.phoneNumber = "Số điện thoại không hợp lệ";
         return false;
       }
 
@@ -238,7 +237,10 @@ async function handleSubmit() {
   };
 
   if (payload.dateOfBirth) {
-    payload.dateOfBirth = moment(payload.dateOfBirth).format("YYYY-MM-DD");
+    const formated = moment(payload.dateOfBirth).format("YYYY-MM-DD");
+    if (formated != "Invalid date") {
+      payload.dateOfBirth = formated;
+    }
   }
 
   if (!payload.phoneNumber?.trim()) {
