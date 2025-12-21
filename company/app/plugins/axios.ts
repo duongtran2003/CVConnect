@@ -39,9 +39,9 @@ export default defineNuxtPlugin(() => {
       })
       .catch((err) => {
         console.error(err);
-        console.log("refresh fail, logout!");
+        // console.log("refresh fail, logout!");
         const encodedRoute = encodeURIComponent(route.fullPath);
-        console.log({ encodedRoute });
+        // console.log({ encodedRoute });
         logout(encodedRoute);
       });
 
@@ -57,7 +57,7 @@ export default defineNuxtPlugin(() => {
       return config;
     },
     // (error) => {
-    //   console.log("catch in axios plugin with error", error);
+    //   // console.log("catch in axios plugin with error", error);
     //   if (error.response && error.response.status === 403) {
     //     router.push({ path: "/403" });
     //   }
