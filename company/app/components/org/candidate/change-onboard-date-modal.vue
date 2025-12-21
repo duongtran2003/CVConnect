@@ -11,7 +11,7 @@
           :required="true"
           :value="formInput.onboardDate"
           :hide-navigations="['seconds']"
-          :enable-time-picker="true"
+          :enable-time-picker="false"
           :error="''"
           :slim-error="true"
           :is-teleport="'html'"
@@ -84,7 +84,7 @@ const isSubmitDisabled = computed(() => {
 
 async function handleSubmit() {
   isLoading.value = true;
-  const success = await changeOnboardDate(props.changeDateTarget?.id, toUtcDateWithTime(formInput.value.onboardDate));
+  const success = await changeOnboardDate(props.changeDateTarget?.id, toUtcDateStart(formInput.value.onboardDate));
   isLoading.value = false;
 
   if (success) {

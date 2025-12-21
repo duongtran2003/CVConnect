@@ -52,7 +52,7 @@
                   :required="false"
                   :value="formInput.onboardDate"
                   :hide-navigations="['seconds']"
-                  :enable-time-picker="true"
+                  :enable-time-picker="false"
                   :error="''"
                   :slim-error="true"
                   :is-teleport="'html'"
@@ -397,7 +397,7 @@ const previewData = computed(() => {
     formInput.value.process?.label == "Onboard" &&
     formInput.value.onboardDate
   ) {
-    data.examStartTime = toUtcDateWithTime(formInput.value.onboardDate);
+    data.examStartTime = toUtcDateStart(formInput.value.onboardDate);
   }
 
   console.log({ data });

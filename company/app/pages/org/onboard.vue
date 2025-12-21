@@ -421,7 +421,7 @@ const fetchData = async () => {
   for (const [index, entry] of data.entries()) {
     entry.index = index + 1 + (pageIndex.value - 1) * pageSize.value;
 
-    entry.onboardDate = formatDateTime(entry.onboardDate, "DD/MM/YYYY - HH:mm");
+    entry.onboardDate = formatDateTime(entry.onboardDate, "DD/MM/YYYY");
     entry.applyDate = formatDateTime(entry.applyDate, "DD/MM/YYYY - HH:mm");
     entry.fullName = entry.candidateInfo.fullName;
     entry.email = entry.candidateInfo.email;

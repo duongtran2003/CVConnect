@@ -193,7 +193,7 @@
             "
           >
             <div class="misc-text">
-              {{ `Thời gian onboard: ${formatDateTime(displayJobAd.onboardDate, "DD/MM/YYYY - HH:mm")}` }}
+              {{ `Thời gian onboard: ${formatDateTime(displayJobAd.onboardDate, "DD/MM/YYYY")}` }}
             </div>
           </template>
         </div>
