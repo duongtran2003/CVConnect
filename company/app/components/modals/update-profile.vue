@@ -172,9 +172,14 @@ function initForm() {
     email: props.userInfo.email || "",
     phoneNumber: props.userInfo.phoneNumber || "",
     address: props.userInfo.address || "",
-    dateOfBirth: props.userInfo.dateOfBirth || "",
-    // dateOfBirth: "",
+    dateOfBirth: "",
   };
+  if (props.userInfo.dateOfBirth) {
+    formInput.value.dateOfBirth = moment(
+      props.userInfo.dateOfBirth,
+      "DD/MM/YYYY",
+    ).toDate();
+  }
   formSnapshot.value = cloneDeep(formInput.value);
 }
 
