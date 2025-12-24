@@ -267,10 +267,10 @@ async function getMessages() {
       messages.value[0].sentAt * 1000,
     );
     // console.log({
-      messages: messages.value,
-      sentAt: messages.value[0].sentAt,
-      utcTime: toUtcDateWithTimeFromNumber(messages.value[0].sentAt * 1000),
-    });
+    //   messages: messages.value,
+    //   sentAt: messages.value[0].sentAt,
+    //   utcTime: toUtcDateWithTimeFromNumber(messages.value[0].sentAt * 1000),
+    // });
   }
   isLoading.value = false;
 }
