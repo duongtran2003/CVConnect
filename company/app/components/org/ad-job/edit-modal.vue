@@ -159,7 +159,7 @@
             </div>
             <OrgAdJobEditModalMailPreview
               v-model="isPreviewModalOpen"
-              :data="props.data"
+              :data="previewData"
             />
           </div>
         </div>
@@ -234,6 +234,14 @@ const isSubmitDisabled = computed(() => {
     return true;
   }
   return false;
+});
+
+const previewData = computed(() => {
+  const data = {
+    ...formInput.value,
+  };
+
+  return data;
 });
 
 const selectedTemplate = computed(() => {
