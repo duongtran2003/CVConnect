@@ -406,7 +406,15 @@ const previewData = computed(() => {
     (process: any) => process.id == formInput.value.process?.value,
   );
   if (jobProcess) {
-    data.jobAdProcessId = jobProcess.jobAdProcessId;
+    data.nextJobAdProcessName = jobProcess.processName;
+  }
+
+  if (currentProcessIndex.value != -1) {
+    const currentJobProcess =
+      props.changeProcessTarget?.jobAdProcessCandidates[
+        currentProcessIndex.value
+      ];
+    data.jobAdProcessName = currentJobProcess.processName;
   }
 
   let placeholderCodes: string[] = [];
