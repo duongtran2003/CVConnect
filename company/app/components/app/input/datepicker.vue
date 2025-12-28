@@ -15,7 +15,7 @@
       :model-value="props.value"
       :placeholder="props.placeholder"
       :disabled="props.isDisabled"
-      format="dd/MM/yyyy"
+      :format="props.enableTimePicker ? 'dd/MM/yyyy HH:mm' : 'dd/MM/yyyy'"
       @update:model-value="handleInput($event)"
       @cleared="emits('clear')"
       @closed="emits('close')"
