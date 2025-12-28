@@ -57,22 +57,22 @@
           formatDateTime(props.data.applyDate, "DD/MM/YYYY HH:mm")
         }}</span>
       </div>
-      <div class="block">
-        <div class="label">
-          <Icon name="fluent:step-24-filled" />
-          <span>Vòng hiện tại</span>
-        </div>
-        <span
-          class="chip"
-          :style="{
-            borderColor: PROCESS_COLOR_CODE[props.data.currentRound.code],
-            color: PROCESS_COLOR_CODE[props.data.currentRound.code],
-            backgroundColor: `${PROCESS_COLOR_CODE[props.data.currentRound.code]}0D`,
-          }"
-        >
-          {{ props.data.currentRound.name }}
-        </span>
-      </div>
+      <!-- <div class="block"> -->
+      <!--   <div class="label"> -->
+      <!--     <Icon name="fluent:step-24-filled" /> -->
+      <!--     <span>Vòng hiện tại</span> -->
+      <!--   </div> -->
+      <!--   <span -->
+      <!--     class="chip" -->
+      <!--     :style="{ -->
+      <!--       borderColor: PROCESS_COLOR_CODE[props.data.currentRound.code], -->
+      <!--       color: PROCESS_COLOR_CODE[props.data.currentRound.code], -->
+      <!--       backgroundColor: `${PROCESS_COLOR_CODE[props.data.currentRound.code]}0D`, -->
+      <!--     }" -->
+      <!--   > -->
+      <!--     {{ props.data.currentRound.name }} -->
+      <!--   </span> -->
+      <!-- </div> -->
       <div
         v-if="
           props.data.onboardDate &&
@@ -109,6 +109,37 @@
           <span>Lí do bị loại</span>
         </div>
         <span class="value">{{ props.data.eliminateReason.description }}</span>
+      </div>
+      <div class="processes">
+        <div class="list">
+          <div
+            v-for="(process, index) of props.data.jobAdProcessCandidates"
+            :key="process.id"
+            :title="processTooltip(process)"
+            class="process"
+          >
+            <div
+              v-if="index !== 0"
+              class="line"
+              :class="{
+                highlighted:
+                  index <= displayJobAdCurrentProcessIndex(props.data),
+              }"
+            >
+              <span></span>
+            </div>
+            <div
+              class="dot"
+              :class="{
+                highlighted:
+                  index <= displayJobAdCurrentProcessIndex(props.data),
+              }"
+            >
+              <Icon name="stash:circle-dot" />
+              <span>{{ process.processName }}</span>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="divider"></div>
       <div class="misc">
@@ -179,6 +210,35 @@ type TProps = {
 const router = useRouter();
 
 const props = defineProps<TProps>();
+
+const processTooltip = computed(() => {
+  return (process: any) => {
+    let tooltip = "";
+    if (process.actionDate) {
+      const dateTime = formatDateTime(process.actionDate, "DD/MM/YYYY HH:mm");
+      if (process.processName == "Ứng tuyển") {
+        tooltip += `Ngày ứng tuyển: ${dateTime}`;
+      } else {
+        tooltip += `Ngày chuyển vòng: ${dateTime}`;
+      }
+    }
+
+    return tooltip;
+  };
+});
+
+const displayJobAdCurrentProcessIndex = computed(() => {
+  return (displayJobAd: any) => {
+    let index = displayJobAd.jobAdProcessCandidates.findIndex(
+      (process: any) => process.isCurrentProcess,
+    );
+    if (index == -1) {
+      index = 0;
+    }
+
+    return index;
+  };
+});
 
 function handlePreviewCV() {
   window.open(props.data.candidateInfo.cvUrl, "_blank");
@@ -290,6 +350,103 @@ function handlePreviewCV() {
     display: flex;
     flex-direction: column;
     gap: 8px;
+
+    .processes {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 8px;
+
+      .list {
+        display: flex;
+        flex-direction: column;
+
+        .process {
+          display: flex;
+          flex-direction: column;
+
+          .line {
+            padding-left: 9px;
+            &.highlighted {
+              span {
+                background-color: $color-primary-500;
+              }
+            }
+            span {
+              height: 16px;
+              width: 2px;
+              display: block;
+              background-color: $color-gray-300;
+            }
+          }
+
+          .dot {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 4px;
+            color: $color-gray-300;
+
+            &.highlighted {
+              color: $color-primary-500;
+            }
+
+            .iconify {
+              display: block;
+              font-size: 20px;
+              min-width: 20px;
+              min-height: 20px;
+            }
+          }
+        }
+      }
+
+      .actions {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .action-btn {
+          height: 32px;
+          width: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid $color-primary-500;
+          cursor: pointer;
+          border-radius: 4px;
+
+          .iconify {
+            font-size: 18px;
+          }
+
+          &.next-step-btn {
+            border-color: $color-success;
+            color: $color-success;
+          }
+
+          &.onboard-btn {
+            border-color: $color-success;
+            color: $color-success;
+          }
+
+          &.not-onboard-btn {
+            border-color: $color-danger;
+            color: $color-danger;
+          }
+
+          &.edit-onboard-date-btn {
+            border-color: $color-warning;
+            color: $color-warning;
+          }
+
+          &.reject-btn {
+            border-color: $color-danger;
+            color: $color-danger;
+          }
+        }
+      }
+    }
 
     .misc {
       display: flex;
