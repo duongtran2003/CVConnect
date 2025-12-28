@@ -34,6 +34,7 @@
         :label="'Mật khẩu'"
         :required="true"
         :error="formError.password"
+        :max-length="255"
         :placeholder="'Mời nhập mật khẩu'"
         :value="formInput.password"
         :is-secured="true"
