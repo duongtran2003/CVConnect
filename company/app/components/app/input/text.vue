@@ -71,7 +71,7 @@ const props = withDefaults(defineProps<TInputTextProps>(), {
   required: false,
   isSecured: false,
   isDisabled: false,
-  maxLength: 80,
+  maxLength: 255,
   showError: true,
   tooltip: "",
   placeholder: "",

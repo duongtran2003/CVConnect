@@ -387,6 +387,10 @@ function handlePreviewCV() {
             gap: 4px;
             color: $color-gray-300;
 
+            span {
+              font-size: 13px;
+            }
+
             &.highlighted {
               color: $color-primary-500;
             }
