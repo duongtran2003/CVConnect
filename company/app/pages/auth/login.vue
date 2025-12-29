@@ -19,6 +19,7 @@
             :error="formError.username"
             @input="handleInput('username', $event)"
             @blur="validateKey('username')"
+            @enter="handleLoginClick"
           />
           <AppInputText
             :value="formInput.password"
@@ -28,6 +29,7 @@
             :is-secured="true"
             @input="handleInput('password', $event)"
             @blur="validateKey('password')"
+            @enter="handleLoginClick"
           />
           <AppButton
             class="login-button"
