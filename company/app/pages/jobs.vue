@@ -92,10 +92,16 @@ async function fetchJobs() {
   }
   controller.value = new AbortController();
 
-  const queryObj = {
+  let queryObj: any = {
     ...convertFilter(),
-    ...sort.value.value,
   };
+
+  if (sort.value?.value) {
+    queryObj = {
+      ...queryObj,
+      ...sort.value.value,
+    };
+  }
 
   const jobAdsRes = await getJobAds(queryObj, controller.value);
   if (!jobAdsRes) {

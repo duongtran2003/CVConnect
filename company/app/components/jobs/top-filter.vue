@@ -26,7 +26,7 @@
         :slim-error="true"
         :fetch-fn="null"
         @input="handleSetSort($event)"
-        @clear-value="handleSetSort($event)"
+        @clear-value="handleSetSort(null)"
       />
     </div>
   </div>
