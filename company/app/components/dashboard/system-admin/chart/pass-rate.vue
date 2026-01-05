@@ -47,7 +47,7 @@ title: {
         title: {
           text: "Lượng ứng tuyển",
         },
-        min: yMin,
+        min: 0,
         max: yMax,
       },
       {

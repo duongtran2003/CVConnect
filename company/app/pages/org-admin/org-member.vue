@@ -87,6 +87,7 @@ import {
   orgMemberTableHeaders,
   pageSizeOptions,
 } from "~/const/views/org-admin/org-member";
+import moment from "moment";
 
 definePageMeta({
   layout: "org-admin",
@@ -397,6 +398,13 @@ const fetchData = async () => {
   totalItems.value = res.data.pageInfo.totalElements;
 
   for (const [index, entry] of data.entries()) {
+    if (entry.dateOfBirth) {
+      const arr = entry.dateOfBirth;
+      entry.dateOfBirth = moment([arr[0], arr[1] - 1, arr[2]]).format(
+        "DD/MM/YYYY",
+      );
+    }
+
     entry.index = index + 1 + (pageIndex.value - 1) * pageSize.value;
     entry.createdAt = formatDateTime(entry.createdAt, "DD/MM/YYYY - HH:mm");
     entry.updatedAt = formatDateTime(entry.updatedAt, "DD/MM/YYYY - HH:mm");
@@ -425,6 +433,7 @@ const fetchData = async () => {
         };
     entry.canDelete = false;
   }
+
   tableData.value = data;
 };
 const debouncedFetchData = debounce(fetchData, 500);

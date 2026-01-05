@@ -132,6 +132,7 @@ function handleViewOrgDetail() {
   padding: 12px;
   border-radius: 12px;
   background-color: white;
+  width: 280px;
   @include box-shadow;
 
   .divider {

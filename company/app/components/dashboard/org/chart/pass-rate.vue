@@ -48,7 +48,7 @@ const complexChart = computed(() => {
         title: {
           text: "Lượng ứng tuyển",
         },
-        min: yMin,
+        min: 0,
         max: yMax,
       },
       {
