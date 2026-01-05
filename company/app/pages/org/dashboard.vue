@@ -58,9 +58,11 @@ import type { TJobAdByHrData } from "~/components/dashboard/org/chart/job-ad-by-
 import type { TJobAdByDeptData } from "~/components/dashboard/org/chart/job-ad-by-dept.vue";
 import type { TPassedByLevel } from "~/components/dashboard/org/chart/passed-by-level.vue";
 import type { TByEliminatedReasonData } from "~/components/dashboard/org/chart/eliminated-by-reason.vue";
+import type { TPermissionCheckType } from "~/types/permision";
+import { PERMISSION_CHECK_TYPE } from "~/const/permission";
 
 definePageMeta({
-  layout: "org",
+  layout: "org-admin",
 });
 
 const { setLoading } = useLoadingStore();

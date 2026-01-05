@@ -75,7 +75,7 @@ export const usePermission = () => {
     }
 
     const initialRoute = await getInitialRoute();
-    router.push({ path: initialRoute });
+    await router.push({ path: initialRoute });
     return;
   }
 
