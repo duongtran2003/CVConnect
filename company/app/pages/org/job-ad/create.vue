@@ -273,9 +273,9 @@ const handleSubmit = async (type: string = "") => {
     }
   }
   if (type === "public") {
-    payload.isPublic = true;
+    payload.public = true;
   } else {
-    payload.isPublic = false;
+    payload.public = false;
   }
 
   setLoading(true);
