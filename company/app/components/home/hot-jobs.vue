@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isLoading || jobs.length > 0"  class="hot-jobs">
+  <div v-if="isLoading || jobs.length > 0" class="hot-jobs">
     <div class="title">
       <Icon name="fluent-color:megaphone-loud-32" />
       Việc làm hot nhất
@@ -23,7 +23,7 @@
         :sibling-count="1"
         :variant="'ghost'"
         active-variant="subtle"
-        :items-per-page="20"
+        :items-per-page="18"
         :page="currentPage"
         :total="pageInfo.totalElements"
         @update:page="handlePageIndexChange($event)"
@@ -55,7 +55,7 @@ async function fetchData() {
   controller.value = new AbortController();
 
   const res = await getFeaturedJobAds(
-    { pageIndex: currentPage.value - 1, pageSize: 20 },
+    { pageIndex: currentPage.value - 1, pageSize: 18 },
     controller.value,
   );
   jobs.value = res.data.data;

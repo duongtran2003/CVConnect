@@ -138,9 +138,7 @@ const isFormValid = computed(() => {
     return false;
   }
 
-  if (
-    !formInput.value.name.trim()
-  ) {
+  if (!formInput.value.name.trim()) {
     // console.log("failed here");
     return false;
   }
@@ -152,10 +150,10 @@ const isFormValid = computed(() => {
 async function handleSubmit() {
   //call api here
   const payload: Record<string, any> = {
-    name: formInput.value.name.trim(),
-    website: formInput.value.website.trim(),
-    description: formInput.value.description.trim(),
-    industryIds: formInput.value.industryList.map((indus: any) => indus.value),
+    name: formInput.value.name?.trim(),
+    website: formInput.value.website?.trim(),
+    description: formInput.value.description?.trim(),
+    industryIds: formInput.value.industryList?.map((indus: any) => indus.value),
   };
 
   const staffCount = formInput.value.companySize?.value?.split("-");
@@ -220,19 +218,14 @@ watch(
       };
       const from = props.companyInfo.staffCountFrom;
       const to = props.companyInfo.staffCountTo;
+      console.log({ from, to });
       if (from == 1) {
         formInput.value.companySize = companySizeOptions[0];
-      }
-
-      if (from == 50) {
+      } else if (from == 50) {
         formInput.value.companySize = companySizeOptions[1];
-      }
-
-      if (from == 100) {
+      } else if (from == 100) {
         formInput.value.companySize = companySizeOptions[2];
-      }
-
-      if (from == 200) {
+      } else if (from == 200) {
         formInput.value.companySize = companySizeOptions[3];
       } else {
         formInput.value.companySize = companySizeOptions[4];
