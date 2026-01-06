@@ -123,6 +123,16 @@ function handlePageIndexChange(page: any) {
       }
     }
 
+    :deep(.org-card) {
+      max-width: calc((100% - 24px) / 4);
+      min-width: calc((100% - 24px) / 4);
+
+      @media (max-width: 1000px) {
+        max-width: calc((100% - 16px) / 3);
+        min-width: calc((100% - 16px) / 3);
+      }
+    }
+
     .spinner {
       width: 100%;
       height: 84px;

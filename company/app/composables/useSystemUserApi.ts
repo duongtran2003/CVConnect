@@ -53,7 +53,7 @@ export const useSystemUserApi = () => {
     try {
       const queryString = objectToQuery(params);
 
-      const res = await $axios.get(`/core/org/filter/export?${queryString}`, {
+      const res = await $axios.get(`/user/user/filter/export?${queryString}`, {
         responseType: "blob",
         signal: abortController?.signal,
       });

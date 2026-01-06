@@ -214,6 +214,10 @@ const convertQuery = () => {
     restoredFilter.createdAt = createdAt;
   }
 
+  if (query.fullName) {
+    restoredFilter.info = query.fullName;
+  }
+
   // if (query.isActive) {
   //   const values = (query.isActive as string).split(",");
   //   // console.log(values);
@@ -618,6 +622,10 @@ const pageSizeOpts = computed(() => {
 // NOTE: From filter to query string
 const normalizeFilter = (filter: any) => {
   const normalizedFilter = cloneDeep(filter);
+  if (normalizedFilter.info) {
+    normalizedFilter.fullName = normalizedFilter.info;
+    delete normalizedFilter.info;
+  }
   if (normalizedFilter.createdAt) {
     const startDate = normalizedFilter.createdAt[0];
     const endDate = normalizedFilter.createdAt[1];
