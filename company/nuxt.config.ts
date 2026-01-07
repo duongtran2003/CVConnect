@@ -38,15 +38,16 @@ export default defineNuxtConfig({
     "~/assets/global.scss", // This needs to be explicitly included
   ],
   vite: {
-    // server: {
-    //   proxy: {
-    //     "/_api": {
-    //       target: "http://26.9.175.39:8888",
-    //       changeOrigin: true,
-    //       rewrite: (path) => path.replace(/^\/_api/, "/api/v1"),
-    //     },
-    //   },
-    // },
+    server: {
+      proxy: {
+        "/_api": {
+          // target: "https://api.vclab.tech",
+          target: "http://26.46.56.105:8888",
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/_api/, "/api/v1"),
+        },
+      },
+    },
     css: {
       preprocessorOptions: {
         scss: {
