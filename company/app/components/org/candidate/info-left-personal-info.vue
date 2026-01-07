@@ -17,7 +17,7 @@
     <div class="row">
       <AppInputSearchSelect
         :label="'Đánh giá cấp bậc'"
-        :required="false"
+        :required="true"
         :options="levelOptions"
         :value="formInput.level"
         :error="''"
@@ -80,7 +80,7 @@ const { setLoading } = useLoadingStore();
 const levelList = ref<Record<string, any>[]>([]);
 const formInputSnapshot = ref<Record<string, any>>({});
 const formInput = ref<Record<string, any>>({
-  level: undefined,
+  level: null,
   skill: "",
 });
 
@@ -104,6 +104,10 @@ const levelOptions = computed(() => {
 });
 
 const isSubmitDisabled = computed(() => {
+  if (!formInput.value.level) {
+    return true;
+  }
+
   return isEqual(formInput.value, formInputSnapshot.value);
 });
 
@@ -148,13 +152,15 @@ async function handleUpdate() {
 watch(
   () => props,
   (newValue) => {
-    formInput.value = {
-      level: {
+    const formInputObj: any = {};
+    if (!isEmpty(newValue.info.candidateSummaryOrg.level)) {
+      formInputObj.level = {
         value: newValue.info.candidateSummaryOrg.level.id,
         label: newValue.info.candidateSummaryOrg.level.levelName,
-      },
-      skill: newValue.info.candidateSummaryOrg.skill,
-    };
+      };
+    }
+    formInputObj.skill = newValue.info.candidateSummaryOrg.skill;
+    formInput.value = formInputObj;
     formInputSnapshot.value = cloneDeep(formInput.value);
   },
   {
