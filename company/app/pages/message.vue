@@ -250,6 +250,9 @@ watch(
       if (idx !== -1) {
         const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
         targetCard.hasMessageUnread = true;
+        if (!targetCard.conversation) {
+          targetCard.conversation = {};
+        }
         targetCard.conversation.lastMessage = newMessage.data.newMessage.text;
         targetCard.conversation.lastMessageSenderId =
           newMessage.data.newMessage.senderId;
