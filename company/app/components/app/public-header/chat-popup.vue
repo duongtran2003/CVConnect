@@ -192,6 +192,7 @@ function connect() {
         const newCard = {
           conversation: {
             candidateId: candidateId,
+            candidateInfoId: newMessage.candidateInfoId,
             jobAdId: jobAdId,
             lastMessage: newMessage.newMessage.text,
             lastMessageSenderId: newMessage.newMessage.senderId,
@@ -282,11 +283,18 @@ function handleClickOutside() {
 function handleClickConversation(conversation: any) {
   isPopupOpen.value = false;
   if (props.isHr) {
-    // console.log({ conversation });
-    router.push({
-      path: `/org/candidate/detail/${conversation.candidateInfo.id}`,
-      query: { tab: "discussion", jobAdId: conversation.jobAd.id },
+    const candidateInfoId =
+      conversation.candidateInfo.id ??
+      conversation.conversation.candidateInfoId;
+    const jobAdId = conversation.jobAd.id ?? conversation.conversation.jobAdId;
+    if (candidateInfoId == undefined || jobAdId == undefined) {
+      return;
+    }
+    const url = router.resolve({
+      path: `/org/candidate/detail/${candidateInfoId}`,
+      query: { tab: "discussion", jobAdId: jobAdId },
     });
+    window.open(url.href, "_blank");
   } else {
     router.push({ path: "/message", query: { id: conversation?.id } });
   }
@@ -318,6 +326,10 @@ watch(
 
         checkUnread();
 
+        if (!card) {
+          return;
+        }
+
         card.hasMessageUnread = false;
       } else {
         const candidateId = newMessage.data.candidateId;
@@ -333,11 +345,16 @@ watch(
 
         checkUnread();
 
+        if (!card) {
+          return;
+        }
+
         card.hasMessageUnread = false;
       }
     }
     if (newMessage.topic == PUB_SUB_TOPIC.NEW_MESSAGE) {
       // console.log("bat su kien tu nhan tin");
+      checkUnread();
       if (newMessage.data.isSelf) {
         connection.value.emit(SOCKET_CHAT_EVENT.RECEIVE_MESSAGE, {
           jobAdId: newMessage.data.jobAdId,
@@ -362,6 +379,11 @@ watch(
         if (idx !== -1) {
           const [targetCard] = list.value.splice(idx, 1); // removes it (keeps reference)
           targetCard.hasMessageUnread = true;
+
+          if (!targetCard.conversation) {
+            targetCard.conversation = {};
+          }
+
           targetCard.conversation.lastMessage = newMessage.data.newMessage.text;
           targetCard.conversation.lastMessageSenderId =
             newMessage.data.newMessage.senderId;
@@ -394,6 +416,11 @@ watch(
           // console.log({ targetCard, list: list.value });
 
           targetCard.hasMessageUnread = true;
+
+          if (!targetCard.conversation) {
+            targetCard.conversation = {};
+          }
+
           targetCard.conversation.lastMessage = newMessage.data.newMessage.text;
           targetCard.conversation.lastMessageSenderId =
             newMessage.data.newMessage.senderId;
