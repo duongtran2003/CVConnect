@@ -31,13 +31,13 @@ export const useConversationApi = () => {
   };
 
   const getConversationOrgInfo = async (
-    orgId: any,
+    jobAdId: any,
     controller?: AbortController,
   ) => {
     const _abortController = controller;
     try {
       const res = await $axios.get(
-        `/core/org/outside/org-by-job-ad/${orgId}`,
+        `/core/org/outside/org-by-job-ad/${jobAdId}`,
         {
           signal: _abortController ? _abortController.signal : undefined,
         },

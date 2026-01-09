@@ -283,7 +283,7 @@ async function getOrgInfo() {
   getOrgInfoController.value = new AbortController();
 
   const res = await getConversationOrgInfo(
-    props.detail.org.id,
+    props.detail.jobAd.id,
     getOrgInfoController.value,
   );
   if (res) {
