@@ -39,7 +39,7 @@ export function parseMergeTagsToHtml(
   // console.log("parse this", text);
   if (!text) return "<p></p>";
 
-  const html = text.replace(/\$\{([A-Za-z0-9_]+)\}/g, (_, code) => {
+  const html = text.replace(/\$\{([A-Za-z0-9_-]+)\}/g, (_, code) => {
     // console.log(code);
     const p = placeholders.find((ph) => ph.code === code);
     if (!p) return `\${${code}}`;
