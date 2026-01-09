@@ -456,7 +456,8 @@ async function fetchInfo() {
       .description-block {
         :deep(.content) {
           font-size: 14px;
-          word-break: break-all;
+          word-break: break-word;
+          text-align: justify;
         }
       }
     }

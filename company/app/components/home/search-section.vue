@@ -272,7 +272,7 @@ watch(isPopoverShow, (val) => {
               color: $text-light;
               cursor: pointer;
               flex: 1;
-              word-break: break-all;
+              word-break: break-word;
             }
             .iconify {
               font-size: 20px;
