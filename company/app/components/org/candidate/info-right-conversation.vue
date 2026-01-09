@@ -140,7 +140,9 @@ onBeforeMount(() => {
     const jobAdId = route.query.jobAdId;
     let ad: any = undefined;
     if (jobAdId) {
-      const foundJobAd = props.jobAds.find((jobAd) => jobAd.id == jobAdId);
+      const foundJobAd = props.jobAds.find(
+        (jobAd) => jobAd.jobAd.id == jobAdId,
+      );
       if (foundJobAd) {
         ad = foundJobAd;
       } else {
