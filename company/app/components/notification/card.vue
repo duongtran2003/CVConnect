@@ -40,6 +40,7 @@ function handleClickNoti() {
   border-top: 1px solid $color-gray-300;
   border-bottom: 1px solid $color-gray-300;
   cursor: pointer;
+  width: 100%;
 
   &.unread {
     background-color: rgba($color-primary-50, 0.6);
